@@ -257,7 +257,7 @@
 			path = background;
 			sourceTree = "<group>";
 		};
-		AA269A9B29DD28330093CF81 /* sys */ = {
+		AA269A9B29DD28330093CF81 /* system */ = {
 			isa = PBXGroup;
 			children = (
 				AA6C1EDE2BBDF63100DBC063 /* OS.hpp */,
@@ -273,14 +273,13 @@
 				AA7A3DD929B6E2540005EEA7 /* Logger.cpp */,
 				AA7A3DCC29B6E2530005EEA7 /* Clock.hpp */,
 				AA7A3DD829B6E2540005EEA7 /* Clock.cpp */,
-				AA269A9929DD26E90093CF81 /* Utility.hpp */,
 				AAA436BB2A243F58001FA92C /* Engine.hpp */,
 				AAA436BA2A243F58001FA92C /* Engine.cpp */,
 				AAA436BD2A244C23001FA92C /* EngineSDL.cpp */,
 				AA6CA9992AFCD6A7003CEA0A /* OGL.hpp */,
 				AA6CA9982AFCD6A7003CEA0A /* OGL.cpp */,
 			);
-			path = sys;
+			path = system;
 			sourceTree = "<group>";
 		};
 		AA7A3DB129B6E1620005EEA7 = {
@@ -310,7 +309,8 @@
 			children = (
 				AA7A3DD029B6E2540005EEA7 /* AXN.hpp */,
 				AA92B1222BE4477000D6E6DF /* Namespaces.hpp */,
-				AA269A9B29DD28330093CF81 /* sys */,
+				AA269A9929DD26E90093CF81 /* Utility.hpp */,
+				AA269A9B29DD28330093CF81 /* system */,
 				AA7A3E0429B6E2540005EEA7 /* geometry */,
 				AA7A3E1B29B6E2540005EEA7 /* physics */,
 				AA7A3E2129B6E2540005EEA7 /* graphics */,

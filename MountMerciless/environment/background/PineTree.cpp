@@ -7,7 +7,7 @@ using mtmercy::PineTree;
 namespace
 {
 const Angle MAX_SWAY = TAU / 64.0;
-const double SWAY_PERIOD = 40.0;
+const uint SWAY_PERIOD = 40;
 const Planc TRUNK_HEIGHT = 72.0;
 const Planc TRUNK_THICKNESS = 16.0;
 const Planc SUB_TRUNK_HEIGHT_INITIAL = 101.0;
@@ -100,8 +100,7 @@ const PineTree & PineTree::render( ) const
 {
     Object::render( );
 
-    Angle d_sway_angle = Angle( sin( (double)( world( )->age( ) / SWAY_PERIOD ) * MAX_SWAY.radians( ) ) );
-    // todo make member variable
+    Angle d_sway_angle = Angle( sin( ( (double)world( )->age( ) / (double)SWAY_PERIOD ) * MAX_SWAY.radians( ) ) );
     Angle sway_angle = d_sway_angle;
 
     Vector offset;

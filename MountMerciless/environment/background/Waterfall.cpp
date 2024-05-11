@@ -52,7 +52,7 @@ Waterfall & Waterfall::update( )
     while( new_foam_count-- )
     {
         Foam & foam = m_foam.insert_back( Foam( ) );
-        foam.position = ORIGIN + Vector( Random::flipped( Random::rdouble( width( ).half( ).half( ) ) ), 0.0 );
+        foam.position = Vector( Random::flipped( Random::rdouble( width( ).half( ).half( ) ) ), 0.0 );
         foam.radius = Random::rdouble( FOAM_RADIUS_START );
         foam.movement = Vector( Random::rdouble( -FOAM_X_SPEED, FOAM_X_SPEED ), FOAM_Y_SPEED );
     }
@@ -63,8 +63,8 @@ Waterfall & Waterfall::update( )
         foam.position += foam.movement;
         foam.radius -= FOAM_RADIUS_SHRINK;
     }
-    m_foam.remove_if( []( Foam foam )
-                      { return ( ( foam.radius <= FOAM_RADIUS_MIN ) || ( foam.position.y( ) < -foam.movement.dy( ) ) ); } );
+    m_foam.remove_if( [ & ]( Foam foam )
+                      { return ( ( foam.radius <= FOAM_RADIUS_MIN ) || ( foam.position.y( ) < 0.0 ) ); } );
 
     return *this;
 }

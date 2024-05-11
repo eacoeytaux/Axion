@@ -245,12 +245,10 @@ public:
     };
 };
 
-template <typename T>
 class IDset : public set<Identifiable, Identifiable::Hasher>
 {
 };
 
-template <typename T>
 class IDuset : public uset<Identifiable, Identifiable::Hasher>
 {
 };
@@ -263,126 +261,6 @@ class IDmap : public map<Identifiable, T, Identifiable::Hasher>
 template <typename T>
 class IDumap : public umap<Identifiable, T, Identifiable::Hasher>
 {
-};
-
-template <typename T>
-class Span
-{
-public:
-    virtual ~Span( ){ };
-    Span( const T & max ) : m_min( max ), m_max( max ) { }
-    Span( const T & min, const T & max ) : m_min( min ), m_max( max )
-    {
-        if( m_min > m_max )
-        {
-            swap_values( m_min, m_max );
-        }
-    };
-
-    const T & min( ) const { return m_min; }
-    const T & max( ) const { return m_max; }
-
-    T range( ) const { return T( m_max - m_min ); }
-
-    template <typename T2>
-    Span & operator=( const varray<T2> & v )
-    {
-        Assert( ( v.size( ) == 1 ) || ( v.size( ) == 2 ), "varray must have exactly 1 or 2 elements" );
-
-        m_min = (T)v[ 0 ];
-
-        if( v.size( ) == 1 )
-        {
-            m_max = m_min;
-        }
-        else
-        {
-            m_max = (T)v[ 1 ];
-
-            if( m_min > m_max )
-            {
-                T tmp = m_min;
-                m_min = m_max;
-                m_max = tmp;
-            }
-        }
-
-        return *this;
-    }
-
-private:
-    T m_min, m_max;
-};
-
-template <typename T>
-class Slider
-{
-public:
-    Slider( const T & min, const T & max ) : m_min_value( ( min < max ) ? min : max ), m_max_value( ( min < max ) ? max : min )
-    {
-        value( min_value( ) );
-    }
-
-    Slider( const T & max = T( 0 ) ) : m_min_value( 0 ), m_max_value( max )
-    {
-        value( min_value( ) );
-    }
-
-    const T & value( ) const { return m_value; }
-    Slider & value( const T & value, bool set_new_min_max_value = false )
-    {
-        Assert( ( set_new_min_max_value || ( ( value >= min_value( ) ) && ( value <= max_value( ) ) ) ), "value must be in range" );
-
-        m_value = value;
-
-        if( set_new_min_max_value )
-        {
-            if( m_value > max_value( ) )
-                max_value( m_value );
-            else if( m_value < min_value( ) )
-                min_value( m_value );
-        }
-
-        return *this;
-    }
-
-    const T & min_value( ) const { return m_min_value; }
-    Slider & min_value( const T & min_value )
-    {
-        m_min_value = min_value;
-
-        if( m_value < m_min_value )
-            value( m_min_value );
-
-        return *this;
-    }
-
-    const T & max_value( ) const { return m_max_value; }
-    Slider & max_value( const T & max_value )
-    {
-        m_max_value = max_value;
-
-        if( m_value > m_max_value )
-            value( m_max_value );
-
-        return *this;
-    }
-
-    double value_percentage( ) const { return ( (double)( m_value - m_min_value ) / (double)( m_max_value - m_min_value ) ); }
-    Slider & value_percentage( const double p, bool set_new_min_max_value = false )
-    {
-        return value( ( ( m_max_value - m_min_value ) * p ) + m_min_value, set_new_min_max_value );
-    }
-
-    Slider & delta( const T & delta, bool set_new_min_max_value = false )
-    {
-        return value( m_value + delta, set_new_min_max_value );
-    }
-
-private:
-    T m_value;
-    T m_min_value;
-    T m_max_value;
 };
 
 class Counter
@@ -402,15 +280,149 @@ public:
             return true;
         }
     }
+
     Counter & reset( const uint countdown )
     {
         m_countdown = countdown;
         return *this;
     }
+
     uint remaining( ) const { return m_countdown; }
 
 private:
     uint m_countdown;
+};
+
+template <typename T>
+class Span
+{
+public:
+    virtual ~Span( ){ };
+    Span( )
+        : m_min( T( 0 ) ), m_max( T( 0 ) )
+    {
+    }
+
+    Span( const T & max_value )
+        : m_min( max_value ), m_max( max_value )
+    {
+    }
+
+    Span( const T & min_value, const T & max_value )
+        : m_min( min_value ), m_max( max_value )
+    {
+        if( m_min > m_max )
+        {
+            swap_values( m_min, m_max );
+        }
+    };
+
+    const T & min( ) const { return m_min; }
+    const T & max( ) const { return m_max; }
+
+    T range( ) const { return T( max( ) - min( ) ); }
+
+    template <typename T2>
+    Span & operator=( const varray<T2> & v )
+    {
+        Assert( ( v.size( ) == 1 ) || ( v.size( ) == 2 ), "varray must have exactly 1 or 2 elements" );
+
+        m_min = (T)v[ 0 ];
+
+        if( v.size( ) == 1 )
+        {
+            m_max = m_min;
+        }
+        else
+        {
+            m_max = (T)v[ 1 ];
+
+            if( m_min > m_max )
+            {
+                swap_values( m_min, m_max );
+            }
+        }
+
+        return *this;
+    }
+
+private:
+    T m_min, m_max;
+};
+
+template <typename T>
+class Slider
+{
+public:
+    Slider( const T & max_value = T( 0 ) )
+        : m_min_value( 0 ), m_max_value( max_value )
+    {
+        value( min( ) );
+    }
+
+    Slider( const T & min_value, const T & max_value )
+        : m_min_value( ( min_value < max_value ) ? min_value : max_value ), m_max_value( ( min_value < max_value ) ? max_value : min_value )
+    {
+        value( min( ) );
+    }
+
+    const T & value( ) const { return m_value; }
+    Slider & value( const T & value, bool set_new_min_max_value = false )
+    {
+        Assert( ( set_new_min_max_value || ( ( value >= min( ) ) && ( value <= max( ) ) ) ), "value must be in range" );
+
+        m_value = value;
+
+        if( set_new_min_max_value )
+        {
+            if( m_value > max( ) )
+                max( m_value );
+            if( m_value < min( ) )
+                min( m_value );
+        }
+
+        return *this;
+    }
+
+    const T & min( ) const { return m_min_value; }
+    Slider & min( const T & min_value )
+    {
+        m_min_value = min_value;
+
+        if( m_value < m_min_value )
+            value( m_min_value );
+
+        return *this;
+    }
+
+    const T & max( ) const { return m_max_value; }
+    Slider & max( const T & max_value )
+    {
+        m_max_value = max_value;
+
+        if( m_value > m_max_value )
+            value( m_max_value );
+
+        return *this;
+    }
+
+    T range( ) const { return T( max( ) - min( ) ); }
+
+    double value_percentage( ) const { return ( (double)( m_value - m_min_value ) / (double)( m_max_value - m_min_value ) ); }
+    Slider & value_percentage( const double p, bool set_new_min_max_value = false )
+    {
+        return value( ( ( m_max_value - m_min_value ) * p ) + m_min_value, set_new_min_max_value );
+    }
+
+    Slider & delta( const T & delta, bool set_new_min_max_value = false )
+    {
+        return value( m_value + delta, set_new_min_max_value );
+    }
+
+private:
+    T m_value;
+    T m_min_value;
+    T m_max_value;
 };
 
 // -- range util functions --

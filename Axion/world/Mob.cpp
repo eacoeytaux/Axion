@@ -3,7 +3,7 @@
 using axn::reality::Mob;
 
 // TODO make variable probably (even be in mob?)
-static Span<uint> BLINK_SPAN = { 120, 240 };
+static Span<uint> BLINK_WAIT = { 120, 240 };
 static int BLINK_DURATION = 3;
 
 Mob::Mob( World * world, const Coordinate & _position, const double _health ) : Object( world, _position )
@@ -16,7 +16,7 @@ Mob::Mob( World * world, const Coordinate & _position, const double _health ) : 
 
     health( _health );
 
-    m_blink_wait.reset( Random::rint( BLINK_SPAN ) );
+    m_blink_wait.reset( Random::rint( BLINK_WAIT ) );
     m_blink_duration.reset( BLINK_DURATION );
 }
 
@@ -31,7 +31,7 @@ Mob & Mob::update( )
         if( m_blink_duration.tick( ) )
         {
             m_blink_duration.reset( BLINK_DURATION );
-            m_blink_wait.reset( Random::rint( BLINK_SPAN ) );
+            m_blink_wait.reset( Random::rint( BLINK_WAIT ) );
             drawing_dirty( true );
         }
     }
@@ -86,13 +86,13 @@ Mob & Mob::health_percentage( const double _health_percentage )
 
 Mob & Mob::heal( double _health )
 {
-    m_health.value( min( m_health.value( ) + _health, m_health.max_value( ) ) );
+    m_health.value( min( m_health.value( ) + _health, m_health.max( ) ) );
     return *this;
 }
 
 Mob & Mob::heal_full( )
 {
-    m_health.value( m_health.max_value( ) );
+    m_health.value( m_health.max( ) );
     return *this;
 }
 
@@ -113,7 +113,7 @@ Mob & Mob::hurt( double _damage )
 
 uint Mob::max_health( ) const
 {
-    return m_health.max_value( );
+    return m_health.max( );
 }
 
 Mob & Mob::max_health( double _health )
