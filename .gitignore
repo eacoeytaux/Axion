@@ -1,0 +1,36 @@
+# -- ALL --
+
+# compiled object files
+*.o
+*.obj
+*.slo
+*.lo
+
+# precompiled headers
+*.gch
+*.pch
+
+# compiled dynamic libraries
+*.dll
+*.dylib
+*.so
+
+# compiled static libraries
+*.a
+*.lib
+*.lai
+*.la
+
+# executables
+*.exe
+*.out
+*.app
+
+# -- WINDOWS --
+
+# -- OSX --
+
+# user settings
+xcuserdata/
+
+# -- LINUX --

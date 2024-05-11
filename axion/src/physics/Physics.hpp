@@ -1,9 +1,0 @@
-#ifndef Physics_hpp
-#define Physics_hpp
-
-#include "axn.hpp"
-#include "Geometry.hpp"
-#include "Matter.hpp"
-#include "Joint.hpp"
-
-#endif /* physics_hpp */
