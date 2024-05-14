@@ -2,5 +2,5 @@
 
 int main( int argc, char * argv[] )
 {
-    Engine::run( "Mount Merciless", new mtmercy::MountMerciless( ) );
+    Engine::run( new mtmercy::MountMerciless( ), "Mount Merciless" );
 }

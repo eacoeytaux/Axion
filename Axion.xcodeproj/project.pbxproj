@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA01DC022BF32283006FE720 /* Random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA01DC012BF32283006FE720 /* Random.cpp */; };
 		AA02570A2BB939BC00DB1313 /* Hills.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA0257082BB939BC00DB1313 /* Hills.cpp */; };
 		AA13AC9C2BD1FADB005DAD3C /* GrassTerrain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA13AC9A2BD1FADB005DAD3C /* GrassTerrain.cpp */; };
 		AA13ACA32BD33859005DAD3C /* Snail.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA13ACA12BD33859005DAD3C /* Snail.cpp */; };
@@ -18,8 +19,9 @@
 		AA4B69CB29C27E8B00B26E9E /* SDL2_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA7A3E7329B6F8320005EEA7 /* SDL2_image.framework */; };
 		AA4B69CE29C27E8D00B26E9E /* SDL2_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA7A3E7129B6F81C0005EEA7 /* SDL2_mixer.framework */; };
 		AA4B69D029C27E8F00B26E9E /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA7A3E6F29B6F7F00005EEA7 /* SDL2.framework */; };
+		AA597D872BF02B050032B3BC /* FixedRectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA597D852BF02B050032B3BC /* FixedRectangle.cpp */; };
 		AA5EC1112A81A6B9006EE411 /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA5EC1102A81A6B9006EE411 /* Transform.cpp */; };
-		AA61027E2B2BF2940098B280 /* Shape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA61027D2B2BF2940098B280 /* Shape.cpp */; };
+		AA61027E2B2BF2940098B280 /* Polygon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA61027D2B2BF2940098B280 /* Polygon.cpp */; };
 		AA6CA9912AFCD549003CEA0A /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA6CA9902AFCD549003CEA0A /* OpenGL.framework */; };
 		AA6CA99A2AFCD6A7003CEA0A /* OGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA6CA9982AFCD6A7003CEA0A /* OGL.cpp */; };
 		AA6CA99C2AFCE2AE003CEA0A /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA6CA99B2AFCE2AE003CEA0A /* GLUT.framework */; };
@@ -75,6 +77,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AA01DC012BF32283006FE720 /* Random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Random.cpp; sourceTree = "<group>"; };
 		AA0257082BB939BC00DB1313 /* Hills.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Hills.cpp; sourceTree = "<group>"; };
 		AA0257092BB939BC00DB1313 /* Hills.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Hills.hpp; sourceTree = "<group>"; };
 		AA13AC9A2BD1FADB005DAD3C /* GrassTerrain.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GrassTerrain.cpp; sourceTree = "<group>"; };
@@ -96,9 +99,11 @@
 		AA269A9629D790B90093CF81 /* Waterfall.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Waterfall.hpp; sourceTree = "<group>"; };
 		AA269A9929DD26E90093CF81 /* Utility.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Utility.hpp; sourceTree = "<group>"; };
 		AA541EF82A8C04FE00B97422 /* Color.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Color.hpp; sourceTree = "<group>"; };
+		AA597D852BF02B050032B3BC /* FixedRectangle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FixedRectangle.cpp; sourceTree = "<group>"; };
+		AA597D862BF02B050032B3BC /* FixedRectangle.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FixedRectangle.hpp; sourceTree = "<group>"; };
 		AA5EC1102A81A6B9006EE411 /* Transform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Transform.cpp; sourceTree = "<group>"; };
 		AA61027C2B2BE14E0098B280 /* .clang-format */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".clang-format"; sourceTree = SOURCE_ROOT; };
-		AA61027D2B2BF2940098B280 /* Shape.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Shape.cpp; sourceTree = "<group>"; };
+		AA61027D2B2BF2940098B280 /* Polygon.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Polygon.cpp; sourceTree = "<group>"; };
 		AA6C1EDE2BBDF63100DBC063 /* OS.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OS.hpp; sourceTree = "<group>"; };
 		AA6C1EE02BBE032300DBC063 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		AA6CA9902AFCD549003CEA0A /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -110,7 +115,7 @@
 		AA7A3DCC29B6E2530005EEA7 /* Clock.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Clock.hpp; sourceTree = "<group>"; };
 		AA7A3DCD29B6E2530005EEA7 /* Logger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Logger.hpp; sourceTree = "<group>"; };
 		AA7A3DD029B6E2540005EEA7 /* AXN.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AXN.hpp; sourceTree = "<group>"; };
-		AA7A3DD129B6E2540005EEA7 /* Random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Random.cpp; sourceTree = "<group>"; };
+		AA7A3DD129B6E2540005EEA7 /* Random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Random.cpp; path = system/Random.cpp; sourceTree = "<group>"; };
 		AA7A3DD429B6E2540005EEA7 /* Random.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Random.hpp; sourceTree = "<group>"; };
 		AA7A3DD629B6E2540005EEA7 /* Assert.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Assert.hpp; sourceTree = "<group>"; };
 		AA7A3DD829B6E2540005EEA7 /* Clock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Clock.cpp; sourceTree = "<group>"; };
@@ -147,7 +152,7 @@
 		AA7A3E0529B6E2540005EEA7 /* Line.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Line.cpp; sourceTree = "<group>"; };
 		AA7A3E0829B6E2540005EEA7 /* Angle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Angle.hpp; sourceTree = "<group>"; };
 		AA7A3E0929B6E2540005EEA7 /* Vector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Vector.hpp; sourceTree = "<group>"; };
-		AA7A3E0A29B6E2540005EEA7 /* Shape.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Shape.hpp; sourceTree = "<group>"; };
+		AA7A3E0A29B6E2540005EEA7 /* Polygon.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Polygon.hpp; sourceTree = "<group>"; };
 		AA7A3E0D29B6E2540005EEA7 /* Coordinate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Coordinate.cpp; sourceTree = "<group>"; };
 		AA7A3E1029B6E2540005EEA7 /* Vector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Vector.cpp; sourceTree = "<group>"; };
 		AA7A3E1329B6E2540005EEA7 /* Coordinate.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Coordinate.hpp; sourceTree = "<group>"; };
@@ -216,10 +221,67 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		AA094B5E2BB33D1A007932DD /* environment */ = {
+		AA01DC062BF322FB006FE720 /* physics */ = {
 			isa = PBXGroup;
 			children = (
-				AA22A17E2BCA2D940048F445 /* background */,
+				AA7A3E1E29B6E2540005EEA7 /* Physics.hpp */,
+				AA7A3DE729B6E2540005EEA7 /* Constants.hpp */,
+				AA7A3E1F29B6E2540005EEA7 /* Matter.hpp */,
+				AA7A3E1D29B6E2540005EEA7 /* Matter.cpp */,
+				AA7A3E2029B6E2540005EEA7 /* Joint.hpp */,
+				AA7A3E1C29B6E2540005EEA7 /* Joint.cpp */,
+			);
+			name = physics;
+			sourceTree = "<group>";
+		};
+		AA01DC072BF32315006FE720 /* world */ = {
+			isa = PBXGroup;
+			children = (
+				AA01DC082BF32343006FE720 /* environment */,
+				AA7A3DDE29B6E2540005EEA7 /* World.hpp */,
+				AA7A3DF529B6E2540005EEA7 /* World.cpp */,
+				AA7A3DE629B6E2540005EEA7 /* Object.hpp */,
+				AA7A3DE229B6E2540005EEA7 /* Object.cpp */,
+				AA7A3DF229B6E2540005EEA7 /* Mob.hpp */,
+				AA7A3DE429B6E2540005EEA7 /* Mob.cpp */,
+				AA7A3E3329B6E2540005EEA7 /* Player.hpp */,
+				AA7A3E2F29B6E2540005EEA7 /* Player.cpp */,
+				AA9752202BB2C0E7003289EF /* God.cpp */,
+			);
+			name = world;
+			sourceTree = "<group>";
+		};
+		AA01DC082BF32343006FE720 /* environment */ = {
+			isa = PBXGroup;
+			children = (
+				AA7A3DDC29B6E2540005EEA7 /* Terrain.hpp */,
+				AA7A3DF329B6E2540005EEA7 /* Terrain.cpp */,
+				AA7A3DF729B6E2540005EEA7 /* TerrainEdge.hpp */,
+				AA7A3DE029B6E2540005EEA7 /* TerrainEdge.cpp */,
+				AA7A3DE329B6E2540005EEA7 /* TerrainVertex.hpp */,
+				AA7A3DE829B6E2540005EEA7 /* TerrainVertex.cpp */,
+				AA7A3DDD29B6E2540005EEA7 /* Bedrock.hpp */,
+				AA9752222BB2C0FE003289EF /* Background.hpp */,
+				AA9752232BB2C0FE003289EF /* Foreground.hpp */,
+			);
+			name = environment;
+			sourceTree = "<group>";
+		};
+		AA01DC092BF32397006FE720 /* player */ = {
+			isa = PBXGroup;
+			children = (
+				AA9752132BB2BF6B003289EF /* Climber.hpp */,
+				AA97520B2BB2BF6B003289EF /* Climber.cpp */,
+				AA97520E2BB2BF6B003289EF /* Arrow.hpp */,
+				AA9752112BB2BF6B003289EF /* Arrow.cpp */,
+			);
+			name = player;
+			sourceTree = "<group>";
+		};
+		AA01DC0C2BF323D0006FE720 /* enviroment */ = {
+			isa = PBXGroup;
+			children = (
+				AA01DC0D2BF323EE006FE720 /* background */,
 				AA13AC9B2BD1FADB005DAD3C /* GrassTerrain.hpp */,
 				AA13AC9A2BD1FADB005DAD3C /* GrassTerrain.cpp */,
 				AA22A1802BCA2DD10048F445 /* Dust.hpp */,
@@ -229,10 +291,10 @@
 				AA7A3DEA29B6E2540005EEA7 /* Fire.hpp */,
 				AA7A3DF129B6E2540005EEA7 /* Fire.cpp */,
 			);
-			path = environment;
+			name = enviroment;
 			sourceTree = "<group>";
 		};
-		AA22A17E2BCA2D940048F445 /* background */ = {
+		AA01DC0D2BF323EE006FE720 /* background */ = {
 			isa = PBXGroup;
 			children = (
 				AA7A3DEF29B6E2540005EEA7 /* Sky.hpp */,
@@ -254,106 +316,51 @@
 				AA269A9629D790B90093CF81 /* Waterfall.hpp */,
 				AA269A9529D790B90093CF81 /* Waterfall.cpp */,
 			);
-			path = background;
+			name = background;
 			sourceTree = "<group>";
 		};
-		AA269A9B29DD28330093CF81 /* system */ = {
+		AA01DC0E2BF3240A006FE720 /* mobs */ = {
 			isa = PBXGroup;
 			children = (
-				AA6C1EDE2BBDF63100DBC063 /* OS.hpp */,
-				AA22A1762BC617DC0048F445 /* STD.hpp */,
-				AA22A1792BC6517C0048F445 /* STDc.hpp */,
-				AA22A17C2BC65A090048F445 /* STDptr.hpp */,
-				AAE877DC2BB2BB41007B3937 /* Debug.hpp */,
-				AA6CA9A12AFD7BF9003CEA0A /* Error.hpp */,
-				AA7A3DD629B6E2540005EEA7 /* Assert.hpp */,
-				AA7A3DD429B6E2540005EEA7 /* Random.hpp */,
-				AA7A3DD129B6E2540005EEA7 /* Random.cpp */,
-				AA7A3DCD29B6E2530005EEA7 /* Logger.hpp */,
-				AA7A3DD929B6E2540005EEA7 /* Logger.cpp */,
-				AA7A3DCC29B6E2530005EEA7 /* Clock.hpp */,
-				AA7A3DD829B6E2540005EEA7 /* Clock.cpp */,
-				AAA436BB2A243F58001FA92C /* Engine.hpp */,
-				AAA436BA2A243F58001FA92C /* Engine.cpp */,
-				AAA436BD2A244C23001FA92C /* EngineSDL.cpp */,
-				AA6CA9992AFCD6A7003CEA0A /* OGL.hpp */,
-				AA6CA9982AFCD6A7003CEA0A /* OGL.cpp */,
+				AA9752072BB2BF6B003289EF /* Fox.hpp */,
+				AA9752042BB2BF6B003289EF /* Fox.cpp */,
+				AA13ACA22BD33859005DAD3C /* Snail.hpp */,
+				AA13ACA12BD33859005DAD3C /* Snail.cpp */,
+				AA9752052BB2BF6B003289EF /* Bird.hpp */,
+				AA9752062BB2BF6B003289EF /* Bird.cpp */,
 			);
-			path = system;
+			name = mobs;
 			sourceTree = "<group>";
 		};
-		AA7A3DB129B6E1620005EEA7 = {
-			isa = PBXGroup;
-			children = (
-				AA9752092BB2BF6B003289EF /* main.cpp */,
-				AA6C1EE02BBE032300DBC063 /* .gitignore */,
-				AA61027C2B2BE14E0098B280 /* .clang-format */,
-				AAA6D0D72BB2999300077030 /* .clang-format-run.sh */,
-				AA7A3E6E29B6F7F00005EEA7 /* Frameworks */,
-				AA7A3DBC29B6E1620005EEA7 /* Axion */,
-				AA9752012BB2BF6B003289EF /* MountMerciless */,
-				AA7A3DBB29B6E1620005EEA7 /* Products */,
-			);
-			sourceTree = "<group>";
-		};
-		AA7A3DBB29B6E1620005EEA7 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				AA7A3DBA29B6E1620005EEA7 /* Axion */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		AA7A3DBC29B6E1620005EEA7 /* Axion */ = {
+		AA597D8F2BF3216B0032B3BC /* axn */ = {
 			isa = PBXGroup;
 			children = (
 				AA7A3DD029B6E2540005EEA7 /* AXN.hpp */,
 				AA92B1222BE4477000D6E6DF /* Namespaces.hpp */,
 				AA269A9929DD26E90093CF81 /* Utility.hpp */,
-				AA269A9B29DD28330093CF81 /* system */,
-				AA7A3E0429B6E2540005EEA7 /* geometry */,
-				AA7A3E1B29B6E2540005EEA7 /* physics */,
-				AA7A3E2129B6E2540005EEA7 /* graphics */,
-				AA7A3DFC29B6E2540005EEA7 /* audio */,
-				AA7A3DDB29B6E2540005EEA7 /* world */,
+				AA597D972BF322370032B3BC /* system */,
+				AA597D952BF321DF0032B3BC /* geometry */,
+				AA01DC062BF322FB006FE720 /* physics */,
+				AA597D932BF321A70032B3BC /* graphics */,
+				AA597D922BF3219E0032B3BC /* audio */,
+				AA01DC072BF32315006FE720 /* world */,
 			);
-			path = Axion;
+			name = axn;
 			sourceTree = "<group>";
 		};
-		AA7A3DDB29B6E2540005EEA7 /* world */ = {
+		AA597D902BF3217F0032B3BC /* mt */ = {
 			isa = PBXGroup;
 			children = (
-				AA7A3DDE29B6E2540005EEA7 /* World.hpp */,
-				AA7A3DF529B6E2540005EEA7 /* World.cpp */,
-				AA7A3DE629B6E2540005EEA7 /* Object.hpp */,
-				AA7A3DE229B6E2540005EEA7 /* Object.cpp */,
-				AA7A3DF229B6E2540005EEA7 /* Mob.hpp */,
-				AA7A3DE429B6E2540005EEA7 /* Mob.cpp */,
-				AA7A3E3329B6E2540005EEA7 /* Player.hpp */,
-				AA7A3E2F29B6E2540005EEA7 /* Player.cpp */,
-				AA9752202BB2C0E7003289EF /* God.cpp */,
-				AA7A3DE929B6E2540005EEA7 /* environment */,
+				AA9752082BB2BF6B003289EF /* MountMerciless.hpp */,
+				AA9752022BB2BF6B003289EF /* MountMerciless.cpp */,
+				AA01DC092BF32397006FE720 /* player */,
+				AA01DC0E2BF3240A006FE720 /* mobs */,
+				AA01DC0C2BF323D0006FE720 /* enviroment */,
 			);
-			path = world;
+			name = mt;
 			sourceTree = "<group>";
 		};
-		AA7A3DE929B6E2540005EEA7 /* environment */ = {
-			isa = PBXGroup;
-			children = (
-				AA7A3DDC29B6E2540005EEA7 /* Terrain.hpp */,
-				AA7A3DF329B6E2540005EEA7 /* Terrain.cpp */,
-				AA7A3DF729B6E2540005EEA7 /* TerrainEdge.hpp */,
-				AA7A3DE029B6E2540005EEA7 /* TerrainEdge.cpp */,
-				AA7A3DE329B6E2540005EEA7 /* TerrainVertex.hpp */,
-				AA7A3DE829B6E2540005EEA7 /* TerrainVertex.cpp */,
-				AA7A3DDD29B6E2540005EEA7 /* Bedrock.hpp */,
-				AA9752222BB2C0FE003289EF /* Background.hpp */,
-				AA9752232BB2C0FE003289EF /* Foreground.hpp */,
-			);
-			path = environment;
-			sourceTree = "<group>";
-		};
-		AA7A3DFC29B6E2540005EEA7 /* audio */ = {
+		AA597D922BF3219E0032B3BC /* audio */ = {
 			isa = PBXGroup;
 			children = (
 				AA7A3E0129B6E2540005EEA7 /* Audio.hpp */,
@@ -362,44 +369,10 @@
 				AA7A3E0329B6E2540005EEA7 /* Speaker.hpp */,
 				AA7A3DFE29B6E2540005EEA7 /* Speaker.cpp */,
 			);
-			path = audio;
+			name = audio;
 			sourceTree = "<group>";
 		};
-		AA7A3E0429B6E2540005EEA7 /* geometry */ = {
-			isa = PBXGroup;
-			children = (
-				AA7A3E1829B6E2540005EEA7 /* Geometry.hpp */,
-				AAB55A4129D132950088E000 /* Planc.hpp */,
-				AA7A3E1329B6E2540005EEA7 /* Coordinate.hpp */,
-				AA7A3E0D29B6E2540005EEA7 /* Coordinate.cpp */,
-				AA7A3E0829B6E2540005EEA7 /* Angle.hpp */,
-				AA7A3E1A29B6E2540005EEA7 /* Angle.cpp */,
-				AA7A3E0929B6E2540005EEA7 /* Vector.hpp */,
-				AA7A3E1029B6E2540005EEA7 /* Vector.cpp */,
-				AAB55A3E29D12ABC0088E000 /* Transform.hpp */,
-				AA5EC1102A81A6B9006EE411 /* Transform.cpp */,
-				AA7A3E1629B6E2540005EEA7 /* Line.hpp */,
-				AA7A3E0529B6E2540005EEA7 /* Line.cpp */,
-				AA7A3E0A29B6E2540005EEA7 /* Shape.hpp */,
-				AA61027D2B2BF2940098B280 /* Shape.cpp */,
-			);
-			path = geometry;
-			sourceTree = "<group>";
-		};
-		AA7A3E1B29B6E2540005EEA7 /* physics */ = {
-			isa = PBXGroup;
-			children = (
-				AA7A3E1E29B6E2540005EEA7 /* Physics.hpp */,
-				AA7A3DE729B6E2540005EEA7 /* Constants.hpp */,
-				AA7A3E1F29B6E2540005EEA7 /* Matter.hpp */,
-				AA7A3E1D29B6E2540005EEA7 /* Matter.cpp */,
-				AA7A3E2029B6E2540005EEA7 /* Joint.hpp */,
-				AA7A3E1C29B6E2540005EEA7 /* Joint.cpp */,
-			);
-			path = physics;
-			sourceTree = "<group>";
-		};
-		AA7A3E2129B6E2540005EEA7 /* graphics */ = {
+		AA597D932BF321A70032B3BC /* graphics */ = {
 			isa = PBXGroup;
 			children = (
 				AA7A3E2429B6E2540005EEA7 /* Graphics.hpp */,
@@ -414,7 +387,78 @@
 				AA7A3E2A29B6E2540005EEA7 /* Camera.hpp */,
 				AA7A3E2229B6E2540005EEA7 /* Camera.cpp */,
 			);
-			path = graphics;
+			name = graphics;
+			sourceTree = "<group>";
+		};
+		AA597D952BF321DF0032B3BC /* geometry */ = {
+			isa = PBXGroup;
+			children = (
+				AA7A3E1829B6E2540005EEA7 /* Geometry.hpp */,
+				AAB55A4129D132950088E000 /* Planc.hpp */,
+				AA7A3E1329B6E2540005EEA7 /* Coordinate.hpp */,
+				AA7A3E0D29B6E2540005EEA7 /* Coordinate.cpp */,
+				AA7A3E0829B6E2540005EEA7 /* Angle.hpp */,
+				AA7A3E1A29B6E2540005EEA7 /* Angle.cpp */,
+				AA7A3E0929B6E2540005EEA7 /* Vector.hpp */,
+				AA7A3E1029B6E2540005EEA7 /* Vector.cpp */,
+				AAB55A3E29D12ABC0088E000 /* Transform.hpp */,
+				AA5EC1102A81A6B9006EE411 /* Transform.cpp */,
+				AA7A3E1629B6E2540005EEA7 /* Line.hpp */,
+				AA7A3E0529B6E2540005EEA7 /* Line.cpp */,
+				AA7A3E0A29B6E2540005EEA7 /* Polygon.hpp */,
+				AA61027D2B2BF2940098B280 /* Polygon.cpp */,
+				AA597D862BF02B050032B3BC /* FixedRectangle.hpp */,
+				AA597D852BF02B050032B3BC /* FixedRectangle.cpp */,
+			);
+			name = geometry;
+			sourceTree = "<group>";
+		};
+		AA597D972BF322370032B3BC /* system */ = {
+			isa = PBXGroup;
+			children = (
+				AA6C1EDE2BBDF63100DBC063 /* OS.hpp */,
+				AA22A1762BC617DC0048F445 /* STD.hpp */,
+				AA22A1792BC6517C0048F445 /* STDc.hpp */,
+				AA22A17C2BC65A090048F445 /* STDptr.hpp */,
+				AAE877DC2BB2BB41007B3937 /* Debug.hpp */,
+				AA6CA9A12AFD7BF9003CEA0A /* Error.hpp */,
+				AA7A3DD629B6E2540005EEA7 /* Assert.hpp */,
+				AA7A3DD429B6E2540005EEA7 /* Random.hpp */,
+				AA7A3DD129B6E2540005EEA7 /* Random.cpp */,
+				AA01DC012BF32283006FE720 /* Random.cpp */,
+				AA7A3DCD29B6E2530005EEA7 /* Logger.hpp */,
+				AA7A3DD929B6E2540005EEA7 /* Logger.cpp */,
+				AA7A3DCC29B6E2530005EEA7 /* Clock.hpp */,
+				AA7A3DD829B6E2540005EEA7 /* Clock.cpp */,
+				AAA436BB2A243F58001FA92C /* Engine.hpp */,
+				AAA436BA2A243F58001FA92C /* Engine.cpp */,
+				AAA436BD2A244C23001FA92C /* EngineSDL.cpp */,
+				AA6CA9992AFCD6A7003CEA0A /* OGL.hpp */,
+				AA6CA9982AFCD6A7003CEA0A /* OGL.cpp */,
+			);
+			name = system;
+			sourceTree = "<group>";
+		};
+		AA7A3DB129B6E1620005EEA7 = {
+			isa = PBXGroup;
+			children = (
+				AA7A3E6E29B6F7F00005EEA7 /* Frameworks */,
+				AA597D8F2BF3216B0032B3BC /* axn */,
+				AA597D902BF3217F0032B3BC /* mt */,
+				AA9752092BB2BF6B003289EF /* main.cpp */,
+				AA6C1EE02BBE032300DBC063 /* .gitignore */,
+				AA61027C2B2BE14E0098B280 /* .clang-format */,
+				AAA6D0D72BB2999300077030 /* .clang-format-run.sh */,
+				AA7A3DBB29B6E1620005EEA7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA7A3DBB29B6E1620005EEA7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA7A3DBA29B6E1620005EEA7 /* Axion */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		AA7A3E6E29B6F7F00005EEA7 /* Frameworks */ = {
@@ -427,42 +471,6 @@
 				AA6CA99B2AFCE2AE003CEA0A /* GLUT.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		AA9752012BB2BF6B003289EF /* MountMerciless */ = {
-			isa = PBXGroup;
-			children = (
-				AA9752082BB2BF6B003289EF /* MountMerciless.hpp */,
-				AA9752022BB2BF6B003289EF /* MountMerciless.cpp */,
-				AA97520A2BB2BF6B003289EF /* player */,
-				AA9752032BB2BF6B003289EF /* mobs */,
-				AA094B5E2BB33D1A007932DD /* environment */,
-			);
-			path = MountMerciless;
-			sourceTree = "<group>";
-		};
-		AA9752032BB2BF6B003289EF /* mobs */ = {
-			isa = PBXGroup;
-			children = (
-				AA9752072BB2BF6B003289EF /* Fox.hpp */,
-				AA9752042BB2BF6B003289EF /* Fox.cpp */,
-				AA13ACA22BD33859005DAD3C /* Snail.hpp */,
-				AA13ACA12BD33859005DAD3C /* Snail.cpp */,
-				AA9752052BB2BF6B003289EF /* Bird.hpp */,
-				AA9752062BB2BF6B003289EF /* Bird.cpp */,
-			);
-			path = mobs;
-			sourceTree = "<group>";
-		};
-		AA97520A2BB2BF6B003289EF /* player */ = {
-			isa = PBXGroup;
-			children = (
-				AA9752132BB2BF6B003289EF /* Climber.hpp */,
-				AA97520B2BB2BF6B003289EF /* Climber.cpp */,
-				AA97520E2BB2BF6B003289EF /* Arrow.hpp */,
-				AA9752112BB2BF6B003289EF /* Arrow.cpp */,
-			);
-			path = player;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -558,13 +566,15 @@
 				AA7A3E4429B6E2540005EEA7 /* Clock.cpp in Sources */,
 				AA7A3E4C29B6E2540005EEA7 /* PineTree.cpp in Sources */,
 				AA7A3E6229B6E2540005EEA7 /* Camera.cpp in Sources */,
-				AA61027E2B2BF2940098B280 /* Shape.cpp in Sources */,
+				AA61027E2B2BF2940098B280 /* Polygon.cpp in Sources */,
 				AA13ACA92BD357D4005DAD3C /* Bush.cpp in Sources */,
+				AA01DC022BF32283006FE720 /* Random.cpp in Sources */,
 				AA13ACA62BD34405005DAD3C /* AspenTree.cpp in Sources */,
 				AA7A3E4729B6E2540005EEA7 /* TerrainEdge.cpp in Sources */,
 				AA7A3E4A29B6E2540005EEA7 /* Lighting.cpp in Sources */,
 				AA7A3E4E29B6E2540005EEA7 /* Sky.cpp in Sources */,
 				AA7A3E5329B6E2540005EEA7 /* SoundClip.cpp in Sources */,
+				AA597D872BF02B050032B3BC /* FixedRectangle.cpp in Sources */,
 				AA02570A2BB939BC00DB1313 /* Hills.cpp in Sources */,
 				AA7A3E5929B6E2540005EEA7 /* Coordinate.cpp in Sources */,
 				AA9752142BB2BF6B003289EF /* MountMerciless.cpp in Sources */,
