@@ -4,7 +4,9 @@
 #include "OS.hpp"
 #if defined( OS_WINDOWS )
 // ---------------- //
-// todo
+#ifdef _DEBUG
+#define AXN_DEBUG
+#endif
 // ---------------- //
 #elif defined( OS_APPLE )
 // ---------------- //
@@ -12,7 +14,7 @@
 #define AXN_DEBUG
 #endif
 // ---------------- //
-#elif defined( OS_LINUX
+#elif defined( OS_LINUX )
 // ---------------- //
 // todo
 // ---------------- //

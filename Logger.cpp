@@ -38,7 +38,7 @@ error Logger::init( const bool _file )
     if( _file )
     {
         Clock clock;
-        log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( "." ) + "." + clock.datestamp( "." ) + ".log" ).c_str( ), "w+" );
+        fopen_s( &log_file, ( LOG_DIRECTORY + clock.timestamp( "." ) + "." + clock.datestamp( "." ) + ".log" ).c_str( ), "w+" );
         if( !( b_using_file = log_file ) )
             return error_not_init;
     }
@@ -130,7 +130,10 @@ error Logger::close( )
         log_message( INFO_LOG, "complete ...............\n" );
     b_initialized = false;
 
-    return fclose( log_file ) ? error_todo : no_error;
+    if (log_file)
+        return fclose(log_file) ? error_todo : no_error;
+    else
+        return no_error;
 }
 
 #endif

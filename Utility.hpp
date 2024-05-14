@@ -1,13 +1,13 @@
 #ifndef Utility_hpp
 #define Utility_hpp
 
-#include "system/OS.hpp"
-#include "system/STD.hpp"
-#include "system/STDc.hpp"
-#include "system/STDptr.hpp"
+#include "OS.hpp"
+#include "STD.hpp"
+#include "STDc.hpp"
+#include "STDptr.hpp"
 
-#include "system/Error.hpp"
-#include "system/Assert.hpp"
+#include "Error.hpp"
+#include "Assert.hpp"
 
 #include "Namespaces.hpp"
 

@@ -178,14 +178,28 @@ private:
 using std::queue;
 using std::stack;
 
-using std::set;
+template <typename K, typename C = std::less<K>>
+class set : public std::set<K, C>
+{
+    using std::set<K, C>::set;
+
+public:
+    bool contains(const K& k) const
+    {
+        return (std::set<K, C>::find(k) != std::set<K, C>::end());
+    }
+};
+
 template <typename K, typename H = std::hash<K>, typename E = std::equal_to<K>>
 class uset : public std::unordered_set<K, H, E>
 {
     using std::unordered_set<K, H, E>::unordered_set;
 
 public:
-    bool contains( const K & ) const { return false; } // TODO!!!
+    bool contains(const K& k) const
+    {
+        return (std::unordered_set<K, H, E>::find(k) != std::unordered_set<K, H, E>::end());
+    }
 };
 
 using std::map;
@@ -195,7 +209,10 @@ class umap : public std::unordered_map<K, V, H, E>
     using std::unordered_map<K, V, H, E>::unordered_map;
 
 public:
-    bool contains( const K & ) const { return false; } // TODO!!!
+    bool contains(const K& k) const
+    {
+        return (std::unordered_map<K, V, H, E>::find(k) != std::unordered_map<K, V, H, E>::end());
+    }
 };
 
 // avoid confusion between std::vector and axn::Vector

@@ -2,7 +2,7 @@
 #define Drawing_hpp
 
 #include "Color.hpp"
-#include "../geometry/Geometry.hpp"
+#include "Geometry.hpp"
 
 namespace axn
 {

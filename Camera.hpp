@@ -1,7 +1,7 @@
 #ifndef Camera_hpp
 #define Camera_hpp
 
-#include "../geometry/Geometry.hpp"
+#include "Geometry.hpp"
 #include "Color.hpp"
 #include "Drawing.hpp"
 #include "Lighting.hpp"

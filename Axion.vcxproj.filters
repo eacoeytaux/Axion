@@ -13,351 +13,390 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\axn">
+      <UniqueIdentifier>{ec5caa80-0b9d-477e-8819-9ef3c42574b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\axn\audio">
+      <UniqueIdentifier>{f5233a8c-d4c0-496a-b476-f43c541f0947}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\axn\world">
+      <UniqueIdentifier>{21946e0e-e116-4e9b-b128-88d95d02dd94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\axn\graphics">
+      <UniqueIdentifier>{5832f251-73f0-40bb-8125-686f87a49dba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\axn\geometry">
+      <UniqueIdentifier>{c0780cd3-6bc3-403f-983a-dfc67cabba25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\axn\physics">
+      <UniqueIdentifier>{01b53baa-7ec9-49e3-b4e8-b2ca999f08e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\axn\system">
+      <UniqueIdentifier>{211e2baf-297d-46a1-abbc-c2be70611d11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\mt">
+      <UniqueIdentifier>{4a1d9402-2ee2-412b-81fe-565bce818a21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\mt\mobs">
+      <UniqueIdentifier>{2980a19a-bc68-41aa-8be0-0a811be1cdc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\mt\mobs\player">
+      <UniqueIdentifier>{a92d2f4f-0231-4ff5-8f8a-26dd84fb4ca2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\mt\environment">
+      <UniqueIdentifier>{52a05681-1065-4b27-96f7-85e8faa79190}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\Angle.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Arrow.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Angle.cpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="source\AspenTree.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\axn\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="source\Bird.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Climber.cpp">
+      <Filter>Source Files\mt\mobs\player</Filter>
     </ClCompile>
-    <ClCompile Include="source\Bush.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Clock.cpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClCompile>
-    <ClCompile Include="source\Camera.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Coordinate.cpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="source\Climber.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Drawing.cpp">
+      <Filter>Source Files\axn\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="source\Clock.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Engine.cpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClCompile>
-    <ClCompile Include="source\Cloud.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="EngineSDL.cpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClCompile>
-    <ClCompile Include="source\Coordinate.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="FixedRectangle.cpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="source\DistantBird.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Line.cpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="source\Drawing.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Polygon.cpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="source\Dust.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Vector.cpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="source\Engine.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="source\EngineSDL.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="God.cpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClCompile>
-    <ClCompile Include="source\Fire.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="MountMerciless.cpp">
+      <Filter>Source Files\mt</Filter>
     </ClCompile>
-    <ClCompile Include="source\Fox.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Joint.cpp">
+      <Filter>Source Files\axn\physics</Filter>
     </ClCompile>
-    <ClCompile Include="source\God.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Matter.cpp">
+      <Filter>Source Files\axn\physics</Filter>
     </ClCompile>
-    <ClCompile Include="source\GrassTerrain.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClCompile>
-    <ClCompile Include="source\Hills.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Random.cpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClCompile>
-    <ClCompile Include="source\Joint.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Lighting.cpp">
+      <Filter>Source Files\axn\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="source\Lighting.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="LightSource.cpp">
+      <Filter>Source Files\axn\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="source\LightSource.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="OGL.cpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClCompile>
-    <ClCompile Include="source\Line.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="SoundClip.cpp">
+      <Filter>Source Files\axn\audio</Filter>
     </ClCompile>
-    <ClCompile Include="source\Logger.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Speaker.cpp">
+      <Filter>Source Files\axn\audio</Filter>
     </ClCompile>
-    <ClCompile Include="source\main.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Mob.cpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClCompile>
-    <ClCompile Include="source\Matter.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Object.cpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClCompile>
-    <ClCompile Include="source\Mob.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClCompile>
-    <ClCompile Include="source\MountainRange.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClCompile>
-    <ClCompile Include="source\MountMerciless.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="TerrainEdge.cpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClCompile>
-    <ClCompile Include="source\Object.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="TerrainVertex.cpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClCompile>
-    <ClCompile Include="source\OGL.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="World.cpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClCompile>
-    <ClCompile Include="source\PineTree.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Arrow.cpp">
+      <Filter>Source Files\mt\mobs\player</Filter>
     </ClCompile>
-    <ClCompile Include="source\Player.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Bird.cpp">
+      <Filter>Source Files\mt\mobs</Filter>
     </ClCompile>
-    <ClCompile Include="source\Random.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Fox.cpp">
+      <Filter>Source Files\mt\mobs</Filter>
     </ClCompile>
-    <ClCompile Include="source\Shape.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="AspenTree.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
-    <ClCompile Include="source\Skull.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Bush.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
-    <ClCompile Include="source\Sky.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Cloud.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
-    <ClCompile Include="source\Snail.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="DistantBird.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
-    <ClCompile Include="source\SoundClip.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Dust.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
-    <ClCompile Include="source\Speaker.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Fire.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
-    <ClCompile Include="source\Terrain.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="GrassTerrain.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
-    <ClCompile Include="source\TerrainEdge.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Hills.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
-    <ClCompile Include="source\TerrainVertex.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="MountainRange.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
-    <ClCompile Include="source\Transform.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="PineTree.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
-    <ClCompile Include="source\Vector.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Skull.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
-    <ClCompile Include="source\Waterfall.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Sky.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
-    <ClCompile Include="source\World.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Snail.cpp">
+      <Filter>Source Files\mt\mobs</Filter>
+    </ClCompile>
+    <ClCompile Include="Waterfall.cpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\Angle.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Angle.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="source\Arrow.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Assert.hpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClInclude>
-    <ClInclude Include="source\AspenTree.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Audio.hpp">
+      <Filter>Source Files\axn\audio</Filter>
     </ClInclude>
-    <ClInclude Include="source\Assert.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="AXN.hpp">
+      <Filter>Source Files\axn</Filter>
     </ClInclude>
-    <ClInclude Include="source\Audio.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Background.hpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="source\Background.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Bedrock.hpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="source\Bedrock.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Camera.hpp">
+      <Filter>Source Files\axn\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\Bird.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Climber.hpp">
+      <Filter>Source Files\mt\mobs\player</Filter>
     </ClInclude>
-    <ClInclude Include="source\Bush.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Clock.hpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClInclude>
-    <ClInclude Include="source\Camera.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Color.hpp">
+      <Filter>Source Files\axn\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\Climber.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Constants.hpp">
+      <Filter>Source Files\axn\physics</Filter>
     </ClInclude>
-    <ClInclude Include="source\Clock.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Coordinate.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="source\Cloud.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Debug.hpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClInclude>
-    <ClInclude Include="source\Color.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Drawing.hpp">
+      <Filter>Source Files\axn\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\Constants.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Engine.hpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClInclude>
-    <ClInclude Include="source\Coordinate.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Error.hpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClInclude>
-    <ClInclude Include="source\Debug.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="FixedRectangle.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="source\DistantBird.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Geometry.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="source\Drawing.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Line.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="source\Dust.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Polygon.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="source\Engine.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Vector.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="source\Error.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Transform.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="source\Fire.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Foreground.hpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="source\Foreground.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Graphics.hpp">
+      <Filter>Source Files\axn\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\Fox.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="MountMerciless.hpp">
+      <Filter>Source Files\mt</Filter>
     </ClInclude>
-    <ClInclude Include="source\Geometry.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Joint.hpp">
+      <Filter>Source Files\axn\physics</Filter>
     </ClInclude>
-    <ClInclude Include="source\Graphics.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Matter.hpp">
+      <Filter>Source Files\axn\physics</Filter>
     </ClInclude>
-    <ClInclude Include="source\GrassTerrain.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Logger.hpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClInclude>
-    <ClInclude Include="source\Hills.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Random.hpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClInclude>
-    <ClInclude Include="source\Joint.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Lighting.hpp">
+      <Filter>Source Files\axn\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\Lighting.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="LightSource.hpp">
+      <Filter>Source Files\axn\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\LightSource.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="OGL.hpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClInclude>
-    <ClInclude Include="source\Line.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Speaker.hpp">
+      <Filter>Source Files\axn\audio</Filter>
     </ClInclude>
-    <ClInclude Include="source\Logger.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="SoundClip.hpp">
+      <Filter>Source Files\axn\audio</Filter>
     </ClInclude>
-    <ClInclude Include="source\Matter.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Utility.hpp">
+      <Filter>Source Files\axn</Filter>
     </ClInclude>
-    <ClInclude Include="source\Mob.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Namespaces.hpp">
+      <Filter>Source Files\axn</Filter>
     </ClInclude>
-    <ClInclude Include="source\MountainRange.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Mob.hpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="source\MountMerciless.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Object.hpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="source\Namespaces.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="OS.hpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClInclude>
-    <ClInclude Include="source\Object.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Physics.hpp">
+      <Filter>Source Files\axn\physics</Filter>
     </ClInclude>
-    <ClInclude Include="source\OGL.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Planc.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="source\OS.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Player.hpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="source\Physics.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="STD.hpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClInclude>
-    <ClInclude Include="source\PineTree.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="STDc.hpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClInclude>
-    <ClInclude Include="source\Planc.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="STDptr.hpp">
+      <Filter>Source Files\axn\system</Filter>
     </ClInclude>
-    <ClInclude Include="source\Player.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Terrain.hpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="source\Random.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="TerrainEdge.hpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="source\Shape.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="TerrainVertex.hpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="source\Skull.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Visible.hpp">
+      <Filter>Source Files\axn\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\Sky.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="World.hpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="source\Snail.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Arrow.hpp">
+      <Filter>Source Files\mt\mobs\player</Filter>
     </ClInclude>
-    <ClInclude Include="source\SoundClip.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Bird.hpp">
+      <Filter>Source Files\mt\mobs</Filter>
     </ClInclude>
-    <ClInclude Include="source\Speaker.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Fox.hpp">
+      <Filter>Source Files\mt\mobs</Filter>
     </ClInclude>
-    <ClInclude Include="source\STD.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="AspenTree.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="source\STDc.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Bush.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="source\STDptr.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Cloud.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="source\Terrain.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="DistantBird.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="source\TerrainEdge.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Dust.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="source\TerrainVertex.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Fire.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="source\Transform.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="GrassTerrain.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="source\Utility.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Hills.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="source\Vector.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="MountainRange.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="source\Visible.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="PineTree.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="source\Waterfall.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Skull.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="source\World.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Sky.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="source\AXN.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Snail.hpp">
+      <Filter>Source Files\mt\mobs</Filter>
+    </ClInclude>
+    <ClInclude Include="Waterfall.hpp">
+      <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

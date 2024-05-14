@@ -1,7 +1,7 @@
 #ifndef Lighting_hpp
 #define Lighting_hpp
 
-#include "../geometry/Geometry.hpp"
+#include "Geometry.hpp"
 #include "Color.hpp"
 #include "Drawing.hpp"
 #include "LightSource.hpp"

@@ -1,8 +1,8 @@
 #ifndef Color_hpp
 #define Color_hpp
 
-#include "../system/STD.hpp"
-#include "../system/Assert.hpp"
+#include "STD.hpp"
+#include "Assert.hpp"
 
 namespace axn
 {
