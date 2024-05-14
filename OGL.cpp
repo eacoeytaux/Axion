@@ -311,13 +311,13 @@ error ogl::transform( const Transform & _transform )
 
 error ogl::translate( const double _x, const double _y )
 {
-    glTranslatef( _x, _y, 0.0 );
+    glTranslated( _x, _y, 0.0 );
     return check_errors( );
 }
 
 error ogl::scale( const double _x, const double _y )
 {
-    glScalef( _x, _y, 1.0 );
+    glScaled( _x, _y, 1.0 );
     return check_errors( );
 }
 
@@ -351,7 +351,7 @@ error ogl::vertex( const double _x, const double _y, const double _z, const doub
         return error_todo;
     }
     
-    glVertex4f( _x, _y, _z, _w );
+    glVertex4d( _x, _y, _z, _w );
     return check_errors( );
 }
 
@@ -422,7 +422,7 @@ double ogl::line_width( )
 
 error ogl::color( const double _r, const double _g, const double _b, const double _a )
 {
-    glColor4f( _r, _g, _b, _a );
+    glColor4d( _r, _g, _b, _a );
     return check_errors( );
 }
 

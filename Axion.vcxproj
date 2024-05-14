@@ -191,13 +191,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\ethan\OneDrive\Documents\SDL2\devel\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\ethan\OneDrive\Documents\SDL2\devel\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\libs\win\sdl2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\ethan\OneDrive\Documents\SDL2\devel\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\ethan\OneDrive\Documents\SDL2\devel\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\libs\win\sdl2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -233,13 +234,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\ethan\OneDrive\Documents\GLFW\glfw-3.4.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\ethan\OneDrive\Documents\GLFW\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\libs\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -250,7 +251,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\ethan\OneDrive\Documents\GLFW\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -258,7 +259,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\ethan\OneDrive\Documents\GLFW\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\libs\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
