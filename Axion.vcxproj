@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\Angle.cpp" />
+    <ClCompile Include="source\Arrow.cpp" />
+    <ClCompile Include="source\AspenTree.cpp" />
+    <ClCompile Include="source\Bird.cpp" />
+    <ClCompile Include="source\Bush.cpp" />
+    <ClCompile Include="source\Camera.cpp" />
+    <ClCompile Include="source\Climber.cpp" />
+    <ClCompile Include="source\Clock.cpp" />
+    <ClCompile Include="source\Cloud.cpp" />
+    <ClCompile Include="source\Coordinate.cpp" />
+    <ClCompile Include="source\DistantBird.cpp" />
+    <ClCompile Include="source\Drawing.cpp" />
+    <ClCompile Include="source\Dust.cpp" />
+    <ClCompile Include="source\Engine.cpp" />
+    <ClCompile Include="source\EngineSDL.cpp" />
+    <ClCompile Include="source\Fire.cpp" />
+    <ClCompile Include="source\Fox.cpp" />
+    <ClCompile Include="source\God.cpp" />
+    <ClCompile Include="source\GrassTerrain.cpp" />
+    <ClCompile Include="source\Hills.cpp" />
+    <ClCompile Include="source\Joint.cpp" />
+    <ClCompile Include="source\Lighting.cpp" />
+    <ClCompile Include="source\LightSource.cpp" />
+    <ClCompile Include="source\Line.cpp" />
+    <ClCompile Include="source\Logger.cpp" />
+    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\Matter.cpp" />
+    <ClCompile Include="source\Mob.cpp" />
+    <ClCompile Include="source\MountainRange.cpp" />
+    <ClCompile Include="source\MountMerciless.cpp" />
+    <ClCompile Include="source\Object.cpp" />
+    <ClCompile Include="source\OGL.cpp" />
+    <ClCompile Include="source\PineTree.cpp" />
+    <ClCompile Include="source\Player.cpp" />
+    <ClCompile Include="source\Random.cpp" />
+    <ClCompile Include="source\Shape.cpp" />
+    <ClCompile Include="source\Skull.cpp" />
+    <ClCompile Include="source\Sky.cpp" />
+    <ClCompile Include="source\Snail.cpp" />
+    <ClCompile Include="source\SoundClip.cpp" />
+    <ClCompile Include="source\Speaker.cpp" />
+    <ClCompile Include="source\Terrain.cpp" />
+    <ClCompile Include="source\TerrainEdge.cpp" />
+    <ClCompile Include="source\TerrainVertex.cpp" />
+    <ClCompile Include="source\Transform.cpp" />
+    <ClCompile Include="source\Vector.cpp" />
+    <ClCompile Include="source\Waterfall.cpp" />
+    <ClCompile Include="source\World.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\Angle.hpp" />
+    <ClInclude Include="source\Arrow.hpp" />
+    <ClInclude Include="source\AspenTree.hpp" />
+    <ClInclude Include="source\Assert.hpp" />
+    <ClInclude Include="source\Audio.hpp" />
+    <ClInclude Include="source\AXN.hpp" />
+    <ClInclude Include="source\Background.hpp" />
+    <ClInclude Include="source\Bedrock.hpp" />
+    <ClInclude Include="source\Bird.hpp" />
+    <ClInclude Include="source\Bush.hpp" />
+    <ClInclude Include="source\Camera.hpp" />
+    <ClInclude Include="source\Climber.hpp" />
+    <ClInclude Include="source\Clock.hpp" />
+    <ClInclude Include="source\Cloud.hpp" />
+    <ClInclude Include="source\Color.hpp" />
+    <ClInclude Include="source\Constants.hpp" />
+    <ClInclude Include="source\Coordinate.hpp" />
+    <ClInclude Include="source\Debug.hpp" />
+    <ClInclude Include="source\DistantBird.hpp" />
+    <ClInclude Include="source\Drawing.hpp" />
+    <ClInclude Include="source\Dust.hpp" />
+    <ClInclude Include="source\Engine.hpp" />
+    <ClInclude Include="source\Error.hpp" />
+    <ClInclude Include="source\Fire.hpp" />
+    <ClInclude Include="source\Foreground.hpp" />
+    <ClInclude Include="source\Fox.hpp" />
+    <ClInclude Include="source\Geometry.hpp" />
+    <ClInclude Include="source\Graphics.hpp" />
+    <ClInclude Include="source\GrassTerrain.hpp" />
+    <ClInclude Include="source\Hills.hpp" />
+    <ClInclude Include="source\Joint.hpp" />
+    <ClInclude Include="source\Lighting.hpp" />
+    <ClInclude Include="source\LightSource.hpp" />
+    <ClInclude Include="source\Line.hpp" />
+    <ClInclude Include="source\Logger.hpp" />
+    <ClInclude Include="source\Matter.hpp" />
+    <ClInclude Include="source\Mob.hpp" />
+    <ClInclude Include="source\MountainRange.hpp" />
+    <ClInclude Include="source\MountMerciless.hpp" />
+    <ClInclude Include="source\Namespaces.hpp" />
+    <ClInclude Include="source\Object.hpp" />
+    <ClInclude Include="source\OGL.hpp" />
+    <ClInclude Include="source\OS.hpp" />
+    <ClInclude Include="source\Physics.hpp" />
+    <ClInclude Include="source\PineTree.hpp" />
+    <ClInclude Include="source\Planc.hpp" />
+    <ClInclude Include="source\Player.hpp" />
+    <ClInclude Include="source\Random.hpp" />
+    <ClInclude Include="source\Shape.hpp" />
+    <ClInclude Include="source\Skull.hpp" />
+    <ClInclude Include="source\Sky.hpp" />
+    <ClInclude Include="source\Snail.hpp" />
+    <ClInclude Include="source\SoundClip.hpp" />
+    <ClInclude Include="source\Speaker.hpp" />
+    <ClInclude Include="source\STD.hpp" />
+    <ClInclude Include="source\STDc.hpp" />
+    <ClInclude Include="source\STDptr.hpp" />
+    <ClInclude Include="source\Terrain.hpp" />
+    <ClInclude Include="source\TerrainEdge.hpp" />
+    <ClInclude Include="source\TerrainVertex.hpp" />
+    <ClInclude Include="source\Transform.hpp" />
+    <ClInclude Include="source\Utility.hpp" />
+    <ClInclude Include="source\Vector.hpp" />
+    <ClInclude Include="source\Visible.hpp" />
+    <ClInclude Include="source\Waterfall.hpp" />
+    <ClInclude Include="source\World.hpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{18f762b7-9424-4f16-a34b-7493357befa8}</ProjectGuid>
+    <RootNamespace>Axion</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\Users\ethan\OneDrive\Documents\SDL2\devel\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\ethan\OneDrive\Documents\SDL2\devel\lib\x64;$(LibraryPath)</LibraryPath>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\Users\ethan\OneDrive\Documents\SDL2\devel\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\ethan\OneDrive\Documents\SDL2\devel\lib\x64;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\ethan\OneDrive\Documents\GLFW\glfw-3.4.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\ethan\OneDrive\Documents\GLFW\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\ethan\OneDrive\Documents\GLFW\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\ethan\OneDrive\Documents\GLFW\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

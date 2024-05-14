@@ -183,6 +183,9 @@ template <typename K, typename H = std::hash<K>, typename E = std::equal_to<K>>
 class uset : public std::unordered_set<K, H, E>
 {
     using std::unordered_set<K, H, E>::unordered_set;
+
+public:
+    bool contains( const K & ) const { return false; } // TODO!!!
 };
 
 using std::map;
@@ -190,6 +193,9 @@ template <typename K, typename V, typename H = std::hash<K>, typename E = std::e
 class umap : public std::unordered_map<K, V, H, E>
 {
     using std::unordered_map<K, V, H, E>::unordered_map;
+
+public:
+    bool contains( const K & ) const { return false; } // TODO!!!
 };
 
 // avoid confusion between std::vector and axn::Vector

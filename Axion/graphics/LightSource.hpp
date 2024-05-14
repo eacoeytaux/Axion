@@ -2,7 +2,7 @@
 #define LightSource_hpp
 
 #include "Color.hpp"
-#include "Geometry.hpp"
+#include "../geometry/Geometry.hpp"
 
 namespace axn
 {

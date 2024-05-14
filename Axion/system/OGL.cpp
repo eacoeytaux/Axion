@@ -3,7 +3,7 @@
 #include "OS.hpp"
 #if defined( OS_WINDOWS )
 // ---------------- //
-// todo
+#include <GLFW/glfw3.h>
 // ---------------- //
 #elif defined( OS_APPLE )
 // ---------------- //
@@ -430,13 +430,13 @@ error ogl::blend_normal( )
 {
     enable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glBlendEquation( GL_FUNC_ADD );
+    // glBlendEquation( GL_FUNC_ADD );
     return check_errors( );
 }
 
 error ogl::enable_anti_alias( )
 {
-    enable( GL_MULTISAMPLE );
+    // enable( GL_MULTISAMPLE );
     enable( GL_LINE_SMOOTH );
     enable( GL_POLYGON_SMOOTH );
     static_once( )
@@ -449,7 +449,7 @@ error ogl::enable_anti_alias( )
 
 error ogl::disable_anti_alias( )
 {
-    disable( GL_MULTISAMPLE );
+    // disable( GL_MULTISAMPLE );
     disable( GL_LINE_SMOOTH );
     disable( GL_POLYGON_SMOOTH );
     return check_errors( );

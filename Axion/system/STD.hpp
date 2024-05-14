@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iostream>
 #include <memory>
+#include <functional>
 #include <queue>
 #include <stack>
 #include <list>
@@ -62,6 +63,8 @@ const double SQRT_2 = sqrt( 2 );
 
 const double INFINITY_POSITIVE = INFINITY;
 const double INFINITY_NEGATIVE = -INFINITY;
+
+typedef unsigned int uint;
 
 } // namespace axn
 
