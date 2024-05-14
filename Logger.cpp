@@ -38,7 +38,19 @@ error Logger::init( const bool _file )
     if( _file )
     {
         Clock clock;
+#if defined( OS_WINDOWS )
+// ---------------- //
         fopen_s( &log_file, ( LOG_DIRECTORY + clock.timestamp( "." ) + "." + clock.datestamp( "." ) + ".log" ).c_str( ), "w+" );
+// ---------------- //
+#elif defined( OS_APPLE )
+// ---------------- //
+        log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( "." ) + "." + clock.datestamp( "." ) + ".log" ).c_str( ), "w+" );
+// ---------------- //
+#elif defined( OS_LINUX )
+// ---------------- //
+// todo
+// ---------------- //
+#endif
         if( !( b_using_file = log_file ) )
             return error_not_init;
     }

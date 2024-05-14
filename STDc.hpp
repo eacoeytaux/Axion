@@ -178,40 +178,38 @@ private:
 using std::queue;
 using std::stack;
 
-template <typename K, typename C = std::less<K>>
-class set : public std::set<K, C>
+template <typename Key, typename Compare = std::less<Key>>
+class set : public std::set<Key, Compare>
 {
-    using std::set<K, C>::set;
+    using std::set<Key, Compare>::set;
 
 public:
-    bool contains( const K & k ) const
+    bool contains( const Key & k ) const
     {
-        return ( std::set<K, C>::find( k ) != std::set<K, C>::end( ) );
+        return ( std::set<Key, Compare>::find( k ) != std::set<Key, Compare>::end( ) );
     }
 };
 
-template <typename K, typename H = std::hash<K>, typename E = std::equal_to<K>>
-class uset : public std::unordered_set<K, H, E>
+template <typename Key, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
+class uset : public std::unordered_set<Key, Hash, Equal>
 {
-    using std::unordered_set<K, H, E>::unordered_set;
-
+    using std::unordered_set<Key, Hash, Equal>::unordered_set;
+    
 public:
-    bool contains( const K & k ) const
+    bool contains( const Key & k ) const
     {
-        return ( std::unordered_set<K, H, E>::find( k ) != std::unordered_set<K, H, E>::end( ) );
+        return ( std::unordered_set<Key, Hash, Equal>::find( k ) != std::unordered_set<Key, Hash, Equal>::end( ) );
     }
 };
 
 using std::map;
-template <typename K, typename V, typename H = std::hash<K>, typename E = std::equal_to<K>>
-class umap : public std::unordered_map<K, V, H, E>
+template <typename Key, typename Value, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
+class umap : public std::unordered_map<Key, Value, Hash, Equal>
 {
-    using std::unordered_map<K, V, H, E>::unordered_map;
-
 public:
-    bool contains( const K & k ) const
+    bool contains( const Key & k ) const
     {
-        return ( std::unordered_map<K, V, H, E>::find( k ) != std::unordered_map<K, V, H, E>::end( ) );
+        return ( std::unordered_map<Key, Value, Hash, Equal>::unordered_map::find( k ) != std::unordered_map<Key, Value, Hash, Equal>::unordered_map::end( ) );
     }
 };
 

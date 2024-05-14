@@ -25,7 +25,6 @@
 		AA6CA9912AFCD549003CEA0A /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA6CA9902AFCD549003CEA0A /* OpenGL.framework */; };
 		AA6CA99A2AFCD6A7003CEA0A /* OGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA6CA9982AFCD6A7003CEA0A /* OGL.cpp */; };
 		AA6CA99C2AFCE2AE003CEA0A /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA6CA99B2AFCE2AE003CEA0A /* GLUT.framework */; };
-		AA7A3E4329B6E2540005EEA7 /* Random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7A3DD129B6E2540005EEA7 /* Random.cpp */; };
 		AA7A3E4429B6E2540005EEA7 /* Clock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7A3DD829B6E2540005EEA7 /* Clock.cpp */; };
 		AA7A3E4529B6E2540005EEA7 /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7A3DD929B6E2540005EEA7 /* Logger.cpp */; };
 		AA7A3E4729B6E2540005EEA7 /* TerrainEdge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7A3DE029B6E2540005EEA7 /* TerrainEdge.cpp */; };
@@ -115,7 +114,6 @@
 		AA7A3DCC29B6E2530005EEA7 /* Clock.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Clock.hpp; sourceTree = "<group>"; };
 		AA7A3DCD29B6E2530005EEA7 /* Logger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Logger.hpp; sourceTree = "<group>"; };
 		AA7A3DD029B6E2540005EEA7 /* AXN.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AXN.hpp; sourceTree = "<group>"; };
-		AA7A3DD129B6E2540005EEA7 /* Random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Random.cpp; path = system/Random.cpp; sourceTree = "<group>"; };
 		AA7A3DD429B6E2540005EEA7 /* Random.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Random.hpp; sourceTree = "<group>"; };
 		AA7A3DD629B6E2540005EEA7 /* Assert.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Assert.hpp; sourceTree = "<group>"; };
 		AA7A3DD829B6E2540005EEA7 /* Clock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Clock.cpp; sourceTree = "<group>"; };
@@ -424,7 +422,6 @@
 				AA6CA9A12AFD7BF9003CEA0A /* Error.hpp */,
 				AA7A3DD629B6E2540005EEA7 /* Assert.hpp */,
 				AA7A3DD429B6E2540005EEA7 /* Random.hpp */,
-				AA7A3DD129B6E2540005EEA7 /* Random.cpp */,
 				AA01DC012BF32283006FE720 /* Random.cpp */,
 				AA7A3DCD29B6E2530005EEA7 /* Logger.hpp */,
 				AA7A3DD929B6E2540005EEA7 /* Logger.cpp */,
@@ -530,7 +527,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA7A3E4329B6E2540005EEA7 /* Random.cpp in Sources */,
 				AA7A3E4D29B6E2540005EEA7 /* Cloud.cpp in Sources */,
 				AA9752182BB2BF6B003289EF /* Climber.cpp in Sources */,
 				AA7A3E4829B6E2540005EEA7 /* Object.cpp in Sources */,
