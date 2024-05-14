@@ -12,7 +12,7 @@ bool Player::god( ) const
     {
         gods[ *this ] = false;
     }
-    
+
     return gods[ *this ];
 }
 

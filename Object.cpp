@@ -319,7 +319,7 @@ double Object::friction_resistance( ) const
     {
         return m_ground->resistance( );
     }
-    
+
     return 0; // TODO AIR_RESISTANCE;
 }
 
@@ -354,7 +354,7 @@ Object & Object::terrain_boundaries( const bool _terrain_boundaries )
     {
         m_ground = nullptr;
     }
-    
+
     return *this;
 }
 

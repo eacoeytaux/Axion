@@ -184,9 +184,9 @@ class set : public std::set<K, C>
     using std::set<K, C>::set;
 
 public:
-    bool contains(const K& k) const
+    bool contains( const K & k ) const
     {
-        return (std::set<K, C>::find(k) != std::set<K, C>::end());
+        return ( std::set<K, C>::find( k ) != std::set<K, C>::end( ) );
     }
 };
 
@@ -196,9 +196,9 @@ class uset : public std::unordered_set<K, H, E>
     using std::unordered_set<K, H, E>::unordered_set;
 
 public:
-    bool contains(const K& k) const
+    bool contains( const K & k ) const
     {
-        return (std::unordered_set<K, H, E>::find(k) != std::unordered_set<K, H, E>::end());
+        return ( std::unordered_set<K, H, E>::find( k ) != std::unordered_set<K, H, E>::end( ) );
     }
 };
 
@@ -209,9 +209,9 @@ class umap : public std::unordered_map<K, V, H, E>
     using std::unordered_map<K, V, H, E>::unordered_map;
 
 public:
-    bool contains(const K& k) const
+    bool contains( const K & k ) const
     {
-        return (std::unordered_map<K, V, H, E>::find(k) != std::unordered_map<K, V, H, E>::end());
+        return ( std::unordered_map<K, V, H, E>::find( k ) != std::unordered_map<K, V, H, E>::end( ) );
     }
 };
 

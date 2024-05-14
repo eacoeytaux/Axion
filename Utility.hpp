@@ -207,7 +207,7 @@ T & flip( T & t, bool f = true )
     {
         t = -t;
     }
-    
+
     return t;
 }
 
@@ -320,7 +320,7 @@ template <typename T>
 class Span
 {
 public:
-    virtual ~Span( ) { };
+    virtual ~Span( ) { }
     Span( ) : m_min( T( 0 ) ), m_max( T( 0 ) ) { }
     Span( const T & max_value ) : m_min( max_value ), m_max( max_value ) { }
     Span( const T & min_value, const T & max_value ) : m_min( min_value ), m_max( max_value )
@@ -385,7 +385,7 @@ public:
             {
                 max( m_value );
             }
-            
+
             if( m_value < min( ) )
             {
                 min( m_value );

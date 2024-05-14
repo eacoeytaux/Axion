@@ -28,7 +28,7 @@ Mob & Mob::update( )
         {
             drawing_dirty( true );
         }
-        
+
         if( m_blink_duration.tick( ) )
         {
             m_blink_duration.reset( BLINK_DURATION );
@@ -163,7 +163,7 @@ Drawing Mob::debug_overlay( ) const
     {
         debug_overlay.draw( BLACK, Polygon::rectangle( health_width, health_height, offset ) );
     }
-    
+
     debug_overlay.move( position( ) );
     debug_overlay.draw( Object::debug_overlay( ) );
 

@@ -443,12 +443,12 @@
 			isa = PBXGroup;
 			children = (
 				AA7A3E6E29B6F7F00005EEA7 /* Frameworks */,
+				AAA6D0D72BB2999300077030 /* .clang-format-run.sh */,
+				AA61027C2B2BE14E0098B280 /* .clang-format */,
+				AA6C1EE02BBE032300DBC063 /* .gitignore */,
+				AA9752092BB2BF6B003289EF /* main.cpp */,
 				AA597D8F2BF3216B0032B3BC /* axn */,
 				AA597D902BF3217F0032B3BC /* mt */,
-				AA9752092BB2BF6B003289EF /* main.cpp */,
-				AA6C1EE02BBE032300DBC063 /* .gitignore */,
-				AA61027C2B2BE14E0098B280 /* .clang-format */,
-				AAA6D0D72BB2999300077030 /* .clang-format-run.sh */,
 				AA7A3DBB29B6E1620005EEA7 /* Products */,
 			);
 			sourceTree = "<group>";

@@ -275,7 +275,7 @@ error ogl::matrix_modelview_mode( const bool _load_identity )
     {
         load_identity( );
     }
-    
+
     return check_errors( );
 }
 
@@ -287,7 +287,7 @@ error ogl::matrix_projection_mode( const bool _load_identity )
     {
         load_identity( );
     }
-    
+
     return check_errors( );
 }
 
@@ -350,7 +350,7 @@ error ogl::vertex( const double _x, const double _y, const double _z, const doub
     {
         return error_todo;
     }
-    
+
     glVertex4d( _x, _y, _z, _w );
     return check_errors( );
 }

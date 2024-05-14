@@ -27,6 +27,7 @@
 *.app
 
 # -- WINDOWS --
+
 .vs/
 x32/
 x64/

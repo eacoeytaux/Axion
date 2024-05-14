@@ -32,7 +32,7 @@ error Engine::run( World * world, const string _app_name )
     {
         return error_not_init;
     }
-    
+
     static bool running = false;
     if( !Assert( !running, "Engine is already running!" ) )
     {

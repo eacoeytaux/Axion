@@ -130,8 +130,8 @@ error Logger::close( )
         log_message( INFO_LOG, "complete ...............\n" );
     b_initialized = false;
 
-    if (log_file)
-        return fclose(log_file) ? error_todo : no_error;
+    if( log_file )
+        return fclose( log_file ) ? error_todo : no_error;
     else
         return no_error;
 }
