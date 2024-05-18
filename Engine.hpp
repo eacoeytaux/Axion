@@ -52,7 +52,7 @@ public:
     static void anti_alias( bool aa ) { anti_alias_eng( aa ); }
 
     // audio
-    static double volume( ) { return volume_eng( ); }
+    static dec volume( ) { return volume_eng( ); }
     static void volume_up( ) { volume_up_eng( ); }
     static void volume_down( ) { volume_down_eng( ); }
     static bool muted( ) { return muted_eng( ); }
@@ -86,7 +86,7 @@ private:
     static void anti_alias_eng( bool );
 
     // audio
-    static double volume_eng( );
+    static dec volume_eng( );
     static void volume_up_eng( );
     static void volume_down_eng( );
     static bool muted_eng( );

@@ -9,8 +9,9 @@
 
 namespace
 {
+const uint GRID_LENGTH = 100;
 const uint START_AGE = 0; // 1024;
-const double CAMERA_ZOOM_RATIO = 0.96875;
+const dec CAMERA_ZOOM_RATIO = 0.96875;
 } // namespace
 
 World::World( )
@@ -43,6 +44,9 @@ World & World::destroy( )
 World & World::init( )
 {
     m_age = 0;
+
+    bounds( FixedRectangle( 1500.0, 1500.0 ) );
+
     create( );
 
     for_range( START_AGE ) update( ); // age world before adding player
@@ -62,55 +66,133 @@ World & World::reset( )
     return *this;
 }
 
-#ifdef AXN_DEBUG
-const Angle DELTA = -( TAU / (double)Engine::FPS );
-const Planc LINE_THICKNESS = 1.0;
-const Planc TARGET_RADIUS = 2.0;
-const Planc FPS_RADIUS = 32.0;
-const Color COLOR_MAIN = WHITE;
-const Color COLOR_INNER = RED;
-const double COLOR_OPACITY = 0.5;
-
-Drawing camera_drawing( const Camera & _camera )
+Drawing World::render_bounds( )
 {
-    Drawing grid;
+    const FixedRectangle & _bounds = bounds( );
 
-    grid.draw( COLOR_MAIN.a( COLOR_OPACITY ), Line( Coordinate( -_camera.width( ).half( ) / _camera.zoom( ), 0.0 ), Coordinate( _camera.width( ).half( ) / _camera.zoom( ), 0.0 ) ), true );
-    grid.draw( COLOR_MAIN.a( COLOR_OPACITY ), Line( Coordinate( 0.0, -_camera.height( ).half( ) / _camera.zoom( ) ), Coordinate( 0.0, _camera.height( ).half( ) / _camera.zoom( ) ) ), true );
+    Drawing bounds_drawing;
 
-    Vector target_offset = _camera.target( ) - _camera.center( );
+    if( bool use_pulse = true )
+    {
+        const Color BOUNDS_COLOR = RED;
+        const Planc BOUNDS_THICKNESS = 5.0;
 
-    Polygon target_outer = Polygon::circle( ( TARGET_RADIUS + LINE_THICKNESS ) / _camera.zoom( ), target_offset );
-    Polygon target_inner = Polygon::circle( ( TARGET_RADIUS ) / _camera.zoom( ), target_offset );
+        static uint PULSE = 0;
+        const uint PULSE_SPAN = 30;
+        const uint PULSE_THICKNESS = BOUNDS_THICKNESS;
+        const dec PULSE_ALPHA_START = 0.8;
 
-    grid.draw( COLOR_MAIN, target_outer, FILLED, true );
-    grid.draw( COLOR_INNER, target_inner, FILLED, true );
+        static uint PULSE_COLOR = 0;
+        const uint PULSE_COLOR_SPAN = 71;
 
-    grid.move( _camera.center( ) );
+        dec percent_pulse = (dec)( PULSE = ( PULSE + 1 ) % PULSE_SPAN ) / (dec)( PULSE_SPAN );
+        dec percent_color = (dec)( PULSE_COLOR = ( PULSE_COLOR + 1 ) % PULSE_COLOR_SPAN ) / (dec)( PULSE_COLOR_SPAN );
 
-    return grid;
+        static ColorSlider rainbow[] = {
+            ColorSlider( RED, YELLOW ),
+            ColorSlider( YELLOW, GREEN ),
+            ColorSlider( GREEN, CYAN ),
+            ColorSlider( CYAN, BLUE ),
+            ColorSlider( BLUE, MAGENTA ),
+            ColorSlider( MAGENTA, RED ) };
+
+        Color color;
+        for_range( 6 )
+        {
+            if( percent_color < ( (dec)( i + 1 ) / 6.0 ) )
+            {
+                color = rainbow[ i ].color_at( ( percent_color - ( (dec)i / 6.0 ) ) * 6.0 );
+                break;
+            }
+        }
+
+        bounds_drawing.draw( color.a( ( 1.0 - percent_pulse ) * PULSE_ALPHA_START ), _bounds, BOUNDS_THICKNESS + ( percent_pulse * PULSE_THICKNESS * 2 ), true );
+        bounds_drawing.draw( color.a( 1.0 ), _bounds, BOUNDS_THICKNESS, true );
+    }
+    else
+    {
+        const Color BOUNDS_COLOR = WHITE;
+        const Color BOUNDS_BORDER_COLOR = BLACK;
+
+        const Planc BOUNDS_THICKNESS = 3.0;
+        const Planc BOUNDS_BORDER_THICKNESS = 2.0;
+
+        bounds_drawing.draw( BOUNDS_BORDER_COLOR, _bounds, BOUNDS_THICKNESS + ( BOUNDS_BORDER_THICKNESS * 2 ), true );
+        bounds_drawing.draw( BOUNDS_COLOR, _bounds, BOUNDS_THICKNESS, true );
+    }
+
+    return bounds_drawing;
 }
 
-Drawing fps_drawing( const Camera & _camera )
+#ifdef AXN_DEBUG
+Drawing World::render_grid( )
 {
-    Drawing fps;
+    Drawing grid_drawing;
 
-    Polygon fps_circle = Polygon::circle( FPS_RADIUS / _camera.zoom( ) );
-    Polygon fps_dot = Polygon::circle( TARGET_RADIUS / _camera.zoom( ) );
-    Line fps_line( ORIGIN, Coordinate( 0, FPS_RADIUS / _camera.zoom( ) ) );
+    Grid & grid = object_grid( );
+    Coordinate top = bounds( ).top( );
+    Coordinate bottom = bounds( ).bottom( );
+
+    for_range( x, grid.x_range( ).range( ) )
+    {
+        grid_drawing.draw( BLACK, Line( Coordinate( GRID_LENGTH * x, bottom.y( ) ), Coordinate( GRID_LENGTH * x, top.y( ) ) ) );
+    }
+
+    for_range( y, grid.y_range( ).range( ) )
+    {
+    }
+
+    return grid_drawing;
+}
+
+Drawing World::render_debug_overlay( )
+{
+    const Camera * _camera = active_camera( );
+    const Planc _width = _camera->width( );
+    const Planc _height = _camera->height( );
+    const dec _zoom = _camera->zoom( );
+
+    const Angle DELTA = TAU / (dec)Engine::FPS;
+    const Planc LINE_THICKNESS = 1.0;
+    const Planc TARGET_RADIUS = 2.0;
+    const Planc FPS_RADIUS = 32.0;
+    const Color COLOR_MAIN = WHITE;
+    const Color COLOR_INNER = RED;
+    const dec COLOR_OPACITY = 1.0;
 
     static Angle delta;
-    delta += DELTA;
+    delta -= DELTA;
 
-    fps_line.rotate( delta );
+    Vector target_offset = _camera->target( ) - _camera->center( );
 
-    fps.draw( COLOR_MAIN, fps_dot, FILLED, true );
-    fps.draw( COLOR_MAIN.a( COLOR_OPACITY ), fps_circle, LINE_THICKNESS, true );
-    fps.draw( COLOR_MAIN.a( COLOR_OPACITY ), fps_line, LINE_THICKNESS, true );
+    Polygon target_outer = Circle( ( TARGET_RADIUS + LINE_THICKNESS ) / _zoom, target_offset );
+    Polygon target_inner = Circle( ( TARGET_RADIUS ) / _zoom, target_offset );
 
-    fps.move( _camera.center( ) );
+    Line fps_line = Line( ORIGIN, Coordinate( 0, FPS_RADIUS / _zoom ) ).rotate( delta );
+    Polygon fps_circle = Circle( FPS_RADIUS / _zoom );
+    Polygon fps_dot = Circle( TARGET_RADIUS / _zoom );
 
-    return fps;
+    Drawing overlay;
+
+    overlay.draw( COLOR_MAIN.a( COLOR_OPACITY ),
+                  Line( Coordinate( -half( _width ) / _zoom, 0.0 ),
+                        Coordinate( half( _width ) / _zoom, 0.0 ) ),
+                  LINE_THICKNESS, true );
+    overlay.draw( COLOR_MAIN.a( COLOR_OPACITY ),
+                  Line( Coordinate( 0.0, -half( _height ) / _zoom ),
+                        Coordinate( 0.0, half( _height ) / _zoom ) ),
+                  LINE_THICKNESS, true );
+
+    overlay.draw( COLOR_MAIN, target_outer, FILLED );
+    overlay.draw( COLOR_INNER, target_inner, FILLED );
+
+    overlay.draw( COLOR_MAIN, fps_dot, FILLED );
+    overlay.draw( COLOR_MAIN.a( COLOR_OPACITY ), fps_circle, LINE_THICKNESS, true );
+    overlay.draw( COLOR_MAIN.a( COLOR_OPACITY ), fps_line, LINE_THICKNESS, true );
+
+    overlay.move( _camera->center( ) );
+
+    return overlay;
 }
 #endif
 
@@ -120,9 +202,11 @@ World & World::render( )
     camera->clear( );
 
 #ifdef AXN_DEBUG
-    // when debugging don't show full darkness
     if( Debug::active )
-        m_lighting->darkness_intensity( min<double>( m_lighting->darkness_intensity( ), 0.25 ) );
+    {
+        // when debugging don't show full darkness
+        m_lighting->darkness_intensity( min<dec>( m_lighting->darkness_intensity( ), 0.25 ) );
+    }
 #endif
 
     m_lighting->clear_light_sources( );
@@ -141,24 +225,35 @@ World & World::render( )
     }
 
     if( m_lighting_active && m_lighting )
-        camera->lighting( m_lighting );
-    else
-        camera->clear_lighting( );
-
-#ifdef AXN_DEBUG
-    Drawing debug_overlay;
-    if( Debug::active )
     {
-        for_each( object, m_objects ) if( object->draw_debug )
-            debug_overlay.draw( object->debug_overlay( ) );
-
-        debug_overlay.draw( camera_drawing( *camera ) );
-        debug_overlay.draw( fps_drawing( *camera ) );
+        camera->lighting( m_lighting );
+    }
+    else
+    {
+        camera->clear_lighting( );
     }
 
-    Visible debug_visible( debug_overlay );
+#ifdef AXN_DEBUG
+    Visible grid_visible( render_grid( ) );
+    camera->capture( &grid_visible );
+#endif
+
+    Visible bounds_visible( render_bounds( ) );
+    camera->capture( &bounds_visible );
+
+#ifdef AXN_DEBUG
+    Visible debug_overlay_visible;
     if( Debug::active )
-        camera->capture( &debug_visible );
+    {
+        Drawing debug_overlay_drawing;
+        for_each( object, m_objects ) if( object->draw_debug )
+        {
+            debug_overlay_drawing.draw( object->debug_overlay( ).move( object->position( ) ) );
+        }
+        debug_overlay_drawing.draw( render_debug_overlay( ) );
+        debug_overlay_visible = Visible( debug_overlay_drawing );
+        camera->capture( &debug_overlay_visible );
+    }
 #endif
 
     camera->render( );
@@ -347,17 +442,36 @@ World & World::update( )
     add_objects_from_queue( );
     m_objects.sort( object_sort );
     m_solid_objects.sort( object_sort );
-    for_each( object, m_objects )
-    {
-        object->update_object( );
-    }
-    m_objects.remove_if( []( Object * object )
-                         { return object->deleted( ); } );
+
+    update_objects( m_objects );
+
+    m_objects.remove_if( [ & ]( Object * object )
+                         {
+        if( object->deleted( ) )
+        {
+            remove_object( object );
+            return true;
+        }
+        else
+        {
+            return false;
+        } } );
 
     if( m_players.size( ) )
     {
         m_active_camera->update( m_players[ 0 ]->position( ) );
     }
+
+    return *this;
+}
+
+World & World::update_object( Object * object )
+{
+    object_grid( ).mark_absent( object );
+
+    object->update_object( );
+
+    object_grid( ).mark_present( object );
 
     return *this;
 }
@@ -384,7 +498,7 @@ list<Object *> World::objects_in_range( const Planc & _lower_x, const Planc & _u
 list<Object *> World::solid_objects_in_range( const Planc & _lower_x, const Planc & _upper_x )
 {
     list<Object *> objects;
-    // objects.reserve(m_solid_objects.size());
+    // objects.reserve( m_solid_objects.size( ) );
     for_each( object, m_solid_objects )
     {
         if( in_range<Planc>( object->position( ).x( ), _lower_x - half( object->width( ) ), _upper_x + half( object->width( ) ), true ) )
@@ -395,9 +509,15 @@ list<Object *> World::solid_objects_in_range( const Planc & _lower_x, const Plan
     return objects;
 }
 
-World & World::add_object( Object * _object )
+World & World::add_object( Object * object )
 {
-    m_object_queue.push( _object );
+    m_object_queue.push( object );
+    return *this;
+}
+
+World & World::remove_object( Object * object )
+{
+    object_grid( ).mark_absent( object );
     return *this;
 }
 
@@ -407,8 +527,13 @@ World & World::add_objects_from_queue( )
     {
         Object * object = m_object_queue.front( );
         m_objects.insert_back( object );
+
         if( object->solid( ) )
+        {
             m_solid_objects.insert_back( object );
+        }
+
+        object_grid( ).mark_present( object );
 
         m_object_queue.pop( );
     }
@@ -419,8 +544,8 @@ World & World::clear_objects( )
 {
     for_each( object, m_objects ) safe_delete( object );
 
-    m_solid_objects.clear( );
     m_objects.clear( );
+    m_solid_objects.clear( );
 
     while( m_object_queue.size( ) )
     {
@@ -441,6 +566,17 @@ World & World::clear_objects( )
 uint World::age( ) const
 {
     return m_age;
+}
+
+const FixedRectangle & World::bounds( ) const
+{
+    return m_bounds;
+}
+
+World & World::bounds( const FixedRectangle & _bounds )
+{
+    m_object_grid.init( m_bounds = _bounds );
+    return *this;
 }
 
 World & World::add_player( const Coordinate & _position )
@@ -508,4 +644,69 @@ const Terrain * World::terrain( ) const
 Vector World::wind( ) const
 {
     return m_wind;
+}
+
+World::Grid & World::Grid::init( const FixedRectangle & _bounds )
+{
+    m_offset = _bounds.bottom( );
+
+    m_grid_x_size = ceil( _bounds.width( ) / (dec)GRID_LENGTH );
+    m_grid_y_size = ceil( _bounds.height( ) / (dec)GRID_LENGTH );
+
+    m_grid.resize( m_grid_x_size, varray<GridBlock>( m_grid_y_size ) );
+
+    for_range( x, m_grid_x_size )
+    {
+        for_range( y, m_grid_y_size )
+        {
+            m_grid[ x ][ y ].x = x;
+            m_grid[ x ][ y ].y = y;
+        }
+    }
+
+    return *this;
+}
+
+uint World::Grid::x( const Planc & _x )
+{
+    return floor( ( _x - m_offset.x( ) ) / GRID_LENGTH );
+}
+
+uint World::Grid::y( const Planc & _y )
+{
+    return floor( ( _y - m_offset.y( ) ) / GRID_LENGTH );
+}
+
+Span<uint> World::Grid::x_range( const FixedRectangle & _r )
+{
+    return Span<uint>( x( _r.bottom( ).x( ) ), x( _r.top( ).x( ) ) );
+}
+
+Span<uint> World::Grid::y_range( const FixedRectangle & _r )
+{
+    return Span<uint>( y( _r.bottom( ).y( ) ), y( _r.top( ).y( ) ) );
+}
+
+World::Grid & World::Grid::mark( const bool _present, Object * object )
+{
+    Span<uint> grid_x_range = x_range( object->hit_box( ) );
+    Span<uint> grid_y_range = y_range( object->hit_box( ) );
+
+    for_range( x, grid_x_range.range( ) )
+    {
+        for_range( y, grid_y_range.range( ) )
+        {
+            GridBlock & block = m_grid[ x + grid_x_range.min( ) ][ y + grid_y_range.min( ) ];
+            if( _present )
+            {
+                block.m_objects.insert( object );
+            }
+            else
+            {
+                block.m_objects.erase( object );
+            }
+        }
+    }
+
+    return *this;
 }

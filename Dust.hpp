@@ -17,7 +17,7 @@ public:
 
 private:
     Planc m_radius;
-    double m_alpha;
+    dec m_alpha;
     uint m_sides;
     Angle m_rotation;
     Angle m_rotation_speed;

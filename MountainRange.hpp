@@ -10,7 +10,7 @@ class MountainRange : public Object
 {
 public:
     virtual ~MountainRange( ) { }
-    MountainRange( World *, Planc base_bottom, double z, const Color & color );
+    MountainRange( World *, Planc base_bottom, dec z, const Color & color );
 };
 
 } // namespace mtmercy

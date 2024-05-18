@@ -22,13 +22,13 @@ public:
 
     virtual Planc light_sight( ) const = 0;
 
-    virtual Player & hurt( double health ) override;
+    virtual Player & hurt( dec health ) override;
 
 protected:
     virtual Player & die( ) override;
 
 private:
-    virtual Player & move( ) override;
+    virtual Player & update_movement( ) override;
 
     // -------------- GOD MODE --------------
 public:

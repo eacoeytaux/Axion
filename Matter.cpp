@@ -1,21 +1,21 @@
 #include "Matter.hpp"
 
-Matter::Matter( const Coordinate & _position, const Polygon & _space, const double _mass )
+Matter::Matter( const Coordinate & _position, const Polygon & _space, const dec _mass )
     : m_position( _position ), m_space( _space ), m_mass( _mass )
 {
 }
 
-Matter::Matter( const Vector & _position_velocity, const Polygon & _space, const double _mass )
+Matter::Matter( const Vector & _position_velocity, const Polygon & _space, const dec _mass )
     : m_position( _position_velocity.origin( ) ), m_velocity( _position_velocity ), m_space( _space ), m_mass( _mass )
 {
 }
 
-double Matter::mass( ) const
+dec Matter::mass( ) const
 {
     return m_mass;
 }
 
-Matter & Matter::mass( const double _mass )
+Matter & Matter::mass( const dec _mass )
 {
     m_mass = _mass;
     return *this;
@@ -28,8 +28,8 @@ Coordinate Matter::position( ) const
 
 Matter & Matter::position( const Coordinate & _position )
 {
-    Vector d_position( m_position, _position );
-    move( d_position );
+    ;
+    move( Vector( m_position, _position ) );
     return *this;
 }
 
@@ -63,7 +63,10 @@ Matter & Matter::add_velocity( const Vector & _velocity )
 
 Matter & Matter::move( const Vector & _distance )
 {
-    m_position += _distance;
+    if( _distance.has_magnitude( ) )
+    {
+        m_position += _distance;
+    }
     return *this;
 }
 

@@ -102,7 +102,7 @@ error Engine::run( World * world, const string _app_name )
             check_quit( world->render( ); );
             check_quit( render_eng( ); );
 
-            wait_eng( (int)( max( 0.0, ( 1000.0 / (double)FPS ) - ( current_ticks_eng( ) - start_ticks ) ) ) );
+            wait_eng( (int)( max( 0.0, ( 1000.0 / (dec)FPS ) - ( current_ticks_eng( ) - start_ticks ) ) ) );
         }
     }
     catch( ... )

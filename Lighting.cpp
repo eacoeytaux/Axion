@@ -15,12 +15,12 @@ Lighting & Lighting::darkness_active( const bool _darkness_active )
     return *this;
 }
 
-double Lighting::darkness_intensity( ) const
+dec Lighting::darkness_intensity( ) const
 {
     return m_darkness_slider.value( );
 }
 
-Lighting & Lighting::darkness_intensity( const double _intensity )
+Lighting & Lighting::darkness_intensity( const dec _intensity )
 {
     m_darkness_slider.value( _intensity );
     return *this;

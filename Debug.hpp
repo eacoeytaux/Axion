@@ -21,14 +21,14 @@
 #endif
 
 #ifdef AXN_DEBUG
-#define breakpoint Debug::breakpoint_function( );
+#define breakpoint Debug::breakpointf( );
 namespace axn
 {
 class Debug
 {
 public:
     static bool active;
-    static bool breakpoint_function( ) { return true; }
+    static bool breakpointf( ) { return true; }
 };
 } // namespace axn
 #else

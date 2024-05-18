@@ -175,8 +175,25 @@ private:
     }
 };
 
-using std::queue;
-using std::stack;
+template <typename T>
+class queue : public std::queue<T>
+{
+    using std::queue<T>::queue;
+
+public:
+    T pop( )
+    {
+        T t = std::queue<T>::front( );
+        std::queue<T>::pop( );
+        return t;
+    }
+};
+
+template <typename T>
+class stack : public std::stack<T>
+{
+    using std::stack<T>::stack;
+};
 
 template <typename Key, typename Compare = std::less<Key>>
 class set : public std::set<Key, Compare>
@@ -194,7 +211,7 @@ template <typename Key, typename Hash = std::hash<Key>, typename Equal = std::eq
 class uset : public std::unordered_set<Key, Hash, Equal>
 {
     using std::unordered_set<Key, Hash, Equal>::unordered_set;
-    
+
 public:
     bool contains( const Key & k ) const
     {
@@ -229,7 +246,7 @@ public:
         if( index_start == index_end )
             return varray( );
         assert_index( index_start );
-        assert_index( index_end + 1 );
+        assert_index( index_end - 1 );
         varray ret( index_end - index_start );
         for( uint index = index_start; index < index_end; ++index )
             ret.insert_back( index );
@@ -355,15 +372,15 @@ public:
         return *this;
     }
 
-    varray<T> & resize( uint size )
+    varray<T> & resize( uint size, const T & t = T( ) )
     {
-        std::vector<T>::resize( size );
+        std::vector<T>::resize( size, t );
         return *this;
     }
 
-    varray<T> & resize_more( uint size )
+    varray<T> & resize_more( uint size, const T & t = T( ) )
     {
-        resize( (uint)std::vector<T>::size( ) + size );
+        resize( (uint)std::vector<T>::size( ) + size, t );
         return *this;
     }
 

@@ -10,7 +10,7 @@ class AspenTree : public Object
 {
 public:
     virtual ~AspenTree( ) { }
-    AspenTree( World *, const Coordinate & root, double z = 1.0 );
+    AspenTree( World *, const Coordinate & root, dec z = 1.0 );
 };
 
 } // namespace mtmercy

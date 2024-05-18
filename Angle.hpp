@@ -15,7 +15,7 @@ class Angle
 {
 public:
     virtual ~Angle( ) { }
-    Angle( double radians = 0, bool truncate = TRUNCATE_ANGLE_DEFAULT );
+    Angle( dec radians = 0, bool truncate = TRUNCATE_ANGLE_DEFAULT );
     Angle( const Planc & dx, const Planc & dy, bool truncate = TRUNCATE_ANGLE_DEFAULT );
     Angle( const Coordinate & c, bool truncate = TRUNCATE_ANGLE_DEFAULT );
     Angle( const Coordinate & from, const Coordinate & to, bool truncate = TRUNCATE_ANGLE_DEFAULT );
@@ -24,14 +24,14 @@ public:
     Angle & truncate( bool truncate );
     Angle truncated( );
 
-    double radians( ) const;
-    double degrees( ) const;
+    dec radians( ) const;
+    dec degrees( ) const;
 
-    Angle & radians( double radians );
+    Angle & radians( dec radians );
     Angle & radians( const Planc & dx, const Planc & dy );
 
-    double sin( double multiplier = 1.0 ) const;
-    double cos( double multiplier = 1.0 ) const;
+    dec sin( dec multiplier = 1.0 ) const;
+    dec cos( dec multiplier = 1.0 ) const;
 
     Quadrant quadrant( ) const;
     Axis axis( ) const;
@@ -44,9 +44,9 @@ public:
     Angle half( ) const;
     Angle & halve( );
 
-    operator double( ) const { return m_radians; }
+    operator dec( ) const { return m_radians; }
 
-    Angle & operator=( double radians );
+    Angle & operator=( dec radians );
 
     Angle operator-( ) const;
 
@@ -58,27 +58,27 @@ public:
 
     bool operator==( const Angle & angle ) const;
     bool operator!=( const Angle & angle ) const;
-    bool operator<( const Angle & angle ) const;
     bool operator<=( const Angle & angle ) const;
-    bool operator>( const Angle & angle ) const;
     bool operator>=( const Angle & angle ) const;
+    bool operator<( const Angle & angle ) const;
+    bool operator>( const Angle & angle ) const;
 
-    Angle operator+( double radians ) const;
-    Angle operator-( double radians ) const;
-    Angle operator*( double scale ) const;
-    Angle operator/( double scale ) const;
+    Angle operator+( dec radians ) const;
+    Angle operator-( dec radians ) const;
+    Angle operator*( dec scale ) const;
+    Angle operator/( dec scale ) const;
 
-    Angle & operator+=( double radians );
-    Angle & operator-=( double radians );
-    Angle & operator*=( double scale );
-    Angle & operator/=( double scale );
+    Angle & operator+=( dec radians );
+    Angle & operator-=( dec radians );
+    Angle & operator*=( dec scale );
+    Angle & operator/=( dec scale );
 
-    bool operator==( double radians ) const;
-    bool operator!=( double radians ) const;
-    bool operator<( double radians ) const;
-    bool operator<=( double radians ) const;
-    bool operator>( double radians ) const;
-    bool operator>=( double radians ) const;
+    bool operator==( dec radians ) const;
+    bool operator!=( dec radians ) const;
+    bool operator<=( dec radians ) const;
+    bool operator>=( dec radians ) const;
+    bool operator<( dec radians ) const;
+    bool operator>( dec radians ) const;
 
     Angle operator+( int radians ) const;
     Angle operator-( int radians ) const;
@@ -92,10 +92,10 @@ public:
 
     bool operator==( int radians ) const;
     bool operator!=( int radians ) const;
-    bool operator<( int radians ) const;
     bool operator<=( int radians ) const;
-    bool operator>( int radians ) const;
     bool operator>=( int radians ) const;
+    bool operator<( int radians ) const;
+    bool operator>( int radians ) const;
 
     Angle operator+( uint radians ) const;
     Angle operator-( uint radians ) const;
@@ -109,30 +109,30 @@ public:
 
     bool operator==( uint radians ) const;
     bool operator!=( uint radians ) const;
-    bool operator<( uint radians ) const;
     bool operator<=( uint radians ) const;
-    bool operator>( uint radians ) const;
     bool operator>=( uint radians ) const;
+    bool operator<( uint radians ) const;
+    bool operator>( uint radians ) const;
 
-    static double radians_to_degrees( double radians );
-    static double degrees_to_radians( double degrees );
+    static dec radians_to_degrees( dec radians );
+    static dec degrees_to_radians( dec degrees );
 
 private:
     bool m_truncate = TRUNCATE_ANGLE_DEFAULT; // keeps radians within [ 0, 2 * pi )
 
-    double m_radians = 0.0;
+    dec m_radians = 0.0;
 #ifdef AXN_DEBUG
-    double m_degrees = 0.0;
+    dec m_degrees = 0.0;
 #endif
 };
 
-const double TAU = 6.283185307179586476925;
-const double PI = 3.141592653589793236926;
-const double RIGHT_ANGLE = 1.570796326794896618463;
-const double RIGHT_ANGLE_0 = RIGHT_ANGLE * 0.0;
-const double RIGHT_ANGLE_1 = RIGHT_ANGLE * 1.0;
-const double RIGHT_ANGLE_2 = RIGHT_ANGLE * 2.0;
-const double RIGHT_ANGLE_3 = RIGHT_ANGLE * 3.0;
+const dec TAU = 6.283185307179586476925;
+const dec PI = 3.141592653589793236926;
+const dec RIGHT_ANGLE = 1.570796326794896618463;
+const dec RIGHT_ANGLE_0 = RIGHT_ANGLE * 0.0;
+const dec RIGHT_ANGLE_1 = RIGHT_ANGLE * 1.0;
+const dec RIGHT_ANGLE_2 = RIGHT_ANGLE * 2.0;
+const dec RIGHT_ANGLE_3 = RIGHT_ANGLE * 3.0;
 
 } // namespace geometry
 } // namespace axn

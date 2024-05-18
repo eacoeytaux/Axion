@@ -17,9 +17,9 @@ const Player & Player::render( ) const
             const Color GLOW_COLOR = Color( WHITE, 0.125 );
             const Planc GLOW_RADIUS = height( );
 
-            god_drawing.draw( GLOW_COLOR, Polygon::circle( GLOW_RADIUS * 2.0 ) );
-            god_drawing.draw( GLOW_COLOR, Polygon::circle( GLOW_RADIUS * 1.7 ) );
-            god_drawing.draw( GLOW_COLOR, Polygon::circle( GLOW_RADIUS * 1.3 ) );
+            god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * 2.0 ) );
+            god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * 1.7 ) );
+            god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * 1.3 ) );
         }
 
         draw( god_drawing );
@@ -37,15 +37,15 @@ Player & Player::update( )
 
     if( god( ) )
     {
-        add_light_source( position( ), 512.0 ); // the all seeing eye
+        add_light_source( position( ), 512 ); // the all seeing eye
     }
 
     return *this;
 }
 
-Player & Player::move( )
+Player & Player::update_movement( )
 {
-    Mob::move( );
+    Mob::update_movement( );
     return *this;
 }
 
@@ -65,7 +65,7 @@ Player & Player::die( )
     return *this;
 }
 
-Player & Player::hurt( double _health )
+Player & Player::hurt( dec _health )
 {
 #ifdef AXN_DEBUG
     if( god( ) )

@@ -22,8 +22,8 @@ public:
 
     bool darkness_active( ) const;
     Lighting & darkness_active( bool );
-    double darkness_intensity( ) const;
-    Lighting & darkness_intensity( double );
+    dec darkness_intensity( ) const;
+    Lighting & darkness_intensity( dec );
 
     const varray<LightSource> & light_sources( ) const;
     Lighting & add_light_source( const LightSource & );
@@ -33,7 +33,7 @@ private:
     varray<LightSource> m_light_sources;
 
     bool m_darkness_active = false;
-    Slider<double> m_darkness_slider = Slider<double>( 1.0 );
+    Slider<dec> m_darkness_slider = Slider<dec>( 1.0 );
 };
 
 } // namespace graphics

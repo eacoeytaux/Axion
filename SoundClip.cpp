@@ -14,7 +14,7 @@
 //     if ( _volume <= 0 ) return true;
 //     if ( SYSAudio::muted() ) return true;
 //     bool success = true;
-//     //double volume = 1.0;
+//     //dec volume = 1.0;
 //     //int global_volume = MIX_MAX_VOLUME * SYSAudio::volume( ) * volume;
 //     //success = !Mix_Volume( -1, global_volume ) && success;
 //     //success = !Mix_PlayChannel( -1, Mix_LoadWAV( ( base_location + _load_name ).c_str( ) ), 0 ) && success;

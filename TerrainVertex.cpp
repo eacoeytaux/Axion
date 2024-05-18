@@ -12,14 +12,16 @@ TerrainEdge * TerrainVertex::edge2( ) const { return m_e2; }
 
 TerrainVertex & TerrainVertex::edge1( TerrainEdge * e1 )
 {
-    Assert( (bool)!m_e1, "Edge has already been set" );
+    Assert( !(bool)m_e1, "Edge 1 has already been set" );
+
     m_e1 = e1;
     return *this;
 }
 
 TerrainVertex & TerrainVertex::edge2( TerrainEdge * e2 )
 {
-    Assert( (bool)!m_e2, "Edge has already been set" );
+    Assert( !(bool)m_e2, "Edge 2 has already been set" );
+
     m_e2 = e2;
     return *this;
 }

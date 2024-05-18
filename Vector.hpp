@@ -4,7 +4,6 @@
 #include "Planc.hpp"
 #include "Coordinate.hpp"
 #include "Angle.hpp"
-#include "Line.hpp"
 
 namespace axn
 {
@@ -52,15 +51,13 @@ public:
     Vector & operator+=( const Vector & );
     Vector & operator-=( const Vector & );
 
-    Vector operator*( double scale ) const;
-    Vector operator/( double scale ) const;
-    Vector & operator*=( double scale );
-    Vector & operator/=( double scale );
+    Vector operator*( dec scale ) const;
+    Vector operator/( dec scale ) const;
+    Vector & operator*=( dec scale );
+    Vector & operator/=( dec scale );
 
     bool operator==( const Vector & ) const;
     bool operator!=( const Vector & ) const;
-
-    operator Line( ) const;
 
 private:
     Coordinate m_origin = ORIGIN;

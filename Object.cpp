@@ -41,7 +41,13 @@ const Object & Object::render_object( ) const
 
 Object & Object::update( )
 {
-    move( );
+    if( marked_to_delete( ) )
+    {
+        mark_deleted( );
+    }
+
+    update_movement( );
+
     return *this;
 }
 
@@ -87,7 +93,7 @@ Object & Object::update_velocity( )
     {
         if( velocity.has_magnitude( ) )
         {
-            velocity.flatten( m_ground->line( ).angle( ) );
+            velocity.flatten( m_ground->line( ).angle( ).flip( ) );
         }
     }
     else if( !m_ground && m_gravity_ratio )
@@ -95,13 +101,13 @@ Object & Object::update_velocity( )
         velocity += ( GRAVITY * m_gravity_ratio );
     }
 
-    velocity *= ( 1 - friction_resistance( ) );
+    velocity *= ( 1.0 - friction_resistance( ) );
 
     Matter::velocity( velocity );
     return *this;
 }
 
-Object & Object::move( )
+Object & Object::update_movement( )
 {
     if( stationary( ) )
         return *this;
@@ -110,8 +116,8 @@ Object & Object::move( )
     if( m_ground )
         checked_edges.insert( m_ground );
 
-    double remaining_percentage = 1.0;
-    while( ( double_ge( remaining_percentage, 0.0 ) && !isnan( remaining_percentage ) ) && !stationary( ) )
+    dec remaining_percentage = 1.0;
+    while( ( dec_ge( remaining_percentage, 0.0 ) && !isnan( remaining_percentage ) ) && !stationary( ) )
     {
         update_velocity( );
         Vector velocity = Object::velocity( ) * remaining_percentage;
@@ -122,11 +128,11 @@ Object & Object::move( )
 
         Vector movement = Vector( center, center + velocity );
 
-        double movement_percentage = 1.0;
+        dec movement_percentage = 1.0;
 
         TerrainEdge * next_ground = m_ground;
 
-        // if objects doubles through walls don't bother
+        // if objects decs through walls don't bother
         if( terrain_boundaries( ) || !m_world->terrain( ) )
         {
             TerrainEdge * ground_left = nullptr;
@@ -216,15 +222,50 @@ Object & Object::move( )
             Planc end_x = position( ).x( ) + width( ).half( ) + movement.dx( );
             list<Object *> objects = world( )->solid_objects_in_range( start_x, end_x );
 
+            Line movement_line( movement );
             for_each( object, objects )
             {
                 if( this == object )
+                {
                     continue;
+                }
 
                 FixedRectangle hit_box = object->hit_box( );
-                hit_box.width( hit_box.width( ) + width( ) );
-                hit_box.height( hit_box.height( ) + height( ) );
-                varray<Line> intersections = hit_box.intersection( movement );
+                hit_box.expand_width( width( ) );
+                hit_box.expand_height( height( ) );
+
+                varray<Line> intersections;
+                if( hit_box.width( ) && hit_box.height( ) )
+                {
+                    intersections = hit_box.intersection( movement );
+                }
+                else
+                {
+                    if( hit_box.width( ) )
+                    {
+                        Line hit_box_line( hit_box.center( ).x( ) - hit_box.width( ).half( ), hit_box.center( ).x( ) + hit_box.width( ).half( ) );
+                        if( movement_line.intersects( hit_box_line ) )
+                        {
+                            intersections = { Line( movement.origin( ), movement_line.intersection( hit_box_line ) ) };
+                        }
+                    }
+                    else if( hit_box.height( ) )
+                    {
+                        Line hit_box_line( hit_box.center( ).y( ) - hit_box.height( ).half( ), hit_box.center( ).y( ) + hit_box.height( ).half( ) );
+                        if( movement_line.intersects( hit_box_line ) )
+                        {
+                            intersections = { Line( movement.origin( ), movement_line.intersection( hit_box_line ) ) };
+                        }
+                    }
+                    else
+                    {
+                        if( movement_line.on( hit_box.center( ) ) )
+                        {
+                            intersections = { Line( movement.origin( ), hit_box.center( ) ) };
+                        }
+                    }
+                }
+
                 if( intersections.size( ) )
                 {
                     ObjectCollision collision;
@@ -239,7 +280,10 @@ Object & Object::move( )
                 struct
                 {
                     Coordinate origin;
-                    bool operator( )( const ObjectCollision & c1, const ObjectCollision & c2 ) { return ( c1.line.c2( ).distance( origin ) < c2.line.c2( ).distance( origin ) ); }
+                    bool operator( )( const ObjectCollision & c1, const ObjectCollision & c2 )
+                    {
+                        return ( c1.line.c1( ).distance( origin ) < c2.line.c1( ).distance( origin ) );
+                    }
                 } collision_sort;
                 collision_sort.origin = position( );
                 collied_objects.sort( collision_sort );
@@ -248,18 +292,39 @@ Object & Object::move( )
 
                 collide( collision.object );
 
-                // movement = Vector( collision.line.c1( ), collision.line.c2( ) ).origin( position( ) );
+                // movement = Vector( position( ), collision.line.c1( ) );
             }
+        }
+
+        move( movement );
+        ground( next_ground );
+
+        remaining_percentage *= ( 1.0 - ( movement.magnitude( ) / velocity.magnitude( ) ) );
+    }
+
+    return *this;
+}
+
+Object & Object::move( const Vector & _movement )
+{
+    if( _movement.has_magnitude( ) )
+    {
+        position( position( ) + _movement );
+
+        FixedRectangle world_bounds = world( )->bounds( );
+
+        world_bounds.width( world_bounds.width( ) / ( z( ) * z( ) ) );
+        world_bounds.height( world_bounds.height( ) / ( z( ) * z( ) ) );
+
+        if( !world_bounds.contains( position( ) ) )
+        {
+            out_of_bounds( );
         }
 
         for_each( object, m_movement_subscribers )
         {
-            object->react_to_movement( this, movement );
+            object->react_to_movement( this, _movement );
         }
-
-        ground( next_ground );
-        position( position( ) + movement );
-        remaining_percentage *= ( 1.0 - ( movement.magnitude( ) / velocity.magnitude( ) ) );
     }
 
     return *this;
@@ -313,7 +378,7 @@ Object & Object::stationary( const bool _stationary )
     return *this;
 }
 
-double Object::friction_resistance( ) const
+dec Object::friction_resistance( ) const
 {
     if( m_ground )
     {
@@ -331,6 +396,12 @@ TerrainEdge * Object::ground( ) const
 Object & Object::ground( TerrainEdge * ground )
 {
     m_ground = ground;
+    return *this;
+}
+
+Object & Object::out_of_bounds( )
+{
+    mark_to_delete( );
     return *this;
 }
 
@@ -358,9 +429,9 @@ Object & Object::terrain_boundaries( const bool _terrain_boundaries )
     return *this;
 }
 
-double Object::gravity_ratio( ) const { return m_gravity_ratio; }
+dec Object::gravity_ratio( ) const { return m_gravity_ratio; }
 
-Object & Object::gravity_ratio( const double _gravity_ratio )
+Object & Object::gravity_ratio( const dec _gravity_ratio )
 {
     m_gravity_ratio = _gravity_ratio;
     return *this;
@@ -368,7 +439,7 @@ Object & Object::gravity_ratio( const double _gravity_ratio )
 
 FixedRectangle Object::hit_box( ) const
 {
-    Polygon space = Matter::space( ) - position( );
+    Polygon space = Matter::space( );
     return FixedRectangle( space.upper_bound_x( ) - space.lower_bound_x( ), space.upper_bound_y( ) - space.lower_bound_y( ), position( ) );
 }
 
@@ -380,13 +451,13 @@ FixedRectangle Object::visible_box( ) const
 Object & Object::track_position( uint count )
 {
     m_last_position_count = count;
-    // TODO resize m_last_positions
+    m_last_positions.resize( count, position( ) );
     return *this;
 }
 
 Coordinate Object::last_position( uint past )
 {
-    return m_last_positions[ ( m_last_position_index + past ) % m_last_positions.size( ) ];
+    return m_last_positions[ ( m_last_position_index + past ) % m_last_position_count ];
 }
 
 Object & Object::subscribe_to_movement( Object * object )
@@ -405,21 +476,27 @@ Object & Object::add_movement_subscriber( Object * object )
 #ifdef AXN_DEBUG
 Drawing Object::debug_overlay( ) const
 {
-    const double VELOCITY_SCALE = 3.0;
-    const double HIT_BOX_THICKNESS = 1.0;
-    const Color HIT_BOX_COLOR = YELLOW;
+    const Planc HIT_BOX_THICKNESS = 2.0;
+    const Planc DOT_RADIUS = HIT_BOX_THICKNESS;
+    const Planc VELOCITY_THICKNESS = HIT_BOX_THICKNESS;
+    const Planc VELOCITY_ARROW_LENGTH = 10.0;
+    const Planc VELOCITY_MAGNITUDE_MINIMUM = 1.0;
+    const Planc VELOCITY_SCALE = 3.0;
+    const Color COLOR = YELLOW;
 
     Drawing debug_overlay;
 
     // hit box
-    debug_overlay.draw( HIT_BOX_COLOR, hit_box( ), HIT_BOX_THICKNESS );
+    debug_overlay.draw( COLOR, hit_box( ) - position( ), HIT_BOX_THICKNESS, true );
 
-    // center / velocity
-    debug_overlay.draw( HIT_BOX_COLOR, Polygon::circle( HIT_BOX_THICKNESS * 2.0, position( ) ), FILLED );
-    Vector velocity_graphic = velocity( ).origin( position( ) ) * VELOCITY_SCALE;
-    if( velocity_graphic.magnitude( ) > 1.0 )
+    // center
+    debug_overlay.draw( COLOR, Circle( DOT_RADIUS ), FILLED );
+
+    // velocity
+    Vector velocity_graphic = velocity( ) * VELOCITY_SCALE;
+    if( velocity_graphic.magnitude( ) >= VELOCITY_MAGNITUDE_MINIMUM )
     {
-        debug_overlay.draw( HIT_BOX_COLOR, velocity_graphic, 10, HIT_BOX_THICKNESS );
+        debug_overlay.draw( COLOR, velocity_graphic, VELOCITY_ARROW_LENGTH, VELOCITY_THICKNESS, true );
     }
 
     return debug_overlay;

@@ -31,21 +31,33 @@ public:
     const Planc & height( ) const;
     FixedRectangle & height( const Planc & );
 
-    Coordinate top_left( ) const;
     Coordinate top_right( ) const;
+    Coordinate top_left( ) const;
     Coordinate bottom_left( ) const;
     Coordinate bottom_right( ) const;
+
+    Coordinate top( ) const { return top_right( ); }
+    Coordinate bottom( ) const { return bottom_left( ); }
 
     Planc upper_bound_x( ) const;
     Planc upper_bound_y( ) const;
     Planc lower_bound_x( ) const;
     Planc lower_bound_y( ) const;
 
-    bool contains( const Coordinate & ) const;
-    bool intersects( const Line & line ) const { return ( intersection( line ).size( ) > 0 ); }
+    bool contains( const Coordinate & coordinate, bool inclusive = true ) const;
+    bool intersects( const Line & line ) const;
     varray<Line> intersection( const Line & line ) const;
 
     Planc area( ) const;
+
+    FixedRectangle & expand( const Planc & d_width_and_height ) { return expand( d_width_and_height, d_width_and_height ); }
+    FixedRectangle & shrink( const Planc & d_width_and_height ) { return shrink( d_width_and_height, d_width_and_height ); }
+    FixedRectangle & expand( const Planc & d_width, const Planc & d_height );
+    FixedRectangle & shrink( const Planc & d_width, const Planc & d_height );
+    FixedRectangle & expand_width( const Planc & d_width );
+    FixedRectangle & shrink_width( const Planc & d_width );
+    FixedRectangle & expand_height( const Planc & d_height );
+    FixedRectangle & shrink_height( const Planc & d_height );
 
     FixedRectangle operator+( const Vector & ) const;
     FixedRectangle & operator+=( const Vector & );

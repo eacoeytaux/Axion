@@ -4,6 +4,8 @@
 #include "Planc.hpp"
 #include "Coordinate.hpp"
 #include "Angle.hpp"
+#include "Vector.hpp"
+#include "Transform.hpp"
 
 namespace axn
 {
@@ -14,18 +16,25 @@ class Line
 {
 public:
     virtual ~Line( ) { }
-    Line( const Coordinate & c1 = ORIGIN, const Coordinate & c2 = ORIGIN );
+    Line( );
+    Line( const Coordinate & c1, const Coordinate & c2 );
+    Line( const Vector & v );
 
     const Coordinate & c1( ) const;
-    Line & c1( const Coordinate & );
     const Coordinate & c2( ) const;
-    Line & c2( const Coordinate & );
-    Angle angle( ) const;
 
-    Line & rotate( const Angle &, const Coordinate & = ORIGIN );
+    Angle angle( ) const;
+    Vector vector( ) const;
+
+    Line & transform( const Transform & t );
+
+    Line & move( const Vector & );
+    Line & stretch( const Vector & );
+    Line & scale( dec scale, const Coordinate & origin = ORIGIN );
+    Line & rotate( const Angle & angle, const Coordinate & origin = ORIGIN );
     Line & mirror( const Vector & axis );
-    Line & mirror_x( );
-    Line & mirror_y( );
+    Line & mirror_x( ) { return mirror( X_HAT ); }
+    Line & mirror_y( ) { return mirror( Y_HAT ); }
 
     bool vertical( ) const;
     bool horizontal( ) const;
@@ -41,11 +50,11 @@ public:
     Coordinate high( ) const;
     Coordinate low( ) const;
 
-    virtual bool in_box( const Coordinate & ) const;
+    virtual bool in_box( const Coordinate &, bool inclusive = true ) const;
     bool on( const Coordinate & ) const;
     bool above( const Coordinate &, bool inclusive = false ) const;
     bool below( const Coordinate &, bool inclusive = false ) const;
-    bool intersects( const Line & ) const;
+    bool intersects( const Line &, bool inclusive = true ) const;
     Coordinate intersection( const Line & ) const;
 
     bool operator==( const Line & ) const;

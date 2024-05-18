@@ -13,14 +13,22 @@ namespace axn
 class Assert
 {
 private:
-    bool m_b;
+    bool m_passed;
+    string m_message;
 
-    static void fail( const char * message = nullptr )
+    void fail( const char * message )
     {
+        m_passed = false;
+        m_message = string( message );
+
         if( strlen( message ) )
+        {
             Log( ERROR_LOG, "assert failed! ......... ( %s )", message );
+        }
         else
+        {
             Log( ERROR_LOG, "assert failed! ........." );
+        }
 
         breakpoint;
 
@@ -30,7 +38,15 @@ private:
 public:
     virtual ~Assert( ) { }
 
-    Assert( bool b, const char * message = "", ... ) : m_b( b )
+    Assert( const char * message = "", ... ) : m_passed( false )
+    {
+        va_list va_args;
+        va_start( va_args, message );
+        Assert::fail( message );
+        va_end( va_args );
+    }
+
+    Assert( bool b, const char * message = "", ... ) : m_passed( b )
     {
         if( !b )
         {
@@ -41,15 +57,8 @@ public:
         }
     }
 
-    Assert( const char * message = "", ... ) : m_b( false )
-    {
-        va_list va_args;
-        va_start( va_args, message );
-        Assert::fail( message );
-        va_end( va_args );
-    }
-
-    operator bool( ) const { return m_b; }
+    operator bool( ) const { return m_passed; }
+    operator string( ) const { return m_message; }
 };
 
 } // namespace axn

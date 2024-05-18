@@ -29,16 +29,16 @@ DistantBird::DistantBird( World * world, const Coordinate & _position ) : Object
 
     velocity( VectorX( X_SPEED ) );
 
-    m_wing_cycle_offset = Random::rdouble( WING_CYCLE ) * TAU;
-    m_flight_cycle_offset = Random::rdouble( FLIGHT_HEIGHT_CYCLE ) * half( PI );
+    m_wing_cycle_offset = Random::rdec( WING_CYCLE ) * TAU;
+    m_flight_cycle_offset = Random::rdec( FLIGHT_HEIGHT_CYCLE ) * half( PI );
 }
 
 const DistantBird & DistantBird::render( ) const
 {
     Object::render( );
 
-    Planc wing_y = WING_HEIGHT_SPAN * sin( (double)( age( ) + m_wing_cycle_offset ) / (double)WING_CYCLE );
-    Planc flight_y = FLIGHT_HEIGHT_SPAN * sin( (double)( age( ) + m_flight_cycle_offset ) / (double)FLIGHT_HEIGHT_CYCLE );
+    Planc wing_y = WING_HEIGHT_SPAN * sin( (dec)( age( ) + m_wing_cycle_offset ) / (dec)WING_CYCLE );
+    Planc flight_y = FLIGHT_HEIGHT_SPAN * sin( (dec)( age( ) + m_flight_cycle_offset ) / (dec)FLIGHT_HEIGHT_CYCLE );
 
     Polygon bird_polygon = Polygon( { Coordinate( 0.0, 0.0 ), Coordinate( -1.0, 1.0 ), Coordinate( -4.0, 1.0 ), Coordinate( -12.0, -1.0 ), Coordinate( -4.0, -1.0 ), Coordinate( -2.0, 0.0 ) } );
     Polygon bird_wing = Polygon( { Coordinate( -2.0, 0.0 ), Coordinate( -9.0, -1.0 ), Coordinate( -5.0, wing_y ) } );

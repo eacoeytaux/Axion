@@ -46,7 +46,7 @@ const Feather & Feather::render( ) const
 Bird::Bird( World * world, const Coordinate & _position ) : Mob( world, _position )
 {
     gravity_ratio( 0.0 );
-    space( Polygon::rectangle( 32.0, 32.0 ) );
+    space( Rectangle( 32.0, 32.0 ) );
     health( BIRD_HEALTH );
 }
 
@@ -72,8 +72,8 @@ Bird & Bird::update( )
     {
         Coordinate target = world( )->player( )->position( );
         target += VectorY( 270.0 );
-        target += Vector( sin( (double)( ( (Planc)( world( )->age( ) ) * ROTATIONAL_SPEED / ROTATIONAL_RADIUS ) * ROTATIONAL_RADIUS ) ), 0.0 );
-        target += VectorY( -sin( (double)( ( ( (Planc)( world( )->age( ) ) - ( LIFT_DISTANCE / 2.0 ) ) * LIFT_SPEED / LIFT_DISTANCE ) * LIFT_DISTANCE ) ) );
+        target += Vector( sin( (dec)( ( (Planc)( world( )->age( ) ) * ROTATIONAL_SPEED / ROTATIONAL_RADIUS ) * ROTATIONAL_RADIUS ) ), 0.0 );
+        target += VectorY( -sin( (dec)( ( ( (Planc)( world( )->age( ) ) - ( LIFT_DISTANCE / 2.0 ) ) * LIFT_SPEED / LIFT_DISTANCE ) * LIFT_DISTANCE ) ) );
         Vector movement = Vector( position( ), target );
         if( movement.dx( ) > 0.0 )
             movement.dx( min( SPEED, movement.dx( ) ) );

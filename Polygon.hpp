@@ -19,14 +19,12 @@ public:
     static const uint CIRCLE_PRECISION;
 
     virtual ~Polygon( ) { }
-    Polygon( const varray<Coordinate> & coordinates = { ORIGIN, ORIGIN, ORIGIN } );
+    Polygon( );
+    Polygon( const varray<Coordinate> & coordinates, bool assume_is_convex = false );
+    Polygon( const varray<Coordinate> & coordinates, const Transform &, bool assume_is_convex = false );
 
-    static Polygon triangle( const Coordinate & c1, const Coordinate & c2, const Coordinate & c3 );
-    static Polygon rectangle( const Planc & width, const Planc & height, const Coordinate & center = ORIGIN, Angle rotation = Angle( 0 ) );
-    static Polygon square( const Planc & width, const Coordinate & center = ORIGIN, Angle rotation = Angle( 0 ) );
-    static Polygon circle( const Planc & radius = 1.0, const Coordinate & center = ORIGIN );
     static Polygon equilateral( uint side_count, const Planc & radius = 1.0, const Coordinate & center = ORIGIN, Angle rotation = Angle( 0 ) );
-    static Polygon expand( const Polygon & polygon, Planc expansion );
+    static Polygon expand( const Polygon & polygon, const Planc & expansion );
 
     Transform transform( bool cumulative = true ) const;
     const varray<Coordinate> & coordinates( bool raw = false ) const;
@@ -48,7 +46,7 @@ public:
     Planc lower_bound_x( ) const;
     Planc lower_bound_y( ) const;
 
-    bool contains( const Coordinate & ) const;
+    bool contains( const Coordinate & coordinate, bool inclusive = true ) const;
     bool intersects( const Line & line ) const { return ( intersection( line ).size( ) > 0 ); }
     varray<Line> intersection( const Line & line ) const;
 
@@ -56,7 +54,7 @@ public:
 
     Polygon & move( const Vector & );
     Polygon & stretch( const Vector & );
-    Polygon & scale( double scale, const Coordinate & origin = ORIGIN );
+    Polygon & scale( dec scale, const Coordinate & origin = ORIGIN );
     Polygon & rotate( const Angle & angle, const Coordinate & origin = ORIGIN );
     Polygon & mirror( const Vector & axis );
     Polygon & mirror_x( ) { return mirror( X_HAT ); }
@@ -93,15 +91,42 @@ private:
     mutable bool m_convex_hull_dirty = true;
 
     mutable bool m_convex = true;
-    mutable bool m_clockwise = false;
-    mutable Planc m_lower_bound_x = INFINITY_POSITIVE;
-    mutable Planc m_lower_bound_y = INFINITY_POSITIVE;
-    mutable Planc m_upper_bound_x = INFINITY_NEGATIVE;
-    mutable Planc m_upper_bound_y = INFINITY_NEGATIVE;
+    mutable Planc m_lower_bound_x = P0;
+    mutable Planc m_lower_bound_y = P0;
+    mutable Planc m_upper_bound_x = P0;
+    mutable Planc m_upper_bound_y = P0;
 
     void process( ) const;
     void process( bool transform, bool lines, bool triangles, bool convex_partitions, bool convex_hull ) const;
     void dirty( ) const;
+};
+
+class Triangle : public Polygon
+{
+public:
+    virtual ~Triangle( ) { }
+    Triangle( const Coordinate & c1, const Coordinate & c2, const Coordinate & c3 );
+};
+
+class Rectangle : public Polygon
+{
+public:
+    virtual ~Rectangle( ) { }
+    Rectangle( const Planc & width, const Planc & height, const Coordinate & center = ORIGIN, Angle rotation = Angle( 0 ) );
+};
+
+class Square : public Polygon
+{
+public:
+    virtual ~Square( ) { }
+    Square( const Planc & width_and_height, const Coordinate & center = ORIGIN, Angle rotation = Angle( 0 ) );
+};
+
+class Circle : public Polygon
+{
+public:
+    virtual ~Circle( ) { }
+    Circle( const Planc & radius = 1.0, const Coordinate & center = ORIGIN );
 };
 
 } // namespace geometry

@@ -4,7 +4,7 @@
 static Span<uint> BLINK_WAIT = { 120, 240 };
 static int BLINK_DURATION = 3;
 
-Mob::Mob( World * world, const Coordinate & _position, const double _health ) : Object( world, _position )
+Mob::Mob( World * world, const Coordinate & _position, const dec _health ) : Object( world, _position )
 {
 #ifdef AXN_DEBUG
     draw_debug = true;
@@ -16,6 +16,12 @@ Mob::Mob( World * world, const Coordinate & _position, const double _health ) : 
 
     m_blink_wait.reset( Random::rint( BLINK_WAIT ) );
     m_blink_duration.reset( BLINK_DURATION );
+}
+
+const Mob & Mob::render( ) const
+{
+    Object::render( );
+    return *this;
 }
 
 Mob & Mob::update( )
@@ -46,10 +52,10 @@ Mob & Mob::update_velocity( )
     return *this;
 }
 
-Mob & Mob::move( )
+Mob & Mob::update_movement( )
 {
-    Object::move( );
-    if( velocity( ).has_magnitude( ) )
+    Object::update_movement( );
+    if( velocity( ).dx( ) )
     {
         facing_left( velocity( ).dx( ) < 0.0 );
     }
@@ -68,24 +74,24 @@ Mob & Mob::die( )
     return *this;
 }
 
-double Mob::health( ) const
+dec Mob::health( ) const
 {
     return m_health.value( );
 }
 
-Mob & Mob::health( double _health )
+Mob & Mob::health( dec _health )
 {
     m_health.value( _health, true );
     return *this;
 }
 
-Mob & Mob::health_percentage( const double _health_percentage )
+Mob & Mob::health_percentage( const dec _health_percentage )
 {
     m_health.value_percentage( _health_percentage );
     return *this;
 }
 
-Mob & Mob::heal( double _health )
+Mob & Mob::heal( dec _health )
 {
     m_health.value( min( m_health.value( ) + _health, m_health.max( ) ) );
     return *this;
@@ -97,9 +103,9 @@ Mob & Mob::heal_full( )
     return *this;
 }
 
-Mob & Mob::hurt( double _damage )
+Mob & Mob::hurt( dec _damage )
 {
-    double health = Mob::health( ) - min( _damage, Mob::health( ) );
+    dec health = Mob::health( ) - min( _damage, Mob::health( ) );
     if( health == 0.0 )
     {
         m_health.value( 0.0 );
@@ -112,14 +118,14 @@ Mob & Mob::hurt( double _damage )
     return *this;
 }
 
-uint Mob::max_health( ) const
+dec Mob::max_health( ) const
 {
     return m_health.max( );
 }
 
-Mob & Mob::max_health( double _health )
+Mob & Mob::max_health( dec _health )
 {
-    m_health = Slider<double>( _health );
+    m_health = Slider<dec>( _health );
     return *this;
 }
 
@@ -137,34 +143,55 @@ Mob & Mob::facing_left( const bool _facing_left )
 #ifdef AXN_DEBUG
 Drawing Mob::debug_overlay( ) const
 {
+    const Planc HEALTH_BAR_BORDER_WIDTH = 2.0;
+    const Planc HEALTH_BAR_WIDTH_MIN = 20.0;
+    const dec HEALTH_BAR_TO_OBJECT_RATIO = 1.2;
+    const Planc HEALTH_BAR_HEIGHT = 4.0;
+    const Planc HEALTH_BAR_OFFSET = HEALTH_BAR_HEIGHT;
+
+    const dec RED_START = 0.1;
+    const dec YELLOW_START = 0.5;
+    static_once( ) { Assert( RED_START < YELLOW_START ); }
+
     Drawing debug_overlay;
 
-    Planc health_width = hit_box( ).width( ) * 1.2;
-    Planc health_height = 5.0;
-    Coordinate offset = Coordinate( 0.0, -( ( space( ).bound_height( ).half( ) ) * 1.2 ) - health_height );
+    Planc health_width = max( HEALTH_BAR_WIDTH_MIN, hit_box( ).width( ) * HEALTH_BAR_TO_OBJECT_RATIO );
+    Planc health_height = HEALTH_BAR_HEIGHT;
+    Coordinate offset( 0.0, -( hit_box( ).height( ).half( ) + ( health_height * 1.5 ) + HEALTH_BAR_BORDER_WIDTH ) );
 
-    debug_overlay.draw( WHITE, Polygon::rectangle( health_width + 2.0, health_height + 2.0, offset ) );
+    debug_overlay.draw( WHITE, Rectangle( health_width + HEALTH_BAR_BORDER_WIDTH, health_height + HEALTH_BAR_BORDER_WIDTH, offset ) );
+    debug_overlay.draw( BLACK, Rectangle( health_width, health_height, offset ) );
 
-    double health_percentage = (double)health( ) / (double)max_health( );
     if( alive( ) )
     {
+        dec health_percentage = health( ) / max_health( );
+
+        Color health_color;
         if( health_percentage == 1.0 )
         {
-            debug_overlay.draw( GREEN, Polygon::rectangle( health_width, health_height, offset ) );
+            health_color = GREEN;
         }
-        else
+        else if( health_percentage >= YELLOW_START )
         {
-            debug_overlay.draw( RED, Polygon::rectangle( health_width, health_height, offset ) );
-            Coordinate health_offset = offset + VectorX( floor( -health_width.half( ) + ( health_width.half( ) ) * health_percentage ) );
-            debug_overlay.draw( GREEN, Polygon::rectangle( (int)( health_width * health_percentage ), health_height, health_offset ) );
+            health_color = ColorSlider( YELLOW, GREEN ).color_at( ( health_percentage - YELLOW_START ) * ( 1.0 / ( 1.0 - YELLOW_START ) ) );
         }
+        else if( health_percentage >= RED_START )
+        {
+            health_color = ColorSlider( RED, YELLOW ).color_at( ( health_percentage - RED_START ) * ( 1.0 / ( 1.0 - RED_START ) ) );
+        }
+        else // if( health_percentage < RED_START )
+        {
+            health_color = RED;
+        }
+
+        debug_overlay.draw( health_color, Rectangle( health_width * health_percentage, health_height,
+                                                     offset + VectorX( ( health_width.half( ) * health_percentage ) - health_width.half( ) ) ) );
     }
     else
     {
-        debug_overlay.draw( BLACK, Polygon::rectangle( health_width, health_height, offset ) );
+        debug_overlay.draw( BLACK, Rectangle( health_width, health_height, offset ) );
     }
 
-    debug_overlay.move( position( ) );
     debug_overlay.draw( Object::debug_overlay( ) );
 
     return debug_overlay;

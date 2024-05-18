@@ -26,7 +26,7 @@ public:
     static error rseed( string seed );
     static error rseed( uint seed );
 
-    static bool rbool( double true_odds = 0.5 );
+    static bool rbool( dec true_odds = 0.5 );
 
     template <typename T>
     static int rint( const Span<T> & span, Distribution distribution = DEFAULT_DISTRIBUTION ) { return rint( span.min( ), span.max( ), distribution ); }
@@ -34,9 +34,9 @@ public:
     static int rint( int low_bound, int high_bound, Distribution distribution = DEFAULT_DISTRIBUTION );
 
     template <typename T>
-    static double rdouble( const Span<T> & span, Distribution distribution = DEFAULT_DISTRIBUTION ) { return rdouble( span.min( ), span.max( ), distribution ); }
-    static double rdouble( double high_bound, Distribution distribution = DEFAULT_DISTRIBUTION ) { return rdouble( 0.0, high_bound, distribution ); }
-    static double rdouble( double low_bound, double high_bound, Distribution distribution = DEFAULT_DISTRIBUTION );
+    static dec rdec( const Span<T> & span, Distribution distribution = DEFAULT_DISTRIBUTION ) { return rdec( span.min( ), span.max( ), distribution ); }
+    static dec rdec( dec high_bound, Distribution distribution = DEFAULT_DISTRIBUTION ) { return rdec( 0.0, high_bound, distribution ); }
+    static dec rdec( dec low_bound, dec high_bound, Distribution distribution = DEFAULT_DISTRIBUTION );
 
     template <typename T>
     static Planc rPlanc( const Span<T> & span, Distribution distribution = DEFAULT_DISTRIBUTION ) { return rPlanc( span.min( ), span.max( ), distribution ); }
@@ -52,7 +52,7 @@ public:
     static Color rColor( bool include_alpha = false );
 
     template <typename T>
-    static T & flip( T & t, double flip_odds = 0.5 )
+    static T & flip( T & t, dec flip_odds = 0.5 )
     {
         if( rbool( flip_odds ) )
         {
@@ -62,7 +62,7 @@ public:
     }
 
     template <typename T>
-    static T flipped( const T & t, double flip_odds = 0.5 )
+    static T flipped( const T & t, dec flip_odds = 0.5 )
     {
         if( rbool( flip_odds ) )
         {

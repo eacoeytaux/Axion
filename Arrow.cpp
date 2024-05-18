@@ -7,7 +7,7 @@ using mtmercy::Arrow;
 
 namespace
 {
-const double DAMAGE = 10.0;
+const dec DAMAGE = 10.0;
 
 const uint LIFESPAN = 300;
 const uint FADESPAN = 50;
@@ -54,12 +54,12 @@ Arrow::Arrow( World * world, const Coordinate & tip, const Vector & launch_speed
     track_position( 1 );
 }
 
-double Arrow::fade_alpha( ) const
+dec Arrow::fade_alpha( ) const
 {
     if( age( ) < LIFESPAN )
         return 1.0;
     else
-        return ( 1.0 - ( ( age( ) - (double)LIFESPAN ) / (double)FADESPAN ) );
+        return ( 1.0 - ( ( age( ) - (dec)LIFESPAN ) / (dec)FADESPAN ) );
 }
 
 const Arrow & Arrow::render( ) const
@@ -130,7 +130,7 @@ Arrow & Arrow::angle( const Angle & _angle )
     return *this;
 }
 
-double Arrow::length( ) const { return SHAFT_LENGTH + HEAD_LENGTH_INNER; }
+dec Arrow::length( ) const { return SHAFT_LENGTH + HEAD_LENGTH_INNER; }
 
 Arrow & Arrow::ground( TerrainEdge * ground )
 {

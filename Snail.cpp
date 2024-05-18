@@ -19,7 +19,7 @@ Snail::Snail( World * world, const Coordinate & _position ) : Mob( world, _posit
 {
     drawing_always_dirty( true );
 
-    // space( Polygon::square( SHELL_RADIUS * 2 ) );
+    // space( Square( SHELL_RADIUS * 2 ) );
 }
 
 const Snail & Snail::render( ) const
@@ -34,10 +34,10 @@ const Snail & Snail::render( ) const
     }
 
     Coordinate tail = VectorA( angle, -SHELL_RADIUS );
-    Coordinate head = VectorA( angle, SHELL_RADIUS + ( half( SLUG_THICKNESS ) * sin( (double)age( ) / STRETCH_PERIOD ) ) );
+    Coordinate head = VectorA( angle, SHELL_RADIUS + ( half( SLUG_THICKNESS ) * sin( (dec)age( ) / STRETCH_PERIOD ) ) );
     Coordinate head_top = head + VectorA( angle, SLUG_THICKNESS ) + VectorA( angle + RIGHT_ANGLE, SLUG_THICKNESS );
 
-    draw( SHELL_COLOR, Polygon::circle( SHELL_RADIUS, VectorA( angle + RIGHT_ANGLE, SHELL_RADIUS ) ) );
+    draw( SHELL_COLOR, Circle( SHELL_RADIUS, VectorA( angle + RIGHT_ANGLE, SHELL_RADIUS ) ) );
     draw( SLUG_COLOR, Polygon( { head, head_top, tail } ) );
 
     return *this;

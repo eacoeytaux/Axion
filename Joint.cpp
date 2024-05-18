@@ -24,7 +24,7 @@ Coordinate Joint::joint( ) const
 
     if( a < b + c )
     {
-        return VectorA( Angle( flipped<double>( acos( ( pow( a, 2 ) + pow( b, 2 ) - pow( c, 2 ) ) / ( a * b * 2.0 ) ), m_inward ) ) + v.angle( ), arm_length_1( ), c1( ) ).destination( );
+        return VectorA( Angle( flipped<dec>( acos( ( pow( a, 2 ) + pow( b, 2 ) - pow( c, 2 ) ) / ( a * b * 2.0 ) ), m_inward ) ) + v.angle( ), arm_length_1( ), c1( ) );
     }
     else
     {

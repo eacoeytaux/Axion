@@ -1,6 +1,6 @@
 #include "Lighting.hpp"
 
-// LightSource::LightSource( const Coordinate & _position, const Planc & _radius, const Color & _tint, const double _flicker ) : m_position( _position ), m_radius( _radius ), m_flicker( _flicker ), m_tint( _tint ) { }
+// LightSource::LightSource( const Coordinate & _position, const Planc & _radius, const Color & _tint, const dec _flicker ) : m_position( _position ), m_radius( _radius ), m_flicker( _flicker ), m_tint( _tint ) { }
 
 LightSource::LightSource( const Coordinate & _position, const Planc & _radius ) : m_position( _position ), m_radius( _radius ) { }
 
@@ -14,15 +14,15 @@ LightSource & LightSource::position( const Coordinate & _position )
 
 Planc LightSource::radius( ) const { return m_radius; }
 
-LightSource & LightSource::radius( const double _radius )
+LightSource & LightSource::radius( const dec _radius )
 {
     m_radius = _radius;
     return *this;
 }
 
-// double LightSource::flicker( ) const { return m_flicker; }
+// dec LightSource::flicker( ) const { return m_flicker; }
 
-// LightSource & LightSource::flicker( const double _flicker )
+// LightSource & LightSource::flicker( const dec _flicker )
 //{
 //     m_flicker = _flicker;
 //     return *this;

@@ -20,7 +20,7 @@ const Planc LEAVES_BORDER_WIDTH = 4.0;
 
 const Span<uint> SPIKE_COUNT = { 4, 5 };
 const uint SPIKE_SHRINK_RATE = 1;
-const double SPIKE_INNER_RATIO = 0.9;
+const dec SPIKE_INNER_RATIO = 0.9;
 const Planc SPIKE_OFFSET_INNER = 3.0;
 const Planc SPIKE_OFFSET_OUTER = 6.0;
 
@@ -30,20 +30,20 @@ const Color LEAVES_COLOR = Color::rgb( 0x00C000 );
 const Color LEAVES_BORDER_COLOR = Color::rgb( 0x008000 );
 } // namespace
 
-PineTree::PineTree( World * world, const Coordinate & _root, const double _z ) : Object( world, _root )
+PineTree::PineTree( World * world, const Coordinate & _root, const dec _z ) : Object( world, _root )
 {
     drawing_always_dirty( true );
 
     z( _z );
 
-    double shrink_ratio = LEAVES_SHRINK_RATIO;
+    dec shrink_ratio = LEAVES_SHRINK_RATIO;
 
     Drawing & trunk = m_leave_bunches_and_trunk.insert_back( );
 
     Coordinate base;
     Vector trunk_vector( Vector( base, base + VectorA( RIGHT_ANGLE_1, TRUNK_HEIGHT ) ) );
-    trunk.draw( TRUNK_BORDER_COLOR, Line( trunk_vector.origin( ), trunk_vector.destination( ) ), TRUNK_THICKNESS + LEAVES_BORDER_WIDTH * 2.0 );
-    trunk.draw( TRUNK_COLOR, Line( trunk_vector.origin( ), trunk_vector.destination( ) ), TRUNK_THICKNESS );
+    trunk.draw( TRUNK_BORDER_COLOR, Line( trunk_vector ), TRUNK_THICKNESS + LEAVES_BORDER_WIDTH * 2.0 );
+    trunk.draw( TRUNK_COLOR, Line( trunk_vector ), TRUNK_THICKNESS );
     trunk.border( TRUNK_BORDER_COLOR, LEAVES_BORDER_WIDTH );
 
     m_leave_bunches_rotation_points.insert_back( base );
@@ -59,7 +59,7 @@ PineTree::PineTree( World * world, const Coordinate & _root, const double _z ) :
         leaf_bunch_coords.insert_back( ORIGIN );
 
         Angle leaves_angle = -( LEAVES_SPAN / 2.0 ) + RIGHT_ANGLE_3;
-        leaf_bunch_coords.insert_back( VectorA( leaves_angle, ( LEAVES_HEIGHT_BASE_LENGTH + Random::rdouble( -SPIKE_OFFSET_OUTER, SPIKE_OFFSET_OUTER ) ) * shrink_ratio ) );
+        leaf_bunch_coords.insert_back( VectorA( leaves_angle, ( LEAVES_HEIGHT_BASE_LENGTH + Random::rdec( -SPIKE_OFFSET_OUTER, SPIKE_OFFSET_OUTER ) ) * shrink_ratio ) );
 
         uint spike_count = Random::rint( SPIKE_COUNT ) - ( SPIKE_SHRINK_RATE * i );
         Angle leaves_sub_angle = LEAVES_SPAN / ( spike_count + 1 );
@@ -77,7 +77,7 @@ PineTree::PineTree( World * world, const Coordinate & _root, const double _z ) :
         leaves_angle += leaves_sub_angle;
         leaf_bunch_coords.insert_back( VectorA( leaves_angle, LEAVES_HEIGHT_BASE_LENGTH * SPIKE_INNER_RATIO * shrink_ratio ) + VectorA( Random::rAngle( ), SPIKE_OFFSET_INNER * shrink_ratio ) );
 
-        leaf_bunch_coords.insert_back( VectorA( ( LEAVES_SPAN / 2.0 ) + RIGHT_ANGLE_3, ( LEAVES_HEIGHT_BASE_LENGTH + Random::rdouble( SPIKE_OFFSET_OUTER, -SPIKE_OFFSET_OUTER ) ) * shrink_ratio ) );
+        leaf_bunch_coords.insert_back( VectorA( ( LEAVES_SPAN / 2.0 ) + RIGHT_ANGLE_3, ( LEAVES_HEIGHT_BASE_LENGTH + Random::rdec( SPIKE_OFFSET_OUTER, -SPIKE_OFFSET_OUTER ) ) * shrink_ratio ) );
 
         Polygon leaf_bunch = Polygon( leaf_bunch_coords );
         leaf_bunch += last_top + sub_trunk;
@@ -100,7 +100,7 @@ const PineTree & PineTree::render( ) const
 {
     Object::render( );
 
-    Angle d_sway_angle = Angle( sin( ( (double)world( )->age( ) / (double)SWAY_PERIOD ) * MAX_SWAY.radians( ) ) );
+    Angle d_sway_angle = Angle( sin( ( (dec)world( )->age( ) / (dec)SWAY_PERIOD ) * MAX_SWAY.radians( ) ) );
     Angle sway_angle = d_sway_angle;
 
     Vector offset;
@@ -110,7 +110,7 @@ const PineTree & PineTree::render( ) const
 
         Coordinate pre_position = m_leave_bunches_rotation_points[ i ];
         Coordinate post_position = pre_position;
-        post_position.rotate( d_sway_angle * (double)i, i ? m_leave_bunches_rotation_points[ i - 1 ] : ORIGIN );
+        post_position.rotate( d_sway_angle * (dec)i, i ? m_leave_bunches_rotation_points[ i - 1 ] : ORIGIN );
 
         Vector d_sway = post_position - pre_position;
         offset += d_sway;

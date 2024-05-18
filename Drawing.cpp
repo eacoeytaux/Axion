@@ -75,7 +75,7 @@ Drawing & Drawing::move( const Vector & _vector )
     return *this;
 }
 
-Drawing & Drawing::scale( const double _scale, const Coordinate & _origin )
+Drawing & Drawing::scale( const dec _scale, const Coordinate & _origin )
 {
     for_each( colored_polygon, m_colored_polygons ) colored_polygon.polygon.scale( _scale, _origin );
     return *this;
@@ -101,15 +101,28 @@ Drawing & Drawing::draw( const Drawing & _drawing )
     return *this;
 }
 
-Drawing & Drawing::draw( const varray<Color> & _colors, const Polygon & _polygon, const double _thickness, const bool _preserve_thickness )
+Drawing & Drawing::draw( const Drawing & _drawing, const Color & _color )
+{
+    for_each( colored_polygon, _drawing.colored_polygons( ) )
+    {
+        ColoredPolygon new_colored_polygon = colored_polygon;
+        new_colored_polygon.colors = { _color };
+        m_colored_polygons.insert_back( new_colored_polygon );
+    }
+    return *this;
+}
+
+Drawing & Drawing::draw( const varray<Color> & _colors, const Polygon & _polygon, const dec _thickness, const bool _preserve_thickness, const bool _extend_lines )
 {
     Assert( _thickness >= 0.0 );
+    Assert( _colors.size( ) );
 
-    ColoredPolygon colored_polygon;
+    ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
     colored_polygon.polygon = _polygon;
     colored_polygon.colors = _colors;
     colored_polygon.thickness = _thickness;
-    colored_polygon.preserve_thickness = _preserve_thickness && ( _thickness != FILLED );
+    colored_polygon.preserve_thickness = _preserve_thickness;
+    colored_polygon.extend_lines = _extend_lines;
     colored_polygon.opaque = true;
     for_each( color, _colors )
     {
@@ -119,36 +132,31 @@ Drawing & Drawing::draw( const varray<Color> & _colors, const Polygon & _polygon
             break;
         }
     }
-    m_colored_polygons.insert_back( colored_polygon );
 
     return *this;
 }
 
-Drawing & Drawing::draw( const Color & _color, const Polygon & _polygon, const double _thickness, const bool _preserve_thickness )
+Drawing & Drawing::draw( const Color & _color, const Polygon & _polygon, const dec _thickness, const bool _preserve_thickness, const bool _extend_lines )
 {
-    draw( varray<Color>( _polygon.sides( ), _color ), _polygon, _thickness, _preserve_thickness );
-    return *this;
+    return draw( varray<Color>( _polygon.sides( ), _color ), _polygon, _thickness, _preserve_thickness, _extend_lines );
 }
 
-Drawing & Drawing::draw( const Color & _color1, const Color & _color2, const Line & _line, const double _thickness, const bool _preserve_thickness )
+Drawing & Drawing::draw( const Color & _color1, const Color & _color2, const Line & _line, const dec _thickness, const bool _preserve_thickness, const bool _extend_lines )
 {
-    draw( { _color1, _color1, _color2, _color2 }, Polygon::rectangle( _thickness, _line.length( ), ( Vector( _line.c1( ), _line.c2( ) ) / 2.0 ).destination( ), _line.angle( ) - Angle( RIGHT_ANGLE ) ), FILLED, _preserve_thickness );
-    return *this;
+    return draw( { _color1, _color2 }, Polygon( { _line.c1( ), _line.c2( ) } ), _thickness, _preserve_thickness, _extend_lines );
 }
 
-Drawing & Drawing::draw( const Color & _color, const Line & _line, const double _thickness, const bool _preserve_thickness )
+Drawing & Drawing::draw( const Color & _color, const Line & _line, const dec _thickness, const bool _preserve_thickness, const bool _extend_lines )
 {
-    draw( _color, _color, _line, _thickness, _preserve_thickness );
-    return *this;
+    return draw( _color, _color, _line, _thickness, _preserve_thickness, _extend_lines );
 }
 
 #ifdef AXN_DEBUG
-Drawing & Drawing::draw( const Color & _color, const Vector & _vector, const double _arrow_head_length, const double _thickness, const bool _preserve_thickness )
+Drawing & Drawing::draw( const Color & _color, const Vector & _vector, const dec _arrow_head_length, const dec _thickness, const bool _preserve_thickness )
 {
     draw( _color, Line( _vector.origin( ), _vector.destination( ) ), _thickness, _preserve_thickness );
-    draw( _color, Polygon::circle( _thickness, _vector.destination( ) ), _preserve_thickness );
-    draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) + ( half( RIGHT_ANGLE ) ), _arrow_head_length ) ), _thickness, _preserve_thickness );
-    draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) - ( half( RIGHT_ANGLE ) ), _arrow_head_length ) ), _thickness, _preserve_thickness );
+    draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) + ( half( RIGHT_ANGLE ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
+    draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) - ( half( RIGHT_ANGLE ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
     return *this;
 }
 #endif

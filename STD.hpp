@@ -20,15 +20,18 @@
 
 #define use_std( s ) using std::s;
 
-#define use_std_double( s ) \
-    template <typename T>   \
-    T s( const T & t ) { return std::s( (double)t ); }
-#define use_std_double2( s ) \
-    template <typename T>    \
-    T s( const T & t1, const T & t2 ) { return std::s( (double)t1, (double)t2 ); }
+#define use_std_dec( s )  \
+    template <typename T> \
+    T s( const T & t ) { return std::s( (dec)t ); }
+#define use_std_dec2( s ) \
+    template <typename T> \
+    T s( const T & t1, const T & t2 ) { return std::s( (dec)t1, (dec)t2 ); }
 
 namespace axn
 {
+
+typedef double dec;
+typedef unsigned int uint;
 
 use_std( exception );
 use_std( runtime_error );
@@ -42,30 +45,28 @@ use_std( endl );
 
 // -- math std --
 
-use_std_double( abs );
-use_std_double( round );
-use_std_double( floor );
-use_std_double( ceil );
+use_std_dec( abs );
+use_std_dec( round );
+use_std_dec( floor );
+use_std_dec( ceil );
 
-use_std_double( sqrt );
+use_std_dec( sqrt );
 
-use_std_double( sin );
-use_std_double( cos );
-use_std_double( tan );
+use_std_dec( sin );
+use_std_dec( cos );
+use_std_dec( tan );
 
-use_std_double( asin );
-use_std_double( acos );
-use_std_double( atan );
-use_std_double2( atan2 );
+use_std_dec( asin );
+use_std_dec( acos );
+use_std_dec( atan );
+use_std_dec2( atan2 );
 
 // -- constants --
 
-const double SQRT_2 = sqrt( 2 );
+const dec SQRT_2 = sqrt( 2 );
 
-const double INFINITY_POSITIVE = INFINITY;
-const double INFINITY_NEGATIVE = -INFINITY;
-
-typedef unsigned int uint;
+const dec INFINITY_POSITIVE = INFINITY;
+const dec INFINITY_NEGATIVE = -INFINITY;
 
 } // namespace axn
 

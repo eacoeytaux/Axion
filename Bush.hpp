@@ -10,7 +10,7 @@ class Bush : public Object
 {
 public:
     virtual ~Bush( ) { }
-    Bush( World *, const Coordinate & root, double z = 1.0 );
+    Bush( World *, const Coordinate & root, dec z = 1.0 );
 };
 
 } // namespace mtmercy

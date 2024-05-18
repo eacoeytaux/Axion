@@ -8,11 +8,11 @@ namespace
 {
 const uint DAY_LENGTH = 2048;
 
-const double SUNRISE_START = 0.2;
-const double SUNRISE_END = 0.25;
-const double NOON = 0.5;
-const double SUNSET_START = 0.75;
-const double SUNSET_END = 0.8;
+const dec SUNRISE_START = 0.2;
+const dec SUNRISE_END = 0.25;
+const dec NOON = 0.5;
+const dec SUNSET_START = 0.75;
+const dec SUNSET_END = 0.8;
 
 const Span<uint> CLOUD_REGEN_RATE = { 0, 0 }; // 0 for no clouds
 
@@ -56,36 +56,36 @@ const Sky & Sky::render( ) const
     Color top_color;
     Color bottom_color;
 
-    double day = (double)( age( ) % DAY_LENGTH ) / (double)( DAY_LENGTH );
+    dec day = (dec)( age( ) % DAY_LENGTH ) / (dec)( DAY_LENGTH );
 
     if( day <= SUNRISE_START )
     {
-        double d = day / SUNRISE_START;
+        dec d = day / SUNRISE_START;
         top_color = SKY_MIDNIGHT_TO_SUNRISE.color_at( d );
     }
     else if( day <= SUNRISE_END )
     {
-        double d = ( day - SUNRISE_START ) / ( SUNRISE_END - SUNRISE_START );
+        dec d = ( day - SUNRISE_START ) / ( SUNRISE_END - SUNRISE_START );
         top_color = SKY_SUNRISE.color_at( d );
     }
     else if( day <= NOON )
     {
-        double d = ( day - SUNRISE_END ) / ( NOON - SUNRISE_END );
+        dec d = ( day - SUNRISE_END ) / ( NOON - SUNRISE_END );
         top_color = SKY_SUNRISE_TO_NOON.color_at( d );
     }
     else if( day <= SUNSET_START )
     {
-        double d = ( day - NOON ) / ( SUNSET_START - NOON );
+        dec d = ( day - NOON ) / ( SUNSET_START - NOON );
         top_color = SKY_NOON_TO_SUNSET.color_at( d );
     }
     else if( day <= SUNSET_END )
     {
-        double d = ( day - SUNSET_START ) / ( SUNSET_END - SUNSET_START );
+        dec d = ( day - SUNSET_START ) / ( SUNSET_END - SUNSET_START );
         top_color = SKY_SUNSET.color_at( d );
     }
     else if( day <= 1.0 )
     {
-        double d = ( day - SUNSET_END ) / ( 1.0 - SUNSET_END );
+        dec d = ( day - SUNSET_END ) / ( 1.0 - SUNSET_END );
         top_color = SKY_SUNSET_TO_MIDNIGHT.color_at( d );
     }
 
@@ -100,7 +100,7 @@ const Sky & Sky::render( ) const
             top_color,
             bottom_color,
             bottom_color },
-          Polygon::rectangle( world( )->active_camera( )->width( ) + 2.0, world( )->active_camera( )->height( ) + 2.0, ORIGIN ) ); // added + 2 just in case
+          Rectangle( world( )->active_camera( )->width( ) + 2.0, world( )->active_camera( )->height( ) + 2.0, ORIGIN ) ); // added + 2 just in case
 
     return *this;
 }

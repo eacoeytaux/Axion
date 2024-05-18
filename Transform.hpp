@@ -27,22 +27,22 @@ public:
 
     bool identity( ) const;
     bool null( ) const;
-    double determinant( ) const;
+    dec determinant( ) const;
 
     Transform & invert( );
     Transform inverse( ) const;
 
     Transform & operator=( const Transform & );
 
-    Transform operator+( double ) const;
-    Transform operator-( double ) const;
-    Transform operator*( double ) const;
-    Transform operator/( double ) const;
+    Transform operator+( dec ) const;
+    Transform operator-( dec ) const;
+    Transform operator*( dec ) const;
+    Transform operator/( dec ) const;
 
-    Transform & operator+=( double );
-    Transform & operator-=( double );
-    Transform & operator*=( double );
-    Transform & operator/=( double );
+    Transform & operator+=( dec );
+    Transform & operator-=( dec );
+    Transform & operator*=( dec );
+    Transform & operator/=( dec );
 
     Transform operator+( const Transform & ) const;
     Transform operator*( const Transform & ) const;
@@ -92,6 +92,8 @@ class StretchTransform : public Transform
 public:
     StretchTransform( const Vector & stretch );
 };
+
+const Transform IDENTITY_TRANSFORM = IdentityTransform( );
 
 } // namespace geometry
 } // namespace axn

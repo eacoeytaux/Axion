@@ -23,7 +23,6 @@ Vector::Vector( const Coordinate & _c1, const Coordinate & _c2 )
 
 VectorX::VectorX( const Planc & _dx, const Coordinate & _origin ) : Vector( _dx, 0.0, _origin ) { }
 VectorY::VectorY( const Planc & _dy, const Coordinate & _origin ) : Vector( 0.0, _dy, _origin ) { }
-
 VectorA::VectorA( const Angle & _angle, const Planc & _magnitude, const Coordinate & _origin )
 {
     origin( _origin );
@@ -54,12 +53,14 @@ Vector & Vector::dx( const Planc & _dx )
     m_dx = _dx;
     return *this;
 }
+
 Planc Vector::dy( ) const { return m_dy; }
 Vector & Vector::dy( const Planc & _dy )
 {
     m_dy = _dy;
     return *this;
 }
+
 Vector & Vector::dxdy( const Planc & _dx, const Planc & _dy )
 {
     dx( _dx );
@@ -172,25 +173,23 @@ Vector & Vector::operator-=( const Vector & _v )
     return *this;
 }
 
-Vector & Vector::operator*=( const double _scale )
+Vector & Vector::operator*=( const dec _scale )
 {
     dx( m_dx * _scale );
     dy( m_dy * _scale );
     return *this;
 }
 
-Vector & Vector::operator/=( const double _scale )
+Vector & Vector::operator/=( const dec _scale )
 {
     dx( m_dx / _scale );
     dy( m_dy / _scale );
     return *this;
 }
 
-Vector Vector::operator*( const double _scale ) const { return Vector( origin( ), Coordinate( origin( ).x( ) + ( m_dx * _scale ), origin( ).y( ) + ( m_dy * _scale ) ) ); }
+Vector Vector::operator*( const dec _scale ) const { return Vector( origin( ), Coordinate( origin( ).x( ) + ( m_dx * _scale ), origin( ).y( ) + ( m_dy * _scale ) ) ); }
 
-Vector Vector::operator/( const double _scale ) const { return Vector( origin( ), Coordinate( origin( ).x( ) + ( m_dx / _scale ), origin( ).y( ) + ( m_dy / _scale ) ) ); }
+Vector Vector::operator/( const dec _scale ) const { return Vector( origin( ), Coordinate( origin( ).x( ) + ( m_dx / _scale ), origin( ).y( ) + ( m_dy / _scale ) ) ); }
 
-bool Vector::operator==( const Vector & _v ) const { return ( ( origin( ) == _v.origin( ) ) && ( m_dx == _v.m_dx ) && ( m_dy == _v.m_dy ) ); }
+bool Vector::operator==( const Vector & _v ) const { return ( ( m_dx == _v.m_dx ) && ( m_dy == _v.m_dy ) && ( origin( ) == _v.origin( ) ) ); }
 bool Vector::operator!=( const Vector & _v ) const { return !( *this == _v ); }
-
-Vector::operator Line( ) const { return Line( origin( ), destination( ) ); }

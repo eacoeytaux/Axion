@@ -219,7 +219,7 @@ error ogl::clear_stencil( )
     return check_errors( );
 }
 
-error ogl::clear_screen( const double _r, const double _g, const double _b )
+error ogl::clear_screen( const dec _r, const dec _g, const dec _b )
 {
     glClearColor( _r, _g, _b, 1.0 );
     return clear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT );
@@ -293,7 +293,7 @@ error ogl::matrix_projection_mode( const bool _load_identity )
 
 error ogl::transform( const Transform & _transform )
 {
-    double matrix[ 16 ] = {
+    dec matrix[ 16 ] = {
         _transform.get( 0, 0 ),
         _transform.get( 1, 0 ),
         _transform.get( 2, 0 ), 0,
@@ -309,13 +309,13 @@ error ogl::transform( const Transform & _transform )
     return check_errors( );
 }
 
-error ogl::translate( const double _x, const double _y )
+error ogl::translate( const dec _x, const dec _y )
 {
     glTranslated( _x, _y, 0.0 );
     return check_errors( );
 }
 
-error ogl::scale( const double _x, const double _y )
+error ogl::scale( const dec _x, const dec _y )
 {
     glScaled( _x, _y, 1.0 );
     return check_errors( );
@@ -344,7 +344,7 @@ error ogl::end( )
     return check_errors( );
 }
 
-error ogl::vertex( const double _x, const double _y, const double _z, const double _w )
+error ogl::vertex( const dec _x, const dec _y, const dec _z, const dec _w )
 {
     if( !m_started_sequence )
     {
@@ -388,39 +388,39 @@ bool ogl::shaded_smooth( )
     return ( state_int( GL_SHADE_MODEL ) == GL_SMOOTH );
 }
 
-error ogl::point_radius( const double _f )
+error ogl::point_radius( const dec _d )
 {
-    return point_diameter( _f * 2.0 );
+    return point_diameter( _d * 2.0 );
 }
 
-double ogl::point_radius( )
+dec ogl::point_radius( )
 {
     return ( point_diameter( ) / 2.0 );
 }
 
-error ogl::point_diameter( const double _f )
+error ogl::point_diameter( const dec _d )
 {
-    glPointSize( _f );
+    glPointSize( _d );
     return check_errors( );
 }
 
-double ogl::point_diameter( )
+dec ogl::point_diameter( )
 {
     return state_double( GL_POINT_SIZE );
 }
 
-error ogl::line_width( const double _f )
+error ogl::line_width( const dec _d )
 {
-    glLineWidth( _f );
+    glLineWidth( _d );
     return check_errors( );
 }
 
-double ogl::line_width( )
+dec ogl::line_width( )
 {
     return state_double( GL_LINE_WIDTH );
 }
 
-error ogl::color( const double _r, const double _g, const double _b, const double _a )
+error ogl::color( const dec _r, const dec _g, const dec _b, const dec _a )
 {
     glColor4d( _r, _g, _b, _a );
     return check_errors( );
@@ -436,7 +436,7 @@ error ogl::blend_normal( )
 
 error ogl::enable_anti_alias( )
 {
-    // enable( GL_MULTISAMPLE );
+    enable( GL_MULTISAMPLE );
     enable( GL_LINE_SMOOTH );
     enable( GL_POLYGON_SMOOTH );
     static_once( )
@@ -449,7 +449,7 @@ error ogl::enable_anti_alias( )
 
 error ogl::disable_anti_alias( )
 {
-    // disable( GL_MULTISAMPLE );
+    disable( GL_MULTISAMPLE );
     disable( GL_LINE_SMOOTH );
     disable( GL_POLYGON_SMOOTH );
     return check_errors( );

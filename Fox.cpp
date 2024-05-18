@@ -4,7 +4,7 @@ using mtmercy::Fox;
 
 Fox::Fox( World * world, const Coordinate & _position ) : Mob( world, _position )
 {
-    space( Polygon::rectangle( 32.0, 32.0 ) );
+    space( Rectangle( 32.0, 32.0 ) );
 }
 
 const Fox & Fox::render( ) const

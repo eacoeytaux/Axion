@@ -13,7 +13,7 @@ class TerrainEdge
 {
 public:
     virtual ~TerrainEdge( ) { }
-    TerrainEdge( TerrainVertex * v1, TerrainVertex * v2, double resistance = 0.1 );
+    TerrainEdge( TerrainVertex * v1, TerrainVertex * v2, dec resistance = 0.1 );
     TerrainEdge( const TerrainEdge & );
 
     Line line( ) const;
@@ -24,13 +24,13 @@ public:
 
     Angle normal( ) const;
 
-    double resistance( ) const;
+    dec resistance( ) const;
 
 private:
     TerrainVertex * m_v1 = nullptr;
     TerrainVertex * m_v2 = nullptr;
 
-    double m_resistance;
+    dec m_resistance;
 };
 
 } // namespace reality

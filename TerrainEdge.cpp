@@ -2,7 +2,7 @@
 
 #include "TerrainVertex.hpp"
 
-TerrainEdge::TerrainEdge( TerrainVertex * _v1, TerrainVertex * _v2, const double _resistance ) : m_v1( _v1 ), m_v2( _v2 ), m_resistance( _resistance )
+TerrainEdge::TerrainEdge( TerrainVertex * _v1, TerrainVertex * _v2, const dec _resistance ) : m_v1( _v1 ), m_v2( _v2 ), m_resistance( _resistance )
 {
     Assert( (bool)m_v1 );
     Assert( (bool)m_v2 );
@@ -24,4 +24,4 @@ TerrainVertex * TerrainEdge::vertex2( ) const { return m_v2; }
 
 Angle TerrainEdge::normal( ) const { return vector( ).angle( ) + RIGHT_ANGLE; }
 
-double TerrainEdge::resistance( ) const { return m_resistance; }
+dec TerrainEdge::resistance( ) const { return m_resistance; }

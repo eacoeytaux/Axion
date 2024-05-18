@@ -9,12 +9,12 @@ namespace axn
 namespace graphics
 {
 
-const double FILLED = 0.0;
+const dec FILLED = 0.0;
 
 namespace
 {
-const uint RGB_DEPTH = 8;
-const uint ALPHA_DEPTH = 128;
+const uint RGB_DEPTH = 255;
+const uint ALPHA_DEPTH = 255;
 } // namespace
 
 // https://www.calculatorology.com/conversion/color/
@@ -28,13 +28,13 @@ public:
                                m_g( round( c.m_g * RGB_DEPTH ) / RGB_DEPTH ),
                                m_b( round( c.m_b * RGB_DEPTH ) / RGB_DEPTH ),
                                m_a( round( c.m_a * ALPHA_DEPTH ) / ALPHA_DEPTH ) { }
-    Color( const Color & c, double a ) : m_r( round( c.m_r * RGB_DEPTH ) / RGB_DEPTH ),
-                                         m_g( round( c.m_g * RGB_DEPTH ) / RGB_DEPTH ),
-                                         m_b( round( c.m_b * RGB_DEPTH ) / RGB_DEPTH ),
-                                         m_a( round( a * ALPHA_DEPTH ) / ALPHA_DEPTH ) { }
+    Color( const Color & c, dec a ) : m_r( round( c.m_r * RGB_DEPTH ) / RGB_DEPTH ),
+                                      m_g( round( c.m_g * RGB_DEPTH ) / RGB_DEPTH ),
+                                      m_b( round( c.m_b * RGB_DEPTH ) / RGB_DEPTH ),
+                                      m_a( round( a * ALPHA_DEPTH ) / ALPHA_DEPTH ) { }
 
-    static Color rgb( double r, double g, double b ) { return Color::rgba( r, g, b, 1.0 ); }
-    static Color rgba( double r, double g, double b, double a )
+    static Color rgb( dec r, dec g, dec b ) { return Color::rgba( r, g, b, 1.0 ); }
+    static Color rgba( dec r, dec g, dec b, dec a )
     {
         Assert( ( r >= 0.0 ) && ( r <= 1.0 ), "r must be [ 0, 1 ]" );
         Assert( ( g >= 0.0 ) && ( g <= 1.0 ), "g must be [ 0, 1 ]" );
@@ -50,12 +50,12 @@ public:
     }
 
     static Color rgb( uint rgb ) { return Color::rgba( rgb, 1.0 ); }
-    static Color rgba( uint rgb, double a ) { return Color::rgba( (double)( ( rgb & 0xFF0000 ) >> 16 ) / 255.0,
-                                                                  (double)( ( rgb & 0x00FF00 ) >> 8 ) / 255.0,
-                                                                  (double)( ( rgb & 0x0000FF ) >> 0 ) / 255.0, a ); }
+    static Color rgba( uint rgb, dec a ) { return Color::rgba( (dec)( ( rgb & 0xFF0000 ) >> 16 ) / 255.0,
+                                                               (dec)( ( rgb & 0x00FF00 ) >> 8 ) / 255.0,
+                                                               (dec)( ( rgb & 0x0000FF ) >> 0 ) / 255.0, a ); }
 
-    static Color cmyk( double c, double m, double y, double k ) { return Color::cmyka( c, m, y, k, 1.0 ); }
-    static Color cmyka( double c, double m, double y, double k, double a )
+    static Color cmyk( dec c, dec m, dec y, dec k ) { return Color::cmyka( c, m, y, k, 1.0 ); }
+    static Color cmyka( dec c, dec m, dec y, dec k, dec a )
     {
         Assert( ( c >= 0.0 ) && ( c <= 1.0 ), "c must be [ 0, 1 ]" );
         Assert( ( m >= 0.0 ) && ( m <= 1.0 ), "m must be [ 0, 1 ]" );
@@ -64,25 +64,25 @@ public:
         Assert( ( a >= 0.0 ) && ( a <= 1.0 ), "a must be [ 0, 1 ]" );
 
         k = ( 1.0 - k );
-        double r = ( 1.0 - c ) * k;
-        double g = ( 1.0 - m ) * k;
-        double b = ( 1.0 - y ) * k;
+        dec r = ( 1.0 - c ) * k;
+        dec g = ( 1.0 - m ) * k;
+        dec b = ( 1.0 - y ) * k;
         return Color::rgba( r, g, b, a );
     }
 
-    static Color hsv( double h, double s, double v ) { return Color::hsva( h, s, v, 1.0 ); }
-    static Color hsva( double h, double s, double v, double a )
+    static Color hsv( dec h, dec s, dec v ) { return Color::hsva( h, s, v, 1.0 ); }
+    static Color hsva( dec h, dec s, dec v, dec a )
     {
         Assert( ( h >= 0.0 ) && ( h <= 1.0 ), "h must be [ 0, 1 ]" );
         Assert( ( s >= 0.0 ) && ( s <= 1.0 ), "s must be [ 0, 1 ]" );
         Assert( ( v >= 0.0 ) && ( v <= 1.0 ), "v must be [ 0, 1 ]" );
         Assert( ( a >= 0.0 ) && ( a <= 1.0 ), "a must be [ 0, 1 ]" );
 
-        double r, g, b;
+        dec r, g, b;
 
-        double c = v * s;
-        double m = v - c;
-        double x = c * ( 1.0 - abs( ( h * 6.0 ) - floor( h * 3.0 ) - 1.0 ) );
+        dec c = v * s;
+        dec m = v - c;
+        dec x = c * ( 1.0 - abs( ( h * 6.0 ) - floor( h * 3.0 ) - 1.0 ) );
 
         if( x <= 1.0 )
         {
@@ -124,19 +124,19 @@ public:
         return Color::rgba( r, g, b, a );
     }
 
-    static Color hsl( double h, double s, double l ) { return Color::hsla( h, s, l, 1.0 ); }
-    static Color hsla( double h, double s, double l, double a )
+    static Color hsl( dec h, dec s, dec l ) { return Color::hsla( h, s, l, 1.0 ); }
+    static Color hsla( dec h, dec s, dec l, dec a )
     {
         Assert( ( h >= 0.0 ) && ( h <= 1.0 ), "h must be [ 0, 1 ]" );
         Assert( ( s >= 0.0 ) && ( s <= 1.0 ), "s must be [ 0, 1 ]" );
         Assert( ( l >= 0.0 ) && ( l <= 1.0 ), "l must be [ 0, 1 ]" );
         Assert( ( a >= 0.0 ) && ( a <= 1.0 ), "a must be [ 0, 1 ]" );
 
-        double r, g, b;
+        dec r, g, b;
 
-        double c = s * ( 1.0 - abs( ( l * 2.0 ) - 1.0 ) );
-        double m = l - ( c / 2.0 );
-        double x = c * ( 1.0 - abs( ( h * 6.0 ) - floor( h * 3.0 ) - 1.0 ) );
+        dec c = s * ( 1.0 - abs( ( l * 2.0 ) - 1.0 ) );
+        dec m = l - ( c / 2.0 );
+        dec x = c * ( 1.0 - abs( ( h * 6.0 ) - floor( h * 3.0 ) - 1.0 ) );
 
         if( x <= 1.0 )
         {
@@ -178,33 +178,33 @@ public:
         return Color::rgba( r, g, b, a );
     }
 
-    double r( ) const { return m_r; }
-    Color r( double r ) const { return Color::rgba( r, m_g, m_b, m_a ); }
-    Color & r( double r )
+    dec r( ) const { return m_r; }
+    Color r( dec r ) const { return Color::rgba( r, m_g, m_b, m_a ); }
+    Color & r( dec r )
     {
         m_r = round( r * RGB_DEPTH ) / RGB_DEPTH;
         return *this;
     }
 
-    double g( ) const { return m_g; }
-    Color g( double g ) const { return Color::rgba( m_r, g, m_b, m_a ); }
-    Color & g( double g )
+    dec g( ) const { return m_g; }
+    Color g( dec g ) const { return Color::rgba( m_r, g, m_b, m_a ); }
+    Color & g( dec g )
     {
         m_g = round( g * RGB_DEPTH ) / RGB_DEPTH;
         return *this;
     }
 
-    double b( ) const { return m_b; }
-    Color b( double b ) const { return Color::rgba( m_r, m_g, b, m_a ); }
-    Color & b( double b )
+    dec b( ) const { return m_b; }
+    Color b( dec b ) const { return Color::rgba( m_r, m_g, b, m_a ); }
+    Color & b( dec b )
     {
         m_b = round( b * RGB_DEPTH ) / RGB_DEPTH;
         return *this;
     }
 
-    double a( ) const { return m_a; }
-    Color a( double a ) const { return Color::rgba( m_r, m_g, m_b, a ); }
-    Color & a( double a )
+    dec a( ) const { return m_a; }
+    Color a( dec a ) const { return Color::rgba( m_r, m_g, m_b, a ); }
+    Color & a( dec a )
     {
         m_a = round( a * ALPHA_DEPTH ) / ALPHA_DEPTH;
         return *this;
@@ -218,10 +218,10 @@ public:
     bool operator!=( const Color & c ) const { return !( *this == c ); }
 
 private:
-    double m_r = 1.0; // red value
-    double m_g = 1.0; // green value
-    double m_b = 1.0; // blue value
-    double m_a = 1.0; // alpha value
+    dec m_r = 1.0; // red value
+    dec m_g = 1.0; // green value
+    dec m_b = 1.0; // blue value
+    dec m_a = 1.0; // alpha value
 };
 
 const Color TRANSPARENT = Color::rgba( 1.0, 1.0, 1.0, 0.0 );
@@ -260,27 +260,27 @@ public:
     const Color & color_start( ) const { return m_color_start; }
     const Color & color_end( ) const { return m_color_end; }
 
-    double slide( ) const { return m_slide; }
-    Color slide( double s )
+    dec slide( ) const { return m_slide; }
+    Color slide( dec s )
     {
         m_slide = s;
         Assert( ( m_slide >= 0.0 ) && ( m_slide <= 1.0 ), "slide must be [ 0, 1 ]" );
         return *this;
     }
 
-    Color color_at( double d ) const
+    Color color_at( dec f ) const
     {
-        Assert( ( d >= 0.0 ) && ( d <= 1.0 ), "slide must be [ 0, 1 ]" );
+        Assert( ( f >= 0.0 ) && ( f <= 1.0 ), "slide must be [ 0, 1 ]" );
 
-        double d_r = m_color_end.r( ) - m_color_start.r( );
-        double d_g = m_color_end.g( ) - m_color_start.g( );
-        double d_b = m_color_end.b( ) - m_color_start.b( );
-        double d_a = m_color_end.a( ) - m_color_start.a( );
+        dec d_r = m_color_end.r( ) - m_color_start.r( );
+        dec d_g = m_color_end.g( ) - m_color_start.g( );
+        dec d_b = m_color_end.b( ) - m_color_start.b( );
+        dec d_a = m_color_end.a( ) - m_color_start.a( );
 
-        double r = m_color_start.r( ) + ( d_r * d );
-        double g = m_color_start.g( ) + ( d_g * d );
-        double b = m_color_start.b( ) + ( d_b * d );
-        double a = m_color_start.a( ) + ( d_a * d );
+        dec r = m_color_start.r( ) + ( d_r * f );
+        dec g = m_color_start.g( ) + ( d_g * f );
+        dec b = m_color_start.b( ) + ( d_b * f );
+        dec a = m_color_start.a( ) + ( d_a * f );
 
         return Color::rgba( r, g, b, a );
     }
@@ -293,7 +293,7 @@ public:
 private:
     Color m_color_start;
     Color m_color_end;
-    double m_slide;
+    dec m_slide;
 };
 
 } // namespace graphics

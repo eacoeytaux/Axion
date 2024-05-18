@@ -16,8 +16,8 @@ class Visible
 public:
     virtual ~Visible( ) { }
 
-    Visible( double z = 1.0, uint layer_position = 0 ) { *this = Visible( Drawing( ), z, layer_position ); }
-    Visible( const Drawing & drawing, double z = 1.0, uint layer_position = 0 )
+    Visible( dec z = 1.0, uint layer_position = 0 ) { *this = Visible( Drawing( ), z, layer_position ); }
+    Visible( const Drawing & drawing, dec z = 1.0, uint layer_position = 0 )
     {
         m_drawing = drawing;
         this->z( z );
@@ -60,10 +60,10 @@ public:
     }
 
     uint layer_position( ) const { return m_layer_position; }
-    double z( ) const { return m_z; }
+    dec z( ) const { return m_z; }
 
 protected:
-    const Visible & z( double z ) const
+    const Visible & z( dec z ) const
     {
         m_z = z;
         return *this;
@@ -75,7 +75,7 @@ protected:
         return *this;
     }
 
-    const Visible & add_light_source( const Coordinate & position, Planc radius, const Color & tint = TRANSPARENT, double flicker = 0.0 ) const
+    const Visible & add_light_source( const Coordinate & position, Planc radius, const Color & tint = TRANSPARENT, dec flicker = 0.0 ) const
     {
         m_lights.insert_back( LightSource( position, radius ) );
         return *this;
@@ -105,31 +105,31 @@ protected:
         return *this;
     }
 
-    const Visible & draw( const varray<Color> & colors, const Polygon & polygon, double thickness = FILLED ) const
+    const Visible & draw( const varray<Color> & colors, const Polygon & polygon, dec thickness = FILLED ) const
     {
         m_drawing.draw( colors, polygon, thickness );
         return *this;
     }
-    const Visible & draw( const Color & color, const Polygon & polygon, double thickness = FILLED ) const
+    const Visible & draw( const Color & color, const Polygon & polygon, dec thickness = FILLED ) const
     {
         m_drawing.draw( color, polygon, thickness );
         return *this;
     }
 
-    const Visible & draw( const Color & color1, const Color & color2, const Line & line, double thickness = FILLED ) const
+    const Visible & draw( const Color & color1, const Color & color2, const Line & line, dec thickness = FILLED ) const
     {
         m_drawing.draw( color1, color2, line, thickness );
         return *this;
     }
 
-    const Visible & draw( const Color & color, const Line & line, double thickness = FILLED ) const
+    const Visible & draw( const Color & color, const Line & line, dec thickness = FILLED ) const
     {
         m_drawing.draw( color, line, thickness );
         return *this;
     }
 
 #ifdef AXN_DEBUG
-    const Visible & draw( const Color & color, const Vector & vector, uint arrow_head_length, double thickness ) const
+    const Visible & draw( const Color & color, const Vector & vector, uint arrow_head_length, dec thickness ) const
     {
         m_drawing.draw( color, vector, arrow_head_length, thickness );
         return *this;
@@ -176,7 +176,7 @@ protected:
     }
 
 private:
-    mutable double m_z = 1.0;     // 1 = player plane, [0,1) = background, >1 = foreground
+    mutable dec m_z = 1.0;        // 1 = player plane, [0,1) = background, >1 = foreground
     mutable int m_layer_position; // determines show order within layer, higher value shows on top of lower values
 
     mutable varray<LightSource> m_lights;

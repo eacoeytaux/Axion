@@ -7,14 +7,14 @@
 
 namespace
 {
-const double MIN_ZOOM = 0.64;
-const double MAX_ZOOM = 2.5;
+const dec MIN_ZOOM = 0.64;
+const dec MAX_ZOOM = 2.5;
 const uint LIGHTING_LAYERS = 6;
-const double LIGHTING_RADIUS_GROW = 0.333;
-const double LIGHTING_RADIUS_GROW_EXPONENT = 0.88;
+const dec LIGHTING_RADIUS_GROW = 0.333;
+const dec LIGHTING_RADIUS_GROW_EXPONENT = 0.88;
 } // namespace
 
-Camera::Camera( const Coordinate & _target, const Planc & _width, const Planc & _height, const double _zoom ) : m_cursor_world_position( COORDINATE_INFINITY_NEGATIVE )
+Camera::Camera( const Coordinate & _target, const Planc & _width, const Planc & _height, const dec _zoom ) : m_cursor_world_position( COORDINATE_INFINITY_NEGATIVE )
 {
     center( _target );
     target( _target );
@@ -79,11 +79,11 @@ Camera & Camera::render( )
     if( !m_subjects.size( ) )
         return *this;
 
-    const double _screen_width = Engine::screen_width( );
-    const double _screen_height = Engine::screen_height( );
+    const dec _screen_width = Engine::screen_width( );
+    const dec _screen_height = Engine::screen_height( );
 
     const Coordinate _camera_offset = half( Vector( width( ), height( ) ) );
-    const double _zoom = Camera::zoom( );
+    const dec _zoom = Camera::zoom( );
 
     ogl::clear( );
     ogl::depth_always( );
@@ -98,7 +98,7 @@ Camera & Camera::render( )
         Visible cursor_visible( cursor_drawing( ).move( m_cursor_world_position ) );
         capture( &cursor_visible );
 
-        auto draw_convex_polygon = [ & ]( const varray<Color> & _colors, const varray<Coordinate> & _coordinates, const Transform & _transform, const double _z = 0.0 )
+        auto draw_convex_coordinates = [ & ]( const varray<Color> & _colors, const varray<Coordinate> & _coordinates, const Transform & _transform = IDENTITY_TRANSFORM, const dec _z = 0.0 )
         {
             if( !_colors.size( ) || !_coordinates.size( ) )
                 return;
@@ -137,7 +137,7 @@ Camera & Camera::render( )
             ogl::clear_depth( );
             ogl::push_matrix( );
             {
-                if( const double _z = subject->z( ) )
+                if( const dec _z = subject->z( ) )
                 {
                     ogl::scale( _zoom * _z );
                     ogl::translate( -center( ).x( ),
@@ -157,14 +157,14 @@ Camera & Camera::render( )
                         {
                             // TODO
 
-                            // const double _border_width = _drawing.border_width( );
+                            // const dec _border_width = _drawing.border_width( );
                             // const Color _border_color = _drawing.border_color( );
 
                             // Polygon polygon_border = Polygon::expand( _polygon, _border_width );
 
                             // for_each( polygon, polygon_border.convex_partitions( ) )
                             // {
-                            //     draw_convex_polygon( { _border_color }, polygon.coordinates_raw( ), polygon.transform( ) );
+                            //     draw_convex_coordinates( { _border_color }, polygon.coordinates_raw( ), polygon.transform( ) );
                             // }
                         }
 
@@ -173,36 +173,67 @@ Camera & Camera::render( )
                         {
                             const Polygon & _convex_polygon = _convex_polygons[ i ];
 
-                            draw_convex_polygon( _colored_polygon.colors, _convex_polygon.coordinates( true ), _convex_polygon.transform( ) ); // TODO need convex indices
+                            draw_convex_coordinates( _colored_polygon.colors, _convex_polygon.coordinates( true ), _convex_polygon.transform( ) ); // TODO need convex indices
                         }
                     }
                     else
                     {
-                        const double _thickness = _colored_polygon.thickness * ( _colored_polygon.preserve_thickness ? (double)1.0 : _zoom );
+                        const Transform _transform = _colored_polygon.polygon.transform( );
+                        const dec _thickness = _colored_polygon.thickness / ( _colored_polygon.preserve_thickness ? _zoom : 1.0 );
 
                         const varray<Line> & _lines = _polygon.lines( );
                         for_range( _lines.size( ) )
                         {
                             const Line & _line = _lines[ i ];
+                            const Angle _line_angle = _line.angle( );
                             const Vector _line_vector( _line.c1( ), _line.c2( ) );
-                            const Polygon _line_polygon = Polygon::rectangle( _line_vector.magnitude( ), _thickness, _line_vector.half( ).destination( ), _line.angle( ) );
+
+                            const Line & _next_line = _lines[ ( i + 1 ) % _lines.size( ) ];
+                            const Angle _next_line_angle = _next_line.angle( );
+                            const Vector _next_line_vector( _next_line.c1( ), _next_line.c2( ) );
+
+                            Polygon line_polygon;
+                            if( _colored_polygon.extend_lines )
+                            {
+                                line_polygon = Rectangle( _line_vector.magnitude( ) + _thickness, _thickness, _line_vector.half( ), _line_angle );
+                            }
+                            else
+                            {
+                                line_polygon = Rectangle( _line_vector.magnitude( ), _thickness, _line_vector.half( ), _line_angle );
+                            }
+
+                            Polygon corner_polygon;
+                            if( ( _line.c1( ) != _line.c2( ) ) && ( _next_line.c1( ) != _next_line.c2( ) ) )
+                            {
+                                Coordinate c0 = _line.c2( );
+                                Coordinate c1 = c0 + VectorA( _line_angle - RIGHT_ANGLE, half( _thickness ) );
+                                Coordinate c2 = c0 + VectorA( _next_line_angle - RIGHT_ANGLE, half( _thickness ) );
+                                Coordinate c3 = Line( c1, c1 + VectorA( _line_angle ) ).intersection( Line( c2, c2 - VectorA( _next_line_angle ) ) );
+                                corner_polygon = Polygon( { c0, c1, c3, c2 } );
+                            }
 
                             if( _drawing.has_border( ) )
                             {
                                 // TODO
 
-                                // const double _border_width = _drawing.border_width( );
+                                // const dec _border_width = _drawing.border_width( );
                                 // const Color _border_color = _drawing.border_color( );
 
-                                // Polygon polygon_border = Polygon::expand( _line_polygon, _border_width );
+                                // Polygon polygon_border_corner = Polygon::expand( _corner_polygon, _border_width );
+                                // for_each( polygon, polygon_border_corner.convex_partitions( ) )
+                                //{
+                                //     draw_convex_coordinates( { _border_color }, polygon.coordinates( true ), polygon.transform( ) );
+                                // }
 
+                                // Polygon polygon_border = Polygon::expand( line_polygon, _border_width );
                                 // for_each( polygon, polygon_border.convex_partitions( ) )
                                 //{
-                                //     draw_convex_polygon( { _border_color }, polygon.coordinates( true ), polygon.transform( ) );
+                                //     draw_convex_coordinates( { _border_color }, polygon.coordinates( true ), polygon.transform( ) );
                                 // }
                             }
 
-                            draw_convex_polygon( { _colored_polygon.colors[ i ] }, _line_polygon.coordinates( true ), _line_polygon.transform( ) );
+                            draw_convex_coordinates( { _colored_polygon.colors[ i ] }, corner_polygon.coordinates( true ), corner_polygon.transform( ) );
+                            draw_convex_coordinates( { _colored_polygon.colors[ i ] }, line_polygon.coordinates( true ), line_polygon.transform( ) );
                         }
                     }
                 }
@@ -212,50 +243,42 @@ Camera & Camera::render( )
 
         if( m_lighting )
         {
-            const varray<LightSource> & _light_sources = m_lighting->light_sources( );
-
             ogl::clear_depth( );
             ogl::depth_always( );
-            draw_convex_polygon( { BLUE.a( 0.1 ) },
-                                 Polygon::rectangle( _screen_width, _screen_height ).coordinates( ),
-                                 IdentityTransform( ) );
 
-            ogl::push_matrix( );
+            draw_convex_coordinates( { Color::rgba( 0.0, 0.0, 0.5, 0.2 ) }, Rectangle( _screen_width, _screen_height ).coordinates( ) );
+
+            const varray<LightSource> & _light_sources = m_lighting->light_sources( );
+
+            for_range( LIGHTING_LAYERS + 1 )
             {
-                for_range( LIGHTING_LAYERS + 1 )
+                ogl::clear_depth( );
+                ogl::depth_always( );
+                ogl::push_matrix( );
                 {
-                    ogl::clear_depth( );
-                    ogl::depth_always( );
-                    ogl::push_matrix( );
+                    ogl::scale( _zoom );
+                    ogl::translate( -center( ).x( ),
+                                    -center( ).y( ) );
+
+                    for_each( light, _light_sources )
                     {
-
-                        ogl::scale( _zoom );
-                        ogl::translate( -center( ).x( ),
-                                        -center( ).y( ) );
-
-                        for_each( light, _light_sources )
+                        ogl::push_matrix( );
                         {
-                            ogl::push_matrix( );
-                            {
-                                ogl::translate( light.position( ).x( ),
-                                                light.position( ).y( ) );
+                            ogl::translate( light.position( ).x( ),
+                                            light.position( ).y( ) );
 
-                                draw_convex_polygon( { TRANSPARENT },
-                                                     Polygon::circle( light.radius( ) + ( light.radius( ) * LIGHTING_RADIUS_GROW ) * i * pow( LIGHTING_RADIUS_GROW_EXPONENT, i ) ).coordinates( ),
-                                                     IdentityTransform( ) ); // todo
-                            }
-                            ogl::pop_matrix( );
+                            draw_convex_coordinates( { TRANSPARENT },
+                                                     Circle( light.radius( ) * ( ( i * LIGHTING_RADIUS_GROW * pow( LIGHTING_RADIUS_GROW_EXPONENT, i ) ) + 1 ) ).coordinates( ) );
                         }
+                        ogl::pop_matrix( );
                     }
-                    ogl::pop_matrix( );
-
-                    ogl::depth_not_equal( );
-                    draw_convex_polygon( { BLACK.a( min( 1.0, ( (double)( i + 1 ) / (double)LIGHTING_LAYERS ) ) ) },
-                                         Polygon::rectangle( _screen_width, _screen_height ).coordinates( ),
-                                         IdentityTransform( ) );
                 }
+                ogl::pop_matrix( );
+
+                ogl::depth_not_equal( );
+                draw_convex_coordinates( { BLACK.a( min( 1.0, ( (dec)( i + 1 ) / (dec)LIGHTING_LAYERS ) ) ) },
+                                         Rectangle( _screen_width, _screen_height ).coordinates( ) );
             }
-            ogl::pop_matrix( );
         }
     }
     ogl::pop_matrix( );
@@ -265,17 +288,17 @@ Camera & Camera::render( )
 
 Drawing Camera::cursor_drawing( ) const
 {
-    const double RETICLE_WIDTH = 2.0;
-    const double RETICLE_LENGTH = 8.0;
-    const double RETICLE_BORDER_WIDTH = 1.0;
+    const dec RETICLE_WIDTH = 2.0;
+    const dec RETICLE_LENGTH = 8.0;
+    const dec RETICLE_BORDER_WIDTH = 1.0;
 
     Drawing cursor_drawing;
 
-    const double _zoom = zoom( );
-    cursor_drawing.draw( BLACK, Polygon::rectangle( ( RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) / _zoom, ( RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) / _zoom ), 0 );
-    cursor_drawing.draw( BLACK, Polygon::rectangle( ( RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) / _zoom, ( RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) / _zoom ), 0 );
-    cursor_drawing.draw( WHITE, Polygon::rectangle( RETICLE_WIDTH / _zoom, RETICLE_LENGTH / _zoom ), 0 );
-    cursor_drawing.draw( WHITE, Polygon::rectangle( RETICLE_LENGTH / _zoom, RETICLE_WIDTH / _zoom ), 0 );
+    const dec _zoom = zoom( );
+    cursor_drawing.draw( BLACK, Rectangle( ( RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) / _zoom, ( RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) / _zoom ), 0 );
+    cursor_drawing.draw( BLACK, Rectangle( ( RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) / _zoom, ( RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) / _zoom ), 0 );
+    cursor_drawing.draw( WHITE, Rectangle( RETICLE_WIDTH / _zoom, RETICLE_LENGTH / _zoom ), 0 );
+    cursor_drawing.draw( WHITE, Rectangle( RETICLE_LENGTH / _zoom, RETICLE_WIDTH / _zoom ), 0 );
 
     return cursor_drawing;
 }
@@ -322,8 +345,8 @@ Camera & Camera::height( const Planc & _height )
     return *this;
 }
 
-double Camera::zoom( ) const { return m_zoom; }
-Camera & Camera::zoom( const double _zoom )
+dec Camera::zoom( ) const { return m_zoom; }
+Camera & Camera::zoom( const dec _zoom )
 {
     if( !in_range( _zoom, MIN_ZOOM, MAX_ZOOM ) )
         return *this;

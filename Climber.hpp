@@ -111,7 +111,7 @@ private:
     bool m_looking_up = false;
     bool m_looking_down = false;
     bool m_jumping = false;
-    double m_jump_degradation = 0.0;
+    dec m_jump_degradation = 0.0;
     Counter m_jumping_timer;
     Counter m_jump_reset_timer;
 

@@ -1,8 +1,7 @@
 #include "Angle.hpp"
-
 #include "Vector.hpp"
 
-Angle::Angle( const double _radians, const bool _truncate )
+Angle::Angle( const dec _radians, const bool _truncate )
 {
     truncate( _truncate );
     radians( _radians );
@@ -17,13 +16,13 @@ Angle::Angle( const Planc & _dx, const Planc & _dy, const bool _truncate )
 Angle::Angle( const Coordinate & _c, const bool _truncate )
 {
     truncate( _truncate );
-    radians( atan2( (double)_c.y( ), (double)_c.x( ) ) );
+    radians( atan2( (dec)_c.y( ), (dec)_c.x( ) ) );
 }
 
 Angle::Angle( const Coordinate & _from, const Coordinate & _to, const bool _truncate )
 {
     truncate( _truncate );
-    radians( atan2( (double)( _to.y( ) - _from.y( ) ), (double)( _to.x( ) - _from.x( ) ) ) );
+    radians( atan2( (dec)( _to.y( ) - _from.y( ) ), (dec)( _to.x( ) - _from.x( ) ) ) );
 }
 
 bool Angle::truncating( ) const { return m_truncate; }
@@ -38,8 +37,8 @@ Angle Angle::truncated( )
     return Angle( radians( ), true );
 }
 
-double Angle::radians( ) const { return m_radians; }
-double Angle::degrees( ) const
+dec Angle::radians( ) const { return m_radians; }
+dec Angle::degrees( ) const
 {
 #ifdef AXN_DEBUG
     return m_degrees;
@@ -50,12 +49,12 @@ double Angle::degrees( ) const
 
 Angle & Angle::radians( const Planc & _dx, const Planc & _dy )
 {
-    radians( atan2( (double)_dy, (double)_dx ) );
+    radians( atan2( (dec)_dy, (dec)_dx ) );
     return *this;
 }
-Angle & Angle::radians( const double _radians )
+Angle & Angle::radians( const dec _radians )
 {
-    double radians = _radians;
+    dec radians = _radians;
 
     if( is_infinity( _radians ) )
     {
@@ -73,8 +72,8 @@ Angle & Angle::radians( const double _radians )
     return *this;
 }
 
-double Angle::sin( const double _multiplier ) const { return ::sin( radians( ) ) * _multiplier; }
-double Angle::cos( const double _multiplier ) const { return ::cos( radians( ) ) * _multiplier; }
+dec Angle::sin( const dec _multiplier ) const { return ::sin( radians( ) ) * _multiplier; }
+dec Angle::cos( const dec _multiplier ) const { return ::cos( radians( ) ) * _multiplier; }
 
 Quadrant Angle::quadrant( ) const { return VectorA( *this, 1.0 ).destination( ).quadrant( ); }
 bool Angle::in_quadrant( const Quadrant _quadrant ) const { return quadrant( ) == _quadrant; }
@@ -85,10 +84,10 @@ bool Angle::on_axis( const Axis _axis ) const { return axis( ) == _axis; }
 Angle & Angle::flip( ) { return radians( radians( ) + PI ); }
 Angle Angle::flipped( ) const { return Angle( *this + PI ); }
 
-Angle Angle::half( ) const { return Angle( *this / 2.0 ); }
-Angle & Angle::halve( ) { return radians( radians( ) / 2.0 ); }
+Angle Angle::half( ) const { return Angle( ::half( radians( ) ) ); }
+Angle & Angle::halve( ) { return radians( ::half( radians( ) ) ); }
 
-Angle & Angle::operator=( const double _radians ) { return radians( _radians ); }
+Angle & Angle::operator=( const dec _radians ) { return radians( _radians ); }
 
 Angle Angle::operator-( ) const { return Angle( -radians( ), truncating( ) ); }
 
@@ -98,65 +97,65 @@ Angle Angle::operator-( const Angle & _angle ) const { return Angle( radians( ) 
 Angle & Angle::operator+=( const Angle & _angle ) { return radians( radians( ) + _angle.radians( ) ); }
 Angle & Angle::operator-=( const Angle & _angle ) { return radians( radians( ) - _angle.radians( ) ); }
 
-bool Angle::operator==( const Angle & _angle ) const { return double_eq( radians( ), _angle.radians( ) ); }
-bool Angle::operator!=( const Angle & _angle ) const { return double_neq( radians( ), _angle.radians( ) ); }
-bool Angle::operator>( const Angle & _angle ) const { return double_gt( radians( ), _angle.radians( ) ); }
-bool Angle::operator>=( const Angle & _angle ) const { return double_ge( radians( ), _angle.radians( ) ); }
-bool Angle::operator<( const Angle & _angle ) const { return double_lt( radians( ), _angle.radians( ) ); }
-bool Angle::operator<=( const Angle & _angle ) const { return double_le( radians( ), _angle.radians( ) ); }
+bool Angle::operator==( const Angle & _angle ) const { return dec_eq( radians( ), _angle.radians( ) ); }
+bool Angle::operator!=( const Angle & _angle ) const { return dec_neq( radians( ), _angle.radians( ) ); }
+bool Angle::operator<=( const Angle & _angle ) const { return dec_le( radians( ), _angle.radians( ) ); }
+bool Angle::operator>=( const Angle & _angle ) const { return dec_ge( radians( ), _angle.radians( ) ); }
+bool Angle::operator<( const Angle & _angle ) const { return dec_lt( radians( ), _angle.radians( ) ); }
+bool Angle::operator>( const Angle & _angle ) const { return dec_gt( radians( ), _angle.radians( ) ); }
 
-Angle Angle::operator+( const double _radians ) const { return Angle( radians( ) + _radians, truncating( ) ); }
-Angle Angle::operator-( const double _radians ) const { return Angle( radians( ) - _radians, truncating( ) ); }
+Angle Angle::operator+( const dec _radians ) const { return Angle( radians( ) + _radians, truncating( ) ); }
+Angle Angle::operator-( const dec _radians ) const { return Angle( radians( ) - _radians, truncating( ) ); }
 
-Angle & Angle::operator+=( const double _radians ) { return radians( radians( ) + _radians ); }
-Angle & Angle::operator-=( const double _radians ) { return radians( radians( ) - _radians ); }
+Angle & Angle::operator+=( const dec _radians ) { return radians( radians( ) + _radians ); }
+Angle & Angle::operator-=( const dec _radians ) { return radians( radians( ) - _radians ); }
 
-Angle Angle::operator*( const double _scale ) const { return Angle( radians( ) * _scale, truncating( ) ); }
-Angle Angle::operator/( const double _scale ) const { return Angle( radians( ) / _scale, truncating( ) ); }
+Angle Angle::operator*( const dec _scale ) const { return Angle( radians( ) * _scale, truncating( ) ); }
+Angle Angle::operator/( const dec _scale ) const { return Angle( radians( ) / _scale, truncating( ) ); }
 
-Angle & Angle::operator*=( const double _scale ) { return radians( radians( ) * _scale ); }
-Angle & Angle::operator/=( const double _scale ) { return radians( radians( ) / _scale ); }
+Angle & Angle::operator*=( const dec _scale ) { return radians( radians( ) * _scale ); }
+Angle & Angle::operator/=( const dec _scale ) { return radians( radians( ) / _scale ); }
 
-bool Angle::operator==( const double _radians ) const { return double_eq( radians( ), _radians ); }
-bool Angle::operator!=( const double _radians ) const { return double_neq( radians( ), _radians ); }
-bool Angle::operator<( const double _radians ) const { return double_lt( radians( ), _radians ); }
-bool Angle::operator<=( const double _radians ) const { return double_le( radians( ), _radians ); }
-bool Angle::operator>( const double _radians ) const { return double_gt( radians( ), _radians ); }
-bool Angle::operator>=( const double _radians ) const { return double_ge( radians( ), _radians ); }
+bool Angle::operator==( const dec _radians ) const { return dec_eq( radians( ), _radians ); }
+bool Angle::operator!=( const dec _radians ) const { return dec_neq( radians( ), _radians ); }
+bool Angle::operator<=( const dec _radians ) const { return dec_le( radians( ), _radians ); }
+bool Angle::operator>=( const dec _radians ) const { return dec_ge( radians( ), _radians ); }
+bool Angle::operator<( const dec _radians ) const { return dec_lt( radians( ), _radians ); }
+bool Angle::operator>( const dec _radians ) const { return dec_gt( radians( ), _radians ); }
 
-Angle Angle::operator+( const int _radians ) const { return *this + (double)_radians; }
-Angle Angle::operator-( const int _radians ) const { return *this - (double)_radians; }
-Angle Angle::operator*( const int _scale ) const { return *this * (double)_scale; }
-Angle Angle::operator/( const int _scale ) const { return *this / (double)_scale; }
+Angle Angle::operator+( const int _radians ) const { return *this + (dec)_radians; }
+Angle Angle::operator-( const int _radians ) const { return *this - (dec)_radians; }
+Angle Angle::operator*( const int _scale ) const { return *this * (dec)_scale; }
+Angle Angle::operator/( const int _scale ) const { return *this / (dec)_scale; }
 
-Angle & Angle::operator+=( const int _radians ) { return *this += (double)_radians; }
-Angle & Angle::operator-=( const int _radians ) { return *this -= (double)_radians; }
-Angle & Angle::operator*=( const int _scale ) { return *this *= (double)_scale; }
-Angle & Angle::operator/=( const int _scale ) { return *this /= (double)_scale; }
+Angle & Angle::operator+=( const int _radians ) { return *this += (dec)_radians; }
+Angle & Angle::operator-=( const int _radians ) { return *this -= (dec)_radians; }
+Angle & Angle::operator*=( const int _scale ) { return *this *= (dec)_scale; }
+Angle & Angle::operator/=( const int _scale ) { return *this /= (dec)_scale; }
 
-bool Angle::operator==( const int _radians ) const { return double_eq( radians( ), (double)_radians ); }
-bool Angle::operator!=( const int _radians ) const { return double_neq( radians( ), (double)_radians ); }
-bool Angle::operator<( const int _radians ) const { return double_lt( radians( ), (double)_radians ); }
-bool Angle::operator<=( const int _radians ) const { return double_le( radians( ), (double)_radians ); }
-bool Angle::operator>( const int _radians ) const { return double_gt( radians( ), (double)_radians ); }
-bool Angle::operator>=( const int _radians ) const { return double_ge( radians( ), (double)_radians ); }
+bool Angle::operator==( const int _radians ) const { return dec_eq( radians( ), (dec)_radians ); }
+bool Angle::operator!=( const int _radians ) const { return dec_neq( radians( ), (dec)_radians ); }
+bool Angle::operator<=( const int _radians ) const { return dec_le( radians( ), (dec)_radians ); }
+bool Angle::operator>=( const int _radians ) const { return dec_ge( radians( ), (dec)_radians ); }
+bool Angle::operator<( const int _radians ) const { return dec_lt( radians( ), (dec)_radians ); }
+bool Angle::operator>( const int _radians ) const { return dec_gt( radians( ), (dec)_radians ); }
 
-Angle Angle::operator+( const uint _radians ) const { return *this + (double)_radians; }
-Angle Angle::operator-( const uint _radians ) const { return *this - (double)_radians; }
-Angle Angle::operator*( const uint _scale ) const { return *this * (double)_scale; }
-Angle Angle::operator/( const uint _scale ) const { return *this / (double)_scale; }
+Angle Angle::operator+( const uint _radians ) const { return *this + (dec)_radians; }
+Angle Angle::operator-( const uint _radians ) const { return *this - (dec)_radians; }
+Angle Angle::operator*( const uint _scale ) const { return *this * (dec)_scale; }
+Angle Angle::operator/( const uint _scale ) const { return *this / (dec)_scale; }
 
-Angle & Angle::operator+=( const uint _radians ) { return *this += (double)_radians; }
-Angle & Angle::operator-=( const uint _radians ) { return *this -= (double)_radians; }
-Angle & Angle::operator*=( const uint _scale ) { return *this *= (double)_scale; }
-Angle & Angle::operator/=( const uint _scale ) { return *this /= (double)_scale; }
+Angle & Angle::operator+=( const uint _radians ) { return *this += (dec)_radians; }
+Angle & Angle::operator-=( const uint _radians ) { return *this -= (dec)_radians; }
+Angle & Angle::operator*=( const uint _scale ) { return *this *= (dec)_scale; }
+Angle & Angle::operator/=( const uint _scale ) { return *this /= (dec)_scale; }
 
-bool Angle::operator==( const uint _radians ) const { return double_eq( radians( ), (double)_radians ); }
-bool Angle::operator!=( const uint _radians ) const { return double_neq( radians( ), (double)_radians ); }
-bool Angle::operator<( const uint _radians ) const { return double_lt( radians( ), (double)_radians ); }
-bool Angle::operator<=( const uint _radians ) const { return double_le( radians( ), (double)_radians ); }
-bool Angle::operator>( const uint _radians ) const { return double_gt( radians( ), (double)_radians ); }
-bool Angle::operator>=( const uint _radians ) const { return double_ge( radians( ), (double)_radians ); }
+bool Angle::operator==( const uint _radians ) const { return dec_eq( radians( ), (dec)_radians ); }
+bool Angle::operator!=( const uint _radians ) const { return dec_neq( radians( ), (dec)_radians ); }
+bool Angle::operator<=( const uint _radians ) const { return dec_le( radians( ), (dec)_radians ); }
+bool Angle::operator>=( const uint _radians ) const { return dec_ge( radians( ), (dec)_radians ); }
+bool Angle::operator<( const uint _radians ) const { return dec_lt( radians( ), (dec)_radians ); }
+bool Angle::operator>( const uint _radians ) const { return dec_gt( radians( ), (dec)_radians ); }
 
-double Angle::radians_to_degrees( const double _radians ) { return _radians * 360.0 / TAU; }
-double Angle::degrees_to_radians( const double _degrees ) { return _degrees * TAU / 360.0; }
+dec Angle::radians_to_degrees( const dec _radians ) { return _radians * 360.0 / TAU; }
+dec Angle::degrees_to_radians( const dec _degrees ) { return _degrees * TAU / 360.0; }

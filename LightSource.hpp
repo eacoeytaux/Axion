@@ -21,10 +21,10 @@ public:
     LightSource & position( const Coordinate & );
 
     Planc radius( ) const;
-    LightSource & radius( double );
+    LightSource & radius( dec );
 
-    // double flicker( ) const;
-    // LightSource & flicker( double );
+    // dec flicker( ) const;
+    // LightSource & flicker( dec );
 
     // const Color & tint( ) const;
     // LightSource & tint( const Color & );
@@ -36,7 +36,7 @@ private:
     Coordinate m_position;
     Planc m_radius;
 
-    // double m_flicker;
+    // dec m_flicker;
     // color m_tint;
 };
 

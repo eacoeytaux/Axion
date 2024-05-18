@@ -10,7 +10,7 @@ class PineTree : public Object
 {
 public:
     virtual ~PineTree( ) { }
-    PineTree( World *, const Coordinate & root, double z = 1.0 );
+    PineTree( World *, const Coordinate & root, dec z = 1.0 );
 
     virtual const PineTree & render( ) const override;
 

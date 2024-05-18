@@ -26,7 +26,7 @@ public:
     static error clear_stencil( );
 
     static error clear_screen( ) { return ogl::clear_screen( 0.0, 0.0, 0.0 ); }
-    static error clear_screen( double r, double g, double b );
+    static error clear_screen( dec r, dec g, dec b );
 
     static error load_identity( );
 
@@ -41,12 +41,12 @@ public:
 
     static error transform( const Transform & );
 
-    static error translate( double x, double y );
+    static error translate( dec x, dec y );
     static error translate( const Coordinate & c ) { return translate( c.x( ), c.y( ) ); }
     static error translate( const Vector & v ) { return translate( v.dx( ), v.dy( ) ); }
 
-    static error scale( double x, double y );
-    static error scale( double s ) { return scale( s, s ); }
+    static error scale( dec x, dec y );
+    static error scale( dec s ) { return scale( s, s ); }
 
 private:
     static error begin( int gl_enum );
@@ -62,7 +62,7 @@ public:
     static error begin_polygons( );
     static error end( );
 
-    static error vertex( double x, double y, double z = 1.0, double w = 1.0 );
+    static error vertex( dec x, dec y, dec z = 1.0, dec w = 1.0 );
 
     static error faces_counterclockwise( bool );
     static bool faces_counterclockwise( );
@@ -73,16 +73,16 @@ public:
     static error shade_smooth( );
     static bool shaded_smooth( );
 
-    static error point_radius( double );
-    static double point_radius( );
+    static error point_radius( dec );
+    static dec point_radius( );
 
-    static error point_diameter( double );
-    static double point_diameter( );
+    static error point_diameter( dec );
+    static dec point_diameter( );
 
-    static error line_width( double );
-    static double line_width( );
+    static error line_width( dec );
+    static dec line_width( );
 
-    static error color( double r, double g, double b, double a = 1.0 );
+    static error color( dec r, dec g, dec b, dec a = 1.0 );
 
     static error blend_normal( );
     static error blend_func( );

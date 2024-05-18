@@ -47,16 +47,16 @@ void safe_delete( T *& t )
     t = nullptr;
 }
 
-// -- double util functions --
+// -- dec util functions --
 
-const double DEFAULT_FLOAT_EPSILON = 0.0001;
+const dec DEFAULT_DECIMAL_EPSILON = 0.0001;
 
-inline bool is_infinity( const double d )
+inline bool is_infinity( const dec d )
 {
     return ( d == INFINITY_POSITIVE ) || ( d == INFINITY_NEGATIVE );
 }
 
-inline bool double_eq( const double x, const double y, const double epsilon = DEFAULT_FLOAT_EPSILON )
+inline bool dec_eq( const dec x, const dec y, const dec epsilon = DEFAULT_DECIMAL_EPSILON )
 {
     if( abs( x - y ) < epsilon )
     {
@@ -68,29 +68,29 @@ inline bool double_eq( const double x, const double y, const double epsilon = DE
     }
 }
 
-inline bool double_neq( const double x, const double y, const double epsilon = DEFAULT_FLOAT_EPSILON )
+inline bool dec_neq( const dec x, const dec y, const dec epsilon = DEFAULT_DECIMAL_EPSILON )
 {
-    return !double_eq( x, y, epsilon );
+    return !dec_eq( x, y, epsilon );
 }
 
-inline bool double_gt( const double x, const double y, const double epsilon = DEFAULT_FLOAT_EPSILON )
+inline bool dec_gt( const dec x, const dec y, const dec epsilon = DEFAULT_DECIMAL_EPSILON )
 {
     return ( ( x - epsilon ) > y );
 }
 
-inline bool double_ge( const double x, const double y, const double epsilon = DEFAULT_FLOAT_EPSILON )
+inline bool dec_ge( const dec x, const dec y, const dec epsilon = DEFAULT_DECIMAL_EPSILON )
 {
-    return ( ( ( x - epsilon ) > y ) || double_eq( x, y ) );
+    return ( ( ( x - epsilon ) > y ) || dec_eq( x, y ) );
 }
 
-inline bool double_lt( const double x, const double y, const double epsilon = DEFAULT_FLOAT_EPSILON )
+inline bool dec_lt( const dec x, const dec y, const dec epsilon = DEFAULT_DECIMAL_EPSILON )
 {
     return ( ( x + epsilon ) < y );
 }
 
-inline bool double_le( const double x, const double y, const double epsilon = DEFAULT_FLOAT_EPSILON )
+inline bool dec_le( const dec x, const dec y, const dec epsilon = DEFAULT_DECIMAL_EPSILON )
 {
-    return ( ( ( x + epsilon ) < y ) || double_eq( x, y ) );
+    return ( ( ( x + epsilon ) < y ) || dec_eq( x, y ) );
 }
 
 // -- misc. util functions --
@@ -104,15 +104,29 @@ void swap_values( T & t1, T & t2 )
 }
 
 template <typename T>
+T inverse( const T & t )
+{
+    Assert( (bool)t );
+    return ( 1.0 / t );
+}
+
+template <typename T>
+void invert( T & t )
+{
+    Assert( (bool)t );
+    return t = ( 1.0 / t );
+}
+
+template <typename T>
 T half( const T & t )
 {
-    return t / 2.0;
+    return ( t / 2.0 );
 }
 
 template <typename T>
 void halve( T & t )
 {
-    t = t / T( 2 );
+    t = ( t / 2.0 );
 }
 
 template <typename T>
@@ -135,7 +149,7 @@ T pow( const T & t, const uint p )
 template <typename T>
 T & square( T & t )
 {
-    return ( t *= t );
+    return ( t = t * t );
 }
 
 template <typename T>
@@ -147,7 +161,7 @@ T squared( const T & t )
 template <typename T>
 T & cube( T & t )
 {
-    return ( t *= t * t );
+    return ( t = t * t * t );
 }
 
 template <typename T>
@@ -233,7 +247,7 @@ inline string Label( const T & t )
 }
 
 template <typename T>
-inline string Label( )
+inline const string & Label( )
 {
     static const string label = Label( T( ) );
     return label;
@@ -288,6 +302,9 @@ class IDumap : public umap<Identifiable, T, Identifiable::Hasher>
 
 class Counter
 {
+private:
+    uint m_countdown;
+
 public:
     virtual ~Counter( ) { }
     Counter( const uint countdown = 0 ) : m_countdown( countdown ) { }
@@ -311,18 +328,18 @@ public:
     }
 
     uint remaining( ) const { return m_countdown; }
-
-private:
-    uint m_countdown;
 };
 
 template <typename T>
 class Span
 {
+private:
+    T m_min, m_max;
+
 public:
     virtual ~Span( ) { }
     Span( ) : m_min( T( 0 ) ), m_max( T( 0 ) ) { }
-    Span( const T & max_value ) : m_min( max_value ), m_max( max_value ) { }
+    Span( const T & value ) : m_min( value ), m_max( value ) { }
     Span( const T & min_value, const T & max_value ) : m_min( min_value ), m_max( max_value )
     {
         if( m_min > m_max )
@@ -359,14 +376,14 @@ public:
 
         return *this;
     }
-
-private:
-    T m_min, m_max;
 };
 
 template <typename T>
 class Slider
 {
+private:
+    T m_value, m_min_value, m_max_value;
+
 public:
     Slider( ) : m_min_value( 0 ), m_max_value( 0 ) { value( min( ) ); }
     Slider( const T & max_value ) : m_min_value( 0 ), m_max_value( max_value ) { value( min( ) ); }
@@ -423,8 +440,8 @@ public:
 
     T range( ) const { return T( max( ) - min( ) ); }
 
-    double value_percentage( ) const { return ( (double)( m_value - m_min_value ) / (double)( m_max_value - m_min_value ) ); }
-    Slider & value_percentage( const double p, bool set_new_min_max_value = false )
+    dec value_percentage( ) const { return ( (dec)( m_value - m_min_value ) / (dec)( m_max_value - m_min_value ) ); }
+    Slider & value_percentage( const dec p, bool set_new_min_max_value = false )
     {
         return value( ( ( m_max_value - m_min_value ) * p ) + m_min_value, set_new_min_max_value );
     }
@@ -433,11 +450,6 @@ public:
     {
         return value( m_value + delta, set_new_min_max_value );
     }
-
-private:
-    T m_value;
-    T m_min_value;
-    T m_max_value;
 };
 
 // -- range util functions --
@@ -447,13 +459,16 @@ bool in_range( const T & t, const T & low, const T & high, bool include_low, boo
 {
     T l = low;
     T h = high;
+
     bool il = include_low;
     bool ih = include_high;
+
     if( l > h )
     {
         swap_values<T>( l, h );
         swap_values<bool>( il, ih );
     }
+
     return ( ( t > l ) && ( t < h ) ) || ( il && ( t == l ) ) || ( ih && ( t == h ) );
 }
 

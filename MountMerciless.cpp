@@ -42,7 +42,7 @@ World & MountMerciless::create( )
     add_object( new DistantBird( this, Coordinate( -666.0, 866.0 ) ) );
     add_object( new DistantBird( this, Coordinate( -550.0, 900.0 ) ) );
 
-    // add_object( new Waterfall( this, Coordinate( 0.0, 10.0 ), METER * 4.0, METER * 8.0, 0.95 ) );
+    add_object( new Waterfall( this, Coordinate( 0.0, 10.0 ), METER * 4.0, METER * 8.0, 0.95 ) );
 
     terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ), [ & ]( const Coordinate & c, const TerrainEdge * e )
                             { add_object( new AspenTree( this, c ) ); } );

@@ -12,15 +12,15 @@ class Matter
 {
 public:
     virtual ~Matter( ) { }
-    Matter( const Coordinate & position = ORIGIN, const Polygon & space = Polygon( ), double mass = 0.0 );
-    Matter( const Vector & position_velocity, const Polygon & space = Polygon( ), double mass = 0.0 ); // origin of velocity is the position
+    Matter( const Coordinate & position = ORIGIN, const Polygon & space = Polygon( ), dec mass = 0.0 );
+    Matter( const Vector & position_velocity, const Polygon & space = Polygon( ), dec mass = 0.0 ); // origin of velocity is the position
 
     Coordinate position( ) const;
     Matter & position( const Coordinate & position );
     Polygon space( ) const;
     Matter & space( const Polygon & space );
-    double mass( ) const;
-    Matter & mass( double mass );
+    dec mass( ) const;
+    Matter & mass( dec mass );
     Vector velocity( ) const;
     Matter & velocity( const Vector & velocity );
     Matter & add_velocity( const Vector & velocity );
@@ -32,7 +32,7 @@ public:
 private:
     Coordinate m_position;
     Polygon m_space;
-    double m_mass;
+    dec m_mass;
     Vector m_velocity;
 
     bool m_solid = false;

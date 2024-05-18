@@ -25,34 +25,37 @@ public:
     Coordinate center( ) const;
     Drawing & center( const Coordinate & );
     Drawing & move( const Vector & );
-    Drawing & scale( double, const Coordinate & = ORIGIN );
+    Drawing & scale( const dec, const Coordinate & = ORIGIN );
     Drawing & rotate( const Angle &, const Coordinate & = ORIGIN );
     Drawing & mirror( const Vector & );
     Drawing & mirror_x( ) { return mirror( X_HAT ); }
     Drawing & mirror_y( ) { return mirror( Y_HAT ); }
 
     Drawing & draw( const Drawing & );
-    Drawing & draw( const varray<Color> & colors, const Polygon & polygon, double thickness = FILLED, bool preserve_thickness = false );
-    Drawing & draw( const Color & color, const Polygon & polygon, double thickness = FILLED, bool preserve_thickness = false );
-    Drawing & draw( const Color & color1, const Color & color2, const Line & line, double thickness = 1.0, bool preserve_thickness = false );
-    Drawing & draw( const Color & color, const Line & line, double thickness = 1.0, bool preserve_thickness = false );
+    Drawing & draw( const Drawing &, const Color & color );
+    Drawing & draw( const varray<Color> & colors, const Polygon & polygon, const dec thickness = FILLED, bool preserve_thickness = false, bool extend_lines = false );
+    Drawing & draw( const Color & color, const Polygon & polygon, const dec thickness = FILLED, bool preserve_thickness = false, bool extend_lines = false );
+    Drawing & draw( const Color & color1, const Color & color2, const Line & line, const dec thickness = 1.0, bool preserve_thickness = false, bool extend_lines = false );
+    Drawing & draw( const Color & color, const Line & line, const dec thickness = 1.0, bool preserve_thickness = false, bool extend_lines = false );
 #ifdef AXN_DEBUG
-    Drawing & draw( const Color & color, const Vector & vector, const double arrow_head_length, const double thickness = 1.0, bool preserve_thickness = false );
+    Drawing & draw( const Color & color, const Vector & vector, const dec arrow_head_length, const dec thickness = 1.0, bool preserve_thickness = false );
 #endif
 
     bool has_border( ) const { return ( m_border_width && m_border_color.a( ) ); }
     Color border_color( ) const { return m_border_color; }
-    Planc border_width( ) const { return m_border_width; }
     Drawing & border_color( const Color & color )
     {
         m_border_color = color;
         return *this;
     }
+
+    Planc border_width( ) const { return m_border_width; }
     Drawing & border_width( const Planc & width )
     {
         m_border_width = width;
         return *this;
     }
+
     Drawing & border( const Color & color, const Planc & width )
     {
         border_color( color );
@@ -67,12 +70,13 @@ private:
     {
         Polygon polygon;
         varray<Color> colors;
-        double thickness = FILLED;
+        dec thickness = FILLED;
         bool preserve_thickness = false;
+        bool extend_lines = false;
         bool opaque = true;
     };
 
-    Drawing & add_internal( const varray<Color> & colors, const Polygon &, double thickness, bool preserve_thickness );
+    Drawing & add_internal( const varray<Color> & colors, const Polygon &, dec thickness, bool preserve_thickness );
 
     const varray<ColoredPolygon> & colored_polygons( ) const;
     varray<ColoredPolygon> colored_polygons_border( ) const;

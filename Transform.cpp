@@ -15,10 +15,8 @@ RotateTransform::RotateTransform( const Angle & _angle, const Coordinate & _orig
 
     if( _origin != ORIGIN )
     {
-        Transform mt1 = MoveTransform( Vector( _origin ) );
-        Transform mt2 = mt1.inverse( );
-
-        set( mt1 * ( *this ) * mt2 );
+        Transform mt = MoveTransform( Vector( _origin ) );
+        set( mt * ( *this ) * mt.inverse( ) );
     }
 }
 
@@ -26,10 +24,8 @@ ReflectionTransform::ReflectionTransform( const Vector & _axis ) : Transform( tr
 {
     set( 1, 1, -1.0 );
 
-    Transform rt1 = RotateTransform( _axis.angle( ), Vector( _axis.origin( ) ) );
-    Transform rt2 = rt1.inverse( );
-
-    set( rt1 * ( *this ) * rt2 );
+    Transform rt = RotateTransform( _axis.angle( ), Vector( _axis.origin( ) ) );
+    set( rt * ( *this ) * rt.inverse( ) );
 }
 
 ScaleTransform::ScaleTransform( const Planc & _scale, const Coordinate & _origin ) : Transform( true )
@@ -39,10 +35,8 @@ ScaleTransform::ScaleTransform( const Planc & _scale, const Coordinate & _origin
 
     if( _origin != ORIGIN )
     {
-        Transform mt1 = MoveTransform( Vector( _origin ) );
-        Transform mt2 = mt1.inverse( );
-
-        set( mt1 * ( *this ) * mt2 );
+        Transform mt = MoveTransform( Vector( _origin ) );
+        set( mt * ( *this ) * mt.inverse( ) );
     }
 }
 
@@ -50,10 +44,8 @@ StretchTransform::StretchTransform( const Vector & stretch ) : Transform( true )
 {
     set( 0, 0, stretch.magnitude( ) );
 
-    Transform rt1 = RotateTransform( stretch.angle( ), stretch.origin( ) );
-    Transform rt2 = rt1.inverse( );
-
-    set( rt1 * ( *this ) * rt2 );
+    Transform rt = RotateTransform( stretch.angle( ), stretch.origin( ) );
+    set( rt * ( *this ) * rt.inverse( ) );
 }
 
 Transform::Transform( bool identity )
@@ -151,14 +143,14 @@ bool Transform::null( ) const
     return true;
 }
 
-double Transform::determinant( ) const
+dec Transform::determinant( ) const
 {
     return ( m_matrix[ 0 ][ 0 ] * ( ( m_matrix[ 1 ][ 1 ] * m_matrix[ 2 ][ 2 ] ) - ( m_matrix[ 1 ][ 2 ] * m_matrix[ 2 ][ 1 ] ) ) ) -
            ( m_matrix[ 0 ][ 1 ] * ( ( m_matrix[ 1 ][ 0 ] * m_matrix[ 2 ][ 2 ] ) - ( m_matrix[ 1 ][ 2 ] * m_matrix[ 2 ][ 0 ] ) ) ) +
            ( m_matrix[ 0 ][ 2 ] * ( ( m_matrix[ 1 ][ 0 ] * m_matrix[ 2 ][ 1 ] ) - ( m_matrix[ 1 ][ 1 ] * m_matrix[ 2 ][ 0 ] ) ) );
 }
 
-double determinant2x2( Planc a, Planc b, Planc c, Planc d )
+dec determinant2x2( Planc a, Planc b, Planc c, Planc d )
 {
     return ( a * d ) - ( b * c );
 }
@@ -170,7 +162,7 @@ Transform & Transform::invert( )
 
 Transform Transform::inverse( ) const
 {
-    double d = determinant( );
+    dec d = determinant( );
     if( !d )
         return Transform( false );
     d = 1.0 / d;
@@ -193,119 +185,119 @@ Transform & Transform::operator=( const Transform & t )
     return set( t );
 }
 
-Transform Transform::operator+( double d ) const
+Transform Transform::operator+( const dec _d ) const
 {
     Transform t;
-    t.m_matrix[ 0 ][ 0 ] = m_matrix[ 0 ][ 0 ] + d;
-    t.m_matrix[ 0 ][ 1 ] = m_matrix[ 0 ][ 1 ] + d;
-    t.m_matrix[ 0 ][ 2 ] = m_matrix[ 0 ][ 2 ] + d;
-    t.m_matrix[ 1 ][ 0 ] = m_matrix[ 1 ][ 0 ] + d;
-    t.m_matrix[ 1 ][ 1 ] = m_matrix[ 1 ][ 1 ] + d;
-    t.m_matrix[ 1 ][ 2 ] = m_matrix[ 1 ][ 2 ] + d;
-    t.m_matrix[ 2 ][ 0 ] = m_matrix[ 2 ][ 0 ] + d;
-    t.m_matrix[ 2 ][ 1 ] = m_matrix[ 2 ][ 1 ] + d;
-    t.m_matrix[ 0 ][ 2 ] = m_matrix[ 2 ][ 2 ] + d;
+    t.m_matrix[ 0 ][ 0 ] = m_matrix[ 0 ][ 0 ] + _d;
+    t.m_matrix[ 0 ][ 1 ] = m_matrix[ 0 ][ 1 ] + _d;
+    t.m_matrix[ 0 ][ 2 ] = m_matrix[ 0 ][ 2 ] + _d;
+    t.m_matrix[ 1 ][ 0 ] = m_matrix[ 1 ][ 0 ] + _d;
+    t.m_matrix[ 1 ][ 1 ] = m_matrix[ 1 ][ 1 ] + _d;
+    t.m_matrix[ 1 ][ 2 ] = m_matrix[ 1 ][ 2 ] + _d;
+    t.m_matrix[ 2 ][ 0 ] = m_matrix[ 2 ][ 0 ] + _d;
+    t.m_matrix[ 2 ][ 1 ] = m_matrix[ 2 ][ 1 ] + _d;
+    t.m_matrix[ 2 ][ 2 ] = m_matrix[ 2 ][ 2 ] + _d;
     return t;
 }
 
-Transform Transform::operator-( double d ) const
+Transform Transform::operator-( const dec _d ) const
 {
     Transform t;
-    t.m_matrix[ 0 ][ 0 ] = m_matrix[ 0 ][ 0 ] - d;
-    t.m_matrix[ 0 ][ 1 ] = m_matrix[ 0 ][ 1 ] - d;
-    t.m_matrix[ 0 ][ 2 ] = m_matrix[ 0 ][ 2 ] - d;
-    t.m_matrix[ 1 ][ 0 ] = m_matrix[ 1 ][ 0 ] - d;
-    t.m_matrix[ 1 ][ 1 ] = m_matrix[ 1 ][ 1 ] - d;
-    t.m_matrix[ 1 ][ 2 ] = m_matrix[ 1 ][ 2 ] - d;
-    t.m_matrix[ 2 ][ 0 ] = m_matrix[ 2 ][ 0 ] - d;
-    t.m_matrix[ 2 ][ 1 ] = m_matrix[ 2 ][ 1 ] - d;
-    t.m_matrix[ 0 ][ 2 ] = m_matrix[ 2 ][ 2 ] - d;
+    t.m_matrix[ 0 ][ 0 ] = m_matrix[ 0 ][ 0 ] - _d;
+    t.m_matrix[ 0 ][ 1 ] = m_matrix[ 0 ][ 1 ] - _d;
+    t.m_matrix[ 0 ][ 2 ] = m_matrix[ 0 ][ 2 ] - _d;
+    t.m_matrix[ 1 ][ 0 ] = m_matrix[ 1 ][ 0 ] - _d;
+    t.m_matrix[ 1 ][ 1 ] = m_matrix[ 1 ][ 1 ] - _d;
+    t.m_matrix[ 1 ][ 2 ] = m_matrix[ 1 ][ 2 ] - _d;
+    t.m_matrix[ 2 ][ 0 ] = m_matrix[ 2 ][ 0 ] - _d;
+    t.m_matrix[ 2 ][ 1 ] = m_matrix[ 2 ][ 1 ] - _d;
+    t.m_matrix[ 2 ][ 2 ] = m_matrix[ 2 ][ 2 ] - _d;
     return t;
 }
 
-Transform Transform::operator*( double d ) const
+Transform Transform::operator*( const dec _d ) const
 {
     Transform t;
-    t.m_matrix[ 0 ][ 0 ] = m_matrix[ 0 ][ 0 ] * d;
-    t.m_matrix[ 0 ][ 1 ] = m_matrix[ 0 ][ 1 ] * d;
-    t.m_matrix[ 0 ][ 2 ] = m_matrix[ 0 ][ 2 ] * d;
-    t.m_matrix[ 1 ][ 0 ] = m_matrix[ 1 ][ 0 ] * d;
-    t.m_matrix[ 1 ][ 1 ] = m_matrix[ 1 ][ 1 ] * d;
-    t.m_matrix[ 1 ][ 2 ] = m_matrix[ 1 ][ 2 ] * d;
-    t.m_matrix[ 2 ][ 0 ] = m_matrix[ 2 ][ 0 ] * d;
-    t.m_matrix[ 2 ][ 1 ] = m_matrix[ 2 ][ 1 ] * d;
-    t.m_matrix[ 0 ][ 2 ] = m_matrix[ 2 ][ 2 ] * d;
+    t.m_matrix[ 0 ][ 0 ] = m_matrix[ 0 ][ 0 ] * _d;
+    t.m_matrix[ 0 ][ 1 ] = m_matrix[ 0 ][ 1 ] * _d;
+    t.m_matrix[ 0 ][ 2 ] = m_matrix[ 0 ][ 2 ] * _d;
+    t.m_matrix[ 1 ][ 0 ] = m_matrix[ 1 ][ 0 ] * _d;
+    t.m_matrix[ 1 ][ 1 ] = m_matrix[ 1 ][ 1 ] * _d;
+    t.m_matrix[ 1 ][ 2 ] = m_matrix[ 1 ][ 2 ] * _d;
+    t.m_matrix[ 2 ][ 0 ] = m_matrix[ 2 ][ 0 ] * _d;
+    t.m_matrix[ 2 ][ 1 ] = m_matrix[ 2 ][ 1 ] * _d;
+    t.m_matrix[ 2 ][ 2 ] = m_matrix[ 2 ][ 2 ] * _d;
     return t;
 }
 
-Transform Transform::operator/( double d ) const
+Transform Transform::operator/( const dec _d ) const
 {
     Transform t;
-    t.m_matrix[ 0 ][ 0 ] = m_matrix[ 0 ][ 0 ] / d;
-    t.m_matrix[ 0 ][ 1 ] = m_matrix[ 0 ][ 1 ] / d;
-    t.m_matrix[ 0 ][ 2 ] = m_matrix[ 0 ][ 2 ] / d;
-    t.m_matrix[ 1 ][ 0 ] = m_matrix[ 1 ][ 0 ] / d;
-    t.m_matrix[ 1 ][ 1 ] = m_matrix[ 1 ][ 1 ] / d;
-    t.m_matrix[ 1 ][ 2 ] = m_matrix[ 1 ][ 2 ] / d;
-    t.m_matrix[ 2 ][ 0 ] = m_matrix[ 2 ][ 0 ] / d;
-    t.m_matrix[ 2 ][ 1 ] = m_matrix[ 2 ][ 1 ] / d;
-    t.m_matrix[ 0 ][ 2 ] = m_matrix[ 2 ][ 2 ] / d;
+    t.m_matrix[ 0 ][ 0 ] = m_matrix[ 0 ][ 0 ] / _d;
+    t.m_matrix[ 0 ][ 1 ] = m_matrix[ 0 ][ 1 ] / _d;
+    t.m_matrix[ 0 ][ 2 ] = m_matrix[ 0 ][ 2 ] / _d;
+    t.m_matrix[ 1 ][ 0 ] = m_matrix[ 1 ][ 0 ] / _d;
+    t.m_matrix[ 1 ][ 1 ] = m_matrix[ 1 ][ 1 ] / _d;
+    t.m_matrix[ 1 ][ 2 ] = m_matrix[ 1 ][ 2 ] / _d;
+    t.m_matrix[ 2 ][ 0 ] = m_matrix[ 2 ][ 0 ] / _d;
+    t.m_matrix[ 2 ][ 1 ] = m_matrix[ 2 ][ 1 ] / _d;
+    t.m_matrix[ 2 ][ 2 ] = m_matrix[ 2 ][ 2 ] / _d;
     return t;
 }
 
-Transform & Transform::operator+=( double d )
+Transform & Transform::operator+=( const dec _d )
 {
-    m_matrix[ 0 ][ 0 ] += d;
-    m_matrix[ 0 ][ 1 ] += d;
-    m_matrix[ 0 ][ 2 ] += d;
-    m_matrix[ 1 ][ 0 ] += d;
-    m_matrix[ 1 ][ 1 ] += d;
-    m_matrix[ 1 ][ 2 ] += d;
-    m_matrix[ 2 ][ 0 ] += d;
-    m_matrix[ 2 ][ 1 ] += d;
-    m_matrix[ 2 ][ 2 ] += d;
+    m_matrix[ 0 ][ 0 ] += _d;
+    m_matrix[ 0 ][ 1 ] += _d;
+    m_matrix[ 0 ][ 2 ] += _d;
+    m_matrix[ 1 ][ 0 ] += _d;
+    m_matrix[ 1 ][ 1 ] += _d;
+    m_matrix[ 1 ][ 2 ] += _d;
+    m_matrix[ 2 ][ 0 ] += _d;
+    m_matrix[ 2 ][ 1 ] += _d;
+    m_matrix[ 2 ][ 2 ] += _d;
     return *this;
 }
 
-Transform & Transform::operator-=( double d )
+Transform & Transform::operator-=( const dec _d )
 {
-    m_matrix[ 0 ][ 0 ] -= d;
-    m_matrix[ 0 ][ 1 ] -= d;
-    m_matrix[ 0 ][ 2 ] -= d;
-    m_matrix[ 1 ][ 0 ] -= d;
-    m_matrix[ 1 ][ 1 ] -= d;
-    m_matrix[ 1 ][ 2 ] -= d;
-    m_matrix[ 2 ][ 0 ] -= d;
-    m_matrix[ 2 ][ 1 ] -= d;
-    m_matrix[ 2 ][ 2 ] -= d;
+    m_matrix[ 0 ][ 0 ] -= _d;
+    m_matrix[ 0 ][ 1 ] -= _d;
+    m_matrix[ 0 ][ 2 ] -= _d;
+    m_matrix[ 1 ][ 0 ] -= _d;
+    m_matrix[ 1 ][ 1 ] -= _d;
+    m_matrix[ 1 ][ 2 ] -= _d;
+    m_matrix[ 2 ][ 0 ] -= _d;
+    m_matrix[ 2 ][ 1 ] -= _d;
+    m_matrix[ 2 ][ 2 ] -= _d;
     return *this;
 }
 
-Transform & Transform::operator*=( double d )
+Transform & Transform::operator*=( const dec _d )
 {
-    m_matrix[ 0 ][ 0 ] *= d;
-    m_matrix[ 0 ][ 1 ] *= d;
-    m_matrix[ 0 ][ 2 ] *= d;
-    m_matrix[ 1 ][ 0 ] *= d;
-    m_matrix[ 1 ][ 1 ] *= d;
-    m_matrix[ 1 ][ 2 ] *= d;
-    m_matrix[ 2 ][ 0 ] *= d;
-    m_matrix[ 2 ][ 1 ] *= d;
-    m_matrix[ 2 ][ 2 ] *= d;
+    m_matrix[ 0 ][ 0 ] *= _d;
+    m_matrix[ 0 ][ 1 ] *= _d;
+    m_matrix[ 0 ][ 2 ] *= _d;
+    m_matrix[ 1 ][ 0 ] *= _d;
+    m_matrix[ 1 ][ 1 ] *= _d;
+    m_matrix[ 1 ][ 2 ] *= _d;
+    m_matrix[ 2 ][ 0 ] *= _d;
+    m_matrix[ 2 ][ 1 ] *= _d;
+    m_matrix[ 2 ][ 2 ] *= _d;
     return *this;
 }
 
-Transform & Transform::operator/=( double d )
+Transform & Transform::operator/=( const dec _d )
 {
-    m_matrix[ 0 ][ 0 ] /= d;
-    m_matrix[ 0 ][ 1 ] /= d;
-    m_matrix[ 0 ][ 2 ] /= d;
-    m_matrix[ 1 ][ 0 ] /= d;
-    m_matrix[ 1 ][ 1 ] /= d;
-    m_matrix[ 1 ][ 2 ] /= d;
-    m_matrix[ 2 ][ 0 ] /= d;
-    m_matrix[ 2 ][ 1 ] /= d;
-    m_matrix[ 2 ][ 2 ] /= d;
+    m_matrix[ 0 ][ 0 ] /= _d;
+    m_matrix[ 0 ][ 1 ] /= _d;
+    m_matrix[ 0 ][ 2 ] /= _d;
+    m_matrix[ 1 ][ 0 ] /= _d;
+    m_matrix[ 1 ][ 1 ] /= _d;
+    m_matrix[ 1 ][ 2 ] /= _d;
+    m_matrix[ 2 ][ 0 ] /= _d;
+    m_matrix[ 2 ][ 1 ] /= _d;
+    m_matrix[ 2 ][ 2 ] /= _d;
     return *this;
 }
 
@@ -325,7 +317,7 @@ Transform Transform::operator+( const Transform & t ) const
     t2.m_matrix[ 1 ][ 2 ] = m_matrix[ 1 ][ 2 ] + t.m_matrix[ 1 ][ 2 ];
     t2.m_matrix[ 2 ][ 0 ] = m_matrix[ 2 ][ 0 ] + t.m_matrix[ 2 ][ 0 ];
     t2.m_matrix[ 2 ][ 1 ] = m_matrix[ 2 ][ 1 ] + t.m_matrix[ 2 ][ 1 ];
-    t2.m_matrix[ 0 ][ 2 ] = m_matrix[ 2 ][ 2 ] + t.m_matrix[ 2 ][ 2 ];
+    t2.m_matrix[ 2 ][ 2 ] = m_matrix[ 2 ][ 2 ] + t.m_matrix[ 2 ][ 2 ];
     return t2;
 }
 

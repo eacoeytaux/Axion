@@ -43,9 +43,16 @@ public:
 #endif
 
     bool deleted( ) const { return m_deleted; }
-    Object & mark_deleted( )
+    virtual Object & mark_deleted( )
     {
         m_deleted = true;
+        return *this;
+    }
+
+    bool marked_to_delete( ) const { return m_marked_to_delete; }
+    virtual Object & mark_to_delete( )
+    {
+        m_marked_to_delete = true;
         return *this;
     }
 
@@ -54,8 +61,8 @@ public:
 
     bool stationary( ) const;
     Object & stationary( bool );
-    double gravity_ratio( ) const;
-    Object & gravity_ratio( double );
+    dec gravity_ratio( ) const;
+    Object & gravity_ratio( dec );
     bool terrain_boundaries( ) const;
     Object & terrain_boundaries( bool );
     TerrainEdge * ground( ) const;
@@ -72,14 +79,18 @@ public:
     virtual bool operator!=( const Object & other ) const { return !( *this == other ); }
 
 protected:
-    virtual Object & move( );
+    virtual Object & update_movement( );
     virtual Object & update_velocity( );
+
+    virtual Object & move( const Vector & );
     virtual Object & ground( TerrainEdge * ground );
+    virtual Object & out_of_bounds( );
+
     virtual Object & react_to_movement( Object * object, const Vector & );
 
     virtual bool collide( Object * object );
 
-    virtual double friction_resistance( ) const;
+    virtual dec friction_resistance( ) const;
 
 private:
     Object & add_movement_subscriber( Object * );
@@ -89,6 +100,7 @@ private:
     uint m_age = 0;
     uint m_last_world_age_update = 0;
     bool m_deleted = false;
+    bool m_marked_to_delete = false;
 
     Planc m_visible_width = 0.0;
     Planc m_visible_height = 0.0;
@@ -100,7 +112,7 @@ private:
 
     TerrainEdge * m_ground = nullptr;
 
-    double m_gravity_ratio = 1.0;
+    dec m_gravity_ratio = 1.0;
 
     bool m_stationary = false;
     bool m_terrain_boundaries = true;
@@ -120,12 +132,8 @@ public:
     StationaryObject( World * world, const Coordinate & position = ORIGIN ) : Object( world, position ) { }
 
 private:
-    virtual Object & move( ) { return *this; }
-    virtual Object & update_velocity( )
-    {
-        velocity( ZERO_VECTOR );
-        return *this;
-    }
+    virtual Object & update_movement( ) { return *this; }
+    virtual Object & update_velocity( ) { return *this; }
 };
 
 } // namespace reality

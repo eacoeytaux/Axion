@@ -1,8 +1,8 @@
 #include "Line.hpp"
 
-#include "Vector.hpp"
-
-Line::Line( const Coordinate & c1, const Coordinate & c2 ) : m_c1( c1 ), m_c2( c2 ) { evaluate( ); }
+Line::Line( ) : m_c1( ORIGIN ), m_c2( ORIGIN ) { evaluate( ); }
+Line::Line( const Coordinate & _c1, const Coordinate & _c2 ) : m_c1( _c1 ), m_c2( _c2 ) { evaluate( ); }
+Line::Line( const Vector & _v ) : m_c1( _v.origin( ) ), m_c2( _v.destination( ) ) { evaluate( ); }
 
 Line & Line::evaluate( )
 {
@@ -72,21 +72,9 @@ const Coordinate & Line::c1( ) const
     return m_c1;
 }
 
-Line & Line::c1( const Coordinate & c )
-{
-    m_c1 = c;
-    return evaluate( );
-}
-
 const Coordinate & Line::c2( ) const
 {
     return m_c2;
-}
-
-Line & Line::c2( const Coordinate & c )
-{
-    m_c2 = c;
-    return evaluate( );
 }
 
 Angle Line::angle( ) const
@@ -94,40 +82,41 @@ Angle Line::angle( ) const
     return Angle( c1( ), c2( ) );
 }
 
-Line & Line::rotate( const Angle & a, const Coordinate & origin )
+Vector Line::vector( ) const
 {
-    Vector v1( origin, c1( ) );
-    v1.rotate( a );
-    c1( v1.destination( ) );
+    return Vector( c1( ), c2( ) );
+}
 
-    Vector v2( origin, c2( ) );
-    v2.rotate( a );
-    c2( v2.destination( ) );
-
+Line & Line::transform( const Transform & t )
+{
+    m_c1 = t.transform( m_c1 );
+    m_c2 = t.transform( m_c2 );
     return evaluate( );
 }
 
-Line & Line::mirror_x( )
+Line & Line::move( const Vector & _v )
 {
-    return mirror( Vector( 1.0, 0.0 ) );
+    return transform( MoveTransform( _v ) );
 }
 
-Line & Line::mirror_y( )
+Line & Line::stretch( const Vector & _v )
 {
-    return mirror( Vector( 0.0, 1.0 ) );
+    return transform( StretchTransform( _v ) );
+}
+
+Line & Line::scale( const dec _scale, const Coordinate & _origin )
+{
+    return transform( ScaleTransform( _scale, _origin ) );
+}
+
+Line & Line::rotate( const Angle & _a, const Coordinate & _origin )
+{
+    return transform( RotateTransform( _a, _origin ) );
 }
 
 Line & Line::mirror( const Vector & _axis )
 {
-    Coordinate c1_mirrored = c1( );
-    c1_mirrored.mirror( _axis );
-    c1( c1_mirrored );
-
-    Coordinate c2_mirrored = c2( );
-    c2_mirrored.mirror( _axis );
-    c2( c2_mirrored );
-
-    return evaluate( );
+    return transform( ReflectionTransform( _axis ) );
 }
 
 bool Line::vertical( ) const { return m_vertical; }
@@ -153,7 +142,7 @@ Planc Line::x( const Planc & _y ) const
     }
     else
     {
-        Planc x = ( _y - m_b ) / m_m;
+        Planc x = ( _y - b( ) ) / m( );
         // if( in_box( Coordinate( x, _y ) ) ) // todo
         {
             return x;
@@ -178,7 +167,7 @@ Planc Line::y( const Planc & _x ) const
     }
     else
     {
-        Planc y = ( m_m * _x ) + m_b;
+        Planc y = ( m( ) * _x ) + b( );
         // if( in_box( Coordinate( _x, y ) ) ) // todo
         {
             return y;
@@ -191,36 +180,52 @@ Planc Line::y( const Planc & _x ) const
 Coordinate Line::right( ) const
 {
     if( c1( ).x( ) >= c2( ).x( ) )
+    {
         return c1( );
+    }
     else
+    {
         return c2( );
+    }
 }
 
 Coordinate Line::left( ) const
 {
     if( c1( ).x( ) <= c2( ).x( ) )
+    {
         return c1( );
+    }
     else
+    {
         return c2( );
+    }
 }
 
 Coordinate Line::high( ) const
 {
     if( c1( ).y( ) >= c2( ).y( ) )
+    {
         return c1( );
+    }
     else
+    {
         return c2( );
+    }
 }
 
 Coordinate Line::low( ) const
 {
     if( c1( ).y( ) <= c2( ).y( ) )
+    {
         return c1( );
+    }
     else
+    {
         return c2( );
+    }
 }
 
-bool Line::in_box( const Coordinate & _c ) const { return in_range( _c.x( ), left( ).x( ), right( ).x( ) ) && in_range( _c.y( ), low( ).y( ), high( ).y( ) ); }
+bool Line::in_box( const Coordinate & _c, const bool _inclusive ) const { return ( in_range( _c.x( ), left( ).x( ), right( ).x( ), _inclusive ) && in_range( _c.y( ), low( ).y( ), high( ).y( ), _inclusive ) ); }
 
 Planc line_eq( const Line & _l, const Coordinate & _c )
 {
@@ -256,7 +261,7 @@ bool Line::below( const Coordinate & _c, const bool _inclusive ) const
         return ( eq > 0.0 );
 }
 
-bool Line::intersects( const Line & _line ) const
+bool Line::intersects( const Line & _line, const bool _inclusive ) const
 {
     if( vertical( ) && _line.vertical( ) )
     {
@@ -266,7 +271,7 @@ bool Line::intersects( const Line & _line ) const
     {
         return ( c1( ).y( ) == _line.c1( ).y( ) );
     }
-    else if( ( m_m == _line.m_m ) && ( m_b == _line.m_b ) )
+    else if( ( m( ) == _line.m( ) ) && ( b( ) == _line.b( ) ) )
     {
         return true;
     }
@@ -277,31 +282,31 @@ bool Line::intersects( const Line & _line ) const
     if( vertical( ) )
     {
         x_intersect = low( ).x( );
-        y_intersect = ( _line.horizontal( ) ? _line.low( ).y( ) : ( low( ).x( ) * _line.m_m ) + _line.m_b );
+        y_intersect = ( _line.horizontal( ) ? _line.low( ).y( ) : ( low( ).x( ) * _line.m( ) ) + _line.b( ) );
     }
     else if( _line.vertical( ) )
     {
         x_intersect = _line.low( ).x( );
-        y_intersect = ( horizontal( ) ? low( ).y( ) : ( _line.low( ).x( ) * m_m ) + m_b );
+        y_intersect = ( horizontal( ) ? low( ).y( ) : ( _line.low( ).x( ) * m( ) ) + b( ) );
     }
     else if( horizontal( ) )
     {
-        x_intersect = ( low( ).y( ) - _line.m_b ) / _line.m_m;
+        x_intersect = ( low( ).y( ) - _line.b( ) ) / _line.m( );
         y_intersect = low( ).y( );
     }
     else if( _line.horizontal( ) )
     {
-        x_intersect = ( _line.low( ).y( ) - m_b ) / m_m;
+        x_intersect = ( _line.low( ).y( ) - b( ) ) / m( );
         y_intersect = _line.low( ).y( );
     }
     else
     {
-        x_intersect = ( _line.m_b - m_b ) / ( m_m - _line.m_m );
-        y_intersect = ( x_intersect * m_m ) + m_b;
+        x_intersect = ( _line.b( ) - b( ) ) / ( m( ) - _line.m( ) );
+        y_intersect = ( x_intersect * m( ) ) + b( );
     }
 
     Coordinate intersect( x_intersect, y_intersect );
-    return ( in_box( intersect ) && _line.in_box( intersect ) );
+    return ( in_box( intersect, _inclusive ) && _line.in_box( intersect, _inclusive ) );
 }
 
 Coordinate Line::intersection( const Line & _line ) const
@@ -320,7 +325,7 @@ Coordinate Line::intersection( const Line & _line ) const
             return c1( );
         }
     }
-    else if( ( m_m == _line.m_m ) && ( m_b == _line.m_b ) )
+    else if( ( m( ) == _line.m( ) ) && ( b( ) == _line.b( ) ) )
     {
         // if( in_range( c1( ).x( ), _line.left( ).x( ), _line.right( ).x( ) ) ) // todo
         {
@@ -338,28 +343,28 @@ Coordinate Line::intersection( const Line & _line ) const
 
         if( vertical( ) )
         {
-            x_intersect = low( ).x( );
-            y_intersect = ( _line.horizontal( ) ? _line.low( ).y( ) : ( low( ).x( ) * _line.m_m ) + _line.m_b );
+            x_intersect = ( low( ).x( ) );
+            y_intersect = ( _line.horizontal( ) ? _line.low( ).y( ) : ( low( ).x( ) * _line.m( ) ) + _line.b( ) );
         }
         else if( _line.vertical( ) )
         {
-            x_intersect = _line.low( ).x( );
-            y_intersect = ( horizontal( ) ? low( ).y( ) : ( _line.low( ).x( ) * m_m ) + m_b );
+            x_intersect = ( _line.low( ).x( ) );
+            y_intersect = ( horizontal( ) ? low( ).y( ) : ( _line.low( ).x( ) * m( ) ) + b( ) );
         }
         else if( horizontal( ) )
         {
-            x_intersect = ( low( ).y( ) - _line.m_b ) / _line.m_m;
-            y_intersect = low( ).y( );
+            x_intersect = ( low( ).y( ) - _line.b( ) ) / _line.m( );
+            y_intersect = ( low( ).y( ) );
         }
         else if( _line.horizontal( ) )
         {
-            x_intersect = ( _line.low( ).y( ) - m_b ) / m_m;
-            y_intersect = _line.low( ).y( );
+            x_intersect = ( _line.low( ).y( ) - b( ) ) / m( );
+            y_intersect = ( _line.low( ).y( ) );
         }
         else
         {
-            x_intersect = ( _line.m_b - m_b ) / ( m_m - _line.m_m );
-            y_intersect = ( x_intersect * m_m ) + m_b;
+            x_intersect = ( _line.b( ) - b( ) ) / ( m( ) - _line.m( ) );
+            y_intersect = ( x_intersect * m( ) ) + b( );
         }
 
         Coordinate intersect( x_intersect, y_intersect );

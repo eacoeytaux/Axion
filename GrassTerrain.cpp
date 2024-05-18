@@ -121,7 +121,7 @@ GrassTerrain::GrassTerrain( World * world, const varray<Coordinate> & _vertices 
             Line edge_line = edge->line( );
 
             Vector edge_intersect = VectorA( normal - ( RIGHT_ANGLE * 1.5 ), tip );
-            intersect1 = edge_line.intersection( Line( edge_intersect.origin( ), edge_intersect.destination( ) ) );
+            intersect1 = edge_line.intersection( Line( edge_intersect ) );
 
             base_offset1 = edge->normal( ).flipped( );
         }
@@ -131,7 +131,7 @@ GrassTerrain::GrassTerrain( World * world, const varray<Coordinate> & _vertices 
             Line edge_line = edge->line( );
 
             Vector edge_intersect = VectorA( normal + ( RIGHT_ANGLE * 1.5 ), tip );
-            intersect2 = edge_line.intersection( Line( edge_intersect.origin( ), edge_intersect.destination( ) ) );
+            intersect2 = edge_line.intersection( Line( edge_intersect ) );
 
             base_offset2 = edge->normal( ).flipped( );
         }

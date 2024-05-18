@@ -53,21 +53,38 @@ public:
     virtual World & input( const varray<Input *> & inputs = { } );
 
     uint age( ) const;
+    const FixedRectangle & bounds( ) const;
 
     virtual World & pause( bool );
 
     const Camera * active_camera( ) const;
     const Player * player( uint player_number = 0 );
 
-    World & add_object( Object * object );
-    World & add_objects( const varray<Object *> & objects )
+    virtual World & add_object( Object * object );
+    World & add_objects( const list<Object *> & objects )
     {
         for_each( object, objects ) add_object( object );
         return *this;
     }
 
+protected:
+    virtual World & update_object( Object * object );
+    World & update_objects( const list<Object *> & objects )
+    {
+        for_each( object, objects ) update_object( object );
+        return *this;
+    }
+
+    virtual World & remove_object( Object * object );
+    World & remove_objects( const list<Object *> & objects )
+    {
+        for_each( object, objects ) remove_object( object );
+        return *this;
+    }
+
+public:
     World & add_particle( Object * particle ) { return add_object( particle ); }
-    World & add_particles( const varray<Object *> & particles )
+    World & add_particles( const list<Object *> & particles )
     {
         for_each( particle, particles ) add_particle( particle );
         return *this;
@@ -93,6 +110,8 @@ protected:
     virtual World & destroy( );
     virtual World & reset( );
 
+    virtual World & bounds( const FixedRectangle & );
+
     virtual World & add_player( const Coordinate & position );
     virtual Player * create_player( const Coordinate & position ) = 0;
 
@@ -109,10 +128,7 @@ private:
 private:
     uint m_age = 0;
 
-    Camera * m_active_camera = nullptr;
-
     varray<Player *> m_players;
-    varray<Camera> m_player_cameras;
 
     queue<Object *> m_object_queue;
     list<Object *> m_objects;
@@ -121,12 +137,58 @@ private:
     Background * m_background;
     Foreground * m_foreground;
 
-    Terrain * m_terrain;
-
     Lighting * m_lighting;
     bool m_lighting_active;
-
+    Terrain * m_terrain;
     Vector m_wind;
+
+    Camera * m_active_camera = nullptr;
+    varray<Camera> m_player_cameras;
+
+    FixedRectangle m_bounds;
+
+    class Grid
+    {
+    public:
+        struct GridBlock
+        {
+            uint x;
+            uint y;
+
+            set<Object *> m_objects;
+        };
+
+        virtual ~Grid( ) { }
+
+        Grid & init( const FixedRectangle & bounds );
+
+        uint x( const Planc & );
+        uint y( const Planc & );
+
+        Span<uint> x_range( ) { return m_grid_x_size; }
+        Span<uint> y_range( ) { return m_grid_y_size; }
+
+        Span<uint> x_range( const FixedRectangle & );
+        Span<uint> y_range( const FixedRectangle & );
+
+        Grid & mark( bool present, Object * object );
+        Grid & mark_present( Object * object ) { return mark( true, object ); }
+        Grid & mark_absent( Object * object ) { return mark( false, object ); }
+
+    private:
+        uint m_grid_x_size;
+        uint m_grid_y_size;
+        varray<varray<GridBlock>> m_grid;
+        Coordinate m_offset;
+    } m_object_grid;
+
+    Grid & object_grid( ) { return m_object_grid; }
+
+    Drawing render_bounds( );
+#ifdef AXN_DEBUG
+    Drawing render_grid( );
+    Drawing render_debug_overlay( );
+#endif
 };
 
 } // namespace reality

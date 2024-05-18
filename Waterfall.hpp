@@ -14,11 +14,12 @@ private:
         Coordinate position;
         Vector movement;
         Planc radius;
+        dec alpha;
     };
 
 public:
     virtual ~Waterfall( ) { }
-    Waterfall( World *, const Coordinate & bottom, Planc width, Planc height, double z = 1.0 );
+    Waterfall( World *, const Coordinate & bottom, Planc width, Planc height, dec z = 1.0 );
 
     const Waterfall & render( ) const override;
     Waterfall & update( ) override;

@@ -40,8 +40,8 @@ uint WINDOW_HEIGHT;
 bool ANTI_ALIAS = true;
 
 bool MUTED = true;
-double VOLUME_INCREMENT = 0.0625;
-Slider<double> VOLUME;
+dec VOLUME_INCREMENT = 0.0625;
+Slider<dec> VOLUME;
 
 const uint MAX_CONTROLLERS = 4;
 SDL_Joystick * CONTROLLERS[ MAX_CONTROLLERS ];
@@ -58,10 +58,10 @@ void Engine::init_eng( const string _app_name )
     bool assert_check = false;
 
     Assert( ( VOLUME_INCREMENT > 0 ) && ( VOLUME_INCREMENT < 1 ), "volume increment must be ( 0, 1 )" );
-    Assert( ( 1.0 / VOLUME_INCREMENT ) == floor( 1.0 / VOLUME_INCREMENT ), "volume increment be division of 1" );
+    Assert( inverse( VOLUME_INCREMENT ) == floor( inverse( VOLUME_INCREMENT ) ), "volume increment be division of 1" );
 
     assert_check = !SDL_Init( SDL_INIT_EVERYTHING );
-    Assert( assert_check, "SDL2 initialization failed: ", SDL_GetErrorStr( ) );
+    Assert( assert_check, "SDL initialization failed: ", SDL_GetErrorStr( ) );
 
     assert_check = !SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
     Assert( assert_check, "SDL GL Attributes failed: ", SDL_GetErrorStr( ) );
@@ -76,7 +76,7 @@ void Engine::init_eng( const string _app_name )
         _app_name.c_str( ),
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 0, 0,
         SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN_DESKTOP );
-    Assert( assert_check, "SDL2 window initialization failed ", SDL_GetErrorStr( ) );
+    Assert( assert_check, "SDL window initialization failed ", SDL_GetErrorStr( ) );
 
     SDL_DisplayMode display_mode;
     SDL_GetDesktopDisplayMode( 0, &display_mode );
@@ -84,7 +84,7 @@ void Engine::init_eng( const string _app_name )
     WINDOW_HEIGHT = display_mode.h;
 
     assert_check = SDL_GL_CreateContext( WINDOW );
-    Assert( assert_check, "SDL2 window context creation failed: ", SDL_GetErrorStr( ) );
+    Assert( assert_check, "SDL window context creation failed: ", SDL_GetErrorStr( ) );
 
     assert_check = !ogl::init( );
     Assert( assert_check, "OpenGL initialization failed" );
@@ -99,10 +99,10 @@ void Engine::init_eng( const string _app_name )
     audio_spec_in.samples = 4096;
 
     assert_check = !SDL_OpenAudio( &audio_spec_in, &audio_spec_out );
-    Assert( assert_check, "SDL2 audio initialization failed: ", SDL_GetErrorStr( ) );
+    Assert( assert_check, "SDL audio initialization failed: ", SDL_GetErrorStr( ) );
 
     assert_check = SDL_JoystickEventState( SDL_ENABLE );
-    Assert( assert_check, "SDL2 controller initialization failed: ", SDL_GetErrorStr( ) );
+    Assert( assert_check, "SDL controller initialization failed: ", SDL_GetErrorStr( ) );
     for_range( MAX_CONTROLLERS ) CONTROLLERS[ i ] = SDL_JoystickOpen( i );
 
     show_cursor_eng( false );
@@ -147,12 +147,23 @@ bool Engine::show_cursor_eng( ) { return ( SDL_ShowCursor( SDL_QUERY ) == SDL_EN
 void Engine::show_cursor_eng( bool show ) { SDL_ShowCursor( show ? SDL_ENABLE : SDL_DISABLE ); }
 
 bool Engine::anti_alias_eng( ) { return ANTI_ALIAS; }
-void Engine::anti_alias_eng( bool show ) { ANTI_ALIAS = !ANTI_ALIAS; }
+void Engine::anti_alias_eng( bool show )
+{
+    ANTI_ALIAS = show;
+    if( ANTI_ALIAS )
+    {
+        ogl::enable_anti_alias( );
+    }
+    else
+    {
+        ogl::disable_anti_alias( );
+    }
+}
 
 bool Engine::muted_eng( ) { return MUTED; }
 void Engine::mute_eng( bool muted ) { MUTED = muted; }
 
-double Engine::volume_eng( ) { return VOLUME.value( ); }
+dec Engine::volume_eng( ) { return VOLUME.value( ); }
 
 void Engine::volume_up_eng( )
 {
@@ -443,7 +454,7 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
         joystick_x_axis_right = joystick_x_axis_right_new;
         joystick_y_axis_right = joystick_y_axis_right_new;
 
-        inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::RIGHT_JOYSTICK, VectorA( Angle( atan2( (double)joystick_y_axis_right, (double)joystick_x_axis_right ) ) ) ) );
+        inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::RIGHT_JOYSTICK, VectorA( Angle( atan2( (dec)joystick_y_axis_right, (dec)joystick_x_axis_right ) ) ) ) );
     }
 }
 

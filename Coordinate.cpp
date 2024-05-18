@@ -1,5 +1,4 @@
 #include "Coordinate.hpp"
-
 #include "Angle.hpp"
 #include "Vector.hpp"
 #include "Line.hpp"
@@ -49,7 +48,7 @@ Coordinate & Coordinate::rotate( const Angle & _angle, const Coordinate & _origi
 
 Coordinate & Coordinate::mirror_x( ) { return mirror( X_HAT ); }
 Coordinate & Coordinate::mirror_y( ) { return mirror( Y_HAT ); }
-Coordinate & Coordinate::mirror( const Vector & _axis ) { return mirror( Line( _axis.origin( ), _axis.destination( ) ) ); }
+Coordinate & Coordinate::mirror( const Vector & _axis ) { return mirror( Line( _axis ) ); }
 Coordinate & Coordinate::mirror( const Line & _axis )
 {
     xy( x( ) - _axis.c1( ).x( ), y( ) - _axis.c1( ).y( ) );
@@ -65,8 +64,8 @@ Quadrant Coordinate::quadrant( ) const
     if( axis( ) != No_Axis )
         return No_Quadrant;
 
-    bool x_positive = double_gt( this->x( ), 0 );
-    bool y_positive = double_gt( this->y( ), 0 );
+    bool x_positive = dec_gt( this->x( ), 0 );
+    bool y_positive = dec_gt( this->y( ), 0 );
 
     if( x_positive && y_positive )
         return Q1;

@@ -16,7 +16,7 @@ class Camera
 {
 public:
     virtual ~Camera( ) { }
-    Camera( const Coordinate & target = ORIGIN, const Planc & width = 0.0, const Planc & height = 0.0, double zoom = 1.0 );
+    Camera( const Coordinate & target = ORIGIN, const Planc & width = 0.0, const Planc & height = 0.0, dec zoom = 1.0 );
 
     Coordinate screen_to_world( const Coordinate & screen_position ) const;
     Coordinate world_to_screen( const Coordinate & world_position ) const;
@@ -53,8 +53,8 @@ public:
 
     Vector target_offset( ) const;
 
-    double zoom( ) const;
-    Camera & zoom( double );
+    dec zoom( ) const;
+    Camera & zoom( dec );
 
     Coordinate m_cursor_world_position; // TODO make private
 
@@ -66,8 +66,8 @@ private:
     Planc m_width, m_height;
     Coordinate m_center;
     Coordinate m_target;
-    double m_zoom = 1.0;
-    double m_movement_ratio = 0.5;
+    dec m_zoom = 1.0;
+    dec m_movement_ratio = 0.5;
 
     varray<const Visible *> m_subjects;
     const Lighting * m_lighting = nullptr;

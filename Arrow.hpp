@@ -18,7 +18,7 @@ public:
     Angle angle( ) const;
     Arrow & angle( const Angle & );
 
-    double length( ) const;
+    dec length( ) const;
 
 protected:
     virtual Arrow & ground( TerrainEdge * ) override;
@@ -29,10 +29,10 @@ protected:
     virtual void render_shaft( ) const;
     virtual void render_feather( ) const;
 
-    double fade_alpha( ) const;
+    dec fade_alpha( ) const;
 
 private:
-    double m_damage;
+    dec m_damage;
     Angle m_angle;
     Color m_feather_color;
     Object * m_stuck_object;

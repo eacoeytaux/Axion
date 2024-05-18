@@ -119,7 +119,6 @@
 		AA7A3DD829B6E2540005EEA7 /* Clock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Clock.cpp; sourceTree = "<group>"; };
 		AA7A3DD929B6E2540005EEA7 /* Logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Logger.cpp; sourceTree = "<group>"; };
 		AA7A3DDC29B6E2540005EEA7 /* Terrain.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Terrain.hpp; sourceTree = "<group>"; };
-		AA7A3DDD29B6E2540005EEA7 /* Bedrock.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Bedrock.hpp; sourceTree = "<group>"; };
 		AA7A3DDE29B6E2540005EEA7 /* World.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = World.hpp; sourceTree = "<group>"; };
 		AA7A3DE029B6E2540005EEA7 /* TerrainEdge.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainEdge.cpp; sourceTree = "<group>"; };
 		AA7A3DE129B6E2540005EEA7 /* Lighting.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Lighting.hpp; sourceTree = "<group>"; };
@@ -235,7 +234,6 @@
 		AA01DC072BF32315006FE720 /* world */ = {
 			isa = PBXGroup;
 			children = (
-				AA01DC082BF32343006FE720 /* environment */,
 				AA7A3DDE29B6E2540005EEA7 /* World.hpp */,
 				AA7A3DF529B6E2540005EEA7 /* World.cpp */,
 				AA7A3DE629B6E2540005EEA7 /* Object.hpp */,
@@ -245,6 +243,7 @@
 				AA7A3E3329B6E2540005EEA7 /* Player.hpp */,
 				AA7A3E2F29B6E2540005EEA7 /* Player.cpp */,
 				AA9752202BB2C0E7003289EF /* God.cpp */,
+				AA01DC082BF32343006FE720 /* environment */,
 			);
 			name = world;
 			sourceTree = "<group>";
@@ -258,7 +257,6 @@
 				AA7A3DE029B6E2540005EEA7 /* TerrainEdge.cpp */,
 				AA7A3DE329B6E2540005EEA7 /* TerrainVertex.hpp */,
 				AA7A3DE829B6E2540005EEA7 /* TerrainVertex.cpp */,
-				AA7A3DDD29B6E2540005EEA7 /* Bedrock.hpp */,
 				AA9752222BB2C0FE003289EF /* Background.hpp */,
 				AA9752232BB2C0FE003289EF /* Foreground.hpp */,
 			);
@@ -279,7 +277,6 @@
 		AA01DC0C2BF323D0006FE720 /* enviroment */ = {
 			isa = PBXGroup;
 			children = (
-				AA01DC0D2BF323EE006FE720 /* background */,
 				AA13AC9B2BD1FADB005DAD3C /* GrassTerrain.hpp */,
 				AA13AC9A2BD1FADB005DAD3C /* GrassTerrain.cpp */,
 				AA22A1802BCA2DD10048F445 /* Dust.hpp */,
@@ -288,6 +285,7 @@
 				AA22A1822BD038B30048F445 /* Skull.cpp */,
 				AA7A3DEA29B6E2540005EEA7 /* Fire.hpp */,
 				AA7A3DF129B6E2540005EEA7 /* Fire.cpp */,
+				AA01DC0D2BF323EE006FE720 /* background */,
 			);
 			name = enviroment;
 			sourceTree = "<group>";
