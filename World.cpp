@@ -133,13 +133,14 @@ Drawing World::render_grid( )
     Coordinate top = bounds( ).top( );
     Coordinate bottom = bounds( ).bottom( );
 
-    for_range_x( x, grid.x_range( ).range( ) )
+    for_range_x( x, grid.x_range( ).range( ) - 1 )
     {
-        grid_drawing.draw( BLACK, Line( Coordinate( GRID_LENGTH * x, bottom.y( ) ), Coordinate( GRID_LENGTH * x, top.y( ) ) ) );
+        grid_drawing.draw( BLACK, Line( Coordinate( bottom.x( ) + ( GRID_LENGTH * ( x + 1 ) ), bottom.y( ) ), Coordinate( bottom.x( ) + ( GRID_LENGTH * ( x + 1 ) ), top.y( ) ) ) );
     }
 
-    for_range_x( y, grid.y_range( ).range( ) )
+    for_range_x( y, grid.y_range( ).range( ) - 1 )
     {
+        grid_drawing.draw( BLACK, Line( Coordinate( bottom.x( ), bottom.y( ) + ( GRID_LENGTH * ( y + 1 ) ) ), Coordinate( top.x( ), bottom.y( ) + ( GRID_LENGTH * ( y + 1 ) ) ) ) );
     }
 
     return grid_drawing;
@@ -233,13 +234,13 @@ World & World::render( )
         camera->clear_lighting( );
     }
 
+    Visible bounds_visible( render_bounds( ) );
+    camera->capture( &bounds_visible );
+
 #ifdef AXN_DEBUG
     Visible grid_visible( render_grid( ) );
     camera->capture( &grid_visible );
 #endif
-
-    Visible bounds_visible( render_bounds( ) );
-    camera->capture( &bounds_visible );
 
 #ifdef AXN_DEBUG
     Visible debug_overlay_visible;

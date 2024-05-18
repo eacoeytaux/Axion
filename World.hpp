@@ -100,7 +100,7 @@ public:
     const Terrain * terrain( ) const;
     Vector wind( ) const;
 
-    const list<Object *> & objects( ) const; // TODO consts don't line up
+    const list<Object *> & objects( ) const; // TODO list is const but objects are not
 
     list<Object *> objects_in_range( const Planc & lower_x, const Planc & upper_x );
     list<Object *> solid_objects_in_range( const Planc & lower_x, const Planc & upper_x );
@@ -165,8 +165,8 @@ private:
         uint x( const Planc & );
         uint y( const Planc & );
 
-        Span<uint> x_range( ) { return m_grid_x_size; }
-        Span<uint> y_range( ) { return m_grid_y_size; }
+        Span<uint> x_range( ) { return Span<uint>{ 0, m_grid_x_size }; }
+        Span<uint> y_range( ) { return Span<uint>{ 0, m_grid_y_size }; }
 
         Span<uint> x_range( const FixedRectangle & );
         Span<uint> y_range( const FixedRectangle & );
