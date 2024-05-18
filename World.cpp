@@ -133,12 +133,12 @@ Drawing World::render_grid( )
     Coordinate top = bounds( ).top( );
     Coordinate bottom = bounds( ).bottom( );
 
-    for_range( x, grid.x_range( ).range( ) )
+    for_range_x( x, grid.x_range( ).range( ) )
     {
         grid_drawing.draw( BLACK, Line( Coordinate( GRID_LENGTH * x, bottom.y( ) ), Coordinate( GRID_LENGTH * x, top.y( ) ) ) );
     }
 
-    for_range( y, grid.y_range( ).range( ) )
+    for_range_x( y, grid.y_range( ).range( ) )
     {
     }
 
@@ -655,9 +655,9 @@ World::Grid & World::Grid::init( const FixedRectangle & _bounds )
 
     m_grid.resize( m_grid_x_size, varray<GridBlock>( m_grid_y_size ) );
 
-    for_range( x, m_grid_x_size )
+    for_range_x( x, m_grid_x_size )
     {
-        for_range( y, m_grid_y_size )
+        for_range_x( y, m_grid_y_size )
         {
             m_grid[ x ][ y ].x = x;
             m_grid[ x ][ y ].y = y;
@@ -692,9 +692,9 @@ World::Grid & World::Grid::mark( const bool _present, Object * object )
     Span<uint> grid_x_range = x_range( object->hit_box( ) );
     Span<uint> grid_y_range = y_range( object->hit_box( ) );
 
-    for_range( x, grid_x_range.range( ) )
+    for_range_x( x, grid_x_range.range( ) )
     {
-        for_range( y, grid_y_range.range( ) )
+        for_range_x( y, grid_y_range.range( ) )
         {
             GridBlock & block = m_grid[ x + grid_x_range.min( ) ][ y + grid_y_range.min( ) ];
             if( _present )

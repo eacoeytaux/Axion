@@ -436,22 +436,31 @@ error ogl::blend_normal( )
 
 error ogl::enable_anti_alias( )
 {
+#ifndef OS_WINDOWS
     enable( GL_MULTISAMPLE );
+#endif
+
     enable( GL_LINE_SMOOTH );
     enable( GL_POLYGON_SMOOTH );
+
     static_once( )
     {
         hint( GL_LINE_SMOOTH_HINT, GL_NICEST );
         hint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
     }
+
     return check_errors( );
 }
 
 error ogl::disable_anti_alias( )
 {
-    disable( GL_MULTISAMPLE );
+#ifndef OS_WINDOWS
+    disable(GL_MULTISAMPLE);
+#endif
+
     disable( GL_LINE_SMOOTH );
     disable( GL_POLYGON_SMOOTH );
+
     return check_errors( );
 }
 

@@ -15,19 +15,13 @@ string Clock::timestamp( const string _delim ) const
 {
     char time_str[ 9 ];
     time_t time = m_ms / 1000.0;
-    const tm * ptm = nullptr;
+    tm * const ptm = nullptr;
 #if defined( OS_WINDOWS )
-    // ---------------- //
-    localtime_s( &ptm, &time );
-// ---------------- //
+    localtime_s( ptm, &time );
 #elif defined( OS_APPLE )
-    // ---------------- //
     ptm = localtime( &time );
-// ---------------- //
 #elif defined( OS_LINUX )
-// ---------------- //
-// todo
-// ---------------- //
+    // todo
 #endif
     strftime( time_str, sizeof( time_str ), ( "%H" + _delim + "%M" + _delim + "%S" ).c_str( ), ptm );
     return string( time_str );
@@ -37,19 +31,13 @@ string Clock::datestamp( const string _delim ) const
 {
     char time_str[ 11 ];
     time_t time = m_ms / 1000.0;
-    const tm * ptm = nullptr;
+    tm * const ptm = nullptr;
 #if defined( OS_WINDOWS )
-    // ---------------- //
-    localtime_s( &ptm, &time );
-// ---------------- //
+    localtime_s( ptm, &time );
 #elif defined( OS_APPLE )
-    // ---------------- //
     ptm = localtime( &time );
-// ---------------- //
 #elif defined( OS_LINUX )
-// ---------------- //
-// todo
-// ---------------- //
+    // todo
 #endif
     strftime( time_str, sizeof( time_str ), ( "%m" + _delim + "%d" + _delim + "%Y" ).c_str( ), ptm );
     return string( time_str );
