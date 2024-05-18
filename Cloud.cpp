@@ -48,7 +48,7 @@ Cloud::Cloud( World * world ) : Object( world )
     varray<Puff> small_puffs;
 
     int large_puff_count = Random::rint( LARGE_PUFF_COUNT );
-    for_range( large_puff_count )
+    for_range( i, large_puff_count )
     {
         Puff & puff = large_puffs.insert_back( );
 
@@ -59,7 +59,7 @@ Cloud::Cloud( World * world ) : Object( world )
         puff.center_offset *= scale;
 
         int small_puff_count = Random::rint( SMALL_PUFF_COUNT );
-        for_range( small_puff_count )
+        for_range( i, small_puff_count )
         {
             Puff & puff = small_puffs.insert_back( );
 

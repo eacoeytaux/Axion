@@ -9,7 +9,7 @@
 
 namespace
 {
-const uint GRID_LENGTH = 100;
+const uint GRID_BLOCK_SIZE = 105;
 const uint START_AGE = 0; // 1024;
 const dec CAMERA_ZOOM_RATIO = 0.96875;
 } // namespace
@@ -49,7 +49,7 @@ World & World::init( )
 
     create( );
 
-    for_range( START_AGE ) update( ); // age world before adding player
+    for_range( i, START_AGE ) update( ); // age world before adding player
 
     add_player( Coordinate( 0.0, 300.0 ) );
     m_active_camera = &m_player_cameras[ 0 ];
@@ -66,87 +66,94 @@ World & World::reset( )
     return *this;
 }
 
-Drawing World::render_bounds( )
+void World::render_bounds( Camera * camera )
 {
-    const FixedRectangle & _bounds = bounds( );
+    const Color BOUNDS_COLOR = RED;
+    const Planc BOUNDS_THICKNESS = 5.0;
+
+    static uint PULSE = 0;
+    const uint PULSE_SPAN = 30;
+    const uint PULSE_THICKNESS = BOUNDS_THICKNESS;
+    const dec PULSE_ALPHA_START = 0.8;
+
+    static uint PULSE_COLOR = 0;
+    const uint PULSE_COLOR_SPAN = 71;
+
+    dec percent_pulse = (dec)( PULSE = ( PULSE + 1 ) % PULSE_SPAN ) / (dec)( PULSE_SPAN );
+    dec percent_color = (dec)( PULSE_COLOR = ( PULSE_COLOR + 1 ) % PULSE_COLOR_SPAN ) / (dec)( PULSE_COLOR_SPAN );
+
+    static ColorSlider rainbow[] = {
+        ColorSlider( RED, YELLOW ),
+        ColorSlider( YELLOW, GREEN ),
+        ColorSlider( GREEN, CYAN ),
+        ColorSlider( CYAN, BLUE ),
+        ColorSlider( BLUE, MAGENTA ),
+        ColorSlider( MAGENTA, RED ) };
+
+    Color color;
+    for_range( i, 6 )
+    {
+        if( percent_color < ( (dec)( i + 1 ) / 6.0 ) )
+        {
+            color = rainbow[ i ].color_at( ( percent_color - ( (dec)i / 6.0 ) ) * 6.0 );
+            break;
+        }
+    }
 
     Drawing bounds_drawing;
-
-    if( bool use_pulse = true )
-    {
-        const Color BOUNDS_COLOR = RED;
-        const Planc BOUNDS_THICKNESS = 5.0;
-
-        static uint PULSE = 0;
-        const uint PULSE_SPAN = 30;
-        const uint PULSE_THICKNESS = BOUNDS_THICKNESS;
-        const dec PULSE_ALPHA_START = 0.8;
-
-        static uint PULSE_COLOR = 0;
-        const uint PULSE_COLOR_SPAN = 71;
-
-        dec percent_pulse = (dec)( PULSE = ( PULSE + 1 ) % PULSE_SPAN ) / (dec)( PULSE_SPAN );
-        dec percent_color = (dec)( PULSE_COLOR = ( PULSE_COLOR + 1 ) % PULSE_COLOR_SPAN ) / (dec)( PULSE_COLOR_SPAN );
-
-        static ColorSlider rainbow[] = {
-            ColorSlider( RED, YELLOW ),
-            ColorSlider( YELLOW, GREEN ),
-            ColorSlider( GREEN, CYAN ),
-            ColorSlider( CYAN, BLUE ),
-            ColorSlider( BLUE, MAGENTA ),
-            ColorSlider( MAGENTA, RED ) };
-
-        Color color;
-        for_range( 6 )
-        {
-            if( percent_color < ( (dec)( i + 1 ) / 6.0 ) )
-            {
-                color = rainbow[ i ].color_at( ( percent_color - ( (dec)i / 6.0 ) ) * 6.0 );
-                break;
-            }
-        }
-
-        bounds_drawing.draw( color.a( ( 1.0 - percent_pulse ) * PULSE_ALPHA_START ), _bounds, BOUNDS_THICKNESS + ( percent_pulse * PULSE_THICKNESS * 2 ), true );
-        bounds_drawing.draw( color.a( 1.0 ), _bounds, BOUNDS_THICKNESS, true );
-    }
-    else
-    {
-        const Color BOUNDS_COLOR = WHITE;
-        const Color BOUNDS_BORDER_COLOR = BLACK;
-
-        const Planc BOUNDS_THICKNESS = 3.0;
-        const Planc BOUNDS_BORDER_THICKNESS = 2.0;
-
-        bounds_drawing.draw( BOUNDS_BORDER_COLOR, _bounds, BOUNDS_THICKNESS + ( BOUNDS_BORDER_THICKNESS * 2 ), true );
-        bounds_drawing.draw( BOUNDS_COLOR, _bounds, BOUNDS_THICKNESS, true );
-    }
-
-    return bounds_drawing;
+    bounds_drawing.draw( color.a( ( 1.0 - percent_pulse ) * PULSE_ALPHA_START ), bounds( ), BOUNDS_THICKNESS + ( percent_pulse * PULSE_THICKNESS * 2 ), true );
+    bounds_drawing.draw( color.a( 1.0 ), bounds( ), BOUNDS_THICKNESS, true );
+    
+    camera->capture( Visible( bounds_drawing ) );
 }
 
 #ifdef AXN_DEBUG
-Drawing World::render_grid( )
+void World::render_object_grid( Camera * camera, const bool _fill_blocks, std::function<bool(const Grid::Block& block)> fill_block)
 {
-    Drawing grid_drawing;
+    const dec GRID_THICKNESS = 1.0;
+    const Color GRID_COLOR = WHITE.a( 0.25 );
+    const Color FILLED_BLOCK_COLOR = GREEN.a( 0.25 );
 
-    Grid & grid = object_grid( );
+    Grid& grid = object_grid( );
     Coordinate top = bounds( ).top( );
     Coordinate bottom = bounds( ).bottom( );
 
-    for_range_x( x, grid.x_range( ).range( ) - 1 )
+    Drawing grid_drawing;
+
+    if (_fill_blocks)
     {
-        grid_drawing.draw( BLACK, Line( Coordinate( bottom.x( ) + ( GRID_LENGTH * ( x + 1 ) ), bottom.y( ) ), Coordinate( bottom.x( ) + ( GRID_LENGTH * ( x + 1 ) ), top.y( ) ) ) );
+        for_range(x, grid.x_range().range())
+        {
+            for_range(y, grid.x_range().range())
+            {
+                if (fill_block(grid.block(x, y)))
+                {
+                    grid_drawing.draw(FILLED_BLOCK_COLOR,
+                        Polygon({ Coordinate(bottom.x() + (GRID_BLOCK_SIZE * x), bottom.y() + (GRID_BLOCK_SIZE * y)),
+                                  Coordinate(min(bottom.x() + (GRID_BLOCK_SIZE * (x + 1)), top.x()), bottom.y() + (GRID_BLOCK_SIZE * y)),
+                                  Coordinate(min(bottom.x() + (GRID_BLOCK_SIZE * (x + 1)), top.x()), min(bottom.y() + (GRID_BLOCK_SIZE * (y + 1)), top.y( ))),
+                                  Coordinate(bottom.x() + (GRID_BLOCK_SIZE * x), min(bottom.y() + (GRID_BLOCK_SIZE * (y + 1) ), top.y( ) ) ) } ) );
+                }
+            }
+        }
     }
 
-    for_range_x( y, grid.y_range( ).range( ) - 1 )
+    for_range( x, grid.x_range( ).range( ) - 1 )
     {
-        grid_drawing.draw( BLACK, Line( Coordinate( bottom.x( ), bottom.y( ) + ( GRID_LENGTH * ( y + 1 ) ) ), Coordinate( top.x( ), bottom.y( ) + ( GRID_LENGTH * ( y + 1 ) ) ) ) );
+        grid_drawing.draw( GRID_COLOR, Line( Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * ( x + 1 ) ), bottom.y( ) ), Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * ( x + 1 ) ), top.y( ) ) ), GRID_THICKNESS, true );
     }
 
-    return grid_drawing;
+    for_range( y, grid.y_range( ).range( ) - 1 )
+    {
+        grid_drawing.draw( GRID_COLOR, Line( Coordinate( bottom.x( ), bottom.y( ) + ( GRID_BLOCK_SIZE * ( y + 1 ) ) ), Coordinate( top.x( ), bottom.y( ) + ( GRID_BLOCK_SIZE * ( y + 1 ) ) ) ), GRID_THICKNESS, true );
+    }
+    
+    grid_drawing.draw( GRID_COLOR, bounds( ), GRID_THICKNESS, true );
+
+    camera->capture( Visible( grid_drawing ) );
 }
 
-Drawing World::render_debug_overlay( )
+void World::render_camera_fps( Camera * camera, const bool _show_crosshairs )
 {
     const Camera * _camera = active_camera( );
     const Planc _width = _camera->width( );
@@ -157,8 +164,8 @@ Drawing World::render_debug_overlay( )
     const Planc LINE_THICKNESS = 1.0;
     const Planc TARGET_RADIUS = 2.0;
     const Planc FPS_RADIUS = 32.0;
-    const Color COLOR_MAIN = WHITE;
-    const Color COLOR_INNER = RED;
+    const Color MAIN_COLOR = WHITE;
+    const Color TARGET_COLOR = RED;
     const dec COLOR_OPACITY = 1.0;
 
     static Angle delta;
@@ -168,32 +175,37 @@ Drawing World::render_debug_overlay( )
 
     Polygon target_outer = Circle( ( TARGET_RADIUS + LINE_THICKNESS ) / _zoom, target_offset );
     Polygon target_inner = Circle( ( TARGET_RADIUS ) / _zoom, target_offset );
+    Polygon target_cover = Circle( ( TARGET_RADIUS ) / _zoom );
 
     Line fps_line = Line( ORIGIN, Coordinate( 0, FPS_RADIUS / _zoom ) ).rotate( delta );
     Polygon fps_circle = Circle( FPS_RADIUS / _zoom );
     Polygon fps_dot = Circle( TARGET_RADIUS / _zoom );
 
-    Drawing overlay;
+    Drawing overlay_drawing;
 
-    overlay.draw( COLOR_MAIN.a( COLOR_OPACITY ),
-                  Line( Coordinate( -half( _width ) / _zoom, 0.0 ),
-                        Coordinate( half( _width ) / _zoom, 0.0 ) ),
-                  LINE_THICKNESS, true );
-    overlay.draw( COLOR_MAIN.a( COLOR_OPACITY ),
-                  Line( Coordinate( 0.0, -half( _height ) / _zoom ),
-                        Coordinate( 0.0, half( _height ) / _zoom ) ),
-                  LINE_THICKNESS, true );
+    if(_show_crosshairs )
+    {
+        overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
+                              Line( Coordinate( -half( _width ) / _zoom, 0.0 ),
+                                    Coordinate( half( _width ) / _zoom, 0.0 ) ),
+                              LINE_THICKNESS, true );
+        overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
+                              Line( Coordinate( 0.0, -half( _height ) / _zoom ),
+                                    Coordinate( 0.0, half( _height ) / _zoom ) ),
+                              LINE_THICKNESS, true );
+    }
+    
+    overlay_drawing.draw(MAIN_COLOR, target_outer, FILLED);
+    overlay_drawing.draw(TARGET_COLOR, target_inner, FILLED);
+    overlay_drawing.draw(MAIN_COLOR, target_cover, FILLED);
 
-    overlay.draw( COLOR_MAIN, target_outer, FILLED );
-    overlay.draw( COLOR_INNER, target_inner, FILLED );
+    overlay_drawing.draw( MAIN_COLOR, fps_dot, FILLED );
+    overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ), fps_circle, LINE_THICKNESS, true );
+    overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ), fps_line, LINE_THICKNESS, true );
 
-    overlay.draw( COLOR_MAIN, fps_dot, FILLED );
-    overlay.draw( COLOR_MAIN.a( COLOR_OPACITY ), fps_circle, LINE_THICKNESS, true );
-    overlay.draw( COLOR_MAIN.a( COLOR_OPACITY ), fps_line, LINE_THICKNESS, true );
+    overlay_drawing.move( _camera->center( ) );
 
-    overlay.move( _camera->center( ) );
-
-    return overlay;
+    camera->capture( Visible( overlay_drawing ) );
 }
 #endif
 
@@ -234,26 +246,23 @@ World & World::render( )
         camera->clear_lighting( );
     }
 
-    Visible bounds_visible( render_bounds( ) );
-    camera->capture( &bounds_visible );
+    render_bounds( camera );
 
 #ifdef AXN_DEBUG
-    Visible grid_visible( render_grid( ) );
-    camera->capture( &grid_visible );
-#endif
-
-#ifdef AXN_DEBUG
-    Visible debug_overlay_visible;
     if( Debug::active )
     {
-        Drawing debug_overlay_drawing;
-        for_each( object, m_objects ) if( object->draw_debug )
+        // render_grid( camera );
+        render_object_grid( camera, true, []( const Grid::Block & block) { return block.m_objects.size( ); } );
+
+        for_each( object, m_objects )
         {
-            debug_overlay_drawing.draw( object->debug_overlay( ).move( object->position( ) ) );
+            if( object->draw_debug )
+            {
+                camera->capture( Visible( object->debug_overlay( ).move( object->position( ) ) ) );
+            }
         }
-        debug_overlay_drawing.draw( render_debug_overlay( ) );
-        debug_overlay_visible = Visible( debug_overlay_drawing );
-        camera->capture( &debug_overlay_visible );
+
+        render_camera_fps( camera );
     }
 #endif
 
@@ -550,7 +559,7 @@ World & World::clear_objects( )
 
     while( m_object_queue.size( ) )
     {
-        safe_delete( m_object_queue.front( ) );
+        delete( m_object_queue.front( ) );
         m_object_queue.pop( );
     }
 
@@ -651,60 +660,97 @@ World::Grid & World::Grid::init( const FixedRectangle & _bounds )
 {
     m_offset = _bounds.bottom( );
 
-    m_grid_x_size = ceil( _bounds.width( ) / (dec)GRID_LENGTH );
-    m_grid_y_size = ceil( _bounds.height( ) / (dec)GRID_LENGTH );
+    m_grid_x_size = ceil( _bounds.width( ) / (dec)GRID_BLOCK_SIZE );
+    m_grid_y_size = ceil( _bounds.height( ) / (dec)GRID_BLOCK_SIZE );
 
-    m_grid.resize( m_grid_x_size, varray<GridBlock>( m_grid_y_size ) );
+    m_grid.resize( m_grid_x_size, varray<Block>( m_grid_y_size ) );
 
-    for_range_x( x, m_grid_x_size )
+    for_range( x, m_grid_x_size )
     {
-        for_range_x( y, m_grid_y_size )
+        for_range( y, m_grid_y_size )
         {
-            m_grid[ x ][ y ].x = x;
-            m_grid[ x ][ y ].y = y;
+            block( x, y ).init( x, y );
         }
     }
 
     return *this;
 }
 
-uint World::Grid::x( const Planc & _x )
+World::Grid::Block& World::Grid::block( const uint _x, const uint _y )
 {
-    return floor( ( _x - m_offset.x( ) ) / GRID_LENGTH );
+    if( valid_x( _x ) && valid_y( _y ) )
+    {
+        return m_grid[ _x ][ _y ];
+    }
+    else
+    {
+        return m_out_of_bounds_block;
+    }
 }
 
-uint World::Grid::y( const Planc & _y )
+const set<Object *> & World::Grid::objects( const uint _x, const uint _y ) const
 {
-    return floor( ( _y - m_offset.y( ) ) / GRID_LENGTH );
+    return m_grid[ _x ][ _y ].m_objects;
 }
 
-Span<uint> World::Grid::x_range( const FixedRectangle & _r )
+uint World::Grid::x( const Planc & _x ) const
+{
+    Planc x_translated = _x - m_offset.x();
+
+    if (x_translated >= 0)
+    {
+        return floor(x_translated / GRID_BLOCK_SIZE);
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+uint World::Grid::y( const Planc & _y ) const
+{
+    Planc y_translated = _y - m_offset.y( );
+
+    if ( y_translated >= 0 )
+    {
+        return floor(y_translated / GRID_BLOCK_SIZE);
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+Span<uint> World::Grid::x_range( const FixedRectangle & _r ) const
 {
     return Span<uint>( x( _r.bottom( ).x( ) ), x( _r.top( ).x( ) ) );
 }
 
-Span<uint> World::Grid::y_range( const FixedRectangle & _r )
+Span<uint> World::Grid::y_range( const FixedRectangle & _r ) const
 {
     return Span<uint>( y( _r.bottom( ).y( ) ), y( _r.top( ).y( ) ) );
 }
 
 World::Grid & World::Grid::mark( const bool _present, Object * object )
 {
-    Span<uint> grid_x_range = x_range( object->hit_box( ) );
-    Span<uint> grid_y_range = y_range( object->hit_box( ) );
-
-    for_range_x( x, grid_x_range.range( ) )
+    if (object->z() == 1.0)
     {
-        for_range_x( y, grid_y_range.range( ) )
+        Span<uint> grid_x_range = x_range(object->hit_box());
+        Span<uint> grid_y_range = y_range(object->hit_box());
+
+        for_range(x, grid_x_range.range() + 1)
         {
-            GridBlock & block = m_grid[ x + grid_x_range.min( ) ][ y + grid_y_range.min( ) ];
-            if( _present )
+            for_range(y, grid_y_range.range() + 1)
             {
-                block.m_objects.insert( object );
-            }
-            else
-            {
-                block.m_objects.erase( object );
+                Block & b = block(x + grid_x_range.min(), y + grid_y_range.min());
+                if (_present)
+                {
+                    b.m_objects.insert(object);
+                }
+                else
+                {
+                    b.m_objects.erase(object);
+                }
             }
         }
     }

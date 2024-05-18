@@ -18,12 +18,12 @@ namespace utility
 
 // -- defines --
 
-#define for_each( x, v ) for( auto & x: v )
-
-#define for_range_selector( x, r, i, func, ... ) func
-#define for_range_i( r ) for( uint i = 0; i < (uint)r; ++i )
-#define for_range_x( i, r ) for( uint i = 0; i < (uint)r; ++i )
-#define for_range( ... ) for_range_selector(, ##__VA_ARGS__, for_range_x( __VA_ARGS__ ), for_range_i( __VA_ARGS__ ) )
+#define for_each( x, container ) for( auto & x: container )
+#define for_range( i, range ) for( uint i = 0; i < (uint)range; ++i )
+// #define for_range_selector( x, range, i, func, ... ) func
+// #define for_range_i( range ) for( uint i = 0; i < (uint)range; ++i )
+// #define for_range_x( i, range ) for( uint i = 0; i < (uint)range; ++i )
+// #define for_range( ... ) for_range_selector(, ##__VA_ARGS__, for_range_x( __VA_ARGS__ ), for_range_i( __VA_ARGS__ ) )
 
 #define static_once( )                      \
     static bool b_set_##__COUNTER__ = true; \
@@ -142,7 +142,7 @@ T pow( const T & t, const uint p )
     }
 
     T ret = t;
-    for_range( p - 1 ) ret *= t;
+    for_range( i, p - 1 ) ret *= t;
     return ret;
 }
 

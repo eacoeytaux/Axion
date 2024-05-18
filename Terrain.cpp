@@ -20,7 +20,7 @@ Terrain::Terrain( World * world, const varray<Coordinate> & _vertices ) : Object
 
     if( m_vertices.size( ) )
     {
-        for_range( m_vertices.size( ) - 1 )
+        for_range( i, m_vertices.size( ) - 1 )
         {
             make_edge( m_vertices[ i ], m_vertices[ i + 1 ] );
         }

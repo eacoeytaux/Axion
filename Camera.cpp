@@ -70,14 +70,18 @@ Camera & Camera::clear_lighting( )
 
 Camera & Camera::clear( )
 {
-    m_subjects.clear( );
+    for_each(subject, m_owned_subjects) { safe_delete( subject ); }
+    m_owned_subjects.clear( );
+    m_subjects.clear();
     return *this;
 }
 
 Camera & Camera::render( )
 {
-    if( !m_subjects.size( ) )
+    if ( !m_subjects.size( ) )
+    {
         return *this;
+    }
 
     const dec _screen_width = Engine::screen_width( );
     const dec _screen_height = Engine::screen_height( );
@@ -112,11 +116,11 @@ Camera & Camera::render( )
                     if( _colors.size( ) == 1 )
                     {
                         ogl::color( _colors[ 0 ].r( ), _colors[ 0 ].g( ), _colors[ 0 ].b( ), _colors[ 0 ].a( ) );
-                        for_range( _coordinates.size( ) ) ogl::vertex( _coordinates[ i ].x( ), _coordinates[ i ].y( ), -_z );
+                        for_range( i, _coordinates.size( ) ) ogl::vertex( _coordinates[ i ].x( ), _coordinates[ i ].y( ), -_z );
                     }
                     else
                     {
-                        for_range( _coordinates.size( ) )
+                        for_range( i, _coordinates.size( ) )
                         {
                             ogl::color( _colors[ i ].r( ), _colors[ i ].g( ), _colors[ i ].b( ), _colors[ i ].a( ) );
                             ogl::vertex( _coordinates[ i ].x( ), _coordinates[ i ].y( ), -_z );
@@ -169,7 +173,7 @@ Camera & Camera::render( )
                         }
 
                         const varray<Polygon> & _convex_polygons = _polygon.convex_partitions( );
-                        for_range( _convex_polygons.size( ) )
+                        for_range( i, _convex_polygons.size( ) )
                         {
                             const Polygon & _convex_polygon = _convex_polygons[ i ];
 
@@ -182,7 +186,7 @@ Camera & Camera::render( )
                         const dec _thickness = _colored_polygon.thickness / ( _colored_polygon.preserve_thickness ? _zoom : 1.0 );
 
                         const varray<Line> & _lines = _polygon.lines( );
-                        for_range( _lines.size( ) )
+                        for_range( i, _lines.size( ) )
                         {
                             const Line & _line = _lines[ i ];
                             const Angle _line_angle = _line.angle( );
@@ -250,7 +254,7 @@ Camera & Camera::render( )
 
             const varray<LightSource> & _light_sources = m_lighting->light_sources( );
 
-            for_range( LIGHTING_LAYERS + 1 )
+            for_range( i, LIGHTING_LAYERS + 1 )
             {
                 ogl::clear_depth( );
                 ogl::depth_always( );
@@ -305,6 +309,8 @@ Drawing Camera::cursor_drawing( ) const
 
 Camera & Camera::update( const Coordinate & _target, bool _hard_target_set )
 {
+    ++m_age;
+
     if( _hard_target_set )
     {
         center( _target );
@@ -318,15 +324,19 @@ Camera & Camera::update( const Coordinate & _target, bool _hard_target_set )
         m_center += movement;
     }
 
-    ++m_age;
     return *this;
 }
 
 Camera & Camera::capture( const Visible * _subject )
 {
-    if( _subject )
-        m_subjects.insert_back( _subject );
+    Assert( (bool)_subject );
+    m_subjects.insert_back( _subject );
     return *this;
+}
+
+Camera & Camera::capture( const Visible & _subject )
+{
+    return capture( m_owned_subjects.insert_back( new Visible( _subject ) ) );
 }
 
 uint Camera::age( ) const { return m_age; }

@@ -103,14 +103,14 @@ void Engine::init_eng( const string _app_name )
 
     assert_check = SDL_JoystickEventState( SDL_ENABLE );
     Assert( assert_check, "SDL controller initialization failed: ", SDL_GetErrorStr( ) );
-    for_range( MAX_CONTROLLERS ) CONTROLLERS[ i ] = SDL_JoystickOpen( i );
+    for_range( i, MAX_CONTROLLERS ) CONTROLLERS[ i ] = SDL_JoystickOpen( i );
 
     show_cursor_eng( false );
 }
 
 void Engine::close_eng( )
 {
-    for_range( MAX_CONTROLLERS ) SDL_JoystickClose( CONTROLLERS[ i ] );
+    for_range( i, MAX_CONTROLLERS ) SDL_JoystickClose( CONTROLLERS[ i ] );
     SDL_DestroyWindow( WINDOW );
     SDL_CloseAudio( );
     SDL_Quit( );
@@ -126,7 +126,7 @@ void Engine::pause_eng( bool p ) { PAUSED = p; }
 
 void Engine::sync_controllers_eng( )
 {
-    for_range( MAX_CONTROLLERS )
+    for_range( i, MAX_CONTROLLERS )
     {
         SDL_JoystickClose( CONTROLLERS[ i ] );
         CONTROLLERS[ i ] = SDL_JoystickOpen( i );

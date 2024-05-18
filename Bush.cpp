@@ -30,7 +30,7 @@ Bush::Bush( World * world, const Coordinate & _root, const dec _z ) : Object( wo
     int leaf_count = Random::rint( LEAF_COUNT );
     Angle leaf_delta = ( ( PI - ( LEAF_BASE * 2.0 ) ) / (dec)leaf_count );
 
-    for_range( leaf_count + 1 )
+    for_range( i, leaf_count + 1 )
     {
         bush_drawing.draw( BUSH_COLOR, Polygon( { base_right,
                                                   VectorA( LEAF_BASE + ( leaf_delta * (dec)i ), LEAF_LENGTH ),

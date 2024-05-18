@@ -31,6 +31,13 @@ public:
         return *this;
     }
 
+    Camera& capture(const Visible & subject);
+    Camera& capture(const varray<Visible>& subjects)
+    {
+        for_each(subject, subjects) capture(subject);
+        return *this;
+    }
+
     Camera & lighting( const Lighting * lighting );
     Camera & clear_lighting( );
 
@@ -70,6 +77,8 @@ private:
     dec m_movement_ratio = 0.5;
 
     varray<const Visible *> m_subjects;
+    varray<Visible *> m_owned_subjects; // subset of subjects that Camera needs to delete
+
     const Lighting * m_lighting = nullptr;
 };
 

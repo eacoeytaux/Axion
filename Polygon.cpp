@@ -71,7 +71,7 @@ Polygon Polygon::expand( const Polygon & _polygon, const Planc & _expansion )
 
     varray<Coordinate> new_coordinates( _coordinate_count );
 
-    for_range( _coordinate_count )
+    for_range( i, _coordinate_count )
     {
         uint coordinate_prev_index = i ? ( i - 1 ) : ( _coordinate_count - 1 );
         uint coordinate_next_index = ( i + 1 ) % _coordinate_count;
@@ -226,7 +226,7 @@ void Polygon::process( ) const
 
         int bottom_index = 0; // for convex hull
         dec edge_curve = 0;
-        for_range( _coordinate_count )
+        for_range( i, _coordinate_count )
         {
             Coordinate & coordinate = m_coordinates[ i ];
 
@@ -286,7 +286,7 @@ void Polygon::process( ) const
 
             m_lines.reverse( );
 
-            for_range( m_triangles.size( ) )
+            for_range( i, m_triangles.size( ) )
             {
                 varray<Coordinate> coordinates = m_triangles[ i ].coordinates( );
                 m_triangles[ i ] = Polygon( { coordinates[ 2 ], coordinates[ 1 ], coordinates[ 0 ] } );
@@ -350,7 +350,7 @@ void Polygon::process( ) const
         //             if( ( next_next_angle - next_angle ) < Angle( PI ) )
         //             {
         //                 is_ear = true;
-        //                 for_range( coordinates.size( ) )
+        //                 for_range( i, coordinates.size( ) )
         //                 {
         //                     if( ( i == index ) || ( i == ( index + 1 ) % coordinates.size( ) ) || ( i == ( index + 2 ) % coordinates.size( ) ) )
         //                         continue;
@@ -395,11 +395,11 @@ void Polygon::process( ) const
 
             m_convex_partitions = { *this };
             m_convex_partitions_indices = varray<varray<uint>>( 1 );
-            for_range( 1 )
+            for_range( i, 1 )
             {
                 uint side_count = m_convex_partitions[ i ].sides( );
                 m_convex_partitions_indices[ i ].resize( side_count );
-                for_range_x( j, side_count ) { m_convex_partitions_indices[ i ][ j ] = j; }
+                for_range( j, side_count ) { m_convex_partitions_indices[ i ][ j ] = j; }
             }
         }
         else
@@ -413,7 +413,7 @@ void Polygon::process( ) const
             convex_hull_coordinates.insert_back( m_coordinates[ bottom_index ] );
 
             int index_offset = bottom_index;
-            for_range( _coordinate_count - 1 )
+            for_range( i, _coordinate_count - 1 )
             {
                 int index = (int)( i + index_offset + 1 ) % _coordinate_count;
                 Coordinate coordinate = m_coordinates[ index ];
@@ -568,7 +568,7 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
 
         int bottom_index = 0; // for convex hull
         dec edge_curve = 0;
-        for_range( coordinate_count )
+        for_range( i, coordinate_count )
         {
             Coordinate & coordinate = m_coordinates[ i ];
 
@@ -663,7 +663,7 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
 
                 if( triangles && m_convex )
                 {
-                    for_range( m_triangles.size( ) )
+                    for_range( i, m_triangles.size( ) )
                     {
                         varray<Coordinate> coordinates = m_triangles[ i ].coordinates( );
                         m_triangles[ i ] = Polygon( { coordinates[ 2 ], coordinates[ 1 ], coordinates[ 0 ] } );
@@ -731,7 +731,7 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
         //                 if( ( next_next_angle - next_angle ) < Angle( PI ) )
         //                 {
         //                     is_ear = true;
-        //                     for_range( coordinates.size( ) )
+        //                     for_range( i, coordinates.size( ) )
         //                     {
         //                         if( ( i == index ) || ( i == ( index + 1 ) % coordinates.size( ) ) || ( i == ( index + 2 ) % coordinates.size( ) ) )
         //                             continue;
@@ -779,11 +779,11 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
             {
                 m_convex_partitions = { *this };
                 m_convex_partitions_indices = varray<varray<uint>>( 1 );
-                for_range( 1 )
+                for_range( i, 1 )
                 {
                     uint side_count = m_convex_partitions[ i ].sides( );
                     m_convex_partitions_indices[ i ].resize( side_count );
-                    for_range_x( j, side_count ) { m_convex_partitions_indices[ i ][ j ] = j; }
+                    for_range( j, side_count ) { m_convex_partitions_indices[ i ][ j ] = j; }
                 }
             }
             else
@@ -809,7 +809,7 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
                 convex_hull_coordinates.insert_back( m_coordinates[ bottom_index ] );
 
                 int index_offset = bottom_index;
-                for_range( coordinate_count - 1 )
+                for_range( i, coordinate_count - 1 )
                 {
                     int index = (int)( i + index_offset + 1 ) % coordinate_count;
                     Coordinate coordinate = m_coordinates[ index ];
@@ -889,7 +889,7 @@ Planc Polygon::area( ) const
     {
         area += ( ( m_coordinates.back( ).x( ) * m_coordinates.front( ).y( ) ) - ( m_coordinates.back( ).y( ) * m_coordinates.front( ).x( ) ) );
 
-        for_range( m_coordinates.size( ) - 2 )
+        for_range( i, m_coordinates.size( ) - 2 )
         {
             const Coordinate & c1 = m_coordinates[ i ];
             const Coordinate & c2 = m_coordinates[ i + 1 ];
@@ -1003,7 +1003,7 @@ varray<Line> Polygon::intersection( const Line & _line ) const
     intersection_coordinates.sort( line_intersection_distance );
 
     Assert( ( intersection_coordinates.size( ) % 2 ) == 0 );
-    for_range( intersection_coordinates.size( ) / 2 )
+    for_range( i, intersection_coordinates.size( ) / 2 )
     {
         uint i1 = i * 2;
         uint i2 = i1 + 1;
@@ -1036,7 +1036,7 @@ varray<Line> Polygon::lines( const bool _raw ) const
         varray<Line> lines( c.size( ) );
         if( c.size( ) )
         {
-            for_range( c.size( ) - 1 ) lines[ i ] = Line( c[ i ], c[ i + 1 ] );
+            for_range( i, c.size( ) - 1 ) lines[ i ] = Line( c[ i ], c[ i + 1 ] );
             lines[ c.size( ) - 1 ] = Line( c[ c.size( ) - 1 ], c[ 0 ] );
         }
         return lines;
@@ -1088,7 +1088,7 @@ bool Polygon::operator==( const Polygon & _polygon ) const
     bool matched = false;
     int offset = 0;
 
-    for_range( coordinate_count )
+    for_range( i, coordinate_count )
     {
         ++offset;
         if( c1[ offset ] == c2[ 0 ] )
@@ -1101,7 +1101,7 @@ bool Polygon::operator==( const Polygon & _polygon ) const
     if( !matched )
         return false;
 
-    for_range( coordinate_count )
+    for_range( i, coordinate_count )
     {
         if( c1[ ( i + offset ) % coordinate_count ] != c2[ i ] )
             return false;

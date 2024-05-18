@@ -33,7 +33,7 @@ error Random::rseed( )
 error Random::rseed( const string _seed )
 {
     uint seed_uint = 0;
-    for_range( _seed.length( ) ) { seed_uint ^= ( _seed[ i ] << ( 8 * ( i % sizeof( uint ) ) ) ); }
+    for_range( i, _seed.length( ) ) { seed_uint ^= ( _seed[ i ] << ( 8 * ( i % sizeof( uint ) ) ) ); }
     return rseed( seed_uint );
 }
 
@@ -41,7 +41,7 @@ error Random::rseed( const uint _seed )
 {
     ::srand( _seed );
     Log( INFO_LOG, "random seed ............ ( %u )", _seed );
-    for_range( RANDOM_BUFFER_SIZE ) { RANDOM_BUFFER[ i ] = ::rand( ); }
+    for_range( i, RANDOM_BUFFER_SIZE ) { RANDOM_BUFFER[ i ] = ::rand( ); }
     return no_error;
 }
 

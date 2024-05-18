@@ -51,7 +51,7 @@ PineTree::PineTree( World * world, const Coordinate & _root, const dec _z ) : Ob
     Coordinate last_top = trunk_vector.destination( );
 
     uint leaves_count = Random::rint( LEAVES_COUNT );
-    for_range( leaves_count )
+    for_range( i, leaves_count )
     {
         Vector sub_trunk( last_top, last_top + VectorA( RIGHT_ANGLE_1, SUB_TRUNK_HEIGHT_INITIAL * shrink_ratio ) );
 
@@ -65,7 +65,7 @@ PineTree::PineTree( World * world, const Coordinate & _root, const dec _z ) : Ob
         Angle leaves_sub_angle = LEAVES_SPAN / ( spike_count + 1 );
         leaves_sub_angle /= 2.0;
 
-        for_range( spike_count )
+        for_range( i, spike_count )
         {
             leaves_angle += leaves_sub_angle;
             leaf_bunch_coords.insert_back( VectorA( leaves_angle, LEAVES_HEIGHT_BASE_LENGTH * SPIKE_INNER_RATIO * shrink_ratio ) + VectorA( Random::rAngle( ), SPIKE_OFFSET_INNER * shrink_ratio ) );
@@ -104,7 +104,7 @@ const PineTree & PineTree::render( ) const
     Angle sway_angle = d_sway_angle;
 
     Vector offset;
-    for_range( m_leave_bunches_and_trunk.size( ) )
+    for_range( i, m_leave_bunches_and_trunk.size( ) )
     {
         Drawing drawing = m_leave_bunches_and_trunk[ i ];
 

@@ -21,7 +21,7 @@ varray<Drawing::ColoredPolygon> Drawing::colored_polygons_border( ) const
 
             border.colors.clear( );
             border.colors.reserve( border.polygon.sides( ) );
-            for_range( border.polygon.sides( ) ) border.colors.insert_back( border_color( ) );
+            for_range( i, border.polygon.sides( ) ) border.colors.insert_back( border_color( ) );
 
             colored_polygons_border.insert_back( border );
         }

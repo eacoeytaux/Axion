@@ -44,7 +44,8 @@ World & MountMerciless::create( )
 
     add_object( new Waterfall( this, Coordinate( 0.0, 10.0 ), METER * 4.0, METER * 8.0, 0.95 ) );
 
-    terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ), [ & ]( const Coordinate & c, const TerrainEdge * e )
+    terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
+                            [ & ]( const Coordinate & c, const TerrainEdge * e )
                             { add_object( new AspenTree( this, c ) ); } );
 
     add_object( new Fire( this, Coordinate( 50, 20 ) ) );

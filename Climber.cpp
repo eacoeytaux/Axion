@@ -317,7 +317,7 @@ Climber & Climber::ground( TerrainEdge * ground )
     {
         Vector dust_velocity = ( velocity( ).dy( 0.0 ) * DUST_VELOCITY_DAMPEN_RATIO );
         uint dust_count = Random::rint( DUST_LANDING_COUNT );
-        for_range( dust_count )
+        for_range( i, dust_count )
         {
             bool left = i < half( dust_count );
             Coordinate foot = position( ) + left_foot( ) + ( Vector( left_foot( ), right_foot( ) ) * ( (dec)i / (dec)dust_count ) );
@@ -707,7 +707,7 @@ void Climber::render_head( ) const
         // shaved hair
         varray<Coordinate> top_half_coordinates = Circle( HEAD_RADIUS ).coordinates( );
         uint count = ( top_half_coordinates.size( ) / 2 ) - 1;
-        for_range( count ) top_half_coordinates.remove( floor( top_half_coordinates.size( ) / 2.f ) );
+        for_range( i, count ) top_half_coordinates.remove( floor( top_half_coordinates.size( ) / 2.f ) );
         head_drawing.draw( hair_color( ).a( 0.375 ), Polygon( top_half_coordinates ) );
     }
 
@@ -790,7 +790,7 @@ void Climber::render_legs( ) const
     {
         Polygon boot_sub_sole = Rectangle( BOOT_SOLE_SUB_WIDTH, BOOT_SOLE_SUB_HEIGHT, Coordinate( x_offset_base - BOOT_BASE_WIDTH.half( ) + BOOT_SOLE_SUB_WIDTH.half( ), -BOOT_SOLE_SUB_HEIGHT - BOOT_SOLE_HEIGHT.half( ) ) );
         boot_drawing.draw( boot_sole_color( ), boot_sub_sole );
-        for_range( floor( BOOT_BASE_WIDTH.half( ).half( ) ) )
+        for_range( i, floor( BOOT_BASE_WIDTH.half( ).half( ) ) )
         {
             Polygon boot_sub_sole = Rectangle( BOOT_SOLE_SUB_WIDTH, BOOT_SOLE_SUB_HEIGHT, Coordinate( x_offset_base + BOOT_BASE_WIDTH.half( ) - BOOT_SOLE_SUB_WIDTH.half( ) - ( ( BOOT_SOLE_SUB_WIDTH + BOOT_SOLE_SUB_GAP_WIDTH ) * (Planc)i ), -BOOT_SOLE_SUB_HEIGHT - BOOT_SOLE_HEIGHT.half( ) ) );
             boot_drawing.draw( boot_sole_color( ), boot_sub_sole );
@@ -1214,7 +1214,7 @@ const Climber::Hook & Climber::Hook::render( ) const
 
     { // draw rope detail coils
         Vector rope_chunk = VectorA( rope_vector.angle( ), ROPE_WIDTH );
-        for_range( (uint)half( rope_vector.magnitude( ) / rope_chunk.magnitude( ) ) )
+        for_range( i, (uint)half( rope_vector.magnitude( ) / rope_chunk.magnitude( ) ) )
         {
             Polygon rope_strip_rect = Rectangle( ROPE_WIDTH, ROPE_WIDTH, base - ( rope_chunk * ( i + 1 ) * 2 ), rope_chunk.angle( ) );
             draw( ROPE_ALT_COLOR, rope_strip_rect );

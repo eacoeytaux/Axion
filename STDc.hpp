@@ -179,14 +179,6 @@ template <typename T>
 class queue : public std::queue<T>
 {
     using std::queue<T>::queue;
-
-public:
-    T pop( )
-    {
-        T t = std::queue<T>::front( );
-        std::queue<T>::pop( );
-        return t;
-    }
 };
 
 template <typename T>
@@ -316,26 +308,22 @@ public:
 
     T & insert_back( const T & t = T( ) )
     {
-        insert( t, size( ) );
-        return back( );
+        return insert( t, size( ) );
     }
 
     T & insert_front( const T & t = T( ) )
     {
-        insert( t, 0 );
-        return front( );
+        return insert( t, 0 );
     }
 
     varray<T> & insert_back( const varray<T> & v )
     {
-        insert_varray( v, size( ) );
-        return *this;
+        return insert_varray( v, size( ) );
     }
 
     varray<T> & insert_front( const varray<T> & v )
     {
-        insert_varray( v, 0 );
-        return *this;
+        return insert_varray( v, 0 );
     }
 
     virtual varray<T> & insert_varray( const varray<T> & v, uint index )
@@ -348,20 +336,17 @@ public:
 
     varray<T> & remove_front( )
     {
-        remove( 0 );
-        return *this;
+        return remove( 0 );
     }
 
     varray<T> & remove_back( )
     {
-        remove( size( ) - 1 );
-        return *this;
+        return remove( size( ) - 1 );
     }
 
     varray<T> & remove( uint index )
     {
-        remove( index, index + 1 );
-        return *this;
+        return remove( index, index + 1 );
     }
 
     virtual varray<T> & remove( uint index_start, uint index_end )
@@ -392,15 +377,16 @@ public:
 
     varray<T> & reserve_more( uint size )
     {
-        reserve( (uint)std::vector<T>::size( ) + size );
-        return *this;
+        return reserve( (uint)std::vector<T>::size( ) + size );
     }
 
     virtual varray<T> & clear( bool shrink = false )
     {
         std::vector<T>::clear( );
-        if( shrink )
-            std::vector<T>::shrink_to_fit( );
+        if (shrink)
+        {
+            std::vector<T>::shrink_to_fit();
+        }
         return *this;
     }
 
@@ -456,7 +442,7 @@ public:
 
     bool valid_index( uint index ) const
     {
-        return index < size( );
+        return ( index < size( ) );
     }
 
 private:

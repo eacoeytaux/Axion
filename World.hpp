@@ -150,26 +150,40 @@ private:
     class Grid
     {
     public:
-        struct GridBlock
+        struct Block
         {
-            uint x;
-            uint y;
+            void init( uint x, uint y )
+            {
+                m_x = x;
+                m_y = y;
+            }
 
-            set<Object *> m_objects;
+            uint m_x;
+            uint m_y;
+
+            set<Object*> m_objects;
         };
 
+    public:
         virtual ~Grid( ) { }
 
         Grid & init( const FixedRectangle & bounds );
+        
+        Block & block( uint x, uint y );
 
-        uint x( const Planc & );
-        uint y( const Planc & );
+        const set<Object *> & objects( uint x, uint y ) const;
 
-        Span<uint> x_range( ) { return Span<uint>{ 0, m_grid_x_size }; }
-        Span<uint> y_range( ) { return Span<uint>{ 0, m_grid_y_size }; }
+        uint x( const Planc & ) const;
+        uint y( const Planc & ) const;
 
-        Span<uint> x_range( const FixedRectangle & );
-        Span<uint> y_range( const FixedRectangle & );
+        bool valid_x( uint x ) const { return ( x < m_grid_x_size ); }
+        bool valid_y( uint y ) const { return ( y < m_grid_y_size ); }
+
+        Span<uint> x_range( ) const { return Span<uint>{ 0, m_grid_x_size }; }
+        Span<uint> y_range( ) const { return Span<uint>{ 0, m_grid_y_size }; }
+
+        Span<uint> x_range( const FixedRectangle & ) const;
+        Span<uint> y_range( const FixedRectangle & ) const;
 
         Grid & mark( bool present, Object * object );
         Grid & mark_present( Object * object ) { return mark( true, object ); }
@@ -178,16 +192,18 @@ private:
     private:
         uint m_grid_x_size;
         uint m_grid_y_size;
-        varray<varray<GridBlock>> m_grid;
+        Block m_out_of_bounds_block;
+        varray<varray<Block>> m_grid;
         Coordinate m_offset;
     } m_object_grid;
 
     Grid & object_grid( ) { return m_object_grid; }
 
-    Drawing render_bounds( );
+    void render_bounds( Camera * camera );
 #ifdef AXN_DEBUG
-    Drawing render_grid( );
-    Drawing render_debug_overlay( );
+    void render_object_grid( Camera * camera ) { return render_object_grid( camera, false ); }
+    void render_object_grid( Camera * camera, bool fill_blocks, std::function<bool( const Grid::Block & block )> = []( const Grid::Block & block ) { return false; } );
+    void render_camera_fps( Camera * camera, bool show_crosshairs = true );
 #endif
 };
 

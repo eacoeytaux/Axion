@@ -37,7 +37,7 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
         dec leaves_top = 1.f;
         dec leaves_bottom = 0.8f;
 
-        for_range( 10 )
+        for_range( i, 10 )
         {
             // todo
             Coordinate top = VectorA( RIGHT_ANGLE, _length * leaves_top + Random::rPlanc( -5.0, 5.0 ) );
@@ -53,7 +53,7 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
             leaves_bottom -= 0.06;
         }
 
-        for_range( 5 )
+        for_range( i, 5 )
         {
             Coordinate top = VectorA( RIGHT_ANGLE, _length * leaves_top + Random::rPlanc( -5.0, 5.0 ) );
             Coordinate bottom = VectorA( RIGHT_ANGLE, _length * leaves_bottom + Random::rPlanc( -5.0, 5.0 ) );
@@ -73,7 +73,7 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
                                                top,
                                                base_left } ) );
 
-    for_range( _branch_count )
+    for_range( i, _branch_count )
     {
         dec branch_remaining = 1.0 - branch_height;
 
