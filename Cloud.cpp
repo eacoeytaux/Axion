@@ -37,7 +37,9 @@ Cloud::Cloud( World * world ) : Object( world )
 
     Planc x = (Planc)half( Engine::screen_width( ) ) + max_dx( );
     if( world->player( ) )
+    {
         x += world->player( )->position( ).x( );
+    }
     // Coordinate location( x, ( (Planc)Random::rdec( (dec)Engine::screen_height( ), 0.0 /*-(dec)Engine::screen_height()*/ ) ).half( ) - max_dy( ).half( ) );
     Coordinate location( 0.0, 5000.0 ); // todo
     position( location );
