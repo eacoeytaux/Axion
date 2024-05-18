@@ -158,8 +158,8 @@ private:
                 m_y = y;
             }
 
-            uint m_x;
-            uint m_y;
+            uint m_x = 0;
+            uint m_y = 0;
 
             set<Object*> m_objects;
         };

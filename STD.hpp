@@ -18,6 +18,9 @@
 #include <unordered_map>
 #include <vector>
 
+typedef double dec;
+typedef unsigned int uint;
+
 #define use_std( s ) using std::s;
 
 #define use_std_dec( s )  \
@@ -29,9 +32,6 @@
 
 namespace axn
 {
-
-typedef double dec;
-typedef unsigned int uint;
 
 use_std( exception );
 use_std( runtime_error );

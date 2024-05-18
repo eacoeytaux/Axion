@@ -152,7 +152,7 @@
     <ProjectGuid>{18f762b7-9424-4f16-a34b-7493357befa8}</ProjectGuid>
     <RootNamespace>Axion</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <NoWarn>$(NoWarn);C4244</NoWarn>
+    <NoWarn>$(NoWarn);C4244;C26495</NoWarn>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
