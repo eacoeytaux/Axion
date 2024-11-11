@@ -1,9 +1,5 @@
 #include "Mob.hpp"
 
-// TODO make variable probably (even be in mob?)
-static Span<uint> BLINK_WAIT = { 120, 240 };
-static int BLINK_DURATION = 3;
-
 Mob::Mob( World * world, const Coordinate & _position, const dec _health ) : Object( world, _position )
 {
 #ifdef AXN_DEBUG
@@ -11,55 +7,94 @@ Mob::Mob( World * world, const Coordinate & _position, const dec _health ) : Obj
 #endif
 
     solid( true );
+    interactive( true );
 
     health( _health );
-
-    m_blink_wait.reset( Random::rint( BLINK_WAIT ) );
-    m_blink_duration.reset( BLINK_DURATION );
+    
+    // todo
+    m_hurt_display.set( 1 );
 }
 
-const Mob & Mob::render( ) const
+void Mob::render( )
 {
     Object::render( );
-    return *this;
+    
+    if( m_hurt_display.remaining( ) )
+    {
+        hurt_display_settings( );
+    }
 }
 
-Mob & Mob::update( )
+void Mob::hurt_display_settings( )
+{
+    override_color( RED );
+}
+
+void Mob::draw_eyes( const Coordinate & _position, const Angle & _angle )
+{
+    if( m_eye_info_set )
+    {
+        Planc eye_width = m_eye_radius * TWO;
+        Planc eye_height = eyes_closed( ) ? (Planc)ONE : ( eye_width * ( squinting( ) ? HALF : ONE ) );
+        
+        Rectangle eye( eye_width, eye_height );
+        eye.rotate( _angle ).move( _position );
+        
+        draw( eye_color( ), eye );
+    }
+}
+
+void Mob::eye_info( const Planc _eye_radius, const uint _blink_duration, const Span<uint> & _blink_wait_span, const Color & _eye_color )
+{
+    m_eye_radius = _eye_radius;
+    m_eyes_closed = false;
+    m_eyes_squinting = false;
+    m_blink_duration = _blink_duration;
+    m_blink_wait_span = _blink_wait_span;
+    m_eye_color = _eye_color;
+    
+    m_blink_wait_counter.reset( Random::rint( m_blink_wait_span ) );
+    m_blink_duration_counter.reset( m_blink_duration );
+    
+    m_eye_info_set = true;
+}
+
+void Mob::update( )
 {
     Object::update( );
+    
+    m_hurt_display.tick( );
+    m_invincible_counter.tick( );
 
-    if( m_blink_wait.tick( ) )
+    // eyes
+    if( m_blink_wait_counter.tick( ) )
     {
-        if( m_blink_duration.remaining( ) == BLINK_DURATION )
+        if( m_blink_duration_counter.remaining( ) == m_blink_duration )
         {
-            drawing_dirty( true );
+            needs_render( true );
         }
 
-        if( m_blink_duration.tick( ) )
+        if( m_blink_duration_counter.tick( ) )
         {
-            m_blink_duration.reset( BLINK_DURATION );
-            m_blink_wait.reset( Random::rint( BLINK_WAIT ) );
-            drawing_dirty( true );
+            m_blink_duration_counter.reset( m_blink_duration );
+            m_blink_wait_counter.reset( Random::rint( m_blink_wait_span ) );
+            needs_render( true );
         }
     }
-
-    return *this;
 }
 
-Mob & Mob::update_velocity( )
+void Mob::update_velocity( )
 {
     Object::update_velocity( );
-    return *this;
 }
 
-Mob & Mob::update_movement( )
+void Mob::update_movement( )
 {
     Object::update_movement( );
     if( velocity( ).dx( ) )
     {
-        facing_left( velocity( ).dx( ) < 0.0 );
+        facing_left( velocity( ).dx( ) < ZERO );
     }
-    return *this;
 }
 
 bool Mob::alive( ) const
@@ -67,11 +102,13 @@ bool Mob::alive( ) const
     return m_alive;
 }
 
-Mob & Mob::die( )
+void Mob::die( )
 {
-    m_health.value( 0.0 );
-    m_alive = false;
-    return *this;
+    if( !invincible( ) )
+    {
+        m_health.value( ZERO );
+        m_alive = false;
+    }
 }
 
 dec Mob::health( ) const
@@ -79,43 +116,48 @@ dec Mob::health( ) const
     return m_health.value( );
 }
 
-Mob & Mob::health( dec _health )
+void Mob::health( dec _health )
 {
     m_health.value( _health, true );
-    return *this;
 }
 
-Mob & Mob::health_percentage( const dec _health_percentage )
+dec Mob::health_percentage( ) const
+{
+    return m_health.value_percentage( );
+}
+
+void Mob::health_percentage( const dec _health_percentage )
 {
     m_health.value_percentage( _health_percentage );
-    return *this;
 }
 
-Mob & Mob::heal( dec _health )
+void Mob::heal( dec _health )
 {
     m_health.value( min( m_health.value( ) + _health, m_health.max( ) ) );
-    return *this;
 }
 
-Mob & Mob::heal_full( )
+void Mob::heal_full( )
 {
     m_health.value( m_health.max( ) );
-    return *this;
 }
 
-Mob & Mob::hurt( dec _damage )
+void Mob::hurt( dec _damage )
 {
-    dec health = Mob::health( ) - min( _damage, Mob::health( ) );
-    if( health == 0.0 )
+    if( !invincible( ) )
     {
-        m_health.value( 0.0 );
-        die( );
+        dec health = Mob::health( ) - min( _damage, Mob::health( ) );
+        if( health <= ZERO )
+        {
+            m_health.value( ZERO );
+            die( );
+        }
+        else
+        {
+            m_health.value( health );
+            // todo invincible_pause( 30 );
+            m_hurt_display.reset( );
+        }
     }
-    else
-    {
-        m_health.value( health );
-    }
-    return *this;
 }
 
 dec Mob::max_health( ) const
@@ -123,77 +165,77 @@ dec Mob::max_health( ) const
     return m_health.max( );
 }
 
-Mob & Mob::max_health( dec _health )
+void Mob::max_health( dec _health )
 {
+    dec health = Mob::health( );
     m_health = Slider<dec>( _health );
-    return *this;
+    m_health.value( min( health, _health ) );
 }
 
-bool Mob::facing_left( ) const
+bool Mob::facing_right( ) const
 {
-    return m_facing_left;
+    return m_facing_right;
 }
 
-Mob & Mob::facing_left( const bool _facing_left )
+void Mob::facing_right( const bool _facing_right )
 {
-    m_facing_left = _facing_left;
-    return *this;
+    m_facing_right = _facing_right;
 }
 
 #ifdef AXN_DEBUG
 Drawing Mob::debug_overlay( ) const
 {
-    const Planc HEALTH_BAR_BORDER_WIDTH = 2.0;
+    const Planc HEALTH_BAR_BORDER_WIDTH = 1.5;
     const Planc HEALTH_BAR_WIDTH_MIN = 20.0;
     const dec HEALTH_BAR_TO_OBJECT_RATIO = 1.2;
-    const Planc HEALTH_BAR_HEIGHT = 4.0;
+    const Planc HEALTH_BAR_HEIGHT = 5.0;
     const Planc HEALTH_BAR_OFFSET = HEALTH_BAR_HEIGHT;
-
+    
     const dec RED_START = 0.1;
     const dec YELLOW_START = 0.5;
     static_once( ) { Assert( RED_START < YELLOW_START ); }
-
+    
     Drawing debug_overlay;
-
-    Planc health_width = max( HEALTH_BAR_WIDTH_MIN, hit_box( ).width( ) * HEALTH_BAR_TO_OBJECT_RATIO );
-    Planc health_height = HEALTH_BAR_HEIGHT;
-    Coordinate offset( 0.0, -( hit_box( ).height( ).half( ) + ( health_height * 1.5 ) + HEALTH_BAR_BORDER_WIDTH ) );
-
-    debug_overlay.draw( WHITE, Rectangle( health_width + HEALTH_BAR_BORDER_WIDTH, health_height + HEALTH_BAR_BORDER_WIDTH, offset ) );
-    debug_overlay.draw( BLACK, Rectangle( health_width, health_height, offset ) );
-
-    if( alive( ) )
+    
+    if( !invincible_always( ) )
     {
-        dec health_percentage = health( ) / max_health( );
-
-        Color health_color;
-        if( health_percentage == 1.0 )
-        {
-            health_color = GREEN;
-        }
-        else if( health_percentage >= YELLOW_START )
-        {
-            health_color = ColorSlider( YELLOW, GREEN ).color_at( ( health_percentage - YELLOW_START ) * ( 1.0 / ( 1.0 - YELLOW_START ) ) );
-        }
-        else if( health_percentage >= RED_START )
-        {
-            health_color = ColorSlider( RED, YELLOW ).color_at( ( health_percentage - RED_START ) * ( 1.0 / ( 1.0 - RED_START ) ) );
-        }
-        else // if( health_percentage < RED_START )
-        {
-            health_color = RED;
-        }
-
-        debug_overlay.draw( health_color, Rectangle( health_width * health_percentage, health_height,
-                                                     offset + VectorX( ( health_width.half( ) * health_percentage ) - health_width.half( ) ) ) );
-    }
-    else
-    {
+        Planc health_width = max( HEALTH_BAR_WIDTH_MIN, hit_box( ).width( ) * HEALTH_BAR_TO_OBJECT_RATIO );
+        Planc health_height = HEALTH_BAR_HEIGHT;
+        Coordinate offset( ZERO, -( hit_box( ).height( ).half( ) + ( health_height * 1.5 ) + HEALTH_BAR_BORDER_WIDTH ) );
+        
         debug_overlay.draw( BLACK, Rectangle( health_width, health_height, offset ) );
+        
+        if( alive( ) )
+        {
+            dec health_percentage = health( ) / max_health( );
+            Assert( in_range( health_percentage, ZERO, ONE, true ) );
+            
+            Color health_color;
+            if( health_percentage == ONE )
+            {
+                health_color = GREEN;
+            }
+            else if( health_percentage >= YELLOW_START )
+            {
+                health_color = ColorSlider( YELLOW, GREEN ).color_at( ( health_percentage - YELLOW_START ) * inverse( ONE - YELLOW_START ) );
+            }
+            else if( health_percentage >= RED_START )
+            {
+                health_color = ColorSlider( RED, YELLOW ).color_at( ( health_percentage - RED_START ) * inverse( ONE - RED_START ) );
+            }
+            else
+            {
+                health_color = RED;
+            }
+            
+            debug_overlay.draw( health_color, Rectangle( health_width * health_percentage, health_height,
+                                                        offset + VectorX( ( health_width.half( ) * health_percentage ) - health_width.half( ) ) ) );
+        }
+        
+        debug_overlay.draw( WHITE, Rectangle( health_width, health_height, offset ), HEALTH_BAR_BORDER_WIDTH, true );
     }
 
     debug_overlay.draw( Object::debug_overlay( ) );
-
     return debug_overlay;
 }
 #endif

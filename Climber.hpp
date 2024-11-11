@@ -2,8 +2,8 @@
 #define Climber_hpp
 
 #include "MountMerciless.hpp"
-
 #include "Player.hpp"
+#include "Hook.hpp"
 
 namespace mtmercy
 {
@@ -11,14 +11,22 @@ namespace mtmercy
 class Climber : public Player
 {
 public:
-    virtual ~Climber( ) { }
+    virtual ~Climber( );
     Climber( World * world, const Coordinate & position );
 
-    virtual const Climber & render( ) const override;
+    virtual void render( ) override;
+    
+#ifdef AXN_DEBUG
+    virtual Drawing debug_overlay( ) const override;
+#endif
 
-    Climber & update( ) override;
-    Climber & input( Input * ) override;
-    Climber & clear_input( ) override;
+    void update( ) override;
+    void input( Input * ) override;
+    void clear_input( ) override;
+    
+    const Hook & hook( ) const { return m_hook; }
+    
+    void hurt( dec health ) override;
 
     Planc light_sight( ) const override;
 
@@ -33,23 +41,25 @@ public:
     bool aiming_up( ) const;
     bool aiming_down( ) const;
     Angle aim_shake( ) const;
+    Angle aim_shake_range( ) const;
 
 protected:
-    Climber & update_velocity( ) override;
+    void update_velocity( ) override;
 
-    Climber & moving_right( bool );
-    Climber & moving_left( bool );
-    Climber & looking_up( bool );
-    Climber & looking_down( bool );
+    void moving_right( bool );
+    void moving_left( bool );
+    void looking_up( bool );
+    void looking_down( bool );
 
-    Climber & jump( bool );
-    Climber & ground( TerrainEdge * ) override;
+    void jump( bool );
+    void ground( TerrainEdge * ) override;
 
-    Climber & aim( const Angle & );
+    void aim( const Angle & );
+    void aim_shake( const Angle & );
 
-    Climber & fire_hook( );
-    Climber & fire_arrow( );
-    Climber & release_bow( );
+    void fire_hook( );
+    void fire_arrow( );
+    void release_bow( );
 
     // all of these are offsets from position
     Coordinate head_center( ) const;
@@ -72,30 +82,33 @@ protected:
     Coordinate left_foot( ) const;
     Coordinate right_foot( ) const;
 
-    void render_head( ) const;
-    void render_torso( ) const;
-    void render_legs( ) const;
-    void render_front_arm( ) const;
-    void render_back_arm( ) const;
-    void render_front_hand( ) const;
-    void render_back_hand( ) const;
-    void render_crossbow( ) const;
-    void render_arrow( ) const;
-
-    Color skin_color( ) const;
-    Color hair_color( ) const;
-    Color eye_color( ) const;
-
-    Color undershirt_color( ) const;
-    Color jacket_color( ) const;
-
-    Color pants_color( ) const;
-    Color belt_color( ) const;
-    Color belt_buckle_color( ) const;
-
-    Color boot_color( ) const;
-    Color boot_sole_color( ) const;
-    Color boot_lace_color( ) const;
+    void draw_head( );
+    void draw_torso( );
+    void draw_legs( );
+    void draw_front_arm( );
+    void draw_back_arm( );
+    void draw_front_hand( );
+    void draw_back_hand( );
+    void draw_crossbow( );
+    void draw_arrow( );
+    
+    enum ColorPiece
+    {
+        SKIN,
+        HAIR,
+        EYE,
+        UNDERSHIRT,
+        JACKET,
+        PANTS,
+        BELT,
+        BELT_BUCKLE,
+        BOOT,
+        BOOT_SOLE,
+        BOOT_LACE,
+    };
+    
+    Color color( ColorPiece ) const;
+    Color eye_color( ) const override { return color( EYE ); }
 
 private:
     enum Skin
@@ -104,6 +117,8 @@ private:
         MOHAWK,
     } m_skin;
     Skin skin( ) const;
+    
+    Hook m_hook;
 
     Planc m_movement_speed = 0.0;
     bool m_moving_right = false;
@@ -117,6 +132,7 @@ private:
 
     bool m_aiming = true;
     Angle m_aim_angle = 0.0;
+    Angle m_aim_shake_angle = 0.0;
     bool m_firing_hook = false;
     bool m_firing_arrow = false;
     bool m_slashing = false;
@@ -126,46 +142,40 @@ private:
     Counter m_dust_timer;
 
 public:
-    class Hook : public Object
+    class HealthBar : public Camera::HeadUpDisplay
     {
     public:
-        virtual ~Hook( ) { }
-        Hook( World *, const Climber * );
+        HealthBar( Climber * climber );
 
-        const Hook & render( ) const override;
-
-        Hook & update( ) override;
-        Hook & update_velocity( ) override;
-        Hook & ground( TerrainEdge * ground ) override;
-
-        Coordinate hook_tip( ) const;
-        Coordinate hook_base( ) const;
-
-        Hook & fire( const Vector & launch_speed );
-        Hook & retract( );
-        Hook & load( );
-
-        enum HookState
-        {
-            LOADED,
-            HOOKED,
-            FIRING,
-            RETRACTING
-        };
-
-        HookState state( ) const;
+        void render( Camera * ) override;
 
     private:
-        const Climber * m_owner;
+        Climber * m_climber = nullptr;
+    };
 
-        Angle m_angle;
-        Planc m_rope_length;
-        Planc m_max_rope_length;
-        Planc m_rope_growth_speed;
-        Planc m_rope_retract_speed;
+    const HealthBar & healthbar( ) const { return m_healthbar; }
+    void healthbar( const HealthBar & healthbar ) { m_healthbar = healthbar; }
 
-        HookState m_state = LOADED;
-    } m_hook;
+private:
+    HealthBar m_healthbar;
+
+public:
+    class LowHealthAlertEffect : public Camera::ScreenEffect
+    {
+    public:
+        LowHealthAlertEffect( Climber * climber );
+
+        void render( Camera * ) override;
+
+    private:
+        Climber * m_climber = nullptr;
+    };
+
+    const LowHealthAlertEffect & low_health_effect( ) const { return m_low_health_effect; }
+    void low_health_effect( const LowHealthAlertEffect & low_health_effect ) { m_low_health_effect = low_health_effect; }
+
+private:
+    LowHealthAlertEffect m_low_health_effect;
 };
 
 } // namespace mtmercy

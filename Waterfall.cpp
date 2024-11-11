@@ -1,5 +1,4 @@
 #include "Waterfall.hpp"
-
 #include "World.hpp"
 
 using mtmercy::Waterfall;
@@ -23,32 +22,32 @@ const Color WATER_COLOR = CYAN;
 const Color FOAM_COLOR = WHITE;
 } // namespace
 
-Waterfall::Waterfall( World * _world, const Coordinate & _bottom, const Planc _width, const Planc _height, const dec _z ) : StationaryObject( _world, _bottom )
+Waterfall::Waterfall( World * _world, const Coordinate & _bottom, const Planc _width, const Planc _height, const dec _z ) : Object( _world, _bottom )
 {
-    drawing_always_dirty( true );
+    background( true );
+    
+    needs_render_always( true );
 
     z( _z );
 
     space( Rectangle( _width, _height ) );
 }
 
-const Waterfall & Waterfall::render( ) const
+void Waterfall::render( )
 {
     const Color bottom_color = Color( FOAM_COLOR, 0.75 );
     const Color top_color = Color( FOAM_COLOR, 0.0 );
 
     Object::render( );
 
-    draw( WATER_COLOR, Rectangle( width( ), height( ), Coordinate( 0, height( ).half( ) ) ) );
+    draw( WATER_COLOR, Rectangle( width( ), height( ), Coordinate( ZERO, height( ).half( ) ) ) );
 
-    draw( { top_color, top_color, bottom_color, bottom_color }, Rectangle( width( ), height( ), Coordinate( 0, height( ).half( ) ) ) );
+    draw( { top_color, top_color, bottom_color, bottom_color }, Rectangle( width( ), height( ), Coordinate( ZERO, height( ).half( ) ) ) );
 
     for_each( foam, m_foam ) { draw( FOAM_COLOR.a( foam.alpha ), Polygon::equilateral( FOAM_EDGE_COUNT, foam.radius, foam.position ) ); }
-
-    return *this;
 }
 
-Waterfall & Waterfall::update( )
+void Waterfall::update( )
 {
     Object::update( );
 
@@ -56,7 +55,7 @@ Waterfall & Waterfall::update( )
     while( new_foam_count-- )
     {
         Foam & foam = m_foam.insert_back( Foam( ) );
-        foam.position = VectorX( Random::flipped( Random::rdec( width( ).half( ) ) ) );
+        foam.position = VectorX( Random::negative( Random::rdec( width( ).half( ) ) ) );
         foam.movement = Vector( Random::rPlanc( -FOAM_X_SPEED_MAX, FOAM_X_SPEED_MAX ), Random::rPlanc( FOAM_Y_SPEED ) );
         foam.radius = Random::rPlanc( FOAM_RADIUS_START );
         foam.alpha = FOAM_ALPHA_START;
@@ -66,7 +65,7 @@ Waterfall & Waterfall::update( )
     while( new_foam_small_count-- )
     {
         Foam & foam = m_foam.insert_back( Foam( ) );
-        foam.position = VectorX( Random::flipped( Random::rdec( width( ).half( ) ) ) );
+        foam.position = VectorX( Random::negative( Random::rdec( width( ).half( ) ) ) );
         foam.movement = Vector( Random::rPlanc( -FOAM_X_SPEED_MAX, FOAM_X_SPEED_MAX ), Random::rPlanc( FOAM_Y_SPEED ) * FOAM_SMALL_Y_SPEED_RATIO );
         foam.radius = Random::rPlanc( FOAM_SMALL_RADIUS_START );
         foam.alpha = FOAM_ALPHA_START;
@@ -79,8 +78,6 @@ Waterfall & Waterfall::update( )
         foam.position += foam.movement;
         foam.alpha -= FOAM_ALPHA_SHRINK;
     }
-    m_foam.remove_if( []( const Foam & foam )
-                      { return ( ( foam.alpha <= 0.0 ) || ( foam.radius <= FOAM_RADIUS_MIN ) || ( foam.position.y( ) < -foam.radius ) ); } );
-
-    return *this;
+    m_foam.erase_if( []( const Foam & foam )
+                     { return ( ( foam.alpha <= ZERO ) || ( foam.radius <= FOAM_RADIUS_MIN ) || ( foam.position.y( ) < -foam.radius ) ); } );
 }

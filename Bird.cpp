@@ -1,5 +1,4 @@
 #include "Bird.hpp"
-
 #include "World.hpp"
 #include "Player.hpp"
 
@@ -28,7 +27,7 @@ Feather::Feather( World * world, const Coordinate & _position ) : Object( world,
     gravity_ratio( 0.05 );
 }
 
-const Feather & Feather::render( ) const
+void Feather::render( )
 {
     Object::render( );
 
@@ -39,34 +38,30 @@ const Feather & Feather::render( ) const
     // Line stem = Line( position( ), position( ) - Vector( FEATHER_BASE_LENGTH + FEATHER_STEM_LENGTH, 0.0 ) );
     // draw( m_color, feather );
     // draw( m_color, stem, FEATHER_STEM_THICKNESS );
-
-    return *this;
 }
 
 Bird::Bird( World * world, const Coordinate & _position ) : Mob( world, _position )
 {
-    gravity_ratio( 0.0 );
+    no_gravity( );
     space( Rectangle( 32.0, 32.0 ) );
     health( BIRD_HEALTH );
 }
 
-const Bird & Bird::render( ) const
+void Bird::render( )
 {
     Mob::render( );
 
-    const Color color = RED; // todo
+    const Color COLOR = RED;
 
     Polygon wing = Polygon( { Coordinate( 0.0, 0.0 ), Coordinate( -24.0, sin( world( )->age( ) / 16.0 ) * 16.0 ), Coordinate( 16.0, 0.0 ) } );
     if( velocity( ).dx( ) < 0.0 )
         wing.mirror_y( );
 
-    draw( color, Line( Coordinate( -16.0, 0.0 ), Coordinate( 16.0, 0.0 ) ), 4.0 );
-    draw( color, wing );
-
-    return *this;
+    draw( COLOR, Line( Coordinate( -16.0, 0.0 ), Coordinate( 16.0, 0.0 ) ), 4.0 );
+    draw( COLOR, wing );
 }
 
-Bird & Bird::update( )
+void Bird::update( )
 {
     if( alive( ) && world( )->player( ) )
     {
@@ -82,15 +77,13 @@ Bird & Bird::update( )
         velocity( movement );
     }
 
-    drawing_dirty( true );
+    needs_render( true );
 
     Mob::update( );
-    return *this;
 }
 
-Bird & Bird::die( )
+void Bird::die( )
 {
+    normal_gravity( );
     Mob::die( );
-    gravity_ratio( 1.0 );
-    return *this;
 }

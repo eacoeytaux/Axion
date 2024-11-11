@@ -1,22 +1,26 @@
 #include "Polygon.hpp"
 
-const uint Polygon::CIRCLE_PRECISION = 60;
+namespace
+{
+const uint CIRCLE_PRECISION = 60;
+}
+
+uint Polygon::circle_precision( const dec _perimeter )
+{
+    return CIRCLE_PRECISION;
+}
 
 Polygon::Polygon( ) { }
 
 Polygon::Polygon( const varray<Coordinate> & _coordinates, const bool _assume_is_convex )
 {
-    m_coordinates_raw = _coordinates;
-    m_coordinates = _coordinates;
-    // process( );
+    m_coordinates_raw = m_coordinates = _coordinates;
 }
 
 Polygon::Polygon( const varray<Coordinate> & _coordinates, const Transform & _transform, const bool _assume_is_convex )
 {
-    m_coordinates_raw = _coordinates;
-    m_coordinates = _coordinates;
+    m_coordinates_raw = m_coordinates = _coordinates;
     transform( _transform );
-    // process( );
 }
 
 Triangle::Triangle( const Coordinate & c1, const Coordinate & c2, const Coordinate & c3 ) : Polygon( { c1, c2, c3 } ) { }
@@ -35,7 +39,7 @@ Square::Square( const Planc & _width, const Coordinate & _center, const Angle _r
                  _center + Vector( _width, -_width ).half( ).rotate( _rotation ) },
                true ) { }
 
-Circle::Circle( const Planc & _radius, const Coordinate & _center ) : Polygon( Polygon::equilateral( Polygon::CIRCLE_PRECISION ).scale( _radius ).move( _center ) ) { }
+Circle::Circle( const Planc & _radius, const Coordinate & _center ) : Polygon( Polygon::equilateral( Polygon::circle_precision( _radius ) ).coordinates( ), ScaleTransform( _radius ).chain( MoveTransform( _center ) ), true ) { }
 
 Polygon Polygon::equilateral( const uint _side_count, const Planc & _radius, const Coordinate & _center, const Angle _rotation )
 {
@@ -56,7 +60,12 @@ Polygon Polygon::equilateral( const uint _side_count, const Planc & _radius, con
         equilaterals[ _side_count ] = Polygon( coordinates, false );
     }
 
-    return Polygon( equilaterals[ _side_count ] ).scale( _radius ).rotate( _rotation ).move( _center );
+    Polygon equilateral = equilaterals[ _side_count ];
+    equilateral.scale( _radius );
+    equilateral.rotate( _rotation );
+    equilateral.move( _center );
+    
+    return equilateral;
 }
 
 Polygon Polygon::expand( const Polygon & _polygon, const Planc & _expansion )
@@ -97,88 +106,120 @@ Polygon Polygon::expand( const Polygon & _polygon, const Planc & _expansion )
     return Polygon( new_coordinates );
 }
 
-Transform Polygon::transform( const bool _cumulative ) const
+const Polygon & Polygon::dirty( ) const
 {
-    return _cumulative ? m_cumulative_transform : m_transform;
-}
-
-void Polygon::dirty( ) const
-{
+    Transformable::dirty( );
     m_coordinates_dirty = m_lines_dirty = m_triangles_dirty = m_convex_partitions_dirty = m_convex_hull_dirty = true;
+    return *this;
 }
 
-void Polygon::process( ) const
+void Polygon::process( bool do_transform, bool do_lines, bool do_triangles, bool do_convex_partitions, bool do_convex_hull ) const
 {
-    const uint _coordinate_count = m_coordinates.size( );
+    uint coordinate_count = m_coordinates.size( );
 
-    if( _coordinate_count == 0 )
+    if( Transformable::transform( ).identity( ) )
     {
-        m_convex = true;
-
-        m_lower_bound_x = P0;
-        m_lower_bound_y = P0;
-        m_upper_bound_x = P0;
-        m_upper_bound_y = P0;
-
-        m_coordinates_dirty = false;
-
-        m_lines = { };
-        m_lines_dirty = false;
-
-        m_triangles = { };
-        m_triangles_indices = { };
-        m_triangles_dirty = false;
-
-        m_convex_partitions = { };
-        m_convex_partitions_indices = { };
-        m_convex_partitions_dirty = false;
+        do_transform = false;
     }
-    else if( _coordinate_count == 1 )
+
+    if( do_convex_partitions )
     {
-        m_convex = true;
-
-        m_lower_bound_x = m_upper_bound_x = m_coordinates[ 0 ].x( );
-        m_lower_bound_y = m_upper_bound_y = m_coordinates[ 0 ].y( );
-
-        m_coordinates_dirty = false;
-
-        m_lines = { };
-        m_lines_dirty = false;
-
-        m_triangles = { };
-        m_triangles_indices = { };
-        m_triangles_dirty = false;
-
-        m_convex_partitions = { };
-        m_convex_partitions_indices = { };
-        m_convex_partitions_dirty = false;
+        do_triangles = true;
     }
-    else if( _coordinate_count == 2 )
+
+    if( !m_lines_dirty )
     {
+        do_lines = false;
+    }
+
+    if( !m_triangles_dirty )
+    {
+        do_triangles = false;
+    }
+
+    if( !m_convex_partitions_dirty )
+    {
+        do_convex_partitions = false;
+    }
+
+    if( !m_convex_hull_dirty )
+    {
+        do_convex_hull = false;
+    }
+
+    if( !m_coordinates_dirty && !do_transform && !do_lines && !do_triangles && !do_convex_partitions && !do_convex_hull )
+    {
+        return;
+    }
+
+    if( coordinate_count == 1 )
+    {
+        m_coordinates[ 0 ] = Transformable::transform( ).transform( m_coordinates[ 0 ] );
+
         m_convex = true;
 
+        m_lower_bound_x = m_coordinates[ 0 ].x( );
+        m_lower_bound_y = m_coordinates[ 0 ].y( );
+        m_upper_bound_x = m_coordinates[ 0 ].x( );
+        m_upper_bound_y = m_coordinates[ 0 ].y( );
+
+        m_lines_dirty = false;
+        m_triangles_dirty = false;
+        m_convex_partitions_dirty = false;
+        
         m_coordinates_dirty = false;
+    }
+    else if( coordinate_count == 2 )
+    {
+        m_coordinates[ 0 ] = transform( m_coordinates[ 0 ] );
+        m_coordinates[ 1 ] = transform( m_coordinates[ 1 ] );
+
+        m_convex = true;
 
         m_lower_bound_x = min( m_coordinates[ 0 ].x( ), m_coordinates[ 1 ].x( ) );
         m_lower_bound_y = min( m_coordinates[ 0 ].y( ), m_coordinates[ 1 ].y( ) );
         m_upper_bound_x = max( m_coordinates[ 0 ].x( ), m_coordinates[ 1 ].x( ) );
         m_upper_bound_y = max( m_coordinates[ 0 ].y( ), m_coordinates[ 1 ].y( ) );
 
-        m_lines = { Line{ m_coordinates[ 0 ], m_coordinates[ 1 ] } };
         m_lines_dirty = false;
-
-        m_triangles = { };
-        m_triangles_indices = { };
         m_triangles_dirty = false;
-
-        m_convex_partitions = { };
-        m_convex_partitions_indices = { };
         m_convex_partitions_dirty = false;
+        
+        m_coordinates_dirty = false;
     }
-    else if( _coordinate_count == 3 )
+    else if( coordinate_count == 3 )
     {
-        m_convex = true;
+        if( do_transform )
+        {
+            m_coordinates[ 0 ] = transform( m_coordinates[ 0 ] );
+            m_coordinates[ 1 ] = transform( m_coordinates[ 1 ] );
+            m_coordinates[ 2 ] = transform( m_coordinates[ 2 ] );
+        }
 
+        if( do_lines )
+        {
+            m_lines.resize( 3 );
+            m_lines[ 0 ] = Line( m_coordinates[ 0 ], m_coordinates[ 1 ] );
+            m_lines[ 1 ] = Line( m_coordinates[ 1 ], m_coordinates[ 2 ] );
+            m_lines[ 2 ] = Line( m_coordinates[ 2 ], m_coordinates[ 0 ] );
+            m_lines_dirty = false;
+        }
+
+        if( do_triangles )
+        {
+            m_triangles = { Polygon( m_coordinates, true ) };
+            m_triangles_indices = { { 0, 1, 2 } };
+            m_triangles_dirty = false;
+        }
+
+        if( do_convex_partitions )
+        {
+            m_convex_partitions = { Polygon( m_coordinates, true ) };
+            m_convex_partitions_indices = { { 0, 1, 2 } };
+            m_convex_partitions_dirty = false;
+        }
+        
+        m_convex = true;
         if( Line( m_coordinates[ 0 ], m_coordinates[ 1 ] ).above( m_coordinates[ 2 ] ) )
         {
             // is clockwise
@@ -191,354 +232,6 @@ void Polygon::process( ) const
         m_upper_bound_y = max( m_coordinates[ 0 ].y( ), max( m_coordinates[ 1 ].y( ), m_coordinates[ 2 ].y( ) ) );
 
         m_coordinates_dirty = false;
-
-        m_lines.resize( 3 );
-        m_lines[ 0 ] = Line( m_coordinates[ 0 ], m_coordinates[ 1 ] );
-        m_lines[ 1 ] = Line( m_coordinates[ 1 ], m_coordinates[ 2 ] );
-        m_lines[ 2 ] = Line( m_coordinates[ 2 ], m_coordinates[ 0 ] );
-        m_lines_dirty = false;
-
-        m_triangles = { *this };
-        m_triangles_indices = { { 0, 1, 2 } };
-        m_triangles_dirty = false;
-
-        m_convex_partitions = { *this };
-        m_convex_partitions_indices = { { 0, 1, 2 } };
-        m_convex_partitions_dirty = false;
-
-        m_convex_hull = { m_coordinates };
-        m_convex_hull_dirty = false;
-    }
-    else
-    {
-        // default to true then check for violations
-        bool convex_ccw = true;
-        bool convex_cw = true;
-
-        m_lines.resize( _coordinate_count );
-
-        // hope for convex, recalculate if not
-        m_triangles.resize( m_coordinates.size( ) - 2 );
-        m_triangles_indices.resize( m_coordinates.size( ) - 2 );
-
-        // iterate through coordinates and determine xy boundaries, convex, and clockwise see
-        // https://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
-
-        int bottom_index = 0; // for convex hull
-        dec edge_curve = 0;
-        for_range( i, _coordinate_count )
-        {
-            Coordinate & coordinate = m_coordinates[ i ];
-
-            if( is_infinity( coordinate.x( ) ) || is_infinity( coordinate.y( ) ) )
-            {
-                Assert( "no infinities allowed (for now)" );
-            }
-
-            m_lower_bound_x = min( m_lower_bound_x, coordinate.x( ) );
-            m_lower_bound_y = min( m_lower_bound_y, coordinate.y( ) );
-            m_upper_bound_x = max( m_upper_bound_x, coordinate.x( ) );
-            m_upper_bound_y = max( m_upper_bound_y, coordinate.y( ) );
-
-            if( ( coordinate.y( ) < m_coordinates[ bottom_index ].y( ) ) || ( coordinate.y( ) == m_coordinates[ bottom_index ].y( ) && ( coordinate.x( ) < m_coordinates[ bottom_index ].x( ) ) ) )
-            {
-                bottom_index = i;
-            }
-
-            Coordinate prev_coordinate, prev_prev_coordinate;
-            if( i )
-            {
-                if( i > 1 )
-                {
-                    prev_coordinate = m_coordinates[ i - 1 ];
-                    prev_prev_coordinate = m_coordinates[ i - 2 ];
-
-                    if( i >= 2 )
-                    {
-                        m_triangles[ i - 2 ] = Polygon( { m_coordinates[ 0 ], m_coordinates[ i - 1 ], m_coordinates[ i ] } );
-                        m_triangles_indices[ i - 2 ] = { 0, i - 1, i };
-                    }
-                }
-                else if( i == 1 )
-                {
-                    prev_coordinate = m_coordinates[ 0 ];
-                    prev_prev_coordinate = m_coordinates[ _coordinate_count - 1 ];
-                }
-
-                m_lines[ i - 1 ] = Line( m_coordinates[ i - 1 ], m_coordinates[ i ] );
-            }
-            else
-            { // i == 0
-                prev_coordinate = m_coordinates[ _coordinate_count - 1 ];
-                prev_prev_coordinate = m_coordinates[ _coordinate_count - 2 ];
-
-                m_lines[ m_lines.size( ) - 1 ] = Line( m_coordinates[ m_coordinates.size( ) - 1 ], m_coordinates[ 0 ] );
-            }
-
-            edge_curve += (dec)( ( coordinate.x( ) - prev_coordinate.x( ) ) * ( coordinate.y( ) + prev_coordinate.y( ) ) );
-        }
-
-        if( edge_curve > 0 ) // clockwise
-        {
-            m_convex = convex_cw;
-
-            m_coordinates.reverse( );
-
-            m_lines.reverse( );
-
-            for_range( i, m_triangles.size( ) )
-            {
-                varray<Coordinate> coordinates = m_triangles[ i ].coordinates( );
-                m_triangles[ i ] = Polygon( { coordinates[ 2 ], coordinates[ 1 ], coordinates[ 0 ] } );
-                m_triangles_indices[ i ].reverse( );
-            }
-        }
-        else
-        {
-            m_convex = convex_ccw;
-        }
-
-        m_coordinates_dirty = false;
-
-        // if( !m_convex )
-        // { // else already set in for loop above
-        //     int index = 0;
-        //     varray<Coordinate> coordinates = m_coordinates;
-        //
-        //     m_triangles.clear( );
-        //     m_triangles.reserve( coordinates.size( ) - 2 );
-        //
-        //     int size = coordinates.size( );
-        //
-        //     int cycle = 0;
-        //     int max_cycles = ( size * size ) / 2;
-        //     bool success = true; // todo this shouldn't be necessary
-        //
-        //     while( coordinates.size( ) > 3 )
-        //     {
-        //         ++cycle;
-        //         if( cycle >= max_cycles )
-        //         {
-        //             success = false;
-        //             break;
-        //         }
-        //
-        //         Polygon triangle;
-        //         bool is_ear = false;
-        //         Coordinate coordinate = coordinates[ index % coordinates.size( ) ];
-        //         Coordinate next_coordinate = coordinates[ ( index + 1 ) % coordinates.size( ) ];
-        //         Angle next_angle( coordinate, next_coordinate );
-        //
-        // #if 0
-        //         // check if coordinate is colinear and thus can be removed
-        //         Coordinate prev_coordinate = coordinates[ ( index + coordinates.size( ) - 1 ) % coordinates.size( ) ];
-        //         Angle angle_prev( coordinate, prev_coordinate );
-        //         if ( ( next_angle == angle_prev ) || ( next_angle - angle_prev == PI ) ) {
-        //             coordinates.remove( index );
-        //             continue;
-        //         }
-        // #endif
-        //
-        //         Coordinate next_next_coordinate = coordinates[ ( index + 2 ) % coordinates.size( ) ];
-        //         Angle next_next_angle( coordinate, next_next_coordinate );
-        //
-        //         // check if next two points are colinear and if so skip so
-        //         // it will be removed in the next iteration
-        //         if( !( ( next_angle == next_next_angle ) || ( ( next_angle - next_next_angle ) == Angle( PI ) ) ) )
-        //         {
-        //             triangle = Polygon( { coordinate, next_coordinate, next_next_coordinate } );
-        //             if( ( next_next_angle - next_angle ) < Angle( PI ) )
-        //             {
-        //                 is_ear = true;
-        //                 for_range( i, coordinates.size( ) )
-        //                 {
-        //                     if( ( i == index ) || ( i == ( index + 1 ) % coordinates.size( ) ) || ( i == ( index + 2 ) % coordinates.size( ) ) )
-        //                         continue;
-        //                     if( triangle.contains( coordinates[ i ] ) )
-        //                     {
-        //                         is_ear = false;
-        //                         break;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //
-        //         if( is_ear )
-        //         {
-        //             // check and add to triangle list
-        //             // Assert( triangle.area( ), "triangle must have some
-        //             // area or else something is wrong" );
-        //             m_triangles.insert_back( triangle );
-        //             coordinates.remove( ( index + 1 ) % coordinates.size( ) );
-        //         }
-        //         else
-        //         {
-        //             // move index over to continue search
-        //             ++index;
-        //             index %= coordinates.size( );
-        //         }
-        //     }
-        //
-        //     if( success )
-        //     {
-        //         Assert( coordinates.size( ) == 3, "all triangularized Triangles should have 3 "
-        //                                           "points, obviously" );
-        //         Polygon triangle = Polygon( { coordinates[ 0 ], coordinates[ 1 ], coordinates[ 2 ] } );
-        //         if( triangle.area( ) )
-        //             m_triangles.insert_back( triangle );
-        //     }
-        // }
-
-        if( m_convex )
-        {
-            m_convex_hull = m_coordinates;
-
-            m_convex_partitions = { *this };
-            m_convex_partitions_indices = varray<varray<uint>>( 1 );
-            for_range( i, 1 )
-            {
-                uint side_count = m_convex_partitions[ i ].sides( );
-                m_convex_partitions_indices[ i ].resize( side_count );
-                for_range( j, side_count ) { m_convex_partitions_indices[ i ][ j ] = j; }
-            }
-        }
-        else
-        {
-            // todo technically this is true but there's definitely a better way
-            m_convex_partitions = m_triangles;
-            m_convex_partitions_indices = m_triangles_indices;
-
-            varray<Coordinate> convex_hull_coordinates;
-            convex_hull_coordinates.reserve( sides( ) );
-            convex_hull_coordinates.insert_back( m_coordinates[ bottom_index ] );
-
-            int index_offset = bottom_index;
-            for_range( i, _coordinate_count - 1 )
-            {
-                int index = (int)( i + index_offset + 1 ) % _coordinate_count;
-                Coordinate coordinate = m_coordinates[ index ];
-
-                while( convex_hull_coordinates.size( ) > 1 )
-                {
-                    Coordinate prev_coordinate = convex_hull_coordinates[ convex_hull_coordinates.size( ) - 1 ];
-                    Coordinate prev_prev_coordinate = convex_hull_coordinates[ convex_hull_coordinates.size( ) - 2 ];
-                    Angle angle( prev_coordinate, coordinate );
-                    Angle prev_angle( prev_prev_coordinate, prev_coordinate );
-
-                    if( ( angle - prev_angle ) < Angle( PI ) )
-                        break;
-
-                    convex_hull_coordinates.remove_back( );
-                }
-
-                convex_hull_coordinates.insert_back( coordinate );
-            }
-
-            m_convex_hull = convex_hull_coordinates;
-        }
-    }
-}
-
-void Polygon::process( bool transform, bool lines, bool triangles, bool convex_partitions, bool convex_hull ) const
-{
-    uint coordinate_count = m_coordinates.size( );
-
-    if( m_transform.identity( ) )
-        transform = false;
-
-    if( convex_partitions )
-        triangles = true;
-
-    if( !m_lines_dirty )
-        lines = false;
-    if( !m_triangles_dirty )
-        triangles = false;
-    if( !m_convex_partitions_dirty )
-        convex_partitions = false;
-    if( !m_convex_hull_dirty )
-        convex_hull = false;
-
-    if( !m_coordinates_dirty && !lines && !triangles && !convex_partitions && !convex_hull )
-        return;
-
-    if( coordinate_count == 1 )
-    {
-        m_coordinates[ 0 ] = m_transform.transform( m_coordinates[ 0 ] );
-
-        m_convex = true;
-
-        m_lower_bound_x = m_coordinates[ 0 ].x( );
-        m_lower_bound_y = m_coordinates[ 0 ].y( );
-        m_upper_bound_x = m_coordinates[ 0 ].x( );
-        m_upper_bound_y = m_coordinates[ 0 ].y( );
-
-        m_lines_dirty = false;
-        m_triangles_dirty = false;
-        m_convex_partitions_dirty = false;
-    }
-    else if( coordinate_count == 2 )
-    {
-        m_coordinates[ 0 ] = m_transform.transform( m_coordinates[ 0 ] );
-        m_coordinates[ 1 ] = m_transform.transform( m_coordinates[ 1 ] );
-
-        m_convex = true;
-
-        m_lower_bound_x = min( m_coordinates[ 0 ].x( ), m_coordinates[ 1 ].x( ) );
-        m_lower_bound_y = min( m_coordinates[ 0 ].y( ), m_coordinates[ 1 ].y( ) );
-        m_upper_bound_x = max( m_coordinates[ 0 ].x( ), m_coordinates[ 1 ].x( ) );
-        m_upper_bound_y = max( m_coordinates[ 0 ].y( ), m_coordinates[ 1 ].y( ) );
-
-        m_lines_dirty = false;
-        m_triangles_dirty = false;
-        m_convex_partitions_dirty = false;
-    }
-    else if( coordinate_count == 3 )
-    {
-        if( transform )
-        {
-            m_coordinates[ 0 ] = m_transform.transform( m_coordinates[ 0 ] );
-            m_coordinates[ 1 ] = m_transform.transform( m_coordinates[ 1 ] );
-            m_coordinates[ 2 ] = m_transform.transform( m_coordinates[ 2 ] );
-        }
-
-        {
-            m_convex = true;
-            if( Line( m_coordinates[ 0 ], m_coordinates[ 1 ] ).above( m_coordinates[ 2 ] ) )
-            {
-                // is clockwise
-                m_coordinates.reverse( );
-            }
-
-            m_lower_bound_x = min( m_coordinates[ 0 ].x( ), min( m_coordinates[ 1 ].x( ), m_coordinates[ 2 ].x( ) ) );
-            m_lower_bound_y = min( m_coordinates[ 0 ].y( ), min( m_coordinates[ 1 ].y( ), m_coordinates[ 2 ].y( ) ) );
-            m_upper_bound_x = max( m_coordinates[ 0 ].x( ), max( m_coordinates[ 1 ].x( ), m_coordinates[ 2 ].x( ) ) );
-            m_upper_bound_y = max( m_coordinates[ 0 ].y( ), max( m_coordinates[ 1 ].y( ), m_coordinates[ 2 ].y( ) ) );
-
-            m_coordinates_dirty = false;
-        }
-
-        if( lines )
-        {
-            // m_lines.resize( 3 );
-            // m_lines[ 0 ] = Line( m_coordinates[ 0 ], m_coordinates[ 1 ] );
-            // m_lines[ 1 ] = Line( m_coordinates[ 1 ], m_coordinates[ 2 ] );
-            // m_lines[ 2 ] = Line( m_coordinates[ 2 ], m_coordinates[ 0 ] );
-            m_lines_dirty = false;
-        }
-
-        if( triangles )
-        {
-            m_triangles = { *this };
-            m_triangles_indices = { { 0, 1, 2 } };
-            m_triangles_dirty = false;
-        }
-
-        if( convex_partitions )
-        {
-            m_convex_partitions = { *this };
-            m_convex_partitions_indices = { { 0, 1, 2 } };
-            m_convex_partitions_dirty = false;
-        }
     }
     else if( coordinate_count )
     {
@@ -546,12 +239,12 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
         bool convex_ccw = true;
         bool convex_cw = true;
 
-        if( lines )
+        if( do_lines )
         {
             // m_lines.resize( coordinate_count );
         }
 
-        if( triangles )
+        if( do_triangles )
         {
             // hope for convex, recalculate if not
             m_triangles.resize( m_coordinates.size( ) - 2 );
@@ -577,9 +270,9 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
                 Assert( "no infinities allowed (for now)" );
             }
 
-            if( transform )
+            if( do_transform )
             {
-                coordinate = m_transform.transform( coordinate );
+                coordinate = transform( coordinate );
             }
 
             if( m_coordinates_dirty )
@@ -600,9 +293,9 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
                     prev_coordinate = m_coordinates[ 0 ];
                     prev_prev_coordinate = m_coordinates[ coordinate_count - 1 ];
 
-                    if( transform )
+                    if( do_transform )
                     {
-                        prev_prev_coordinate = m_transform.transform( prev_prev_coordinate );
+                        prev_prev_coordinate = transform( prev_prev_coordinate );
                     }
                 }
                 else
@@ -610,17 +303,17 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
                     prev_coordinate = m_coordinates[ coordinate_count - 1 ];
                     prev_prev_coordinate = m_coordinates[ coordinate_count - 2 ];
 
-                    if( transform )
+                    if( do_transform )
                     {
-                        prev_coordinate = m_transform.transform( prev_coordinate );
-                        prev_prev_coordinate = m_transform.transform( prev_prev_coordinate );
+                        prev_coordinate = transform( prev_coordinate );
+                        prev_prev_coordinate = transform( prev_prev_coordinate );
                     }
                 }
 
                 edge_curve += (dec)( ( coordinate.x( ) - prev_coordinate.x( ) ) * ( coordinate.y( ) + prev_coordinate.y( ) ) );
             }
 
-            if( lines )
+            if( do_lines )
             {
                 if( i )
                 {
@@ -629,19 +322,21 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
                 else
                 { // i = 0
                     Coordinate c = m_coordinates[ m_coordinates.size( ) - 1 ];
-                    if( transform )
-                        c = m_transform.transform( c );
+                    if( do_transform )
+                    {
+                        c = transform( c );
+                    }
                     // m_lines[ m_lines.size( ) - 1 ] = Line( c, m_coordinates[ 0 ] );
                 }
             }
 
-            if( triangles && ( i >= 2 ) )
+            if( do_triangles && ( i >= 2 ) )
             {
                 m_triangles[ i - 2 ] = Polygon( { m_coordinates[ 0 ], m_coordinates[ i - 1 ], m_coordinates[ i ] } );
                 m_triangles_indices[ i - 2 ] = { 0, i - 1, i };
             }
 
-            if( convex_hull )
+            if( do_convex_hull )
             {
                 if( ( coordinate.y( ) < m_coordinates[ bottom_index ].y( ) ) || ( coordinate.y( ) == m_coordinates[ bottom_index ].y( ) && ( coordinate.x( ) < m_coordinates[ bottom_index ].x( ) ) ) )
                 {
@@ -661,7 +356,7 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
                 // if( lines )
                 // m_lines.reverse( );
 
-                if( triangles && m_convex )
+                if( do_triangles && m_convex )
                 {
                     for_range( i, m_triangles.size( ) )
                     {
@@ -680,7 +375,7 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
         }
 
         // if( triangles )
-        //{
+        // {
         //     if( !m_convex )
         //     { // else already set in for loop above
         //         int index = 0;
@@ -715,7 +410,7 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
         //             Coordinate prev_coordinate = coordinates[ ( index + coordinates.size( ) - 1 ) % coordinates.size( ) ];
         //             Angle angle_prev( coordinate, prev_coordinate );
         //             if ( ( next_angle == angle_prev ) || ( next_angle - angle_prev == PI ) ) {
-        //                 coordinates.remove( index );
+        //                 coordinates.erase( index );
         //                 continue;
         //             }
         // #endif
@@ -750,7 +445,7 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
         //                 // Assert( triangle.area( ), "triangle must have some
         //                 // area or else something is wrong" );
         //                 m_triangles.insert_back( triangle );
-        //                 coordinates.remove( ( index + 1 ) % coordinates.size( ) );
+        //                 coordinates.erase( ( index + 1 ) % coordinates.size( ) );
         //             }
         //             else
         //             {
@@ -773,11 +468,11 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
         //     m_triangles_dirty = false;
         // }
 
-        if( convex_partitions )
+        if( do_convex_partitions )
         {
             if( m_convex )
             {
-                m_convex_partitions = { *this };
+                m_convex_partitions = { Polygon( m_coordinates, true ) };
                 m_convex_partitions_indices = varray<varray<uint>>( 1 );
                 for_range( i, 1 )
                 {
@@ -796,7 +491,7 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
             m_convex_partitions_dirty = false;
         }
 
-        if( convex_hull )
+        if( do_convex_hull )
         {
             if( m_convex )
             {
@@ -822,9 +517,13 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
                         Angle prev_angle( prev_prev_coordinate, prev_coordinate );
 
                         if( ( angle - prev_angle ) < Angle( PI ) )
+                        {
                             break;
+                        }
                         else
-                            convex_hull_coordinates.remove_back( );
+                        {
+                            convex_hull_coordinates.erase_back( );
+                        }
                     }
                     convex_hull_coordinates.insert_back( coordinate );
                 }
@@ -841,50 +540,37 @@ void Polygon::process( bool transform, bool lines, bool triangles, bool convex_p
         m_coordinates_dirty = false;
     }
 
-    if( transform )
+    if( do_transform )
     {
-        m_transform = IDENTITY_TRANSFORM;
+        const_clear_transform( );
     }
 }
 
-Polygon & Polygon::transform( const Transform & _transform )
-{
-    dirty( );
-    m_transform.chain( _transform );
-    m_cumulative_transform.chain( _transform );
-    return *this;
-}
-
-Polygon & Polygon::move( const Vector & _vector )
-{
-    return transform( MoveTransform( _vector ) );
-}
-
-Polygon & Polygon::stretch( const Vector & _axis )
-{
-    return transform( StretchTransform( _axis ) );
-}
-
-Polygon & Polygon::scale( const dec _scale, const Coordinate & _origin )
-{
-    return transform( ScaleTransform( _scale, _origin ) );
-}
-
-Polygon & Polygon::rotate( const Angle & _angle, const Coordinate & _origin )
-{
-    return transform( RotateTransform( _angle, _origin ) );
-}
-
-Polygon & Polygon::mirror( const Vector & _axis )
-{
-    return transform( ReflectionTransform( _axis ) );
-}
+//Polygon & Polygon::transform( const Transform & _transform )
+//Polygon & Polygon::transform( const Transform & _transform )
+//{
+//{
+//    Transformable::transform( _transform );
+//    Transformable::transform( _transform );
+//
+//
+//    dirty( );
+//    dirty( );
+//    m_transform.chain( _transform );
+//    m_transform.chain( _transform );
+//    m_cumulative_transform.chain( _transform );
+//    m_cumulative_transform.chain( _transform );
+//    return *this;
+//    return *this;
+//}
+//}
 
 Planc Polygon::area( ) const
 {
     process( true, false, true, false, false );
 
-    Planc area = 0.0;
+    Planc area = ZERO;
+
     if( convex( ) )
     {
         area += ( ( m_coordinates.back( ).x( ) * m_coordinates.front( ).y( ) ) - ( m_coordinates.back( ).y( ) * m_coordinates.front( ).x( ) ) );
@@ -902,6 +588,7 @@ Planc Polygon::area( ) const
     {
         for_each( convex, m_convex_partitions ) { area += convex.area( ); }
     }
+
     return area;
 }
 
@@ -946,7 +633,8 @@ bool Polygon::contains( const Coordinate & _coordinate, const bool _inclusive ) 
 
     if( convex( ) )
     {
-        for_each( line, lines( ) )
+        const varray<Line> & lines = Polygon::perimeter( );
+        for_each( line, lines )
         {
             if( !line.below( _coordinate, _inclusive ) )
             {
@@ -960,8 +648,9 @@ bool Polygon::contains( const Coordinate & _coordinate, const bool _inclusive ) 
     {
         for_each( convex_polygon, convex_partitions( ) )
         {
-            if( convex_polygon.contains( _coordinate, _inclusive ) )
+            if( convex_polygon.contains( _coordinate, true ) )
             {
+                // todo need to check if not inclusive and on border
                 return true;
             }
         }
@@ -985,7 +674,8 @@ varray<Line> Polygon::intersection( const Line & _line ) const
         intersection_coordinates.insert_back( _line.c2( ) );
     }
 
-    for_each( line, lines( ) )
+    const varray<Line> & lines = Polygon::perimeter( );
+    for_each( line, lines )
     {
         if( line.intersects( _line ) )
         {
@@ -997,12 +687,12 @@ varray<Line> Polygon::intersection( const Line & _line ) const
     struct
     {
         Coordinate origin;
-        bool operator( )( const Coordinate & c1, const Coordinate & c2 ) { return ( c1.distance( origin ) < c2.distance( origin ) ); }
+        bool operator( )( const Coordinate & c1, const Coordinate & c2 ) { return ( c1.distance_to( origin ) < c2.distance_to( origin ) ); }
     } line_intersection_distance;
     line_intersection_distance.origin = _line.c1( );
     intersection_coordinates.sort( line_intersection_distance );
 
-    Assert( ( intersection_coordinates.size( ) % 2 ) == 0 );
+    // Assert( ( intersection_coordinates.size( ) % 2 ) == 0 );
     for_range( i, intersection_coordinates.size( ) / 2 )
     {
         uint i1 = i * 2;
@@ -1026,7 +716,7 @@ const varray<Coordinate> & Polygon::coordinates( const bool _raw ) const
     }
 }
 
-varray<Line> Polygon::lines( const bool _raw ) const
+Path Polygon::perimeter( const bool _raw ) const
 {
     const varray<Coordinate> & c = coordinates( _raw );
     const uint count = c.size( );
@@ -1075,15 +765,18 @@ Polygon Polygon::operator-( const Vector & _v ) const { return *this + -_v; }
 
 Polygon & Polygon::operator-=( const Vector & _v ) { return *this += -_v; }
 
+// TODO optimize this (no raw?)
 bool Polygon::operator==( const Polygon & _polygon ) const
 {
     if( m_coordinates.size( ) != _polygon.m_coordinates.size( ) )
+    {
         return false;
+    }
 
     uint coordinate_count = m_coordinates.size( );
 
-    const varray<Coordinate> & c1 = coordinates( );
-    const varray<Coordinate> & c2 = _polygon.coordinates( );
+    const varray<Coordinate> & _c1 = coordinates( false );
+    const varray<Coordinate> & _c2 = _polygon.coordinates( false );
 
     bool matched = false;
     int offset = 0;
@@ -1091,7 +784,7 @@ bool Polygon::operator==( const Polygon & _polygon ) const
     for_range( i, coordinate_count )
     {
         ++offset;
-        if( c1[ offset ] == c2[ 0 ] )
+        if( _c1[ offset ] == _c2[ 0 ] )
         {
             matched = true;
             break;
@@ -1099,12 +792,16 @@ bool Polygon::operator==( const Polygon & _polygon ) const
     }
 
     if( !matched )
+    {
         return false;
+    }
 
     for_range( i, coordinate_count )
     {
-        if( c1[ ( i + offset ) % coordinate_count ] != c2[ i ] )
+        if( _c1[ ( i + offset ) % coordinate_count ] != _c2[ i ] )
+        {
             return false;
+        }
     }
 
     return true;

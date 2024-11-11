@@ -35,7 +35,9 @@ class Coordinate
 {
 public:
     virtual ~Coordinate( ) { }
-    Coordinate( const Planc & x = 0.0, const Planc & y = 0.0 );
+
+    Coordinate( );
+    Coordinate( const Planc & x, const Planc & y );
     Coordinate( const Vector & v );
 
     Planc x( ) const;
@@ -43,9 +45,13 @@ public:
     Planc y( ) const;
     Coordinate & y( const Planc & y );
     Coordinate & xy( const Planc & x, const Planc & y );
+    
+    Planc distance_to_origin( ) const { return distance_to( Coordinate( ) ); }
+    Planc distance_to( const Coordinate & coordinate ) const;
+    bool in_distance_range( const Coordinate & coordinate, Planc distance, bool inclusive = true ) const;
 
-    Planc distance( const Coordinate & coordinate ) const;
-
+    Coordinate & move( const Planc &, const Planc & );
+    Coordinate & move( const Coordinate & );
     Coordinate & rotate( const Angle & angle, const Coordinate & origin = Coordinate( 0, 0 ) );
     Coordinate & mirror( const Vector & axis );
     Coordinate & mirror( const Line & axis );
@@ -64,15 +70,31 @@ public:
     Coordinate & operator+=( const Vector & vector );
     Coordinate & operator-=( const Vector & vector );
 
-    bool operator==( const Coordinate & coordinate ) const;
-    bool operator!=( const Coordinate & coordinate ) const;
+    default_equal( Coordinate );
 
 private:
-    Planc m_x = 0.0;
-    Planc m_y = 0.0;
+    Planc m_x = ZERO;
+    Planc m_y = ZERO;
 };
 
-const Coordinate ORIGIN( 0.0, 0.0 );
+inline Planc distance( const Coordinate & c1, const Coordinate & c2 )
+{
+    return c1.distance_to( c2 );
+}
+
+inline bool in_distance_range( const Coordinate & c1, const Coordinate & c2, const Planc & distance, bool inclusive = true )
+{
+    return c1.in_distance_range( c2, distance, inclusive );
+}
+
+inline Coordinate midpoint( const Coordinate & c1, const Coordinate & c2 )
+{
+    Planc dx = c2.x( ) - c1.x( );
+    Planc dy = c2.y( ) - c1.y( );
+    return Coordinate( c1.x( ) + half( dx ), c1.y( ) + half( dy ) );
+}
+
+const Coordinate ORIGIN( ZERO, ZERO );
 const Coordinate COORDINATE_INFINITY_POSITIVE( INFINITY_POSITIVE, INFINITY_POSITIVE );
 const Coordinate COORDINATE_INFINITY_NEGATIVE( INFINITY_NEGATIVE, INFINITY_NEGATIVE );
 

@@ -12,8 +12,9 @@ public:
     virtual ~Skull( ) { }
     Skull( World *, const Coordinate & position );
 
-    virtual const Skull & render( ) const override;
-    virtual Skull & update( ) override;
+    virtual void render( ) override;
+
+    virtual void update( ) override;
 
 private:
     Drawing m_skull_drawing;

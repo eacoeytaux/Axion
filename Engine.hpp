@@ -18,7 +18,7 @@ class World;
 
 struct Input
 {
-    virtual void do_nothing( ) { }
+    virtual void do_nothing( ) const { }
 };
 
 class Engine
@@ -27,6 +27,8 @@ private:
     Engine( ) { }
 
 public:
+    virtual ~Engine( ) { }
+
     static const uint FPS = 30; // frames per second
 
     static error run( World * world, const string app_name = "" );
@@ -72,7 +74,7 @@ private:
     static void sync_controllers_eng( );
 
     static uint current_ticks_eng( );
-    static void wait_eng( uint ticks );
+    static void wait_eng( uint ms );
 
     // graphics
     static uint screen_width_eng( );
@@ -95,8 +97,8 @@ private:
 
 struct KeyInput : public Input
 {
-    typedef char KEY;
-    enum DYNAMIC
+    typedef char Key;
+    enum Dynamic
     {
         NO_DYNAMIC,
         PRESSED,
@@ -104,15 +106,15 @@ struct KeyInput : public Input
         RELEASED,
     };
 
-    KeyInput( KEY k, DYNAMIC d ) : key( k + ( ( ( k >= 'A' ) && ( k <= 'Z' ) ) ? ( 'A' - 'a' ) : 0 ) ), dynamic( d ) { }
+    KeyInput( Key k, Dynamic d ) : key( k + ( ( ( k >= 'A' ) && ( k <= 'Z' ) ) ? ( 'A' - 'a' ) : 0 ) ), dynamic( d ) { }
 
-    const KEY key;
-    const DYNAMIC dynamic;
+    const Key key;
+    const Dynamic dynamic;
 };
 
 struct MouseInput : public Input
 {
-    enum BUTTON
+    enum Button
     {
         NO_BUTTON,
         LEFT_BUTTON,
@@ -120,7 +122,7 @@ struct MouseInput : public Input
         SCROLL_BUTTON,
     };
 
-    enum DYNAMIC
+    enum Dynamic
     {
         NO_DYNAMIC,
         PRESSED,
@@ -129,10 +131,10 @@ struct MouseInput : public Input
         MOVE,
     };
 
-    MouseInput( BUTTON b, DYNAMIC d, const Coordinate & p ) : button( b ), dynamic( d ), position( p ) { }
+    MouseInput( Button b, Dynamic d, const Coordinate & p ) : button( b ), dynamic( d ), position( p ) { }
 
-    const BUTTON button;
-    const DYNAMIC dynamic;
+    const Button button;
+    const Dynamic dynamic;
     const Coordinate position;
 };
 
@@ -142,7 +144,7 @@ struct ControllerInput : public Input
 
 struct ControllerButtonInput : public ControllerInput
 {
-    enum BUTTON
+    enum Button
     {
         NO_BUTTON,
         LEFT_UP_BUTTON,
@@ -165,7 +167,7 @@ struct ControllerButtonInput : public ControllerInput
         TOUCHPAD_BUTTON,
     };
 
-    enum DYNAMIC
+    enum Dynamic
     {
         NO_DYNAMIC,
         PRESSED,
@@ -174,22 +176,22 @@ struct ControllerButtonInput : public ControllerInput
         MOVE,
     };
 
-    ControllerButtonInput( BUTTON b, DYNAMIC d ) : button( b ), dynamic( d ) { }
+    ControllerButtonInput( Button b, Dynamic d ) : button( b ), dynamic( d ) { }
 
-    const BUTTON button;
-    const DYNAMIC dynamic;
+    const Button button;
+    const Dynamic dynamic;
 };
 
 struct ControllerJoystickInput : public ControllerInput
 {
-    enum JOYSTICK
+    enum Joystick
     {
         NO_JOYSTICK,
         RIGHT_JOYSTICK,
         LEFT_JOYSTICK,
     };
 
-    enum DIRECTION
+    enum Direction
     {
         NO_DIRECTION,
         UP,
@@ -198,16 +200,17 @@ struct ControllerJoystickInput : public ControllerInput
         RIGHT,
     };
 
-    ControllerJoystickInput( JOYSTICK j, const Vector & v ) : vector( v ),
-                                                              joystick( j ),
-                                                              direction( v.destination( ).rotate( -half( RIGHT_ANGLE ) ).in_quadrant( Q1 ) ? UP : v.destination( ).rotate( -half( RIGHT_ANGLE ) ).in_quadrant( Q3 ) ? DOWN
-                                                                                                                                              : v.destination( ).rotate( -half( RIGHT_ANGLE ) ).in_quadrant( Q2 )   ? LEFT
-                                                                                                                                              : v.destination( ).rotate( -half( RIGHT_ANGLE ) ).in_quadrant( Q4 )   ? RIGHT
-                                                                                                                                                                                                                    : NO_DIRECTION ) { }
+    ControllerJoystickInput( Joystick j, const Vector & v )
+        : vector( v ),
+          joystick( j ),
+          direction( v.destination( ).rotate( -half( RIGHT_ANGLE ) ).in_quadrant( Q1 ) ? UP : v.destination( ).rotate( -half( RIGHT_ANGLE ) ).in_quadrant( Q3 ) ? DOWN
+                                                                                          : v.destination( ).rotate( -half( RIGHT_ANGLE ) ).in_quadrant( Q2 )   ? LEFT
+                                                                                          : v.destination( ).rotate( -half( RIGHT_ANGLE ) ).in_quadrant( Q4 )   ? RIGHT
+                                                                                                                                                                : NO_DIRECTION ) { }
 
     const Vector vector;
-    const JOYSTICK joystick;
-    const DIRECTION direction;
+    const Joystick joystick;
+    const Direction direction;
 };
 
 } // namespace axn

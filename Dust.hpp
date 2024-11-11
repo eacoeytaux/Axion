@@ -12,8 +12,9 @@ public:
     virtual ~Dust( ) { }
     Dust( World *, const Coordinate & position, const Vector & velocity, const Color & color );
 
-    virtual const Dust & render( ) const override;
-    virtual Dust & update( ) override;
+    virtual void render( ) override;
+
+    virtual void update( ) override;
 
 private:
     Planc m_radius;

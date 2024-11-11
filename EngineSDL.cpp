@@ -2,31 +2,33 @@
 #include "World.hpp"
 
 #include "OGL.hpp"
+
 #include "OS.hpp"
+// -------------------- //
 #if defined( OS_WINDOWS )
-// ---------------- //
+// -------------------- //
 #include <SDL.h>
 #include <SDL_opengl.h>
+// #include <SDL_ttf.h>
 // #include <SDL_mixer.h>
-// #include <SDL_image.h>
-// ---------------- //
+// -------------------- //
 #elif defined( OS_APPLE )
-// ---------------- //
+// -------------------- //
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wquoted-include-in-framework-header"
-
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-
+// #include <SDL2_ttf/SDL_ttf.h>
 // #include <SDL2_mixer/SDL_mixer.h>
-// #include <SDL2_mixer/SDL_image.h>
-
 #pragma GCC diagnostic pop
-// ---------------- //
+// -------------------- //
 #elif defined( OS_LINUX )
-// ---------------- //
-// todo
-// ---------------- //
+// -------------------- //
+#include <SDL.h>
+#include <SDL_opengl.h>
+// #include <SDL_ttf.h>
+// #include <SDL_mixer.h>
+// -------------------- //
 #endif
 
 namespace axn
@@ -39,9 +41,9 @@ uint WINDOW_WIDTH;
 uint WINDOW_HEIGHT;
 bool ANTI_ALIAS = true;
 
-bool MUTED = true;
-dec VOLUME_INCREMENT = 0.0625;
+const dec VOLUME_INCREMENT = 0.0625;
 Slider<dec> VOLUME;
+bool MUTED = true;
 
 const uint MAX_CONTROLLERS = 4;
 SDL_Joystick * CONTROLLERS[ MAX_CONTROLLERS ];
@@ -93,13 +95,13 @@ void Engine::init_eng( const string _app_name )
     SDL_memset( &audio_spec_in, 0, sizeof( audio_spec_in ) );
     SDL_memset( &audio_spec_out, 0, sizeof( audio_spec_out ) );
 
-    audio_spec_in.freq = 44100;
     audio_spec_in.format = AUDIO_F32;
-    audio_spec_in.channels = 2;
     audio_spec_in.samples = 4096;
+    audio_spec_in.freq = 44100;
+    audio_spec_in.channels = 2;
 
-    assert_check = !SDL_OpenAudio( &audio_spec_in, &audio_spec_out );
-    Assert( assert_check, "SDL audio initialization failed: ", SDL_GetErrorStr( ) );
+    // assert_check = !SDL_OpenAudio( &audio_spec_in, &audio_spec_out );
+    // Assert( assert_check, "SDL audio initialization failed: ", SDL_GetErrorStr( ) );
 
     assert_check = SDL_JoystickEventState( SDL_ENABLE );
     Assert( assert_check, "SDL controller initialization failed: ", SDL_GetErrorStr( ) );
@@ -119,6 +121,7 @@ void Engine::close_eng( )
 void Engine::render_eng( )
 {
     SDL_GL_SwapWindow( WINDOW );
+    ogl::clear_screen( );
 }
 
 bool Engine::paused_eng( ) { return PAUSED; }
@@ -134,12 +137,11 @@ void Engine::sync_controllers_eng( )
 }
 
 uint Engine::current_ticks_eng( ) { return SDL_GetTicks( ); }
-void Engine::wait_eng( const uint _ticks )
+void Engine::wait_eng( const uint _ms )
 {
-    if( _ticks )
+    if( _ms )
     {
-        // Log( INFO_LOG, "waiting ms ............. ( %i )", ticks );
-        SDL_Delay( _ticks );
+        SDL_Delay( _ms );
     }
 }
 
@@ -186,7 +188,7 @@ void Engine::volume_down_eng( )
 uint Engine::screen_width_eng( ) { return WINDOW_WIDTH; }
 uint Engine::screen_height_eng( ) { return WINDOW_HEIGHT; }
 
-Coordinate world_position_from_event( const SDL_Event & event, World * world ) { return world->active_camera( )->screen_to_world( Coordinate( event.motion.x, event.motion.y ) ); }
+Coordinate world_position_from_event( const SDL_Event & event, World * world ) { return world->camera( )->screen_to_world( Coordinate( event.motion.x, event.motion.y ) ); }
 
 void Engine::input_eng( varray<Input *> & inputs, World * world )
 {
@@ -196,7 +198,7 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
     static int joystick_x_axis_right_new = 0;
     static int joystick_y_axis_right_new = 0;
 
-    SDL_Event event;
+    static SDL_Event event;
     while( SDL_PollEvent( &event ) )
     {
         switch( event.type )
@@ -263,7 +265,7 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
             case SDL_JOYBUTTONUP :
             case SDL_JOYBUTTONDOWN :
             {
-                ControllerButtonInput::DYNAMIC dynamic = ( event.type == SDL_JOYBUTTONUP ) ? ControllerButtonInput::RELEASED : ControllerButtonInput::PRESSED;
+                ControllerButtonInput::Dynamic dynamic = ( event.type == SDL_JOYBUTTONUP ) ? ControllerButtonInput::RELEASED : ControllerButtonInput::PRESSED;
 
                 switch( event.jbutton.button )
                 {
@@ -355,7 +357,7 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
                 // L2 and R2
                 if( ( event.jaxis.axis == 4 ) || ( event.jaxis.axis == 5 ) )
                 {
-                    ControllerButtonInput::DYNAMIC dynamic = ( ( event.jaxis.value > 1200 ) ? ControllerButtonInput::PRESSED : ControllerButtonInput::RELEASED );
+                    ControllerButtonInput::Dynamic dynamic = ( ( event.jaxis.value > 1200 ) ? ControllerButtonInput::PRESSED : ControllerButtonInput::RELEASED );
                     if( event.jaxis.axis == 4 )
                     { // L2
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::L2_BUTTON, dynamic ) );
@@ -402,7 +404,7 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
                             }
                             else
                             {
-                                // inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::LEFT_JOYSTICK, ZERO_VECTOR ) );
+                                inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::LEFT_JOYSTICK, ZERO_VECTOR ) );
                                 break;
                             }
                         }

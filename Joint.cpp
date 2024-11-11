@@ -2,7 +2,7 @@
 
 Joint::Joint( const Coordinate & _c1, const Planc & _arm_length_1, const Planc & _arm_length_2, const Coordinate & _c2, const bool _inward ) : m_c1( _c1 ), m_c2( _c2 ), m_arm_length_1( _arm_length_1 ), m_arm_length_2( _arm_length_2 ), m_inward( _inward )
 {
-    // Assert( in_range( m_c1.distance( m_c2 ), m_arm_length_1 + m_arm_length_2, m_arm_length_1 - m_arm_length_2 ), "joint is impossible" );
+    // Assert( in_range( m_c1.distance_to( m_c2 ), m_arm_length_1 + m_arm_length_2, m_arm_length_1 - m_arm_length_2 ), "joint is impossible" );
 }
 
 Coordinate Joint::c1( ) const
@@ -24,7 +24,7 @@ Coordinate Joint::joint( ) const
 
     if( a < b + c )
     {
-        return VectorA( Angle( flipped<dec>( acos( ( pow( a, 2 ) + pow( b, 2 ) - pow( c, 2 ) ) / ( a * b * 2.0 ) ), m_inward ) ) + v.angle( ), arm_length_1( ), c1( ) );
+        return VectorA( Angle( negative<dec>( acos( ( square( a ) + square( b ) - square( c ) ) / ( a * b * TWO ) ), m_inward ) ) + v.angle( ), arm_length_1( ), c1( ) );
     }
     else
     {

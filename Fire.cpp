@@ -1,5 +1,4 @@
 #include "Fire.hpp"
-
 #include "World.hpp"
 
 using mtmercy::Fire;
@@ -28,34 +27,39 @@ const dec TINT_INTENSITY = 0.125;
 
 Fire::Fire( World * world, const Coordinate & _position ) : Object( world, _position )
 {
-    drawing_always_dirty( true );
+    needs_render_always( true );
 
-    gravity_ratio( 0.0 );
+    no_gravity( );
     space( Rectangle( FLAME_ORANGE_RADIUS.half( ), FLAME_ORANGE_RADIUS.half( ) ) );
 
     flame_timer.reset( FLAME_WAIT.min( ) );
 }
 
-const Fire & Fire::render( ) const
+void Fire::render( )
 {
     Object::render( );
 
     for_each( flame, m_flames_orange )
-        draw( FLAME_COLOR_ORANGE, Polygon::equilateral( 4, flame.radius.half( ), flame.offset ) );
+    {
+        draw( FLAME_COLOR_ORANGE, Polygon::equilateral( FOUR, flame.radius.half( ), flame.offset ) );
+    }
 
     for_each( flame, m_flames_yellow )
-        draw( FLAME_COLOR_ORANGE, Polygon::equilateral( 4, flame.radius.half( ) * FLAME_YELLOW_OUTLINE_RATIO, flame.offset ) );
+    {
+        draw( FLAME_COLOR_ORANGE, Polygon::equilateral( FOUR, flame.radius.half( ) * FLAME_YELLOW_OUTLINE_RATIO, flame.offset ) );
+    }
 
     for_each( flame, m_flames_yellow )
-        draw( FLAME_COLOR_YELLOW, Polygon::equilateral( 4, flame.radius.half( ), flame.offset ) );
-
-    return *this;
+    {
+        draw( FLAME_COLOR_YELLOW, Polygon::equilateral( FOUR, flame.radius.half( ), flame.offset ) );
+    }
 }
 
-Fire & Fire::update( )
+void Fire::update( )
 {
     Object::update( );
 
+    // todo move to constructor?
     clear_light_sources( );
     add_light_source( position( ), LIGHT_DISTANCE );
     add_light_source( position( ), TINT_DISTANCE, Color( FLAME_COLOR_ORANGE, TINT_INTENSITY ), TINT_FLICKER );
@@ -73,16 +77,14 @@ Fire & Fire::update( )
         flame.radius -= min( FLAME_ORANGE_SHRINK_RATE, flame.radius );
         flame.offset += VectorA( Angle( RIGHT_ANGLE_1 + Random::rAngle( -FLAME_DEVIATION, FLAME_DEVIATION ) ), FLAME_YELLOW_SPEED ) + ( world( )->wind( ) / FLAME_WIND_RESISTANCE );
     }
-    m_flames_orange.remove_if( []( const Flame & flame )
-                               { return flame.radius < FLAME_RADIUS_MIN; } );
+    m_flames_orange.erase_if( []( const Flame & flame )
+                              { return flame.radius < FLAME_RADIUS_MIN; } );
 
     for_each( flame, m_flames_yellow )
     {
         flame.radius -= min( FLAME_YELLOW_SHRINK_RATE, flame.radius );
         flame.offset += VectorA( Angle( RIGHT_ANGLE_1 + Random::rAngle( -FLAME_DEVIATION, FLAME_DEVIATION ) ), FLAME_ORANGE_SPEED ) + ( world( )->wind( ) / FLAME_WIND_RESISTANCE );
     }
-    m_flames_yellow.remove_if( []( const Flame & flame )
-                               { return flame.radius < FLAME_RADIUS_MIN; } );
-
-    return *this;
+    m_flames_yellow.erase_if( []( const Flame & flame )
+                              { return flame.radius < FLAME_RADIUS_MIN; } );
 }

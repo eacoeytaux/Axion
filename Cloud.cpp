@@ -1,5 +1,4 @@
 #include "Cloud.hpp"
-
 #include "World.hpp"
 #include "Player.hpp"
 
@@ -27,10 +26,12 @@ const Span<Planc> SMALL_PUFF_DISTANCE = { ( LARGE_PUFF_RADIUS.max( ) * PUFF_OUTL
 
 Cloud::Cloud( World * world ) : Object( world )
 {
-    drawing_always_dirty( true );
+    background( true );
+    
+    needs_render_always( true );
 
     z( 0.1 );
-    gravity_ratio( 0.0 );
+    no_gravity( );
     terrain_boundaries( false );
 
     // set location
@@ -82,20 +83,16 @@ Planc Cloud::max_dx( ) { return ( ( LARGE_PUFF_RADIUS.max( ) + LARGE_PUFF_DISTAN
 
 Planc Cloud::max_dy( ) { return ( LARGE_PUFF_RADIUS.max( ) + LARGE_PUFF_DISTANCE.max( ) + SMALL_PUFF_RADIUS.max( ) + SMALL_PUFF_DISTANCE.max( ) ); }
 
-const Cloud & Cloud::render( ) const
+void Cloud::render( )
 {
     Object::render( );
 
     draw( m_cloud_drawing );
-
-    return *this;
 }
 
-Cloud & Cloud::update( )
+void Cloud::update( )
 {
     velocity( world( )->wind( ) * WIND_SCALE );
 
     Object::update( );
-
-    return *this;
 }

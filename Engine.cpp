@@ -1,5 +1,4 @@
 #include "Engine.hpp"
-
 #include "World.hpp"
 
 namespace axn
@@ -9,14 +8,37 @@ namespace axn
 // define debug global statics here
 bool Debug::active = false;
 
-bool STEP = false;
-void Engine::step( ) { STEP = true; }
+bool b_step = false;
+void Engine::step( ) { b_step = true; }
 #endif
 
 #define check_quit( f ) \
     f;                  \
+                        \
     if( quit_break )    \
-        break;
+    {                   \
+        break;          \
+    }
+
+#define try_catch_error( f ) \
+    try                      \
+    {                        \
+        f;                   \
+    }                        \
+    catch( ... )             \
+    {                        \
+        errored = true;      \
+    }
+
+#define try_return_error( f, err ) \
+    try                            \
+    {                              \
+        f;                         \
+    }                              \
+    catch( ... )                   \
+    {                              \
+        return err;                \
+    }
 
 bool errored = false;
 bool quit_break = false;
@@ -38,27 +60,14 @@ error Engine::run( World * world, const string _app_name )
     {
         return error_todo;
     }
+
     running = true;
 
 #ifdef AXN_DEBUG
-    try
-    {
-        Logger::init( );
-    }
-    catch( ... )
-    {
-        return error_todo;
-    }
+    try_return_error( Logger::init( ), error_todo );
 #endif
 
-    try
-    {
-        Random::rseed( );
-    }
-    catch( ... )
-    {
-        return error_todo;
-    }
+    try_return_error( Random::seed( ), error_todo );
 
     varray<Input *> inputs;
     auto clear_inputs = [ & ]( )
@@ -73,6 +82,7 @@ error Engine::run( World * world, const string _app_name )
     try
     {
         init_eng( _app_name );
+
         world->init( );
 
         while( !quit_break )
@@ -90,10 +100,10 @@ error Engine::run( World * world, const string _app_name )
             else
             {
 #ifdef AXN_DEBUG
-                if( STEP )
+                if( b_step )
                 {
                     check_quit( world->update( ); );
-                    STEP = false;
+                    b_step = false;
                 }
 #endif
                 world->pause( true );
@@ -102,7 +112,17 @@ error Engine::run( World * world, const string _app_name )
             check_quit( world->render( ); );
             check_quit( render_eng( ); );
 
-            wait_eng( (int)( max( 0.0, ( 1000.0 / (dec)FPS ) - ( current_ticks_eng( ) - start_ticks ) ) ) );
+            int ms = ( 1000.0 / (dec)FPS ) - ( current_ticks_eng( ) - start_ticks );
+
+            if( ms > 0 )
+            {
+                // Log( INFO_LOG, "waiting ms ............. ( %i )", _ms );
+                wait_eng( ms );
+            }
+            else
+            {
+                // Log( INFO_LOG, "missed ms .............. ( %i )", -ms );
+            }
         }
     }
     catch( ... )
@@ -110,36 +130,14 @@ error Engine::run( World * world, const string _app_name )
         errored = true;
     }
 
-    clear_inputs( );
-
-    try
-    {
-        safe_delete( world );
-    }
-    catch( ... )
-    {
-        errored = true;
-    }
+    try_catch_error( clear_inputs( ) );
+    try_catch_error( safe_delete( world ); );
 
 #ifdef AXN_DEBUG
-    try
-    {
-        Logger::close( );
-    }
-    catch( ... )
-    {
-        errored = true;
-    }
+    try_catch_error( Logger::close( ) );
 #endif
 
-    try
-    {
-        close_eng( );
-    }
-    catch( ... )
-    {
-        errored = true;
-    }
+    try_catch_error( close_eng( ) );
 
     running = false;
 

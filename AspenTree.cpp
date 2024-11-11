@@ -1,5 +1,4 @@
 #include "AspenTree.hpp"
-
 #include "World.hpp"
 
 using mtmercy::AspenTree;
@@ -20,6 +19,8 @@ const Color TRUNK_MARK_COLOR = BLACK;
 const Color LEAF_COLOR = RED;
 } // namespace
 
+namespace
+{
 Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc & _base_width, const uint _branch_count );
 Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc & _base_width, const uint _branch_count )
 {
@@ -34,8 +35,8 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
 
     if( _draw_leaves )
     {
-        dec leaves_top = 1.f;
-        dec leaves_bottom = 0.8f;
+        dec leaves_top = 1.0;
+        dec leaves_bottom = 0.8;
 
         for_range( i, 10 )
         {
@@ -69,6 +70,7 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
         }
     }
 
+    tree_drawing.draw( TRUNK_COLOR, Circle( half( _base_width ) ) );
     tree_drawing.draw( TRUNK_COLOR, Polygon( { base_right,
                                                top,
                                                base_left } ) );
@@ -79,33 +81,37 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
 
         Coordinate branch_base = Vector( trunk ).magnitude( trunk.magnitude( ) * branch_height );
 
+        bool left;
+        bool right;
         bool both = Random::rbool( 0 ); // todo
-        bool left = both;
-        bool right = both;
-        if( !both )
+        if( both )
         {
-            if( Random::rbool( ) )
-                left = true;
-            else
-                right = true;
+            left = true;
+            right = true;
         }
+        else
+        {
+            left = Random::rbool( );
+            right = !left;
+        }
+
+        auto draw_branch = [ & ]( bool left )
+        {
+            Drawing branch_drawing = draw_trunk( false, _length * Random::rdec( BRANCH_LENGTH ) * branch_remaining, _base_width * branch_remaining, 0 );
+
+            branch_drawing.rotate( left ? BRANCH_OFFSET : -BRANCH_OFFSET );
+            branch_drawing.move( Vector( branch_base ) );
+            tree_drawing.draw( branch_drawing );
+        };
 
         if( left )
         {
-            Drawing branch_drawing1 = draw_trunk( false, _length * Random::rdec( BRANCH_LENGTH ) * branch_remaining, _base_width * branch_remaining, 0 );
-
-            branch_drawing1.rotate( BRANCH_OFFSET );
-            branch_drawing1.move( Vector( branch_base ) );
-            tree_drawing.draw( branch_drawing1 );
+            draw_branch( true );
         }
 
         if( right )
         {
-            Drawing branch_drawing2 = draw_trunk( false, _length * Random::rdec( BRANCH_LENGTH ) * branch_remaining, _base_width * branch_remaining, 0 );
-
-            branch_drawing2.rotate( -BRANCH_OFFSET );
-            branch_drawing2.move( Vector( branch_base ) );
-            tree_drawing.draw( branch_drawing2 );
+            draw_branch( false );
         }
 
         branch_height += branch_remaining * Random::rdec( BRANCH_BASE_HEIGHT );
@@ -122,10 +128,13 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
 
     return tree_drawing;
 };
+} // namespace
 
 AspenTree::AspenTree( World * world, const Coordinate & _root, const dec _z ) : Object( world, _root )
 {
-    persist_drawing( true );
+    background( true );
+    
+    persist_render( true );
 
     stationary( true );
 
@@ -137,5 +146,7 @@ AspenTree::AspenTree( World * world, const Coordinate & _root, const dec _z ) : 
     Planc base_width = Random::rPlanc( TRUNK_BASE_WIDTH );
     uint branch_count = Random::rint( BRANCH_COUNT );
 
-    draw( draw_trunk( true, height, base_width, branch_count ).rotate( sway ) );
+    Drawing trunk = draw_trunk( true, height, base_width, branch_count );
+    trunk.rotate( sway );
+    draw( trunk );
 }

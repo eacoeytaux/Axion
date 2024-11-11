@@ -3,6 +3,7 @@
 
 #include "Planc.hpp"
 #include "Coordinate.hpp"
+#include "Utility.hpp"
 
 namespace axn
 {
@@ -33,16 +34,21 @@ public:
     dec sin( dec multiplier = 1.0 ) const;
     dec cos( dec multiplier = 1.0 ) const;
 
-    Quadrant quadrant( ) const;
-    Axis axis( ) const;
-    bool in_quadrant( Quadrant quadrant ) const;
-    bool on_axis( Axis axis ) const;
-
     Angle & flip( );
     Angle flipped( ) const;
 
     Angle half( ) const;
-    Angle & halve( );
+    
+    Quadrant quadrant( ) const;
+    Axis axis( ) const;
+    bool in_quadrant( Quadrant quadrant ) const;
+    bool on_axis( Axis axis ) const;
+    
+    bool right( ) const;
+    bool straight( ) const;
+    bool acute( ) const;
+    bool obtuse( ) const;
+    bool reflex( ) const;
 
     operator dec( ) const { return m_radians; }
 
@@ -125,14 +131,6 @@ private:
     dec m_degrees = 0.0;
 #endif
 };
-
-const dec TAU = 6.283185307179586476925;
-const dec PI = 3.141592653589793236926;
-const dec RIGHT_ANGLE = 1.570796326794896618463;
-const dec RIGHT_ANGLE_0 = RIGHT_ANGLE * 0.0;
-const dec RIGHT_ANGLE_1 = RIGHT_ANGLE * 1.0;
-const dec RIGHT_ANGLE_2 = RIGHT_ANGLE * 2.0;
-const dec RIGHT_ANGLE_3 = RIGHT_ANGLE * 3.0;
 
 } // namespace geometry
 } // namespace axn

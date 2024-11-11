@@ -1,20 +1,19 @@
 #ifndef Sky_hpp
 #define Sky_hpp
 
-#include "Background.hpp"
 #include "Cloud.hpp"
 
 namespace mtmercy
 {
 
-class Sky : public Background
+class Sky : public Object
 {
 public:
     virtual ~Sky( ) { }
     Sky( World * );
 
-    virtual const Sky & render( ) const override;
-    virtual Sky & update( ) override;
+    virtual void render( ) override;
+    virtual void update( ) override;
 
 private:
     bool m_has_clouds;

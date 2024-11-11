@@ -1,5 +1,4 @@
 #include "PineTree.hpp"
-
 #include "World.hpp"
 
 using mtmercy::PineTree;
@@ -32,7 +31,9 @@ const Color LEAVES_BORDER_COLOR = Color::rgb( 0x008000 );
 
 PineTree::PineTree( World * world, const Coordinate & _root, const dec _z ) : Object( world, _root )
 {
-    drawing_always_dirty( true );
+    background( true );
+    
+    needs_render_always( true );
 
     z( _z );
 
@@ -85,7 +86,7 @@ PineTree::PineTree( World * world, const Coordinate & _root, const dec _z ) : Ob
         m_leave_bunches_rotation_points.insert_back( last_top );
 
         Drawing & leaves = m_leave_bunches_and_trunk.insert_back( );
-        { // TODO change to border
+        { // todo change to border
             Polygon leaf_border = Polygon::expand( Polygon( leaf_bunch ), LEAVES_BORDER_WIDTH );
             leaves.draw( LEAVES_BORDER_COLOR, leaf_border );
         }
@@ -96,7 +97,7 @@ PineTree::PineTree( World * world, const Coordinate & _root, const dec _z ) : Ob
     }
 }
 
-const PineTree & PineTree::render( ) const
+void PineTree::render( )
 {
     Object::render( );
 
@@ -121,6 +122,4 @@ const PineTree & PineTree::render( ) const
 
         sway_angle += d_sway_angle;
     }
-
-    return *this;
 }

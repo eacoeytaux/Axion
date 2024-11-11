@@ -1,5 +1,4 @@
 #include "Bush.hpp"
-
 #include "World.hpp"
 
 using mtmercy::Bush;
@@ -16,7 +15,9 @@ const Color BUSH_COLOR = GREEN;
 
 Bush::Bush( World * world, const Coordinate & _root, const dec _z ) : Object( world, _root )
 {
-    persist_drawing( true );
+    background( true );
+    
+    persist_render( true );
 
     z( _z );
 

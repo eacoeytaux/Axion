@@ -12,8 +12,8 @@ public:
     virtual ~Snail( ) { }
     Snail( World *, const Coordinate & position );
 
-    virtual const Snail & render( ) const override;
-    virtual Snail & update( ) override;
+    virtual void render( ) override;
+    virtual void update( ) override;
 
 private:
 };

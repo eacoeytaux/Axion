@@ -2,23 +2,28 @@
 #define Debug_hpp
 
 #include "OS.hpp"
+// -------------------- //
 #if defined( OS_WINDOWS )
-// ---------------- //
+// -------------------- //
 #ifdef _DEBUG
 #define AXN_DEBUG
 #endif
-// ---------------- //
+// -------------------- //
 #elif defined( OS_APPLE )
-// ---------------- //
+// -------------------- //
 #ifdef DEBUG
 #define AXN_DEBUG
 #endif
-// ---------------- //
+// -------------------- //
 #elif defined( OS_LINUX )
-// ---------------- //
-// todo
-// ---------------- //
+// -------------------- //
+#ifdef DEBUG
+#define AXN_DEBUG
 #endif
+// -------------------- //
+#endif
+
+#define AXN_DEBUG
 
 #ifdef AXN_DEBUG
 #define breakpoint Debug::breakpointf( );

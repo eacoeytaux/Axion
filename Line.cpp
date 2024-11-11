@@ -1,6 +1,6 @@
 #include "Line.hpp"
 
-Line::Line( ) : m_c1( ORIGIN ), m_c2( ORIGIN ) { evaluate( ); }
+Line::Line( ) : m_c1( ORIGIN ), m_c2( ORIGIN ) { }
 Line::Line( const Coordinate & _c1, const Coordinate & _c2 ) : m_c1( _c1 ), m_c2( _c2 ) { evaluate( ); }
 Line::Line( const Vector & _v ) : m_c1( _v.origin( ) ), m_c2( _v.destination( ) ) { evaluate( ); }
 
@@ -87,36 +87,14 @@ Vector Line::vector( ) const
     return Vector( c1( ), c2( ) );
 }
 
-Line & Line::transform( const Transform & t )
+Line & Line::transform( const Transform & _transform )
 {
-    m_c1 = t.transform( m_c1 );
-    m_c2 = t.transform( m_c2 );
+    Transformable::transform( _transform );
+    
+    m_c1 = _transform.transform( m_c1 );
+    m_c2 = _transform.transform( m_c2 );
+    
     return evaluate( );
-}
-
-Line & Line::move( const Vector & _v )
-{
-    return transform( MoveTransform( _v ) );
-}
-
-Line & Line::stretch( const Vector & _v )
-{
-    return transform( StretchTransform( _v ) );
-}
-
-Line & Line::scale( const dec _scale, const Coordinate & _origin )
-{
-    return transform( ScaleTransform( _scale, _origin ) );
-}
-
-Line & Line::rotate( const Angle & _a, const Coordinate & _origin )
-{
-    return transform( RotateTransform( _a, _origin ) );
-}
-
-Line & Line::mirror( const Vector & _axis )
-{
-    return transform( ReflectionTransform( _axis ) );
 }
 
 bool Line::vertical( ) const { return m_vertical; }
@@ -125,7 +103,55 @@ bool Line::horizontal( ) const { return m_horizontal; }
 Planc Line::m( ) const { return m_m; }
 Planc Line::b( ) const { return m_b; }
 
-Planc Line::length( ) const { return c1( ).distance( c2( ) ); }
+Planc Line::length( ) const { return c1( ).distance_to( c2( ) ); }
+
+Coordinate Line::right( ) const
+{
+    if( c1( ).x( ) >= c2( ).x( ) )
+    {
+        return c1( );
+    }
+    else
+    {
+        return c2( );
+    }
+}
+
+Coordinate Line::left( ) const
+{
+    if( c1( ).x( ) <= c2( ).x( ) )
+    {
+        return c1( );
+    }
+    else
+    {
+        return c2( );
+    }
+}
+
+Coordinate Line::high( ) const
+{
+    if( c1( ).y( ) >= c2( ).y( ) )
+    {
+        return c1( );
+    }
+    else
+    {
+        return c2( );
+    }
+}
+
+Coordinate Line::low( ) const
+{
+    if( c1( ).y( ) <= c2( ).y( ) )
+    {
+        return c1( );
+    }
+    else
+    {
+        return c2( );
+    }
+}
 
 Planc Line::x( const Planc & _y ) const
 {
@@ -177,54 +203,6 @@ Planc Line::y( const Planc & _x ) const
     return P0; // no intersection found
 }
 
-Coordinate Line::right( ) const
-{
-    if( c1( ).x( ) >= c2( ).x( ) )
-    {
-        return c1( );
-    }
-    else
-    {
-        return c2( );
-    }
-}
-
-Coordinate Line::left( ) const
-{
-    if( c1( ).x( ) <= c2( ).x( ) )
-    {
-        return c1( );
-    }
-    else
-    {
-        return c2( );
-    }
-}
-
-Coordinate Line::high( ) const
-{
-    if( c1( ).y( ) >= c2( ).y( ) )
-    {
-        return c1( );
-    }
-    else
-    {
-        return c2( );
-    }
-}
-
-Coordinate Line::low( ) const
-{
-    if( c1( ).y( ) <= c2( ).y( ) )
-    {
-        return c1( );
-    }
-    else
-    {
-        return c2( );
-    }
-}
-
 bool Line::in_box( const Coordinate & _c, const bool _inclusive ) const { return ( in_range( _c.x( ), left( ).x( ), right( ).x( ), _inclusive ) && in_range( _c.y( ), low( ).y( ), high( ).y( ), _inclusive ) ); }
 
 Planc line_eq( const Line & _l, const Coordinate & _c )
@@ -240,25 +218,25 @@ Planc line_eq( const Line & _l, const Coordinate & _c )
 bool Line::on( const Coordinate & _c ) const
 {
     Planc eq = line_eq( *this, _c );
-    return ( eq == 0.0 );
+    return ( eq == ZERO );
 }
 
 bool Line::above( const Coordinate & _c, const bool _inclusive ) const
 {
     Planc eq = line_eq( *this, _c );
-    if( _inclusive && ( eq == 0.0 ) )
+    if( _inclusive && ( eq == ZERO ) )
         return true;
     else
-        return ( eq < 0.0 );
+        return ( eq < ZERO );
 }
 
 bool Line::below( const Coordinate & _c, const bool _inclusive ) const
 {
     Planc eq = line_eq( *this, _c );
-    if( _inclusive && ( eq == 0.0 ) )
+    if( _inclusive && ( eq == ZERO ) )
         return true;
     else
-        return ( eq > 0.0 );
+        return ( eq > ZERO );
 }
 
 bool Line::intersects( const Line & _line, const bool _inclusive ) const
@@ -325,16 +303,24 @@ Coordinate Line::intersection( const Line & _line ) const
             return c1( );
         }
     }
-    else if( ( m( ) == _line.m( ) ) && ( b( ) == _line.b( ) ) )
+    else if( ( m( ) == _line.m( ) ) )
     {
-        // if( in_range( c1( ).x( ), _line.left( ).x( ), _line.right( ).x( ) ) ) // todo
+        if( b( ) == _line.b( ) )
         {
-            return c1( );
+            // if( in_range( c1( ).x( ), _line.left( ).x( ), _line.right( ).x( ) ) ) // todo
+            {
+                return c1( );
+            }
+            // if( in_range( _line.c1( ).x( ), low( ).x( ), high( ).x( ) ) ) // todo
+            // {
+            //    return _line.c1( );
+            // }
         }
-        // if( in_range( _line.c1( ).x( ), low( ).x( ), high( ).x( ) ) ) // todo
-        // {
-        //    return _line.c1( );
-        // }
+        else
+        {
+            // TODO
+            return COORDINATE_INFINITY_NEGATIVE;
+        }
     }
     else
     {
@@ -377,10 +363,6 @@ Coordinate Line::intersection( const Line & _line ) const
 
     return COORDINATE_INFINITY_NEGATIVE;
 }
-
-bool Line::operator==( const Line & _line ) const { return ( ( high( ) == _line.high( ) ) && ( low( ) == _line.low( ) ) ) || ( ( right( ) == _line.right( ) ) && ( left( ) == _line.left( ) ) ); }
-
-bool Line::operator!=( const Line & _line ) const { return !( *this == _line ); }
 
 Line Line::operator+( const Vector & _v ) const { return Line( c1( ) + _v, c2( ) + _v ); }
 

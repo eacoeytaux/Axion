@@ -9,65 +9,136 @@
 
 namespace axn
 {
+
+namespace reality
+{
+
+class World;
+class Object;
+
+} // namespace reality
+
 namespace graphics
 {
 
 class Camera
 {
 public:
-    virtual ~Camera( ) { }
-    Camera( const Coordinate & target = ORIGIN, const Planc & width = 0.0, const Planc & height = 0.0, dec zoom = 1.0 );
+    class HeadUpDisplay;
+    class ScreenEffect;
 
-    Coordinate screen_to_world( const Coordinate & screen_position ) const;
-    Coordinate world_to_screen( const Coordinate & world_position ) const;
-    bool in_view( const Coordinate & world_position ) const;
+    virtual ~Camera( ) { clear_all( ); }
+    Camera( World * world, const Planc & width = 0.0, const Planc & height = 0.0, dec zoom = 1.0 );
 
-    uint age( ) const;
+    uint age( ) const { return m_age; }
 
-    Camera & capture( const Visible * subject );
-    Camera & capture( const varray<const Visible *> & subjects )
+    void update( );
+    void render( );
+
+    void clear_all( );
+    void clear_subjects( );
+    void clear_screen_effects( );
+    void clear_hud_elements( );
+
+    void capture( Visible * subject, bool should_delete = false );
+    void capture( varray<Visible *> & subjects, bool should_delete = false )
     {
-        for_each( subject, subjects ) capture( subject );
-        return *this;
+        for_each( subject, subjects )
+        {
+            capture( subject, should_delete );
+        }
     }
 
-    Camera& capture(const Visible & subject);
-    Camera& capture(const varray<Visible>& subjects)
+    void add_screen_effect( ScreenEffect * effect, bool should_delete = true );
+    void add_screen_effects( varray<ScreenEffect *> & effects, bool should_delete = true )
     {
-        for_each(subject, subjects) capture(subject);
-        return *this;
+        for_each( effect, effects )
+        {
+            add_screen_effect( effect, should_delete );
+        }
     }
 
-    Camera & lighting( const Lighting * lighting );
-    Camera & clear_lighting( );
+    void remove_screen_effect( ScreenEffect * hud_element );
+    void remove_screen_effects( varray<ScreenEffect *> & effects )
+    {
+        for_each( effect, effects )
+        {
+            remove_screen_effect( effect );
+        }
+    }
 
-    Camera & clear( );
-    Camera & render( );
+    void add_hud_element( HeadUpDisplay * hud_element, bool should_delete = true );
+    void add_hud_elements( varray<HeadUpDisplay *> & hud_elements, bool should_delete = true )
+    {
+        for_each( hud_element, hud_elements )
+        {
+            add_hud_element( hud_element, should_delete );
+        }
+    }
 
-    Camera & update( const Coordinate & target, bool hard_target_set = false );
-    Camera & update( bool hard_target_set = false ) { return update( target( ), hard_target_set ); }
+    void remove_hud_element( HeadUpDisplay * hud_element );
+    void remove_hud_elements( varray<HeadUpDisplay *> & hud_elements )
+    {
+        for_each( hud_element, hud_elements )
+        {
+            remove_hud_element( hud_element );
+        }
+    }
+
+#ifdef AXN_DEBUG
+    void capture_debug( Visible * subject, bool should_delete = false );
+    void capture_debug( varray<Visible *> & subjects, bool should_delete = false )
+    {
+        for_each( subject, subjects )
+        {
+            capture_debug( subject, should_delete );
+        }
+    }
+#endif
 
     Planc width( ) const;
-    Camera & width( const Planc & );
+    void width( const Planc & );
     Planc height( ) const;
-    Camera & height( const Planc & );
+    void height( const Planc & );
 
     Coordinate center( ) const;
-    Camera & center( const Coordinate & );
+    void center( const Coordinate & );
+
+    FixedRectangle bounds( ) const;
 
     Coordinate target( ) const;
-    Camera & target( const Coordinate &, bool hard_set = false );
+    void target( const Coordinate &, bool hard_set = false );
 
     Vector target_offset( ) const;
 
     dec zoom( ) const;
-    Camera & zoom( dec );
+    void zoom( dec );
+    
+    dec min_zoom( ) const;
+    dec max_zoom( ) const;
 
-    Coordinate m_cursor_world_position; // TODO make private
+    bool show_hud( ) const;
+    void show_hud( bool );
+
+    dec hud_offset_percentage( ) const;
+    void hud_offset_percentage( dec );
+
+    bool in_view( const Coordinate & world_position ) const;
+
+    Coordinate screen_to_world( const Coordinate & screen_position ) const;
+    Coordinate world_to_screen( const Coordinate & world_position ) const;
+
+    Coordinate cursor_world_position( );
+    void cursor_world_position( const Coordinate & );
+    void cursor_world_position_reset( );
 
 private:
     Drawing cursor_drawing( ) const;
+#ifdef AXN_DEBUG
+    Drawing debug_overlay_drawing( ) const;
+#endif
 
+    World * m_world = nullptr;
     uint m_age = 0;
 
     Planc m_width, m_height;
@@ -76,10 +147,50 @@ private:
     dec m_zoom = 1.0;
     dec m_movement_ratio = 0.5;
 
-    varray<const Visible *> m_subjects;
-    varray<Visible *> m_owned_subjects; // subset of subjects that Camera needs to delete
+    Coordinate m_cursor_world_position;
 
-    const Lighting * m_lighting = nullptr;
+    varray<Visible *> m_subjects;
+    varray<Visible *> m_owned_subjects; // subset of subjects that camera needs to delete
+
+    varray<ScreenEffect *> m_screen_effects;
+    varray<ScreenEffect *> m_owned_screen_effects; // subset of screen effects that camera needs to delete
+
+    varray<HeadUpDisplay *> m_hud_elements;
+    varray<HeadUpDisplay *> m_owned_hud_elements; // subset of hud elements that camera needs to delete
+    dec m_hud_offset_percentage;
+    bool m_show_hud;
+
+#ifdef AXN_DEBUG
+    varray<Visible *> m_debug_subjects;
+    varray<Visible *> m_owned_debug_subjects; // subset of debug subjects that camera needs to delete
+#endif
+
+public:
+    class HeadUpDisplay : public Visible
+    {
+    public:
+        virtual ~HeadUpDisplay( ) { }
+        HeadUpDisplay( dec center_x_percent, dec center_y_percent, dec width_percent, dec height_percent );
+        
+        virtual void render( Camera * ) { Visible::render( ); }
+        
+        FixedRectangle bounds( Camera * ) const;
+
+    private:
+        dec m_center_x_percent;
+        dec m_center_y_percent;
+        dec m_width_percent;
+        dec m_height_percent;
+    };
+
+    class ScreenEffect : public Visible
+    {
+    public:
+        virtual ~ScreenEffect( ) { }
+        ScreenEffect( );
+
+        virtual void render( Camera * ) { Visible::render( ); }
+    };
 };
 
 } // namespace graphics

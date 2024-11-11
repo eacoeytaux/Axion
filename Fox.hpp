@@ -12,10 +12,7 @@ public:
     virtual ~Fox( ) { }
     Fox( World *, const Coordinate & position );
 
-    virtual const Fox & render( ) const override;
-    virtual Fox & update( ) override;
-
-private:
+    virtual void render( ) override;
 };
 
 } // namespace mtmercy

@@ -1,69 +1,272 @@
 #include "World.hpp"
-
 #include "Camera.hpp"
 #include "Player.hpp"
 #include "Terrain.hpp"
 #include "Lighting.hpp"
-#include "Background.hpp"
-#include "Foreground.hpp"
 
 namespace
 {
-const uint GRID_BLOCK_SIZE = 105;
+const uint GRID_BLOCK_SIZE = 256;
 const uint START_AGE = 0; // 1024;
 const dec CAMERA_ZOOM_RATIO = 0.96875;
 } // namespace
 
 World::World( )
 {
-    m_objects = list<Object *>( );
-    m_solid_objects = list<Object *>( );
+    m_objects = varray<Object *>( );
     m_object_queue = queue<Object *>( );
+    m_foreground_objects = varray<Object *>( );
+    m_background_objects = varray<Object *>( );
     destroy( ); // from destruction comes creation
 }
 
-World::~World( ) { destroy( ); }
-
-World & World::create( )
+World::~World( )
 {
-    m_lighting = new Lighting( );
-    add_object( m_terrain = generate_terrain( ) );
-    return *this;
+    destroy( );
 }
 
-World & World::destroy( )
+void World::create( const FixedRectangle & _bounds )
+{
+    bounds( _bounds );
+
+    m_terrain = generate_terrain( );
+    assign_layer_position( m_terrain );
+
+    m_lighting = new Lighting( );
+
+    // TODO camera width / height should be independent of screen size
+    m_camera = new Camera( this, Engine::screen_width( ), Engine::screen_height( ) );
+}
+
+void World::destroy( )
 {
     clear_objects( );
+
+    safe_delete( m_camera );
     safe_delete( m_lighting );
     safe_delete( m_terrain );
-    safe_delete( m_background );
-    safe_delete( m_foreground );
-    return *this;
 }
 
-World & World::init( )
+void World::init( )
 {
     m_age = 0;
 
-    bounds( FixedRectangle( 1500.0, 1500.0 ) );
-
     create( );
 
-    for_range( i, START_AGE ) update( ); // age world before adding player
+    // age world before adding player
+    for_range( i, START_AGE )
+    {
+        update( );
+    }
 
     add_player( Coordinate( 0.0, 300.0 ) );
-    m_active_camera = &m_player_cameras[ 0 ];
-    m_active_camera->target( m_players[ 0 ]->position( ), true );
-    m_active_camera->m_cursor_world_position = COORDINATE_INFINITY_NEGATIVE;
-
-    return *this;
 }
 
-World & World::reset( )
+void World::reset( )
 {
     destroy( );
     init( );
-    return *this;
+}
+
+void World::input( const varray<Input *> & _inputs )
+{
+    for_each( input, _inputs )
+    {
+        if( KeyInput * key_input = dynamic_cast<KeyInput *>( input ) )
+        {
+            KeyInput::Key key = key_input->key;
+            KeyInput::Dynamic dynamic = key_input->dynamic;
+
+            bool pressed = ( dynamic == KeyInput::PRESSED );
+            bool held = ( dynamic == KeyInput::HELD );
+            bool down = ( pressed || held );
+
+            switch( key )
+            {
+                case 27 :
+                { // esc key
+                    Engine::quit( );
+                    return;
+                }
+                case ';' :
+                {
+                    if( pressed )
+                    {
+                        reset( );
+                    }
+                    break;
+                }
+                case 'p' :
+                {
+                    if( pressed )
+                    {
+                        Engine::pause( !Engine::paused( ) );
+                    }
+                    break;
+                };
+                case 'c' :
+                {
+                    if( pressed )
+                    {
+                        Engine::sync_controllers( );
+                    }
+                    break;
+                };
+#ifdef AXN_DEBUG
+                case '\'' :
+                {
+                    if( pressed )
+                    {
+                        Engine::step( );
+                    }
+                    break;
+                };
+#endif
+                case 'm' :
+                {
+                    if( pressed )
+                    {
+                        Engine::mute( !Engine::muted( ) );
+                    }
+                    break;
+                }
+                case 'z' :
+                {
+                    if( pressed )
+                    {
+                        m_camera->zoom( 1.0 );
+                    }
+                    break;
+                };
+                case 'o' :
+                {
+                    if( pressed )
+                    {
+                        Engine::anti_alias( !Engine::anti_alias( ) );
+                    }
+                    break;
+                }
+                case 'l' :
+                {
+                    if( pressed )
+                    {
+                        m_lighting_active = !m_lighting_active;
+                    }
+                    break;
+                }
+                case 'h' :
+                {
+                    if( pressed )
+                    {
+                        m_camera->show_hud( !m_camera->show_hud( ) );
+                    }
+                    break;
+                }
+#ifdef AXN_DEBUG
+                case 'b' :
+                {
+                    if( pressed )
+                    {
+                        m_display_forebackground = !m_display_forebackground;
+                    }
+                    break;
+                }
+#endif
+                case '=' :
+                {
+                    Engine::volume_up( );
+                    break;
+                }
+                case '-' :
+                {
+                    Engine::volume_down( );
+                    break;
+                }
+                case '.' :
+                {
+                    if( down )
+                    {
+                        m_camera->zoom( m_camera->zoom( ) / CAMERA_ZOOM_RATIO );
+                    }
+                    break;
+                }
+                case ',' :
+                {
+                    if( down )
+                    {
+                        m_camera->zoom( m_camera->zoom( ) * CAMERA_ZOOM_RATIO );
+                    }
+                    break;
+                }
+                case '\\' :
+                {
+                    if( pressed )
+                    {
+                        Engine::show_cursor( !Engine::show_cursor( ) );
+                    }
+                    break;
+                }
+#ifdef AXN_DEBUG
+                case '`' :
+                {
+                    if( pressed )
+                    {
+                        Debug::active = !Debug::active;
+                    }
+                    break;
+                }
+#endif
+            }
+        }
+
+        if( MouseInput * mouse_input = dynamic_cast<MouseInput *>( input ) )
+        {
+            Coordinate position = mouse_input->position;
+            MouseInput::Dynamic dynamic = mouse_input->dynamic;
+            MouseInput::Button button = mouse_input->button;
+
+            if( dynamic == MouseInput::MOVE )
+            {
+                if( button == MouseInput::SCROLL_BUTTON )
+                {
+                    if( is_positive( position.y( ) ) )
+                    {
+                        m_camera->zoom( m_camera->zoom( ) / CAMERA_ZOOM_RATIO );
+                    }
+                    else if( is_negative( position.y( ) ) )
+                    {
+                        m_camera->zoom( m_camera->zoom( ) * CAMERA_ZOOM_RATIO );
+                    }
+                }
+                else
+                {
+                    m_camera->cursor_world_position( position );
+                }
+            }
+        }
+    }
+
+    if( !Engine::paused( ) )
+    {
+        for_each( input, _inputs )
+        {
+            for_each( player, m_players )
+            {
+                player->input( input );
+            }
+        }
+    }
+}
+
+void World::pause( bool paused )
+{
+    if( paused )
+    {
+        for_each( player, m_players )
+        {
+            player->clear_input( );
+        }
+    }
 }
 
 void World::render_bounds( Camera * camera )
@@ -82,7 +285,7 @@ void World::render_bounds( Camera * camera )
     dec percent_pulse = (dec)( PULSE = ( PULSE + 1 ) % PULSE_SPAN ) / (dec)( PULSE_SPAN );
     dec percent_color = (dec)( PULSE_COLOR = ( PULSE_COLOR + 1 ) % PULSE_COLOR_SPAN ) / (dec)( PULSE_COLOR_SPAN );
 
-    static ColorSlider rainbow[] = {
+    static ColorSlider rainbow[ 6 ] = {
         ColorSlider( RED, YELLOW ),
         ColorSlider( YELLOW, GREEN ),
         ColorSlider( GREEN, CYAN ),
@@ -101,41 +304,37 @@ void World::render_bounds( Camera * camera )
     }
 
     Drawing bounds_drawing;
-    bounds_drawing.draw( color.a( ( 1.0 - percent_pulse ) * PULSE_ALPHA_START ), bounds( ), BOUNDS_THICKNESS + ( percent_pulse * PULSE_THICKNESS * 2 ), true );
-    bounds_drawing.draw( color.a( 1.0 ), bounds( ), BOUNDS_THICKNESS, true );
-    
-    camera->capture( Visible( bounds_drawing ) );
+    bounds_drawing.draw( color, bounds( ), BOUNDS_THICKNESS, true, true );
+    bounds_drawing.draw( color.a( ( 1.0 - percent_pulse ) * PULSE_ALPHA_START ), bounds( ), BOUNDS_THICKNESS + ( percent_pulse * PULSE_THICKNESS * 2 ), true, true );
+
+    camera->capture( new Visible( bounds_drawing ), true );
 }
 
 #ifdef AXN_DEBUG
-void World::render_object_grid( Camera * camera, const bool _fill_blocks, std::function<bool(const Grid::Block& block)> fill_block)
+void World::render_object_grid( Camera * camera, const bool _fill_blocks, function<bool( const Grid::Block & block )> fill_block )
 {
     const dec GRID_THICKNESS = 1.0;
     const Color GRID_COLOR = WHITE.a( 0.25 );
     const Color FILLED_BLOCK_COLOR = GREEN.a( 0.25 );
 
-    Grid& grid = object_grid( );
+    Grid & grid = object_grid( );
     Coordinate top = bounds( ).top( );
     Coordinate bottom = bounds( ).bottom( );
 
     Drawing grid_drawing;
 
-    if (_fill_blocks)
+    if( _fill_blocks )
     {
-        for_range(x, grid.x_range().range())
-        {
-            for_range(y, grid.x_range().range())
+        grid.traverse( [ & ]( Grid::Block & block )
+                       {
+            if( fill_block( block ) )
             {
-                if (fill_block(grid.block(x, y)))
-                {
-                    grid_drawing.draw(FILLED_BLOCK_COLOR,
-                        Polygon({ Coordinate(bottom.x() + (GRID_BLOCK_SIZE * x), bottom.y() + (GRID_BLOCK_SIZE * y)),
-                                  Coordinate(min(bottom.x() + (GRID_BLOCK_SIZE * (x + 1)), top.x()), bottom.y() + (GRID_BLOCK_SIZE * y)),
-                                  Coordinate(min(bottom.x() + (GRID_BLOCK_SIZE * (x + 1)), top.x()), min(bottom.y() + (GRID_BLOCK_SIZE * (y + 1)), top.y( ))),
-                                  Coordinate(bottom.x() + (GRID_BLOCK_SIZE * x), min(bottom.y() + (GRID_BLOCK_SIZE * (y + 1) ), top.y( ) ) ) } ) );
-                }
-            }
-        }
+                grid_drawing.draw( FILLED_BLOCK_COLOR, Polygon( {
+                    Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y ) ),
+                    Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x + 1 ) ), top.x( ) ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y ) ),
+                    Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x + 1 ) ), top.x( ) ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y + 1 ) ), top.y( ) ) ),
+                    Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y + 1 ) ), top.y( ) ) ) } ) );
+            } } );
     }
 
     for_range( x, grid.x_range( ).range( ) - 1 )
@@ -147,289 +346,99 @@ void World::render_object_grid( Camera * camera, const bool _fill_blocks, std::f
     {
         grid_drawing.draw( GRID_COLOR, Line( Coordinate( bottom.x( ), bottom.y( ) + ( GRID_BLOCK_SIZE * ( y + 1 ) ) ), Coordinate( top.x( ), bottom.y( ) + ( GRID_BLOCK_SIZE * ( y + 1 ) ) ) ), GRID_THICKNESS, true );
     }
-    
+
     grid_drawing.draw( GRID_COLOR, bounds( ), GRID_THICKNESS, true );
 
-    camera->capture( Visible( grid_drawing ) );
-}
-
-void World::render_camera_fps( Camera * camera, const bool _show_crosshairs )
-{
-    const Camera * _camera = active_camera( );
-    const Planc _width = _camera->width( );
-    const Planc _height = _camera->height( );
-    const dec _zoom = _camera->zoom( );
-
-    const Angle DELTA = TAU / (dec)Engine::FPS;
-    const Planc LINE_THICKNESS = 1.0;
-    const Planc TARGET_RADIUS = 2.0;
-    const Planc FPS_RADIUS = 32.0;
-    const Color MAIN_COLOR = WHITE;
-    const Color TARGET_COLOR = RED;
-    const dec COLOR_OPACITY = 1.0;
-
-    static Angle delta;
-    delta -= DELTA;
-
-    Vector target_offset = _camera->target( ) - _camera->center( );
-
-    Polygon target_outer = Circle( ( TARGET_RADIUS + LINE_THICKNESS ) / _zoom, target_offset );
-    Polygon target_inner = Circle( ( TARGET_RADIUS ) / _zoom, target_offset );
-    Polygon target_cover = Circle( ( TARGET_RADIUS ) / _zoom );
-
-    Line fps_line = Line( ORIGIN, Coordinate( 0, FPS_RADIUS / _zoom ) ).rotate( delta );
-    Polygon fps_circle = Circle( FPS_RADIUS / _zoom );
-    Polygon fps_dot = Circle( TARGET_RADIUS / _zoom );
-
-    Drawing overlay_drawing;
-
-    if(_show_crosshairs )
-    {
-        overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
-                              Line( Coordinate( -half( _width ) / _zoom, 0.0 ),
-                                    Coordinate( half( _width ) / _zoom, 0.0 ) ),
-                              LINE_THICKNESS, true );
-        overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
-                              Line( Coordinate( 0.0, -half( _height ) / _zoom ),
-                                    Coordinate( 0.0, half( _height ) / _zoom ) ),
-                              LINE_THICKNESS, true );
-    }
-    
-    overlay_drawing.draw(MAIN_COLOR, target_outer, FILLED);
-    overlay_drawing.draw(TARGET_COLOR, target_inner, FILLED);
-    overlay_drawing.draw(MAIN_COLOR, target_cover, FILLED);
-
-    overlay_drawing.draw( MAIN_COLOR, fps_dot, FILLED );
-    overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ), fps_circle, LINE_THICKNESS, true );
-    overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ), fps_line, LINE_THICKNESS, true );
-
-    overlay_drawing.move( _camera->center( ) );
-
-    camera->capture( Visible( overlay_drawing ) );
+    camera->capture_debug( new Visible( grid_drawing ), true );
 }
 #endif
 
-World & World::render( )
+void World::render( )
 {
-    Camera * camera = m_active_camera;
-    camera->clear( );
+    Camera * camera = m_camera;
+    camera->clear_subjects( );
 
+    m_lighting->clear_light_sources( );
+    
+#ifdef AXN_DEBUG
+    if( m_display_forebackground )
+#endif
+        for_each( object, m_background_objects )
+        {
+            object->render_object( );
+            
+            if( object->visible( ) )
+            {
+                camera->capture( object );
+            }
+        }
+
+    m_terrain->render_object( );
+    camera->capture( m_terrain );
+    
 #ifdef AXN_DEBUG
     if( Debug::active )
     {
-        // when debugging don't show full darkness
-        m_lighting->darkness_intensity( min<dec>( m_lighting->darkness_intensity( ), 0.25 ) );
+        if( m_terrain->draw_debug )
+        {
+            Drawing debug_overlay = m_terrain->debug_overlay( );
+            debug_overlay.move( m_terrain->position( ) );
+            camera->capture_debug( new Visible( debug_overlay ), true );
+        }
+        
+        render_object_grid( camera, true, []( const Grid::Block & block ) { return block.objects.size( ); } );
     }
 #endif
 
-    m_lighting->clear_light_sources( );
-
     for_each( object, m_objects )
     {
-        for_each( light, object->lights( ) ) { m_lighting->add_light_source( light ); }
-        if( object->needs_render( ) )
+        for_each( light, object->lights( ) )
         {
-            object->render_object( );
+            m_lighting->add_light_source( light );
         }
+
+        object->render_object( );
+
         if( object->visible( ) )
         {
             camera->capture( object );
+
+#ifdef AXN_DEBUG
+            if( Debug::active )
+            {
+                if( object->draw_debug )
+                {
+                    Drawing debug_overlay = object->debug_overlay( );
+                    debug_overlay.move( object->position( ) );
+                    
+                    camera->capture_debug( new Visible( debug_overlay ), true );
+                }
+            }
+#endif
         }
     }
-
-    if( m_lighting_active && m_lighting )
+    
+#ifdef AXN_DEBUG
+    if( m_display_forebackground )
+#endif
     {
-        camera->lighting( m_lighting );
-    }
-    else
-    {
-        camera->clear_lighting( );
+        for_each( object, m_foreground_objects )
+        {
+            object->render_object( );
+            
+            if( object->visible( ) )
+            {
+                camera->capture( object );
+            }
+        }
     }
 
     render_bounds( camera );
 
-#ifdef AXN_DEBUG
-    if( Debug::active )
-    {
-        // render_grid( camera );
-        render_object_grid( camera, true, []( const Grid::Block & block) { return block.m_objects.size( ); } );
-
-        for_each( object, m_objects )
-        {
-            if( object->draw_debug )
-            {
-                camera->capture( Visible( object->debug_overlay( ).move( object->position( ) ) ) );
-            }
-        }
-
-        render_camera_fps( camera );
-    }
-#endif
-
     camera->render( );
-
-    return *this;
 }
 
-World & World::input( const varray<Input *> & _inputs )
-{
-    for_each( input, _inputs )
-    {
-        if( KeyInput * key_input = dynamic_cast<KeyInput *>( input ) )
-        {
-            KeyInput::KEY key = key_input->key;
-            KeyInput::DYNAMIC dynamic = key_input->dynamic;
-
-            bool pressed = ( dynamic == KeyInput::PRESSED );
-            bool held = ( dynamic == KeyInput::HELD );
-            bool down = ( pressed || held );
-
-            switch( key )
-            {
-                case 27 :
-                { // esc key
-                    Engine::quit( );
-                    return *this;
-                }
-                case ';' :
-                {
-                    if( pressed )
-                        reset( );
-                    break;
-                }
-                case 'p' :
-                {
-                    if( pressed )
-                        Engine::pause( !Engine::paused( ) );
-                    break;
-                };
-                case 'c' :
-                {
-                    if( pressed )
-                        Engine::sync_controllers( );
-                    break;
-                };
-#ifdef AXN_DEBUG
-                case '\'' :
-                {
-                    if( pressed )
-                        Engine::step( );
-                    break;
-                };
-#endif
-                case 'm' :
-                {
-                    if( pressed )
-                        Engine::mute( !Engine::muted( ) );
-                    break;
-                }
-                case 'z' :
-                {
-                    if( pressed )
-                        m_active_camera->zoom( 1.0 );
-                    break;
-                };
-                case 'o' :
-                {
-                    if( pressed )
-                        Engine::anti_alias( !Engine::anti_alias( ) );
-                    break;
-                }
-                case 'l' :
-                {
-                    if( pressed )
-                        m_lighting_active = !m_lighting_active;
-                    break;
-                }
-                case '=' :
-                {
-                    Engine::volume_up( );
-                    break;
-                }
-                case '-' :
-                {
-                    Engine::volume_down( );
-                    break;
-                }
-                case '.' :
-                {
-                    if( down )
-                        m_active_camera->zoom( m_active_camera->zoom( ) / CAMERA_ZOOM_RATIO );
-                    break;
-                }
-                case ',' :
-                {
-                    if( down )
-                        m_active_camera->zoom( m_active_camera->zoom( ) * CAMERA_ZOOM_RATIO );
-                    break;
-                }
-                case '\\' :
-                {
-                    if( pressed )
-                        Engine::show_cursor( !Engine::show_cursor( ) );
-                    break;
-                }
-#ifdef AXN_DEBUG
-                case '`' :
-                {
-                    if( pressed )
-                        Debug::active = !Debug::active;
-                    break;
-                }
-#endif
-            }
-        }
-
-        if( MouseInput * mouse_input = dynamic_cast<MouseInput *>( input ) )
-        {
-            Coordinate position = mouse_input->position;
-            MouseInput::DYNAMIC dynamic = mouse_input->dynamic;
-            MouseInput::BUTTON button = mouse_input->button;
-
-            if( dynamic == MouseInput::MOVE )
-            {
-                if( button == MouseInput::SCROLL_BUTTON )
-                {
-                    if( position.y( ) > 0.0 )
-                        m_active_camera->zoom( m_active_camera->zoom( ) / CAMERA_ZOOM_RATIO );
-                    else if( position.y( ) < 0.0 )
-                        m_active_camera->zoom( m_active_camera->zoom( ) * CAMERA_ZOOM_RATIO );
-                }
-                else
-                {
-                    m_active_camera->m_cursor_world_position = position;
-                }
-            }
-        }
-    }
-
-    if( !Engine::paused( ) )
-    {
-        for_each( input, _inputs )
-        {
-            for_each( player, m_players )
-            {
-                player->input( input );
-            }
-        }
-    }
-
-    return *this;
-}
-
-World & World::pause( bool paused )
-{
-    if( paused )
-    {
-        for_each( player, m_players )
-        {
-            player->clear_input( );
-        }
-    }
-    return *this;
-}
-
-World & World::update( )
+void World::update( )
 {
     ++m_age;
 
@@ -437,140 +446,196 @@ World & World::update( )
     static auto object_sort = []( const Object * const & obj1, const Object * const & obj2 )
     {
         if( obj1->z( ) != obj2->z( ) )
+        {
             return ( obj1->z( ) < obj2->z( ) );
+        }
+
         if( obj1->layer_position( ) != obj2->layer_position( ) )
+        {
             return ( obj1->layer_position( ) < obj2->layer_position( ) );
+        }
+
         if( obj1->age( ) != obj2->age( ) )
+        {
             return ( obj1->age( ) > obj2->age( ) );
-        // if( obj1->position( ).x( ) != obj2->position( ).x( ) )
-        //      return ( obj1->position( ).x( ) < obj2->position( ).x( ) );
-        // if( obj1->position( ).y( ) != obj2->position( ).y( ) )
-        //     return ( obj1->position( ).y( ) < obj2->position( ).y( ) );
+        }
+
         return false;
     };
 
     add_objects_from_queue( );
-    m_objects.sort( object_sort );
-    m_solid_objects.sort( object_sort );
-
+    m_objects.sort( object_sort, true );
+    
     update_objects( m_objects );
-
-    m_objects.remove_if( [ & ]( Object * object )
-                         {
-        if( object->deleted( ) )
-        {
-            remove_object( object );
-            return true;
-        }
-        else
-        {
-            return false;
-        } } );
-
-    if( m_players.size( ) )
+    
+#ifdef AXN_DEBUG
+    if( m_display_forebackground )
+#endif
     {
-        m_active_camera->update( m_players[ 0 ]->position( ) );
+        m_foreground_objects.sort( object_sort, true );
+        update_objects( m_foreground_objects );
+        
+        m_background_objects.sort( object_sort, true );
+        update_objects( m_background_objects );
     }
 
-    return *this;
+    update_object( m_terrain );
+
+    m_players.erase_if( [ & ]( Player * player )
+                        { return player->deleted( ); } );
+
+    auto erase_deleted_objects = [ & ]( varray<Object *> & objects )
+    {
+        objects.erase_if( [ & ]( Object * object )
+                           {
+            if( !object )
+            {
+                return true;
+            }
+            else if( object->deleted( ) )
+            {
+                remove_object( object );
+                return true;
+            }
+            else
+            {
+                return false;
+            } } );
+    };
+    
+    erase_deleted_objects( m_objects );
+    erase_deleted_objects( m_foreground_objects );
+    erase_deleted_objects( m_background_objects );
+
+    if( m_camera )
+    {
+        if( m_players.size( ) )
+        {
+            m_camera->target( player_main( )->position( ) );
+        }
+
+        m_camera->update( );
+    }
 }
 
-World & World::update_object( Object * object )
+void World::update_object( Object * object )
 {
-    object_grid( ).mark_absent( object );
-
-    object->update_object( );
-
-    object_grid( ).mark_present( object );
-
-    return *this;
+    if( object )
+    {
+        object->update_object( );
+    }
 }
 
-const list<Object *> & World::objects( ) const
+const varray<Object *> & World::objects( ) const
 {
     return m_objects;
 }
 
-list<Object *> World::objects_in_range( const Planc & _lower_x, const Planc & _upper_x )
+varray<Object *> World::objects_in_range( const FixedRectangle & _range )
 {
-    list<Object *> objects;
-    // objects.reserve(m_objects.size());
-    for_each( object, m_objects )
-    {
-        if( in_range<Planc>( object->position( ).x( ), _lower_x, _upper_x, true ) )
+    uset<Object *> objects_set;
+
+    m_object_grid.traverse( [ & ]( Grid::Block & block )
+                            {
+        for_each( object, block.objects )
         {
-            objects.insert_back( object );
-        }
+            objects_set.insert( object );
+        } } );
+
+    varray<Object *> objects;
+    for_each( object, objects_set )
+    {
+        objects.insert_back( object );
     }
+
     return objects;
 }
 
-list<Object *> World::solid_objects_in_range( const Planc & _lower_x, const Planc & _upper_x )
+void World::add_object( Object * object )
 {
-    list<Object *> objects;
-    // objects.reserve( m_solid_objects.size( ) );
-    for_each( object, m_solid_objects )
+    if( object )
     {
-        if( in_range<Planc>( object->position( ).x( ), _lower_x - half( object->width( ) ), _upper_x + half( object->width( ) ), true ) )
-        {
-            objects.insert_back( object );
-        }
+        m_object_queue.push( object );
     }
-    return objects;
 }
 
-World & World::add_object( Object * object )
+void World::remove_object( Object * object )
 {
-    m_object_queue.push( object );
-    return *this;
+    if( object )
+    {
+        if( object->z( ) == ONE )
+        {
+            m_object_grid.erase( object );
+        }
+        
+        safe_delete( object );
+    }
 }
 
-World & World::remove_object( Object * object )
-{
-    object_grid( ).mark_absent( object );
-    return *this;
-}
-
-World & World::add_objects_from_queue( )
+void World::add_objects_from_queue( )
 {
     while( m_object_queue.size( ) )
     {
         Object * object = m_object_queue.front( );
-        m_objects.insert_back( object );
 
-        if( object->solid( ) )
+        assign_layer_position( object );
+        
+        if( object->foreground( ) )
         {
-            m_solid_objects.insert_back( object );
+            m_foreground_objects.insert_back( object );
         }
-
-        object_grid( ).mark_present( object );
+        else if( object->background( ) )
+        {
+            m_background_objects.insert_back( object );
+        }
+        else
+        {
+            m_objects.insert_back( object );
+            
+            if( object->interactive( ) )
+            {
+                m_object_grid.add( object );
+            }
+        }
 
         m_object_queue.pop( );
     }
-    return *this;
 }
 
-World & World::clear_objects( )
+void World::clear_objects( )
 {
-    for_each( object, m_objects ) safe_delete( object );
-
-    m_objects.clear( );
-    m_solid_objects.clear( );
+    m_object_grid.clear( );
 
     while( m_object_queue.size( ) )
     {
-        delete( m_object_queue.front( ) );
+        safe_delete( m_object_queue.front( ) );
         m_object_queue.pop( );
     }
 
+    for_each( object, m_objects )
+    {
+        remove_object( object );
+    }
+
+    for_each( object, m_foreground_objects )
+    {
+        remove_object( object );
+    }
+
+    for_each( object, m_background_objects )
+    {
+        remove_object( object );
+    }
+    
     m_players.clear( );
+    m_objects.clear( );
+    m_foreground_objects.clear( );
+    m_background_objects.clear( );
+}
 
-    m_lighting = nullptr;
-    m_terrain = nullptr;
-    m_background = nullptr;
-    m_foreground = nullptr;
-
-    return *this;
+void World::assign_layer_position( Object * object )
+{
+    object->layer_position( queue<uint>( ) );
 }
 
 uint World::age( ) const
@@ -583,51 +648,47 @@ const FixedRectangle & World::bounds( ) const
     return m_bounds;
 }
 
-World & World::bounds( const FixedRectangle & _bounds )
+void World::bounds( const FixedRectangle & _bounds )
 {
     m_object_grid.init( m_bounds = _bounds );
-    return *this;
 }
 
-World & World::add_player( const Coordinate & _position )
+Player * World::add_player( const Coordinate & _position )
 {
-    Player * new_player = create_player( _position );
-    m_players.insert_back( new_player );
+    Player * new_player = m_players.insert_back( create_player( _position ) );
 
-    Camera player_camera = Camera( new_player->position( ), Engine::screen_width( ), Engine::screen_height( ) );
-    m_player_cameras.insert_back( player_camera );
+    m_camera->target( new_player->position( ), true );
 
     add_object( new_player );
 
-    return *this;
+    return new_player;
 }
 
-const Player * World::player( const uint _player_number )
+Camera * World::camera( )
+{
+    return m_camera;
+}
+
+Player * World::player( const uint _player_number )
 {
     if( m_players.valid_index( _player_number ) )
+    {
         return m_players[ _player_number ];
+    }
     else
+    {
         return nullptr;
+    }
 }
 
-const Camera * World::active_camera( ) const
+Player * World::player_main( )
 {
-    return m_active_camera;
+    return player( 0 );
 }
 
-Camera * player_camera( uint player_number = 0 );
-varray<Camera *> all_player_cameras( );
-
-World & World::background( Background * background )
-{
-    add_object( m_background = background );
-    return *this;
-}
-
-World & World::wind( const Vector & _wind )
+void World::wind( const Vector & _wind )
 {
     m_wind = _wind;
-    return *this;
 }
 
 const Lighting * World::lighting( ) const
@@ -640,10 +701,9 @@ bool World::lighting_active( ) const
     return m_lighting_active;
 }
 
-World & World::lighting_active( bool active )
+void World::lighting_active( bool active )
 {
     m_lighting_active = active;
-    return *this;
 }
 
 const Terrain * World::terrain( ) const
@@ -656,9 +716,9 @@ Vector World::wind( ) const
     return m_wind;
 }
 
-World::Grid & World::Grid::init( const FixedRectangle & _bounds )
+void World::Grid::init( const FixedRectangle & _bounds )
 {
-    m_offset = _bounds.bottom( );
+    m_bounds = _bounds;
 
     m_grid_x_size = ceil( _bounds.width( ) / (dec)GRID_BLOCK_SIZE );
     m_grid_y_size = ceil( _bounds.height( ) / (dec)GRID_BLOCK_SIZE );
@@ -672,11 +732,9 @@ World::Grid & World::Grid::init( const FixedRectangle & _bounds )
             block( x, y ).init( x, y );
         }
     }
-
-    return *this;
 }
 
-World::Grid::Block& World::Grid::block( const uint _x, const uint _y )
+World::Grid::Block & World::Grid::block( const uint _x, const uint _y )
 {
     if( valid_x( _x ) && valid_y( _y ) )
     {
@@ -688,36 +746,31 @@ World::Grid::Block& World::Grid::block( const uint _x, const uint _y )
     }
 }
 
-const set<Object *> & World::Grid::objects( const uint _x, const uint _y ) const
-{
-    return m_grid[ _x ][ _y ].m_objects;
-}
-
 uint World::Grid::x( const Planc & _x ) const
 {
-    Planc x_translated = _x - m_offset.x();
+    Planc x_translated = _x - m_bounds.bottom( ).x( );
 
-    if (x_translated >= 0)
+    if( x_translated >= ZERO )
     {
-        return floor(x_translated / GRID_BLOCK_SIZE);
+        return floor( x_translated / GRID_BLOCK_SIZE );
     }
     else
     {
-        return 0;
+        return ZERO;
     }
 }
 
 uint World::Grid::y( const Planc & _y ) const
 {
-    Planc y_translated = _y - m_offset.y( );
+    Planc y_translated = _y - m_bounds.bottom( ).y( );
 
-    if ( y_translated >= 0 )
+    if( y_translated >= ZERO )
     {
-        return floor(y_translated / GRID_BLOCK_SIZE);
+        return floor( y_translated / GRID_BLOCK_SIZE );
     }
     else
     {
-        return 0;
+        return ZERO;
     }
 }
 
@@ -731,29 +784,40 @@ Span<uint> World::Grid::y_range( const FixedRectangle & _r ) const
     return Span<uint>( y( _r.bottom( ).y( ) ), y( _r.top( ).y( ) ) );
 }
 
-World::Grid & World::Grid::mark( const bool _present, Object * object )
+void World::Grid::traverse( const FixedRectangle & _range, function<void( World::Grid::Block & )> f )
 {
-    if (object->z() == 1.0)
-    {
-        Span<uint> grid_x_range = x_range(object->hit_box());
-        Span<uint> grid_y_range = y_range(object->hit_box());
+    Span<uint> xx = x_range( _range );
+    Span<uint> yy = y_range( _range );
 
-        for_range(x, grid_x_range.range() + 1)
+    for_range( x, xx.range( ) + 1 )
+    {
+        for_range( y, yy.range( ) + 1 )
         {
-            for_range(y, grid_y_range.range() + 1)
-            {
-                Block & b = block(x + grid_x_range.min(), y + grid_y_range.min());
-                if (_present)
-                {
-                    b.m_objects.insert(object);
-                }
-                else
-                {
-                    b.m_objects.erase(object);
-                }
-            }
+            f( block( x + xx.min( ), y + yy.min( ) ) );
         }
     }
+}
 
-    return *this;
+void World::Grid::add( Object * object )
+{
+    if( object->z( ) == ONE )
+    {
+        traverse( object->hit_box( ), [ & ]( Grid::Block & block )
+                        { block.objects.insert( object ); } );
+    }
+}
+
+void World::Grid::erase( Object * object )
+{
+    if( object->z( ) == ONE )
+    {
+        traverse( object->hit_box( ), [ & ]( Grid::Block & block )
+                         { block.objects.erase( object ); } );
+    }
+}
+
+void World::Grid::clear( )
+{
+    return traverse( [ & ]( Grid::Block & block )
+                     { block.objects.clear( ); } );
 }

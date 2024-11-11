@@ -1,5 +1,4 @@
 #include "Sky.hpp"
-
 #include "World.hpp"
 
 using mtmercy::Sky;
@@ -30,9 +29,16 @@ const ColorSlider SKY_SUNSET = ColorSlider( SUNSET_COLOR, SUNSET_COLOR );
 const ColorSlider SKY_SUNSET_TO_MIDNIGHT = ColorSlider( SUNSET_COLOR, MIDNIGHT_COLOR );
 } // namespace
 
-Sky::Sky( World * world ) : Background( world )
+Sky::Sky( World * world ) : Object( world )
 {
-    drawing_always_dirty( true );
+    background( true );
+    
+    needs_render_always( true );
+    
+    gravity_ratio( ZERO );
+    terrain_boundaries( false );
+
+    z( 0.0 );
 
     m_clouds = varray<Cloud *>( );
     if( CLOUD_REGEN_RATE.max( ) )
@@ -49,7 +55,7 @@ Sky::Sky( World * world ) : Background( world )
     }
 }
 
-const Sky & Sky::render( ) const
+void Sky::render( )
 {
     Object::render( );
 
@@ -100,12 +106,10 @@ const Sky & Sky::render( ) const
             top_color,
             bottom_color,
             bottom_color },
-          Rectangle( world( )->active_camera( )->width( ) + 2.0, world( )->active_camera( )->height( ) + 2.0, ORIGIN ) ); // added + 2 just in case
-
-    return *this;
+          Rectangle( world( )->camera( )->width( ) + 2.0, world( )->camera( )->height( ) + 2.0, ORIGIN ) ); // added + 2 just in case
 }
 
-Sky & Sky::update( )
+void Sky::update( )
 {
     Object::update( );
 
@@ -118,5 +122,4 @@ Sky & Sky::update( )
             world( )->add_object( m_clouds.back( ) );
         }
     }
-    return *this;
 }

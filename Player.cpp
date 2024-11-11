@@ -1,34 +1,40 @@
 #include "Player.hpp"
-
 #include "World.hpp"
-
 #include "Arrow.hpp"
 
-Player::Player( World * world, const Coordinate & _position ) : Mob( world, _position, 100 ) { god( god( ) ); }
+namespace
+{
+const uint PLAYER_HEALTH_START = 100;
+}
 
-const Player & Player::render( ) const
+Player::Player( World * world, const Coordinate & _position ) : Mob( world, _position, PLAYER_HEALTH_START )
+{
+    terrain_boundaries( true );
+
+    god( false );
+}
+
+void Player::render( )
 {
     Mob::render( );
 
     if( god( ) )
     {
-        static_setup( Drawing, god_drawing )
-        {
-            const Color GLOW_COLOR = Color( WHITE, 0.125 );
-            const Planc GLOW_RADIUS = height( );
+        const Planc GLOW_RADIUS = height( );
+        const Planc GLOW_RADIUS_RATIO1 = 1.35;
+        const Planc GLOW_RADIUS_RATIO2 = 1.75;
+        const Planc GLOW_RADIUS_RATIO3 = 2.0;
+        const Color GLOW_COLOR = Color( WHITE, 0.125 );
 
-            god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * 2.0 ) );
-            god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * 1.7 ) );
-            god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * 1.3 ) );
-        }
-
+        Drawing god_drawing;
+        god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * GLOW_RADIUS_RATIO1 ) );
+        god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * GLOW_RADIUS_RATIO2 ) );
+        god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * GLOW_RADIUS_RATIO3 ) );
         draw( god_drawing );
     }
-
-    return *this;
 }
 
-Player & Player::update( )
+void Player::update( )
 {
     Mob::update( );
 
@@ -39,38 +45,69 @@ Player & Player::update( )
     {
         add_light_source( position( ), 512 ); // the all seeing eye
     }
-
-    return *this;
 }
 
-Player & Player::update_movement( )
+void Player::update_movement( )
 {
     Mob::update_movement( );
-    return *this;
 }
 
-Player & Player::die( )
+void Player::die( )
 {
-#ifdef AXN_DEBUG
     if( god( ) )
-        return *this;
-#endif
+    {
+        return;
+    }
+
     // if( alive( ) )
-    //{
+    // {
     //     static SoundClip death_cry( "WilhelmScream.wav" );
     //     death_cry.play( );
     // }
 
     Mob::die( );
-    return *this;
 }
 
-Player & Player::hurt( dec _health )
+void Player::hurt( dec _health )
 {
-#ifdef AXN_DEBUG
     if( god( ) )
-        return *this;
-#endif
+    {
+        return;
+    }
+
     Mob::hurt( _health );
-    return *this;
+}
+
+void Player::out_of_bounds( )
+{
+#ifndef AXN_DEBUG
+    Object::out_of_bounds( );
+#endif
+}
+
+void Player::god( const bool _god )
+{
+    if( _god == m_god )
+    {
+        return;
+    }
+
+    m_god = _god;
+
+    if( m_god )
+    {
+        invincible_always( true );   // god is invincible
+        heal_full( );                // god is never wounded
+        no_gravity( );               // god is not pulled on by gravity
+        terrain_boundaries( false ); // god is not affected by boundaries
+        velocity( ZERO_VECTOR );     // god brings all to a halt
+    }
+    else
+    {
+        invincible_always( false );
+        normal_gravity( );
+        terrain_boundaries( true );
+    }
+
+    needs_render( true );
 }

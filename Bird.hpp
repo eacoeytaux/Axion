@@ -12,7 +12,7 @@ public:
     virtual ~Feather( ) { }
     Feather( World *, const Coordinate & position );
 
-    virtual const Feather & render( ) const override;
+    virtual void render( ) override;
 
 private:
     Color m_color;
@@ -24,10 +24,11 @@ public:
     virtual ~Bird( ) { }
     Bird( World *, const Coordinate & position );
 
-    virtual const Bird & render( ) const override;
-    virtual Bird & update( ) override;
+    virtual void render( ) override;
 
-    virtual Bird & die( ) override;
+    virtual void update( ) override;
+
+    virtual void die( ) override;
 
 private:
 };

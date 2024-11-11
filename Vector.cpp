@@ -21,8 +21,8 @@ Vector::Vector( const Coordinate & _c1, const Coordinate & _c2 )
     dy( _c2.y( ) - _c1.y( ) );
 }
 
-VectorX::VectorX( const Planc & _dx, const Coordinate & _origin ) : Vector( _dx, 0.0, _origin ) { }
-VectorY::VectorY( const Planc & _dy, const Coordinate & _origin ) : Vector( 0.0, _dy, _origin ) { }
+VectorX::VectorX( const Planc & _dx, const Coordinate & _origin ) : Vector( _dx, ZERO, _origin ) { }
+VectorY::VectorY( const Planc & _dy, const Coordinate & _origin ) : Vector( ZERO, _dy, _origin ) { }
 VectorA::VectorA( const Angle & _angle, const Planc & _magnitude, const Coordinate & _origin )
 {
     origin( _origin );
@@ -30,7 +30,7 @@ VectorA::VectorA( const Angle & _angle, const Planc & _magnitude, const Coordina
     Angle angle = _angle;
     Planc magnitude = _magnitude;
 
-    if( magnitude < 0.0 )
+    if( is_negative( magnitude ) )
     {
         magnitude *= -1;
         angle += PI;
@@ -98,8 +98,11 @@ bool Vector::has_magnitude( ) const
 Planc Vector::magnitude( ) const
 {
     if( !dx( ) && !dy( ) )
-        return 0.0;
-    return origin( ).distance( destination( ) );
+    {
+        return ZERO;
+    }
+
+    return origin( ).distance_to( destination( ) );
 }
 
 Vector & Vector::magnitude( const Planc & _magnitude )
@@ -117,19 +120,12 @@ Vector & Vector::extend( const Planc & _length )
 
 Vector & Vector::normalize( )
 {
-    return magnitude( 1.0 );
+    return magnitude( ONE );
 }
 
 Vector Vector::half( ) const
 {
-    return *this / 2.0;
-}
-
-Vector & Vector::halve( )
-{
-    m_dx.halve( );
-    m_dy.halve( );
-    return *this;
+    return *this / TWO;
 }
 
 Angle Vector::angle( ) const { return Angle( m_dx, m_dy ); }
@@ -148,7 +144,7 @@ Vector & Vector::rotate_to_angle( const Angle & _angle )
 Vector & Vector::flatten( const Angle & a )
 {
     rotate( -a );
-    dy( 0 );
+    dy( ZERO );
     rotate( a );
     return *this;
 }
@@ -191,5 +187,10 @@ Vector Vector::operator*( const dec _scale ) const { return Vector( origin( ), C
 
 Vector Vector::operator/( const dec _scale ) const { return Vector( origin( ), Coordinate( origin( ).x( ) + ( m_dx / _scale ), origin( ).y( ) + ( m_dy / _scale ) ) ); }
 
-bool Vector::operator==( const Vector & _v ) const { return ( ( m_dx == _v.m_dx ) && ( m_dy == _v.m_dy ) && ( origin( ) == _v.origin( ) ) ); }
-bool Vector::operator!=( const Vector & _v ) const { return !( *this == _v ); }
+Vector & Vector::operator=( const Coordinate & _coordinate )
+{
+    origin( ORIGIN );
+    dx( _coordinate.x( ) );
+    dy( _coordinate.y( ) );
+    return *this;
+}

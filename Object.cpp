@@ -1,5 +1,4 @@
 #include "Object.hpp"
-
 #include "World.hpp"
 #include "Terrain.hpp"
 
@@ -12,49 +11,111 @@ Object::~Object( )
 #ifdef AXN_DEBUG
     --total_objects;
 #endif
+
+    for_each( object, m_movement_subscribers )
+    {
+        object->unsubscribe_to_movement( this );
+    }
+
+    for_each( object, m_movement_subscriptions )
+    {
+        object->remove_movement_subscriber( this );
+    }
 }
 
-Object::Object( World * world, const Coordinate & _position ) : Matter( _position ), m_world( world )
+Object::Object( World * world ) : Matter( ORIGIN ), m_world( world )
 {
+    init( );
+}
+
+Object::Object( World * world, const Coordinate & _position, const Vector & _velocity ) : Matter( Vector( _velocity ).origin( _position ) ), m_world( world )
+{
+    init( );
+}
+
+Object::Object( World * world, const Vector & _position_velocity ) : Matter( _position_velocity ), m_world( world )
+{
+    init( );
+}
+
+void Object::init( )
+{
+    assert( !m_initialized );
+    m_initialized = true;
+    
 #ifdef AXN_DEBUG
     ++total_objects;
 #endif
-    // defaults
-    m_age = 1;
-    m_terrain_boundaries = true;
 
-    position_drawing( position( ) );
+    m_age = 0;
+    
+    foreground( z( ) > ONE );
+    background( z( ) < ONE );
 }
 
-const Object & Object::render( ) const
+Drawing Object::path( const Planc & _distance, const Color & _color, const dec _alpha_start, const dec _alpha_end ) const
 {
-    Visible::position_drawing( position( ) );
-    Visible::render( );
-    return *this;
-}
-
-const Object & Object::render_object( ) const
-{
-    render( );
-    return *this;
-}
-
-Object & Object::update( )
-{
-    if( marked_to_delete( ) )
+    Drawing path;
+    
+    if ( !Object::ground( ) )
     {
-        mark_deleted( );
+        Coordinate c;
+        Vector v = velocity( );
+        Planc d = _distance;
+        dec a = _alpha_start;
+        
+        while( d > ZERO && v.has_magnitude( ) )
+        {
+            v += GRAVITY * gravity_ratio( );
+            v *= ONE - friction_resistance( );
+            
+            if( d > v.magnitude( ) )
+            {
+                d -= v.magnitude( );
+            }
+            else
+            {
+                v.magnitude( d );
+                d = ZERO;
+            }
+            
+            dec d_a = min<dec>( a, ( _alpha_start - _alpha_end ) * ( v.magnitude( ) / _distance ) );
+            
+            path.draw( Color( _color, a ), Color( _color, a - d_a ), Line( c, c + v ) );
+            a -= d_a;
+            
+            c += v;
+        }
     }
-
-    update_movement( );
-
-    return *this;
+    
+    return path;
 }
 
-Object & Object::update_object( )
+void Object::render( )
+{
+    Visible::center( position( ) );
+    Visible::render( );
+}
+
+void Object::render_object( )
+{
+    if( needs_render( ) )
+    {
+        render( );
+    }
+}
+
+void Object::update( )
+{
+    update_movement( );
+}
+
+void Object::update_object( )
 {
     if( m_last_world_age_update == world( )->age( ) )
-        return *this;
+    {
+        return;
+    }
 
     if( m_last_position_count )
     {
@@ -69,22 +130,23 @@ Object & Object::update_object( )
         }
     }
 
-    // -------- //
-    this->update( );
-    // -------- //
+    update( );
 
-    m_last_world_age_update = m_world->age( );
+    if( marked_to_delete( ) )
+    {
+        mark_deleted( );
+    }
+
+    m_last_world_age_update = world( )->age( );
     ++m_age;
-
-    return *this;
 }
 
-Object & Object::update_velocity( )
+void Object::update_velocity( )
 {
     if( stationary( ) )
     {
         Matter::velocity( ZERO_VECTOR );
-        return *this;
+        return;
     }
 
     Vector velocity = Matter::velocity( );
@@ -101,28 +163,33 @@ Object & Object::update_velocity( )
         velocity += ( GRAVITY * m_gravity_ratio );
     }
 
-    velocity *= ( 1.0 - friction_resistance( ) );
+    velocity *= ( ONE - friction_resistance( ) );
 
     Matter::velocity( velocity );
-    return *this;
 }
 
-Object & Object::update_movement( )
+void Object::update_movement( )
 {
-    if( stationary( ) )
-        return *this;
+    // if( stationary( ) )
+    // {
+    //    return;
+    // }
 
     uset<TerrainEdge *> checked_edges;
     if( m_ground )
+    {
         checked_edges.insert( m_ground );
+    }
 
-    dec remaining_percentage = 1.0;
-    while( ( dec_ge( remaining_percentage, 0.0 ) && !isnan( remaining_percentage ) ) && !stationary( ) )
+    dec remaining_percentage = ONE;
+    while( ( dec_gt( remaining_percentage, ZERO ) && !isnan( remaining_percentage ) ) )
     {
         update_velocity( );
         Vector velocity = Object::velocity( ) * remaining_percentage;
         if( !velocity.has_magnitude( ) )
-            break;
+        {
+            // break;
+        }
 
         Coordinate center = position( );
 
@@ -158,23 +225,36 @@ Object & Object::update_movement( )
             }
 
             // check if object is colliding with any edges
-            for_each( terrain_edge, m_world->terrain( )->edges( ) )
+            for_each( terrain_edge, m_world->terrain( )->edges( hit_box( ) ) )
             {
                 // skip if terrain_edge is current ground or adjacent as these are already dealt with
                 if( checked_edges.contains( terrain_edge ) ||
                     ( terrain_edge == m_ground ) ||
                     ( terrain_edge == ground_left ) ||
                     ( terrain_edge == ground_right ) )
+                {
                     continue;
+                }
 
                 checked_edges.insert( terrain_edge );
+
                 Line movement_line = movement;
                 if( movement_line.intersects( terrain_edge->line( ) + VectorY( space( ).bound_height( ).half( ) ) ) )
                 {
                     next_ground = terrain_edge;
+
                     Coordinate intersection = movement_line.intersection( terrain_edge->line( ) + VectorY( space( ).bound_height( ).half( ) ) );
+
                     movement = Vector( center, intersection );
-                    movement_percentage = movement.magnitude( ) / velocity.magnitude( );
+                    
+                    if( velocity.magnitude( ) )
+                    {
+                        movement_percentage = movement.magnitude( ) / velocity.magnitude( );
+                    }
+                    else
+                    {
+                        movement_percentage = ONE;
+                    }
                 }
             }
         }
@@ -185,6 +265,7 @@ Object & Object::update_movement( )
             if( ( movement.dx( ) > 0.0 ) && ( center + movement ).x( ) > m_ground->line( ).right( ).x( ) )
             {
                 movement = Vector( center, m_ground->vertex2( )->position( ) + VectorY( space( ).bound_height( ).half( ) ) );
+
                 if( m_ground->vertex2( ) )
                 {
                     next_ground = m_ground->vertex2( )->edge2( );
@@ -197,6 +278,7 @@ Object & Object::update_movement( )
             else if( ( movement.dx( ) < 0.0 ) && ( center + movement ).x( ) < m_ground->line( ).left( ).x( ) )
             {
                 movement = Vector( center, m_ground->vertex1( )->position( ) + VectorY( space( ).bound_height( ).half( ) ) );
+
                 if( m_ground->vertex1( ) )
                 {
                     next_ground = m_ground->vertex1( )->edge1( );
@@ -208,7 +290,7 @@ Object & Object::update_movement( )
             }
         }
 
-        if( solid( ) )
+        if( interactive( ) )
         {
             struct ObjectCollision
             {
@@ -218,9 +300,9 @@ Object & Object::update_movement( )
 
             list<ObjectCollision> collied_objects;
 
-            Planc start_x = position( ).x( ) - width( ).half( );
-            Planc end_x = position( ).x( ) + width( ).half( ) + movement.dx( );
-            list<Object *> objects = world( )->solid_objects_in_range( start_x, end_x );
+            // todo union with moved hit box
+            // list<Object *> objects = world( )->objects_in_range( hit_box( ) + movement );
+            varray<Object *> objects = world( )->objects_in_range( hit_box( ) );
 
             Line movement_line( movement );
             for_each( object, objects )
@@ -235,7 +317,7 @@ Object & Object::update_movement( )
                 hit_box.expand_height( height( ) );
 
                 varray<Line> intersections;
-                if( hit_box.width( ) && hit_box.height( ) )
+                if( hit_box.area( ) )
                 {
                     intersections = hit_box.intersection( movement );
                 }
@@ -243,7 +325,9 @@ Object & Object::update_movement( )
                 {
                     if( hit_box.width( ) )
                     {
-                        Line hit_box_line( hit_box.center( ).x( ) - hit_box.width( ).half( ), hit_box.center( ).x( ) + hit_box.width( ).half( ) );
+                        Line hit_box_line( hit_box.center( ) - VectorX( hit_box.width( ).half( ) ),
+                                           hit_box.center( ) + VectorX( hit_box.width( ).half( ) ) );
+
                         if( movement_line.intersects( hit_box_line ) )
                         {
                             intersections = { Line( movement.origin( ), movement_line.intersection( hit_box_line ) ) };
@@ -251,7 +335,9 @@ Object & Object::update_movement( )
                     }
                     else if( hit_box.height( ) )
                     {
-                        Line hit_box_line( hit_box.center( ).y( ) - hit_box.height( ).half( ), hit_box.center( ).y( ) + hit_box.height( ).half( ) );
+                        Line hit_box_line( hit_box.center( ) - VectorY( hit_box.height( ).half( ) ),
+                                           hit_box.center( ) + VectorY( hit_box.height( ).half( ) ) );
+
                         if( movement_line.intersects( hit_box_line ) )
                         {
                             intersections = { Line( movement.origin( ), movement_line.intersection( hit_box_line ) ) };
@@ -282,7 +368,7 @@ Object & Object::update_movement( )
                     Coordinate origin;
                     bool operator( )( const ObjectCollision & c1, const ObjectCollision & c2 )
                     {
-                        return ( c1.line.c1( ).distance( origin ) < c2.line.c1( ).distance( origin ) );
+                        return ( c1.line.c1( ).distance_to( origin ) < c2.line.c1( ).distance_to( origin ) );
                     }
                 } collision_sort;
                 collision_sort.origin = position( );
@@ -299,35 +385,63 @@ Object & Object::update_movement( )
         move( movement );
         ground( next_ground );
 
-        remaining_percentage *= ( 1.0 - ( movement.magnitude( ) / velocity.magnitude( ) ) );
+        if( velocity.magnitude( ) )
+        {
+            remaining_percentage *= ( ONE - ( movement.magnitude( ) / velocity.magnitude( ) ) );
+        }
+        else
+        {
+            remaining_percentage = ZERO;
+        }
     }
-
-    return *this;
 }
 
-Object & Object::move( const Vector & _movement )
+void Object::move( const Vector & _movement )
 {
     if( _movement.has_magnitude( ) )
     {
         position( position( ) + _movement );
-
-        FixedRectangle world_bounds = world( )->bounds( );
-
-        world_bounds.width( world_bounds.width( ) / ( z( ) * z( ) ) );
-        world_bounds.height( world_bounds.height( ) / ( z( ) * z( ) ) );
-
-        if( !world_bounds.contains( position( ) ) )
+        
+        if( z( ) )
         {
-            out_of_bounds( );
+            FixedRectangle world_bounds = world( )->bounds( );
+            
+            // todo seems messy?
+            world_bounds.width( world_bounds.width( ) / ( z( ) * z( ) ) );
+            world_bounds.height( world_bounds.height( ) / ( z( ) * z( ) ) );
+            
+            if( !world_bounds.contains( position( ) ) )
+            {
+                out_of_bounds( );
+            }
         }
-
+        
         for_each( object, m_movement_subscribers )
         {
             object->react_to_movement( this, _movement );
         }
     }
+}
 
-    return *this;
+Coordinate Object::position( ) const
+{
+    return Matter::position( );
+}
+
+void Object::position( const Coordinate & _position )
+{
+    if( interactive( ) )
+    {
+        world( )->object_grid( ).erase( this );
+    }
+    
+    Visible::center( _position );
+    Matter::position( _position );
+    
+    if( interactive( ) )
+    {
+        world( )->object_grid( ).add( this );
+    }
 }
 
 Planc Object::width( ) const
@@ -345,10 +459,9 @@ Planc Object::visible_width( ) const
     return m_visible_width;
 }
 
-Object & Object::visible_width( const Planc & _visible_width )
+void Object::visible_width( const Planc & _visible_width )
 {
     m_visible_width = _visible_width;
-    return *this;
 }
 
 Planc Object::visible_height( ) const
@@ -356,10 +469,44 @@ Planc Object::visible_height( ) const
     return m_visible_height;
 }
 
-Object & Object::visible_height( const Planc & _visible_height )
+void Object::visible_height( const Planc & _visible_height )
 {
     m_visible_height = _visible_height;
-    return *this;
+}
+
+bool Object::foreground( ) const
+{
+    return m_foreground;
+}
+
+void Object::foreground( const bool _foreground )
+{
+    m_foreground = _foreground || ( z( ) > ONE );
+}
+
+bool Object::background( ) const
+{
+    return m_background;
+}
+
+void Object::background( const bool _background )
+{
+    m_background = _background || ( z( ) < ONE );
+}
+
+bool Object::interactive( ) const
+{
+    return m_interactive;
+}
+
+void Object::interactive( const bool _interactive )
+{
+    m_interactive = _interactive;
+    
+    if( !m_interactive )
+    {
+        world( )->object_grid( ).erase( this );
+    }
 }
 
 bool Object::stationary( ) const
@@ -367,15 +514,14 @@ bool Object::stationary( ) const
     return m_stationary;
 }
 
-Object & Object::stationary( const bool _stationary )
+void Object::stationary( const bool _stationary )
 {
     m_stationary = _stationary;
+    
     if( m_stationary )
     {
         velocity( ZERO_VECTOR );
     }
-
-    return *this;
 }
 
 dec Object::friction_resistance( ) const
@@ -385,7 +531,7 @@ dec Object::friction_resistance( ) const
         return m_ground->resistance( );
     }
 
-    return 0; // TODO AIR_RESISTANCE;
+    return ZERO; // TODO AIR_RESISTANCE;
 }
 
 TerrainEdge * Object::ground( ) const
@@ -393,16 +539,14 @@ TerrainEdge * Object::ground( ) const
     return m_ground;
 }
 
-Object & Object::ground( TerrainEdge * ground )
+void Object::ground( TerrainEdge * ground )
 {
     m_ground = ground;
-    return *this;
 }
 
-Object & Object::out_of_bounds( )
+void Object::out_of_bounds( )
 {
     mark_to_delete( );
-    return *this;
 }
 
 bool Object::collide( Object * object )
@@ -410,31 +554,27 @@ bool Object::collide( Object * object )
     return false;
 }
 
-Object & Object::react_to_movement( Object * object, const Vector & _v )
+void Object::react_to_movement( Object * object, const Vector & _v )
 {
     Assert( m_movement_subscriptions.contains( object ), "not subscribed to object's movement" );
-    return *this;
 }
 
 bool Object::terrain_boundaries( ) const { return m_terrain_boundaries; }
 
-Object & Object::terrain_boundaries( const bool _terrain_boundaries )
+void Object::terrain_boundaries( const bool _terrain_boundaries )
 {
     m_terrain_boundaries = _terrain_boundaries;
     if( !m_terrain_boundaries )
     {
         m_ground = nullptr;
     }
-
-    return *this;
 }
 
 dec Object::gravity_ratio( ) const { return m_gravity_ratio; }
 
-Object & Object::gravity_ratio( const dec _gravity_ratio )
+void Object::gravity_ratio( const dec _gravity_ratio )
 {
     m_gravity_ratio = _gravity_ratio;
-    return *this;
 }
 
 FixedRectangle Object::hit_box( ) const
@@ -448,11 +588,10 @@ FixedRectangle Object::visible_box( ) const
     return FixedRectangle( visible_width( ), visible_height( ), position( ) );
 }
 
-Object & Object::track_position( uint count )
+void Object::track_position( uint count )
 {
     m_last_position_count = count;
     m_last_positions.resize( count, position( ) );
-    return *this;
 }
 
 Coordinate Object::last_position( uint past )
@@ -460,23 +599,32 @@ Coordinate Object::last_position( uint past )
     return m_last_positions[ ( m_last_position_index + past ) % m_last_position_count ];
 }
 
-Object & Object::subscribe_to_movement( Object * object )
+void Object::subscribe_to_movement( Object * object )
 {
     m_movement_subscriptions.insert( object );
     object->add_movement_subscriber( this );
-    return *this;
 }
 
-Object & Object::add_movement_subscriber( Object * object )
+void Object::unsubscribe_to_movement( Object * object )
+{
+    m_movement_subscriptions.erase( object );
+    object->remove_movement_subscriber( this );
+}
+
+void Object::add_movement_subscriber( Object * object )
 {
     m_movement_subscribers.insert( object );
-    return *this;
+}
+
+void Object::remove_movement_subscriber( Object * object )
+{
+    m_movement_subscribers.erase( object );
 }
 
 #ifdef AXN_DEBUG
 Drawing Object::debug_overlay( ) const
 {
-    const Planc HIT_BOX_THICKNESS = 2.0;
+    const Planc HIT_BOX_THICKNESS = 1.5;
     const Planc DOT_RADIUS = HIT_BOX_THICKNESS;
     const Planc VELOCITY_THICKNESS = HIT_BOX_THICKNESS;
     const Planc VELOCITY_ARROW_LENGTH = 10.0;
@@ -496,7 +644,7 @@ Drawing Object::debug_overlay( ) const
     Vector velocity_graphic = velocity( ) * VELOCITY_SCALE;
     if( velocity_graphic.magnitude( ) >= VELOCITY_MAGNITUDE_MINIMUM )
     {
-        debug_overlay.draw( COLOR, velocity_graphic, VELOCITY_ARROW_LENGTH, VELOCITY_THICKNESS, true );
+        debug_overlay.draw( COLOR, velocity_graphic.origin( ORIGIN ), VELOCITY_ARROW_LENGTH, VELOCITY_THICKNESS, true );
     }
 
     return debug_overlay;

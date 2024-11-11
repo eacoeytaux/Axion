@@ -12,7 +12,7 @@ public:
     virtual ~DistantBird( ) { }
     DistantBird( World *, const Coordinate & position );
 
-    virtual const DistantBird & render( ) const override;
+    virtual void render( ) override;
 
 private:
     uint m_wing_cycle_offset;

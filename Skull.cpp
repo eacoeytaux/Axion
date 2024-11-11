@@ -1,5 +1,4 @@
 #include "Skull.hpp"
-
 #include "World.hpp"
 
 using mtmercy::Skull;
@@ -26,9 +25,7 @@ const Color HOLE_COLOR = BLACK;
 
 Skull::Skull( World * world, const Coordinate & _position ) : Object( world, _position )
 {
-    drawing_always_dirty( true );
-
-    gravity_ratio( 1.0 );
+    needs_render_always( true );
 
     m_skull_drawing.draw( BONE_COLOR, Rectangle( JAW_WIDTH, JAW_HEIGHT, Coordinate( SKULL_RADIUS - half( JAW_WIDTH ), -half( JAW_HEIGHT ) ) ) );
     m_skull_drawing.draw( BONE_COLOR, Circle( SKULL_RADIUS ) );
@@ -39,26 +36,21 @@ Skull::Skull( World * world, const Coordinate & _position ) : Object( world, _po
     m_skull_drawing.rotate( Random::rAngle( ) );
 }
 
-const Skull & Skull::render( ) const
+void Skull::render( )
 {
     Object::render( );
 
     draw( m_skull_drawing );
-
-    return *this;
 }
 
-Skull & Skull::update( )
+void Skull::update( )
 {
     Object::update( );
 
     if( ground( ) )
     {
         Planc distance = velocity( ).magnitude( );
-        dec ratio = Random::flipped( distance / SKULL_CIRCUMFERENCE, ( velocity( ).dx( ) < 0.0 ) );
-        m_skull_drawing.rotate( Angle( TAU * ratio ) );
+        dec ratio = Random::negative( distance / SKULL_CIRCUMFERENCE, is_negative( velocity( ).dx( ) ) );
         m_skull_drawing.rotate( Angle( TAU * ratio ) );
     }
-
-    return *this;
 }

@@ -13,7 +13,7 @@
 // ---------------- //
 #elif defined( OS_LINUX )
 // ---------------- //
-// todo
+//                  //
 // ---------------- //
 #endif
 
@@ -57,7 +57,7 @@ error ogl::reset( )
 
     m_initializing = true;
 
-    clear_screen( 0.0, 0.0, 0.0 );
+    clear_screen( );
 
     faces_counterclockwise( true );
     blend_normal( );
@@ -311,7 +311,7 @@ error ogl::transform( const Transform & _transform )
 
 error ogl::translate( const dec _x, const dec _y )
 {
-    glTranslated( _x, _y, 0.0 );
+    glTranslated( _x, _y, ZERO );
     return check_errors( );
 }
 
@@ -455,7 +455,7 @@ error ogl::enable_anti_alias( )
 error ogl::disable_anti_alias( )
 {
 #ifndef OS_WINDOWS
-    disable(GL_MULTISAMPLE);
+    disable( GL_MULTISAMPLE );
 #endif
 
     disable( GL_LINE_SMOOTH );

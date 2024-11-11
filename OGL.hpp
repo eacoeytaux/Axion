@@ -25,7 +25,7 @@ public:
     static error clear_depth( );
     static error clear_stencil( );
 
-    static error clear_screen( ) { return ogl::clear_screen( 0.0, 0.0, 0.0 ); }
+    static error clear_screen( ) { return ogl::clear_screen( ZERO, ZERO, ZERO ); }
     static error clear_screen( dec r, dec g, dec b );
 
     static error load_identity( );
@@ -52,6 +52,7 @@ private:
     static error begin( int gl_enum );
 
 public:
+    static error end( );
     static error begin_points( );
     static error begin_lines( );
     static error begin_lines_strip( );
@@ -60,7 +61,6 @@ public:
     static error begin_triangles_strip( );
     static error begin_triangles_fan( );
     static error begin_polygons( );
-    static error end( );
 
     static error vertex( dec x, dec y, dec z = 1.0, dec w = 1.0 );
 

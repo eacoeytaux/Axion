@@ -18,19 +18,18 @@ public:
     LightSource( const Coordinate & source, const Planc & distance );
 
     const Coordinate & position( ) const;
-    LightSource & position( const Coordinate & );
+    void position( const Coordinate & );
 
     Planc radius( ) const;
-    LightSource & radius( dec );
+    void radius( dec );
 
     // dec flicker( ) const;
-    // LightSource & flicker( dec );
+    // void flicker( dec );
 
     // const Color & tint( ) const;
-    // LightSource & tint( const Color & );
+    // void tint( const Color & );
 
-    bool operator==( const LightSource & ) const;
-    bool operator!=( const LightSource & ) const;
+    default_equal( LightSource );
 
 private:
     Coordinate m_position;

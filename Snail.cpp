@@ -1,6 +1,5 @@
 #include "Snail.hpp"
-
-#include "TerrainEdge.hpp"
+#include "Terrain.hpp"
 
 using mtmercy::Snail;
 
@@ -17,12 +16,12 @@ const Color SHELL_COLOR = RED;
 
 Snail::Snail( World * world, const Coordinate & _position ) : Mob( world, _position )
 {
-    drawing_always_dirty( true );
+    needs_render_always( true );
 
     // space( Square( SHELL_RADIUS * 2 ) );
 }
 
-const Snail & Snail::render( ) const
+void Snail::render( )
 {
     Mob::render( );
 
@@ -39,11 +38,9 @@ const Snail & Snail::render( ) const
 
     draw( SHELL_COLOR, Circle( SHELL_RADIUS, VectorA( angle + RIGHT_ANGLE, SHELL_RADIUS ) ) );
     draw( SLUG_COLOR, Polygon( { head, head_top, tail } ) );
-
-    return *this;
 }
 
-Snail & Snail::update( )
+void Snail::update( )
 {
     if( ground( ) )
     {
@@ -51,6 +48,4 @@ Snail & Snail::update( )
     }
 
     Object::update( );
-
-    return *this;
 }

@@ -6,7 +6,7 @@
 namespace mtmercy
 {
 
-class Waterfall : public StationaryObject
+class Waterfall : public Object
 {
 private:
     struct Foam
@@ -21,8 +21,8 @@ public:
     virtual ~Waterfall( ) { }
     Waterfall( World *, const Coordinate & bottom, Planc width, Planc height, dec z = 1.0 );
 
-    const Waterfall & render( ) const override;
-    Waterfall & update( ) override;
+    void render( ) override;
+    void update( ) override;
 
 private:
     list<Foam> m_foam;

@@ -19,8 +19,9 @@ public:
     virtual ~Fire( ) { }
     Fire( World *, const Coordinate & position );
 
-    virtual const Fire & render( ) const override;
-    virtual Fire & update( ) override;
+    virtual void render( ) override;
+
+    virtual void update( ) override;
 
 private:
     list<Flame> m_flames_yellow;

@@ -2,69 +2,140 @@
 
 Terrain::~Terrain( )
 {
-    for_each( edge, m_edges ) safe_delete( edge );
+    for_each( edges, m_edges )
+    {
+        for_each( edge, edges )
+        {
+            safe_delete( edge );
+        }
+    }
     m_edges.clear( );
 
-    for_each( vertex, m_vertices ) safe_delete( vertex );
+    for_each( vertices, m_vertices )
+    {
+        for_each( vertex, vertices )
+        {
+            safe_delete( vertex );
+        }
+    }
     m_vertices.clear( );
 }
 
-Terrain::Terrain( World * world, const varray<Coordinate> & _vertices ) : Object( world )
+Terrain::Terrain( World * world, const varray<varray<Coordinate>> & _vertices ) : Object( world )
 {
-    gravity_ratio( 0.0 );
+#ifdef AXN_DEBUG
+    draw_debug = true;
+#endif
 
-    for_each( v, _vertices )
+    no_gravity( );
+
+    bool first = true;
+    for_each( vertices, _vertices )
     {
-        make_vertex( v );
+        make( vertices, !first );
+        first = false;
+    }
+}
+
+void Terrain::make( const varray<Coordinate> & _positions, const bool _loop )
+{
+    if( _positions.size( ) <= 1 )
+    {
+        return;
     }
 
-    if( m_vertices.size( ) )
+    m_vertices.insert_back( varray<TerrainVertex *>( ) );
+    m_edges.insert_back( varray<TerrainEdge *>( ) );
+
+    TerrainVertex * first = nullptr;
+    TerrainVertex * last = nullptr;
+    TerrainVertex * previous = nullptr;
+    for_range( i, _positions.size( ) )
     {
-        for_range( i, m_vertices.size( ) - 1 )
+        const Coordinate & coordinate = _positions[ i ];
+        TerrainVertex * vertex = new TerrainVertex( coordinate );
+        m_vertices.back( ).insert_back( vertex );
+
+        if( i )
         {
-            make_edge( m_vertices[ i ], m_vertices[ i + 1 ] );
+            Assert( (bool)previous );
+            m_edges.back( ).insert_back( new TerrainEdge( previous, vertex ) );
+        }
+
+        previous = vertex;
+
+        if( _loop )
+        {
+            if( !i )
+            {
+                first = vertex;
+            }
+            else if( i == ( _positions.size( ) - 1 ) )
+            {
+                last = vertex;
+            }
+        }
+    }
+
+    if( _loop )
+    {
+        if( first && last )
+        {
+            m_edges.back( ).insert_back( new TerrainEdge( last, first ) );
         }
     }
 }
 
-TerrainVertex * Terrain::make_vertex( const Coordinate & _position )
-{
-    TerrainVertex * vertex( new TerrainVertex( _position ) );
-    m_vertices.insert_back( vertex );
-    return vertex;
-}
+const varray<varray<TerrainVertex *>> & Terrain::vertices( ) const { return m_vertices; }
 
-TerrainEdge * Terrain::make_edge( TerrainVertex * v1, TerrainVertex * v2 )
-{
-    TerrainEdge * edge( new TerrainEdge( v1, v2 ) );
-    m_edges.insert_back( edge );
-    v1->edge2( edge );
-    v2->edge1( edge );
-    return edge;
-}
-const varray<TerrainVertex *> & Terrain::vertices( ) const { return m_vertices; }
+const varray<varray<TerrainEdge *>> & Terrain::edges( ) const { return m_edges; }
 
-const varray<TerrainEdge *> & Terrain::edges( ) const { return m_edges; }
+varray<TerrainEdge *> Terrain::edges( const FixedRectangle & _rect ) const
+{
+    varray<TerrainEdge *> matches_edges;
+
+    for_each( edges, m_edges )
+    {
+        for_each( edge, edges )
+        {
+            // TODO
+            // if( _rect.intersects( edge->line( ) ) )
+            {
+                matches_edges.insert_back( edge );
+            }
+        }
+    }
+
+    return matches_edges;
+}
 
 void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( const Coordinate &, const TerrainEdge * )> & f ) const
 {
     if( !( edges( ).size( ) ) )
         return;
 
-    TerrainEdge * edge = edges( ).front( );
-    Planc x = edge->vertex1( )->position( ).x( ) + Random::rPlanc( _distance_x.range( ) );
-
-    while( edge )
+    for_each( edges, edges( ) )
     {
-        Planc y = edge->line( ).y( x );
-        f( Coordinate( x, y ), edge );
-
-        Planc dx = Random::rPlanc( _distance_x );
-
-        x += dx;
-        while( edge && ( x > edge->vertex2( )->position( ).x( ) ) )
+        if( !edges.size( ) )
         {
-            edge = edge->vertex2( )->edge2( );
+            continue;
+        }
+
+        TerrainEdge * edge = edges.front( );
+        Planc x = edge->vertex1( )->position( ).x( ) + Random::rPlanc( _distance_x.range( ) );
+
+        while( edge )
+        {
+            Planc y = edge->line( ).y( x );
+            f( Coordinate( x, y ), edge );
+
+            Planc dx = Random::rPlanc( _distance_x );
+
+            x += dx;
+            while( edge && ( x > edge->vertex2( )->position( ).x( ) ) )
+            {
+                edge = edge->vertex2( )->edge2( );
+            }
         }
     }
 };
@@ -72,13 +143,95 @@ void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( 
 #ifdef AXN_DEBUG
 Drawing Terrain::debug_overlay( ) const
 {
+    const Planc GROUND_WIDTH = 1.5;
+    const Color COLOR = CYAN;
+
     Drawing debug_overlay;
 
-    for_each( edge, edges( ) )
+    for_each( edges, edges( ) )
     {
-        debug_overlay.draw( MAGENTA, edge->line( ), 1.0 );
+        for_each( edge, edges )
+        {
+            debug_overlay.draw( COLOR, edge->line( ), GROUND_WIDTH );
+        }
     }
 
     return debug_overlay;
 }
 #endif
+
+TerrainVertex::TerrainVertex( const Coordinate & _position ) { m_position = _position; }
+
+Coordinate TerrainVertex::position( ) const { return m_position; }
+
+TerrainEdge * TerrainVertex::edge1( ) const { return m_e1; }
+TerrainEdge * TerrainVertex::edge2( ) const { return m_e2; }
+
+void TerrainVertex::edge1( TerrainEdge * e1 )
+{
+    Assert( !(bool)m_e1, "Edge 1 has already been set" );
+
+    m_e1 = e1;
+}
+
+void TerrainVertex::edge2( TerrainEdge * e2 )
+{
+    Assert( !(bool)m_e2, "Edge 2 has already been set" );
+
+    m_e2 = e2;
+}
+
+Angle TerrainVertex::normal( ) const
+{
+    if( m_e1 && m_e2 )
+    {
+        return ( m_e1->normal( ) + m_e2->normal( ) ).half( ).flipped( );
+    }
+    else if( m_e1 )
+    {
+        return m_e1->normal( );
+    }
+    else if( m_e2 )
+    {
+        return m_e2->normal( );
+    }
+
+    return Angle( RIGHT_ANGLE );
+}
+
+dec TerrainVertex::resistance( ) const { return m_resistance; }
+
+TerrainEdge::TerrainEdge( TerrainVertex * _v1, TerrainVertex * _v2, const dec _resistance ) : m_v1( _v1 ), m_v2( _v2 ), m_resistance( _resistance )
+{
+    Assert( (bool)m_v1 );
+    Assert( (bool)m_v2 );
+
+    m_v1->edge2( this );
+    m_v2->edge1( this );
+}
+
+TerrainEdge::TerrainEdge( const TerrainEdge & _edge )
+{
+    m_v1 = _edge.vertex1( );
+    m_v2 = _edge.vertex2( );
+}
+
+Line TerrainEdge::line( ) const
+{
+    return Line( m_v1->position( ), m_v2->position( ) );
+}
+
+Vector TerrainEdge::vector( ) const
+{
+    return Vector( m_v1->position( ), m_v2->position( ) );
+}
+
+TerrainVertex * TerrainEdge::vertex1( ) const { return m_v1; }
+TerrainVertex * TerrainEdge::vertex2( ) const { return m_v2; }
+
+Angle TerrainEdge::normal( ) const
+{
+    return vector( ).angle( ) + RIGHT_ANGLE;
+}
+
+dec TerrainEdge::resistance( ) const { return m_resistance; }

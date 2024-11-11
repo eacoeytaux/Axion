@@ -7,6 +7,7 @@
 #include "Vector.hpp"
 #include "Transform.hpp"
 #include "Line.hpp"
+#include "Path.hpp"
 #include "Polygon.hpp"
 #include "FixedRectangle.hpp"
 

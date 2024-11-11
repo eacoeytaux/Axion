@@ -12,22 +12,23 @@ public:
     virtual ~Arrow( ) { }
     Arrow( World *, const Coordinate & tip, const Vector & launch_speed, const Color & feather_color );
 
-    virtual const Arrow & render( ) const override;
-    virtual Arrow & update( ) override;
+    virtual void render( ) override;
+
+    virtual void update( ) override;
 
     Angle angle( ) const;
-    Arrow & angle( const Angle & );
+    void angle( const Angle & );
 
     dec length( ) const;
-
+    
 protected:
-    virtual Arrow & ground( TerrainEdge * ) override;
-    virtual Arrow & react_to_movement( Object *, const Vector & ) override;
+    virtual void ground( TerrainEdge * ) override;
+    virtual void react_to_movement( Object *, const Vector & ) override;
     virtual bool collide( Object * ) override;
 
-    virtual void render_head( ) const;
-    virtual void render_shaft( ) const;
-    virtual void render_feather( ) const;
+    virtual void draw_head( );
+    virtual void draw_shaft( );
+    virtual void draw_feather( );
 
     dec fade_alpha( ) const;
 

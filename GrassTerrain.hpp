@@ -10,7 +10,8 @@ class GrassTerrain : public Terrain
 {
 public:
     virtual ~GrassTerrain( ) { }
-    GrassTerrain( World *, const varray<Coordinate> & vertices = { } );
+
+    GrassTerrain( World *, const varray<varray<Coordinate>> & vertices = { } );
 
     virtual const Color & dust_color( ) const;
 };

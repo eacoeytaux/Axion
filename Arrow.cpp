@@ -1,5 +1,4 @@
 #include "Arrow.hpp"
-
 #include "World.hpp"
 #include "Mob.hpp"
 
@@ -42,6 +41,8 @@ Arrow::Arrow( World * world, const Coordinate & tip, const Vector & launch_speed
 #ifdef AXN_DEBUG
     draw_debug = true;
 #endif
+    
+    interactive( true );
 
     solid( true );
 
@@ -57,23 +58,25 @@ Arrow::Arrow( World * world, const Coordinate & tip, const Vector & launch_speed
 dec Arrow::fade_alpha( ) const
 {
     if( age( ) < LIFESPAN )
+    {
         return 1.0;
+    }
     else
+    {
         return ( 1.0 - ( ( age( ) - (dec)LIFESPAN ) / (dec)FADESPAN ) );
+    }
 }
 
-const Arrow & Arrow::render( ) const
+void Arrow::render( )
 {
     Object::render( );
 
-    render_shaft( );
-    render_head( );
-    render_feather( );
-
-    return *this;
+    draw_shaft( );
+    draw_head( );
+    draw_feather( );
 }
 
-void Arrow::render_head( ) const
+void Arrow::draw_head( )
 {
     Polygon head = HEAD;
     head.rotate( angle( ) );
@@ -81,7 +84,7 @@ void Arrow::render_head( ) const
     draw( TIP_COLOR.a( fade_alpha( ) ), head );
 }
 
-void Arrow::render_shaft( ) const
+void Arrow::draw_shaft( )
 {
     Coordinate tip( -HEAD_LENGTH_INNER, 0.0 );
     Coordinate back( -( SHAFT_LENGTH + HEAD_LENGTH_INNER ), 0.0 );
@@ -91,7 +94,7 @@ void Arrow::render_shaft( ) const
     draw( SHAFT_COLOR.a( fade_alpha( ) ), Line( tip, back ), 3.0 );
 }
 
-void Arrow::render_feather( ) const
+void Arrow::draw_feather( )
 {
     Polygon feather = FEATHER;
     feather.move( Vector( -( SHAFT_LENGTH + HEAD_LENGTH_INNER ), 0.0 ) );
@@ -100,39 +103,42 @@ void Arrow::render_feather( ) const
     draw( m_feather_color.a( fade_alpha( ) ), feather );
 }
 
-Arrow & Arrow::update( )
+void Arrow::update( )
 {
     bool airborn = !Object::ground( );
 
     Object::update( );
 
     if( !Object::ground( ) && velocity( ).has_magnitude( ) )
+    {
         angle( velocity( ).angle( ) );
+    }
     else if( airborn )
-        drawing_dirty( true );
+    {
+        needs_render( true );
+    }
 
     if( age( ) >= LIFESPAN )
     {
-        drawing_dirty( true );
+        needs_render( true );
         if( age( ) >= LIFESPAN + FADESPAN )
+        {
             mark_deleted( );
+        }
     }
-
-    return *this;
 }
 
 Angle Arrow::angle( ) const { return m_angle; }
 
-Arrow & Arrow::angle( const Angle & _angle )
+void Arrow::angle( const Angle & _angle )
 {
     m_angle = _angle;
-    drawing_dirty( true );
-    return *this;
+    needs_render( true );
 }
 
 dec Arrow::length( ) const { return SHAFT_LENGTH + HEAD_LENGTH_INNER; }
 
-Arrow & Arrow::ground( TerrainEdge * ground )
+void Arrow::ground( TerrainEdge * ground )
 {
     Object::ground( ground );
 
@@ -141,15 +147,13 @@ Arrow & Arrow::ground( TerrainEdge * ground )
         stationary( true );
         solid( false );
     }
-
-    return *this;
 }
 
 bool Arrow::collide( Object * object )
 {
     Object::collide( object );
 
-    if( solid( ) && !dynamic_cast<Arrow *>( object ) )
+    if( object->interactive( ) && !dynamic_cast<Arrow *>( object ) )
     {
         if( Mob * mob = dynamic_cast<Mob *>( object ) )
         {
@@ -158,6 +162,7 @@ bool Arrow::collide( Object * object )
 
         subscribe_to_movement( object );
         stationary( true );
+        interactive( false );
         solid( false );
 
         return true;
@@ -166,11 +171,9 @@ bool Arrow::collide( Object * object )
     return false;
 }
 
-Arrow & Arrow::react_to_movement( Object * object, const Vector & _v )
+void Arrow::react_to_movement( Object * object, const Vector & _v )
 {
     Object::react_to_movement( object, _v );
 
     position( position( ) + _v );
-
-    return *this;
 }

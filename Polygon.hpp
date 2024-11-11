@@ -7,29 +7,32 @@
 #include "Vector.hpp"
 #include "Transform.hpp"
 #include "Line.hpp"
+#include "Path.hpp"
 
 namespace axn
 {
 namespace geometry
 {
 
-class Polygon
+class Polygon : public Transformable
 {
 public:
-    static const uint CIRCLE_PRECISION;
+    static uint circle_precision( dec perimeter = TAU );
 
     virtual ~Polygon( ) { }
+
     Polygon( );
     Polygon( const varray<Coordinate> & coordinates, bool assume_is_convex = false );
     Polygon( const varray<Coordinate> & coordinates, const Transform &, bool assume_is_convex = false );
-
+    
+    transform_functions( Polygon );
+    
     static Polygon equilateral( uint side_count, const Planc & radius = 1.0, const Coordinate & center = ORIGIN, Angle rotation = Angle( 0 ) );
     static Polygon expand( const Polygon & polygon, const Planc & expansion );
 
-    Transform transform( bool cumulative = true ) const;
     const varray<Coordinate> & coordinates( bool raw = false ) const;
 
-    varray<Line> lines( bool raw = false ) const;
+    Path perimeter( bool raw = false ) const;
     varray<Polygon> triangles( bool raw = false ) const;
     varray<Polygon> convex_partitions( bool raw = false ) const;
     Polygon convex_hull( bool raw = false ) const;
@@ -50,28 +53,15 @@ public:
     bool intersects( const Line & line ) const { return ( intersection( line ).size( ) > 0 ); }
     varray<Line> intersection( const Line & line ) const;
 
-    Polygon & transform( const Transform & t );
-
-    Polygon & move( const Vector & );
-    Polygon & stretch( const Vector & );
-    Polygon & scale( dec scale, const Coordinate & origin = ORIGIN );
-    Polygon & rotate( const Angle & angle, const Coordinate & origin = ORIGIN );
-    Polygon & mirror( const Vector & axis );
-    Polygon & mirror_x( ) { return mirror( X_HAT ); }
-    Polygon & mirror_y( ) { return mirror( Y_HAT ); }
-
     Polygon operator+( const Vector & ) const;
     Polygon & operator+=( const Vector & );
     Polygon operator-( const Vector & ) const;
     Polygon & operator-=( const Vector & );
 
     bool operator==( const Polygon & _polygon ) const;
-    bool operator!=( const Polygon & _polygon ) const { return !( *this == _polygon ); }
+    default_non_equal( Polygon );
 
 private:
-    mutable Transform m_transform;
-    mutable Transform m_cumulative_transform;
-
     mutable varray<Coordinate> m_coordinates;
     mutable varray<Coordinate> m_coordinates_raw;
     mutable bool m_coordinates_dirty = true;
@@ -88,6 +78,7 @@ private:
     mutable bool m_convex_partitions_dirty = true;
 
     mutable varray<Coordinate> m_convex_hull;
+    mutable varray<uint> m_convex_hull_indices;
     mutable bool m_convex_hull_dirty = true;
 
     mutable bool m_convex = true;
@@ -95,10 +86,9 @@ private:
     mutable Planc m_lower_bound_y = P0;
     mutable Planc m_upper_bound_x = P0;
     mutable Planc m_upper_bound_y = P0;
-
-    void process( ) const;
+    
+    virtual const Polygon & dirty( ) const override;
     void process( bool transform, bool lines, bool triangles, bool convex_partitions, bool convex_hull ) const;
-    void dirty( ) const;
 };
 
 class Triangle : public Polygon

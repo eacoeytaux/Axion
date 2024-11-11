@@ -16,9 +16,9 @@ FixedRectangle::FixedRectangle( const Planc & _width, const Planc & _height, con
 
 FixedRectangle::FixedRectangle( const Coordinate & _bottom, const Coordinate & _top )
 {
-    width( _top.x( ) - _bottom.x( ) );
-    height( _top.y( ) - _bottom.y( ) );
-    center( Vector( _bottom, _top ).half( ) );
+    width( abs( _top.x( ) - _bottom.x( ) ) );
+    height( abs( _top.y( ) - _bottom.y( ) ) );
+    center( midpoint( _bottom, _top ) );
 }
 
 const Coordinate & FixedRectangle::center( ) const { return m_center; }
@@ -31,7 +31,7 @@ FixedRectangle & FixedRectangle::center( const Coordinate & _center )
 const Planc & FixedRectangle::width( ) const { return m_width; }
 FixedRectangle & FixedRectangle::width( const Planc & _width )
 {
-    Assert( _width >= 0.0, "cannot have negative width" );
+    Assert( _width >= ZERO, "cannot have negative width" );
     m_width = _width;
     return *this;
 }
@@ -39,7 +39,7 @@ FixedRectangle & FixedRectangle::width( const Planc & _width )
 const Planc & FixedRectangle::height( ) const { return m_height; }
 FixedRectangle & FixedRectangle::height( const Planc & _height )
 {
-    Assert( _height >= 0.0, "cannot have negative height" );
+    Assert( _height >= ZERO, "cannot have negative height" );
     m_height = _height;
     return *this;
 }
@@ -133,6 +133,36 @@ varray<Line> FixedRectangle::intersection( const Line & _line ) const
     return { };
 }
 
+FixedRectangle & FixedRectangle::union_with( const FixedRectangle & _rect )
+{
+    return *this = FixedRectangle( Coordinate( min( lower_bound_x( ), _rect.lower_bound_x( ) ),
+                                               min( lower_bound_y( ), _rect.lower_bound_y( ) ) ),
+                                   Coordinate( max( upper_bound_x( ), _rect.upper_bound_x( ) ),
+                                               max( upper_bound_y( ), _rect.upper_bound_y( ) ) ) );
+}
+
+FixedRectangle & FixedRectangle::intersection_with( const FixedRectangle & _rect )
+{
+    if( !has_intersection_with( _rect ) )
+    {
+        Assert( "does not intersect" );
+        return *this = FixedRectangle( );
+    }
+
+    return *this = FixedRectangle( Coordinate( max( lower_bound_x( ), _rect.lower_bound_x( ) ),
+                                               max( lower_bound_y( ), _rect.lower_bound_y( ) ) ),
+                                   Coordinate( min( upper_bound_x( ), _rect.upper_bound_x( ) ),
+                                               min( upper_bound_y( ), _rect.upper_bound_y( ) ) ) );
+}
+
+bool FixedRectangle::has_intersection_with( const FixedRectangle & _rect ) const
+{
+    return !( ( upper_bound_x( ) < _rect.lower_bound_x( ) ) ||
+              ( upper_bound_x( ) > _rect.upper_bound_x( ) ) ||
+              ( lower_bound_y( ) < _rect.upper_bound_y( ) ) ||
+              ( upper_bound_y( ) > _rect.lower_bound_y( ) ) );
+}
+
 Planc FixedRectangle::area( ) const
 {
     return width( ) * height( );
@@ -154,14 +184,14 @@ FixedRectangle & FixedRectangle::shrink( const Planc & _px, const Planc & _py )
 
 FixedRectangle & FixedRectangle::expand_width( const Planc & _p )
 {
-    Assert( _p >= 0.0, "cannot expand by negative amount, use shrink instead" );
+    Assert( _p >= ZERO, "cannot expand by negative amount, use shrink instead" );
     width( width( ) + _p );
     return *this;
 }
 
 FixedRectangle & FixedRectangle::shrink_width( const Planc & _p )
 {
-    Assert( _p <= 0.0, "cannot shrink by negative amount, use expand instead" );
+    Assert( _p <= ZERO, "cannot shrink by negative amount, use expand instead" );
     Assert( _p >= width( ), "cannot shrink by more than current width" );
     width( width( ) - _p );
     return *this;
@@ -169,14 +199,14 @@ FixedRectangle & FixedRectangle::shrink_width( const Planc & _p )
 
 FixedRectangle & FixedRectangle::expand_height( const Planc & _p )
 {
-    Assert( _p >= 0.0, "cannot expand by negative amount, use shrink instead" );
+    Assert( _p >= ZERO, "cannot expand by negative amount, use shrink instead" );
     height( height( ) + _p );
     return *this;
 }
 
 FixedRectangle & FixedRectangle::shrink_height( const Planc & _p )
 {
-    Assert( _p <= 0.0, "cannot shrink by negative amount, use expand instead" );
+    Assert( _p <= ZERO, "cannot shrink by negative amount, use expand instead" );
     Assert( _p >= height( ), "cannot shrink by more than current height" );
     height( height( ) - _p );
     return *this;
@@ -200,13 +230,6 @@ FixedRectangle FixedRectangle::operator-( const Vector & _v ) const
 FixedRectangle & FixedRectangle::operator-=( const Vector & _v )
 {
     return center( center( ) - _v );
-}
-
-bool FixedRectangle::operator==( const FixedRectangle & _rect ) const
-{
-    return ( ( width( ) == _rect.width( ) ) &&
-             ( height( ) == _rect.height( ) ) &&
-             ( center( ) == _rect.center( ) ) );
 }
 
 FixedRectangle::operator Polygon( ) const

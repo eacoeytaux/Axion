@@ -7,6 +7,7 @@
 #include "Vector.hpp"
 #include "Transform.hpp"
 #include "Line.hpp"
+#include "Path.hpp"
 #include "Polygon.hpp"
 
 namespace axn
@@ -48,26 +49,32 @@ public:
     bool intersects( const Line & line ) const;
     varray<Line> intersection( const Line & line ) const;
 
+    FixedRectangle & union_with( const FixedRectangle & );
+    FixedRectangle & intersection_with( const FixedRectangle & );
+    bool has_intersection_with( const FixedRectangle & ) const;
+
     Planc area( ) const;
 
     FixedRectangle & expand( const Planc & d_width_and_height ) { return expand( d_width_and_height, d_width_and_height ); }
     FixedRectangle & shrink( const Planc & d_width_and_height ) { return shrink( d_width_and_height, d_width_and_height ); }
+
     FixedRectangle & expand( const Planc & d_width, const Planc & d_height );
     FixedRectangle & shrink( const Planc & d_width, const Planc & d_height );
+
     FixedRectangle & expand_width( const Planc & d_width );
     FixedRectangle & shrink_width( const Planc & d_width );
+
     FixedRectangle & expand_height( const Planc & d_height );
     FixedRectangle & shrink_height( const Planc & d_height );
+
+    operator Polygon( ) const;
 
     FixedRectangle operator+( const Vector & ) const;
     FixedRectangle & operator+=( const Vector & );
     FixedRectangle operator-( const Vector & ) const;
     FixedRectangle & operator-=( const Vector & );
 
-    bool operator==( const FixedRectangle & _rect ) const;
-    bool operator!=( const FixedRectangle & _rect ) const { return !( *this == _rect ); }
-
-    operator Polygon( ) const;
+    default_equal( FixedRectangle );
 
 private:
     Planc m_width;

@@ -18,21 +18,43 @@ namespace utility
 
 // -- defines --
 
-#define for_each( x, container ) for( auto & x: container )
-#define for_range( i, range ) for( uint i = 0; i < (uint)range; ++i )
-// #define for_range_selector( x, range, i, func, ... ) func
-// #define for_range_i( range ) for( uint i = 0; i < (uint)range; ++i )
-// #define for_range_x( i, range ) for( uint i = 0; i < (uint)range; ++i )
-// #define for_range( ... ) for_range_selector(, ##__VA_ARGS__, for_range_x( __VA_ARGS__ ), for_range_i( __VA_ARGS__ ) )
+#define for_each( x, container ) \
+    for( auto & x: container )
+
+#define for_range( i, range ) \
+    for( uint i = 0; i < (uint)range; ++i )
+
+#define do_until_break( ) \
+    while( true )
+
+#define while_max( b, max )                 \
+    uint while_max_count_##__COUNTER__ = 0; \
+    while( ( b ) && ( while_max_count_##__COUNTER__++ < max ) )
 
 #define static_once( )                      \
     static bool b_set_##__COUNTER__ = true; \
-    if( b_set_##__COUNTER__ && !( b_set_##__COUNTER__ = false ) || b_set_##__COUNTER__ )
+    if( b_set_##__COUNTER__ && !( b_set_##__COUNTER__ = false ) )
 
 #define static_setup( Class, name )    \
     static Class name;                 \
     static bool name##_not_set = true; \
-    if( name##_not_set && !( name##_not_set = false ) || name##_not_set )
+    if( name##_not_set && !( name##_not_set = false ) )
+
+#define default_equal( Class )                        \
+    bool operator==( const Class & ) const = default; \
+    bool operator!=( const Class & c ) const { return !( *this == c ); }
+
+#define default_non_equal( Class ) \
+    bool operator!=( const Class & c ) const { return !( *this == c ); }
+
+#define default_virtual_equal( Class )                        \
+    virtual bool operator==( const Class & ) const = default; \
+    virtual bool operator!=( const Class & c ) const { return !( *this == c ); }
+
+#define default_virtual_non_equal( Class ) \
+    virtual bool operator!=( const Class & c ) const { return !( *this == c ); }
+
+inline void nothing( ) { }
 
 // -- safe delete --
 
@@ -51,6 +73,16 @@ void safe_delete( T *& t )
 
 const dec DEFAULT_DECIMAL_EPSILON = 0.0001;
 
+inline bool is_int( const dec d )
+{
+    return ( d == rint( d ) );
+}
+
+inline bool is_zero( const dec d )
+{
+    return ( d == ZERO );
+}
+
 inline bool is_infinity( const dec d )
 {
     return ( d == INFINITY_POSITIVE ) || ( d == INFINITY_NEGATIVE );
@@ -58,19 +90,12 @@ inline bool is_infinity( const dec d )
 
 inline bool dec_eq( const dec x, const dec y, const dec epsilon = DEFAULT_DECIMAL_EPSILON )
 {
-    if( abs( x - y ) < epsilon )
-    {
-        return true; // equals!
-    }
-    else
-    {
-        return false;
-    }
+    return ( abs( x - y ) < epsilon );
 }
 
 inline bool dec_neq( const dec x, const dec y, const dec epsilon = DEFAULT_DECIMAL_EPSILON )
 {
-    return !dec_eq( x, y, epsilon );
+    return ( !dec_eq( x, y, epsilon ) );
 }
 
 inline bool dec_gt( const dec x, const dec y, const dec epsilon = DEFAULT_DECIMAL_EPSILON )
@@ -93,40 +118,67 @@ inline bool dec_le( const dec x, const dec y, const dec epsilon = DEFAULT_DECIMA
     return ( ( ( x + epsilon ) < y ) || dec_eq( x, y ) );
 }
 
+inline bool divisible( const dec x, const dec y )
+{
+    return !is_zero( remainder( x, y ) );
+}
+
+inline dec remainder_pos( const dec x, const dec y )
+{
+    dec r = remainder( x, y );
+    while( dec_lt( r, ZERO ) )
+    {
+        r += y;
+    }
+    return r;
+}
+
 // -- misc. util functions --
+
+template <typename T>
+bool is_zero( const T & t )
+{
+    return ( t == ZERO );
+}
+
+template <typename T>
+bool is_positive( const T & t )
+{
+    return ( t > ZERO );
+}
+
+template <typename T>
+bool is_negative( const T & t )
+{
+    return ( t < ZERO );
+}
 
 template <typename T>
 void swap_values( T & t1, T & t2 )
 {
-    T tmp = t1;
+    T t0 = t1;
     t1 = t2;
-    t2 = tmp;
+    t2 = t0;
 }
 
 template <typename T>
 T inverse( const T & t )
 {
-    Assert( (bool)t );
-    return ( 1.0 / t );
+    Assert( (bool)t, "cannot divide by zero" );
+    return ( ONE / t );
 }
 
 template <typename T>
 void invert( T & t )
 {
-    Assert( (bool)t );
-    return t = ( 1.0 / t );
+    Assert( (bool)t, "cannot divide by zero" );
+    return t = ( ONE / t );
 }
 
 template <typename T>
 T half( const T & t )
 {
-    return ( t / 2.0 );
-}
-
-template <typename T>
-void halve( T & t )
-{
-    t = ( t / 2.0 );
+    return ( t / TWO );
 }
 
 template <typename T>
@@ -147,25 +199,13 @@ T pow( const T & t, const uint p )
 }
 
 template <typename T>
-T & square( T & t )
-{
-    return ( t = t * t );
-}
-
-template <typename T>
-T squared( const T & t )
+T square( const T & t )
 {
     return ( t * t );
 }
 
 template <typename T>
-T & cube( T & t )
-{
-    return ( t = t * t * t );
-}
-
-template <typename T>
-T cubed( const T & t )
+T cube( const T & t )
 {
     return ( t * t * t );
 }
@@ -200,42 +240,48 @@ template <typename T>
 const T & min( const varray<T> & list )
 {
     Assert( list.size( ), "list must not be empty" );
-    T & ret = list[ 0 ];
-    for_each( t, list ) if( t < ret ) ret = t;
-    return ret;
+
+    int min_i = ZERO;
+
+    for_range( i, list.size( ) - 1 )
+    {
+        if( list[ i + 1 ] < list[ min_i ] )
+        {
+            min_i = i + 1;
+        }
+    }
+
+    return list[ min_i ];
 }
 
 template <typename T>
 const T & max( const varray<T> & list )
 {
     Assert( list.size( ), "list must not be empty" );
-    T & ret = list[ 0 ];
-    for_each( t, list ) if( t > ret ) ret = t;
-    return ret;
+
+    int max_i = ZERO;
+
+    for_range( i, list.size( ) - 1 )
+    {
+        if( list[ i + 1 ] > list[ max_i ] )
+        {
+            max_i = i + 1;
+        }
+    }
+
+    return list[ max_i ];
 }
 
 template <typename T>
-T & flip( T & t, bool f = true )
+T negative( const T & t, bool f = true )
 {
-    if( f )
-    {
-        t = -t;
-    }
-
-    return t;
+    return f ? -t : t;
 }
 
 template <typename T>
-T flipped( const T & t, bool f = true )
+T log_base( const T & base, const T & t )
 {
-    if( f )
-    {
-        return -t;
-    }
-    else
-    {
-        return t;
-    }
+    return ( log( t ) / log( base ) );
 }
 
 // -- labels --
@@ -273,8 +319,7 @@ public:
 
     operator uint( ) const { return m_id; }
 
-    bool operator==( const Identifiable & i ) const { return id( ) == i.id( ); }
-    bool operator!=( const Identifiable & i ) const { return id( ) != i.id( ); }
+    default_equal( Identifiable );
 
     struct Hasher
     {
@@ -282,7 +327,7 @@ public:
     };
 };
 
-class IDset : public set<Identifiable, Identifiable::Hasher>
+class IDoset : public oset<Identifiable, Identifiable::Hasher>
 {
 };
 
@@ -291,7 +336,7 @@ class IDuset : public uset<Identifiable, Identifiable::Hasher>
 };
 
 template <typename T>
-class IDmap : public map<Identifiable, T, Identifiable::Hasher>
+class IDomap : public omap<Identifiable, T, Identifiable::Hasher>
 {
 };
 
@@ -303,17 +348,18 @@ class IDumap : public umap<Identifiable, T, Identifiable::Hasher>
 class Counter
 {
 private:
-    uint m_countdown;
+    uint m_countdown_top;
+    uint m_countdown_remaining;
 
 public:
     virtual ~Counter( ) { }
-    Counter( const uint countdown = 0 ) : m_countdown( countdown ) { }
+    Counter( const uint countdown = 0 ) : m_countdown_top( countdown ), m_countdown_remaining( countdown ) { }
 
     bool tick( )
     {
-        if( m_countdown )
+        if( m_countdown_remaining )
         {
-            return !m_countdown--;
+            return !m_countdown_remaining--;
         }
         else
         {
@@ -321,13 +367,25 @@ public:
         }
     }
 
-    Counter & reset( const uint countdown )
+    void reset( )
     {
-        m_countdown = countdown;
-        return *this;
+        m_countdown_remaining = m_countdown_top;
     }
 
-    uint remaining( ) const { return m_countdown; }
+    void reset( const uint countdown )
+    {
+        set( countdown );
+        reset( );
+    }
+    
+    void set( const uint countdown )
+    {
+        m_countdown_top = countdown;
+    }
+
+    uint remaining( ) const { return m_countdown_remaining; }
+    
+    default_equal( Counter );
 };
 
 template <typename T>
@@ -338,6 +396,7 @@ private:
 
 public:
     virtual ~Span( ) { }
+
     Span( ) : m_min( T( 0 ) ), m_max( T( 0 ) ) { }
     Span( const T & value ) : m_min( value ), m_max( value ) { }
     Span( const T & min_value, const T & max_value ) : m_min( min_value ), m_max( max_value )
@@ -376,6 +435,8 @@ public:
 
         return *this;
     }
+    
+    default_equal( Span );
 };
 
 template <typename T>
@@ -385,12 +446,14 @@ private:
     T m_value, m_min_value, m_max_value;
 
 public:
+    virtual ~Slider( ) { }
+
     Slider( ) : m_min_value( 0 ), m_max_value( 0 ) { value( min( ) ); }
     Slider( const T & max_value ) : m_min_value( 0 ), m_max_value( max_value ) { value( min( ) ); }
     Slider( const T & min_value, const T & max_value ) : m_min_value( ( min_value < max_value ) ? min_value : max_value ), m_max_value( ( min_value < max_value ) ? max_value : min_value ) { value( min( ) ); }
 
     const T & value( ) const { return m_value; }
-    Slider & value( const T & value, bool set_new_min_max_value = false )
+    void value( const T & value, bool set_new_min_max_value = false )
     {
         Assert( ( set_new_min_max_value || ( ( value >= min( ) ) && ( value <= max( ) ) ) ), "value must be in range" );
 
@@ -408,12 +471,10 @@ public:
                 min( m_value );
             }
         }
-
-        return *this;
     }
 
     const T & min( ) const { return m_min_value; }
-    Slider & min( const T & min_value )
+    void min( const T & min_value )
     {
         m_min_value = min_value;
 
@@ -421,12 +482,10 @@ public:
         {
             value( m_min_value );
         }
-
-        return *this;
     }
 
     const T & max( ) const { return m_max_value; }
-    Slider & max( const T & max_value )
+    void max( const T & max_value )
     {
         m_max_value = max_value;
 
@@ -434,22 +493,22 @@ public:
         {
             value( m_max_value );
         }
-
-        return *this;
     }
 
     T range( ) const { return T( max( ) - min( ) ); }
 
     dec value_percentage( ) const { return ( (dec)( m_value - m_min_value ) / (dec)( m_max_value - m_min_value ) ); }
-    Slider & value_percentage( const dec p, bool set_new_min_max_value = false )
+    void value_percentage( const dec p, bool set_new_min_max_value = false )
     {
-        return value( ( ( m_max_value - m_min_value ) * p ) + m_min_value, set_new_min_max_value );
+        value( ( ( m_max_value - m_min_value ) * p ) + m_min_value, set_new_min_max_value );
     }
 
-    Slider & delta( const T & delta, bool set_new_min_max_value = false )
+    void delta( const T & delta, bool set_new_min_max_value = false )
     {
-        return value( m_value + delta, set_new_min_max_value );
+        value( m_value + delta, set_new_min_max_value );
     }
+    
+    default_equal( Slider );
 };
 
 // -- range util functions --

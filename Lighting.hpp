@@ -18,22 +18,28 @@ class Lighting : public Visible
 {
 public:
     virtual ~Lighting( ) { }
+
     Lighting( );
 
     bool darkness_active( ) const;
-    Lighting & darkness_active( bool );
+    void darkness_active( bool );
     dec darkness_intensity( ) const;
-    Lighting & darkness_intensity( dec );
+    void darkness_intensity( dec );
 
     const varray<LightSource> & light_sources( ) const;
-    Lighting & add_light_source( const LightSource & );
-    Lighting & clear_light_sources( );
+    void add_light_source( const LightSource & );
+    void clear_light_sources( );
+
+    const Color & ambient_color( ) const;
+    void ambient_color( const Color & );
 
 private:
     varray<LightSource> m_light_sources;
 
     bool m_darkness_active = false;
     Slider<dec> m_darkness_slider = Slider<dec>( 1.0 );
+
+    Color m_ambient_color = TRANSPARENT;
 };
 
 } // namespace graphics

@@ -13,14 +13,17 @@ private:
     {
         Planc radius;
         Vector center_offset;
+
+        bool operator==( const Puff & p ) const = default;
+        bool operator!=( const Puff & p ) const = default;
     };
 
 public:
     virtual ~Cloud( ) { }
     Cloud( World * );
 
-    const Cloud & render( ) const override;
-    Cloud & update( ) override;
+    void render( ) override;
+    void update( ) override;
 
 private:
     Drawing m_cloud_drawing;

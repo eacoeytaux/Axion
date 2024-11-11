@@ -1,5 +1,4 @@
 #include "DistantBird.hpp"
-
 #include "World.hpp"
 
 using mtmercy::DistantBird;
@@ -21,10 +20,12 @@ const Color BIRD_COLOR = BLACK;
 
 DistantBird::DistantBird( World * world, const Coordinate & _position ) : Object( world, _position )
 {
-    drawing_always_dirty( true );
+    background( true );
+    
+    needs_render_always( true );
 
     z( 0.5 );
-    gravity_ratio( 0.0 );
+    no_gravity( );
     terrain_boundaries( false );
 
     velocity( VectorX( X_SPEED ) );
@@ -33,7 +34,7 @@ DistantBird::DistantBird( World * world, const Coordinate & _position ) : Object
     m_flight_cycle_offset = Random::rdec( FLIGHT_HEIGHT_CYCLE ) * half( PI );
 }
 
-const DistantBird & DistantBird::render( ) const
+void DistantBird::render( )
 {
     Object::render( );
 
@@ -57,6 +58,4 @@ const DistantBird & DistantBird::render( ) const
 
     draw( BIRD_COLOR, bird_polygon );
     draw( BIRD_COLOR, bird_wing );
-
-    return *this;
 }

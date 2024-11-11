@@ -9,7 +9,7 @@
 namespace axn
 {
 
-enum MESSAGE_TYPE
+enum MessageType
 {
     INFO_LOG = 0,
     WARNING_LOG,
@@ -30,7 +30,7 @@ public:
     static error pause( bool );
     static bool paused( );
 
-    static error log_message( MESSAGE_TYPE type, const char * entry, ... );
+    static error log_message( MessageType type, const char * entry, ... );
 };
 
 #define Log( ... ) Logger::log_message( __VA_ARGS__ )

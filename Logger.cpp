@@ -38,21 +38,19 @@ error Logger::init( const bool _file )
     if( _file )
     {
         Clock clock;
+
 #if defined( OS_WINDOWS )
-        // ---------------- //
         fopen_s( &log_file, ( LOG_DIRECTORY + clock.timestamp( "." ) + "." + clock.datestamp( "." ) + ".log" ).c_str( ), "w+" );
-// ---------------- //
 #elif defined( OS_APPLE )
-        // ---------------- //
         log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( "." ) + "." + clock.datestamp( "." ) + ".log" ).c_str( ), "w+" );
-// ---------------- //
 #elif defined( OS_LINUX )
-// ---------------- //
-// todo
-// ---------------- //
+        log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( "." ) + "." + clock.datestamp( "." ) + ".log" ).c_str( ), "w+" );
 #endif
+
         if( !( b_using_file = log_file ) )
+        {
             return error_not_init;
+        }
     }
 
     b_initialized = true;
@@ -60,10 +58,12 @@ error Logger::init( const bool _file )
     return no_error;
 }
 
-error Logger::log_message( MESSAGE_TYPE _type, const char * _entry, ... )
+error Logger::log_message( MessageType _type, const char * _entry, ... )
 {
-    if( ( !b_initialized ) || b_paused )
+    if( !b_initialized || b_paused )
+    {
         return error_not_init;
+    }
 
     try
     {
@@ -118,9 +118,14 @@ error Logger::log_message( MESSAGE_TYPE _type, const char * _entry, ... )
         if( b_using_file )
         {
             return_error( fprintf( log_file, "[%s] ", current.timestamp( ).c_str( ) ) );
+
             if( type )
+            {
                 return_error( fprintf( log_file, "[%s] ", type_str ) );
+            }
+
             return_error( vfprintf( log_file, _entry, va_args ) );
+
             return_error( fprintf( log_file, "\n" ) );
             return_error( fflush( log_file ) );
         }
@@ -139,13 +144,20 @@ error Logger::log_message( MESSAGE_TYPE _type, const char * _entry, ... )
 error Logger::close( )
 {
     if( b_initialized )
+    {
         log_message( INFO_LOG, "complete ...............\n" );
+    }
+
     b_initialized = false;
 
     if( log_file )
+    {
         return fclose( log_file ) ? error_todo : no_error;
+    }
     else
+    {
         return no_error;
+    }
 }
 
 #endif

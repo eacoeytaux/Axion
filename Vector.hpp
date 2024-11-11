@@ -36,7 +36,6 @@ public:
     Vector & normalize( );
 
     Vector half( ) const;
-    Vector & halve( );
 
     Angle angle( ) const;
     Vector & rotate_to_angle( const Angle & angle );
@@ -55,13 +54,14 @@ public:
     Vector operator/( dec scale ) const;
     Vector & operator*=( dec scale );
     Vector & operator/=( dec scale );
+    
+    Vector & operator=( const Coordinate & );
 
-    bool operator==( const Vector & ) const;
-    bool operator!=( const Vector & ) const;
+    default_equal( Vector );
 
 private:
     Coordinate m_origin = ORIGIN;
-    Planc m_dx = 0.0, m_dy = 0.0;
+    Planc m_dx = ZERO, m_dy = ZERO;
 };
 
 class VectorX : public Vector
@@ -86,9 +86,9 @@ public:
     VectorA( const Angle & angle, const Coordinate & origin );
 };
 
-const Vector ZERO_VECTOR( 0.0, 0.0 );
-const Vector X_HAT( 1.0, 0.0 );
-const Vector Y_HAT( 0.0, 1.0 );
+const Vector ZERO_VECTOR( ZERO, ZERO );
+const Vector X_HAT( ONE, ZERO );
+const Vector Y_HAT( ZERO, ONE );
 
 } // namespace geometry
 } // namespace axn

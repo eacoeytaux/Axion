@@ -12,10 +12,11 @@ namespace axn
 namespace geometry
 {
 
-class Line
+class Line : public Transformable
 {
 public:
     virtual ~Line( ) { }
+
     Line( );
     Line( const Coordinate & c1, const Coordinate & c2 );
     Line( const Vector & v );
@@ -26,49 +27,47 @@ public:
     Angle angle( ) const;
     Vector vector( ) const;
 
-    Line & transform( const Transform & t );
-
-    Line & move( const Vector & );
-    Line & stretch( const Vector & );
-    Line & scale( dec scale, const Coordinate & origin = ORIGIN );
-    Line & rotate( const Angle & angle, const Coordinate & origin = ORIGIN );
-    Line & mirror( const Vector & axis );
-    Line & mirror_x( ) { return mirror( X_HAT ); }
-    Line & mirror_y( ) { return mirror( Y_HAT ); }
+    virtual Line & transform( const Transform & t );
 
     bool vertical( ) const;
     bool horizontal( ) const;
-    virtual Planc length( ) const;
+
     Planc m( ) const;
     Planc b( ) const;
 
-    Planc x( const Planc & y ) const;
-    Planc y( const Planc & x ) const;
+    Planc length( ) const;
 
     Coordinate right( ) const;
     Coordinate left( ) const;
     Coordinate high( ) const;
     Coordinate low( ) const;
 
-    virtual bool in_box( const Coordinate &, bool inclusive = true ) const;
+    Planc x( const Planc & y ) const;
+    Planc y( const Planc & x ) const;
+
     bool on( const Coordinate & ) const;
     bool above( const Coordinate &, bool inclusive = false ) const;
     bool below( const Coordinate &, bool inclusive = false ) const;
+    bool in_box( const Coordinate &, bool inclusive = true ) const;
     bool intersects( const Line &, bool inclusive = true ) const;
     Coordinate intersection( const Line & ) const;
-
-    bool operator==( const Line & ) const;
-    bool operator!=( const Line & ) const;
 
     Line operator+( const Vector & ) const;
     Line & operator+=( const Vector & );
     Line operator-( const Vector & ) const;
     Line & operator-=( const Vector & );
 
+    default_equal( Line );
+
 private:
-    mutable Coordinate m_c1, m_c2;
-    mutable Planc m_m, m_b;
-    mutable bool m_vertical, m_horizontal;
+    Coordinate m_c1 = ORIGIN;
+    Coordinate m_c2 = ORIGIN;
+
+    Planc m_m = 0.0;
+    Planc m_b = 0.0;
+
+    bool m_vertical = false;
+    bool m_horizontal = false;
 
     Line & evaluate( );
 };

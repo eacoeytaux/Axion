@@ -109,28 +109,24 @@ public:
         return insert( t, 0 );
     }
 
-    virtual list<T> & clear( )
+    virtual void clear( )
     {
         std::list<T>::clear( );
-        return *this;
     }
 
-    virtual list<T> & reverse( )
+    virtual void reverse( )
     {
         std::list<T>::reverse( );
-        return *this;
     }
 
-    virtual list<T> & sort( std::function<bool( const T & t1, const T & t2 )> comparator )
+    virtual void sort( std::function<bool( const T & t1, const T & t2 )> comparator )
     {
         std::list<T>::sort( comparator );
-        return *this;
     }
 
-    virtual list<T> & remove_if( std::function<bool( const T & t )> checker )
+    virtual void erase_if( std::function<bool( const T & t )> checker )
     {
-        std::list<T>::remove_if( checker );
-        return *this;
+        std::erase_if( *this, checker );
     }
 
     auto begin( )
@@ -179,20 +175,53 @@ template <typename T>
 class queue : public std::queue<T>
 {
     using std::queue<T>::queue;
+
+public:
+    virtual ~queue( ) { }
+
+    uint size( ) const
+    {
+        return (uint)std::queue<T>::size( );
+    }
+
+    T & front( )
+    {
+        return std::queue<T>::front( );
+    }
+
+    const T & front( ) const
+    {
+        return std::queue<T>::front( );
+    }
+
+    void push( const T & t )
+    {
+        std::queue<T>::push( t );
+    }
+
+    void pop( )
+    {
+        std::queue<T>::pop( );
+    }
 };
 
 template <typename T>
 class stack : public std::stack<T>
 {
     using std::stack<T>::stack;
+
+public:
+    virtual ~stack( ) { }
 };
 
 template <typename Key, typename Compare = std::less<Key>>
-class set : public std::set<Key, Compare>
+class oset : public std::set<Key, Compare>
 {
     using std::set<Key, Compare>::set;
 
 public:
+    virtual ~oset( ) { }
+
     bool contains( const Key & k ) const
     {
         return ( std::set<Key, Compare>::find( k ) != std::set<Key, Compare>::end( ) );
@@ -205,21 +234,48 @@ class uset : public std::unordered_set<Key, Hash, Equal>
     using std::unordered_set<Key, Hash, Equal>::unordered_set;
 
 public:
+    virtual ~uset( ) { }
+
     bool contains( const Key & k ) const
     {
         return ( std::unordered_set<Key, Hash, Equal>::find( k ) != std::unordered_set<Key, Hash, Equal>::end( ) );
     }
 };
 
-using std::map;
+template <typename Key, typename Value, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
+class omap : public std::map<Key, Value, Hash, Equal>
+{
+    using std::map<Key, Value, Hash, Equal>::map;
+
+public:
+    virtual ~omap( ) { }
+
+    bool contains( const Key & k ) const
+    {
+        return ( std::map<Key, Value, Hash, Equal>::map::find( k ) != std::map<Key, Value, Hash, Equal>::unordered_map::end( ) );
+    }
+};
+
 template <typename Key, typename Value, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
 class umap : public std::unordered_map<Key, Value, Hash, Equal>
 {
+    using std::unordered_map<Key, Value, Hash, Equal>::unordered_map;
+
 public:
+    virtual ~umap( ) { }
+
     bool contains( const Key & k ) const
     {
         return ( std::unordered_map<Key, Value, Hash, Equal>::unordered_map::find( k ) != std::unordered_map<Key, Value, Hash, Equal>::unordered_map::end( ) );
     }
+};
+
+enum varray_position
+{
+    NONE,
+    FIRST,
+    LAST,
+    ALL,
 };
 
 // avoid confusion between std::vector and axn::Vector
@@ -236,18 +292,79 @@ public:
     varray copy( uint index_start, uint index_end )
     {
         if( index_start == index_end )
+        {
             return varray( );
+        }
+
         assert_index( index_start );
         assert_index( index_end - 1 );
         varray ret( index_end - index_start );
+
         for( uint index = index_start; index < index_end; ++index )
+        {
             ret.insert_back( index );
+        }
+
         return ret;
     }
 
     uint size( ) const
     {
         return (uint)std::vector<T>::size( );
+    }
+
+    bool contains( const T & t ) const
+    {
+        return find( t, FIRST ).size( );
+    }
+
+    uint contain_count( const T & t ) const
+    {
+        return find( t, ALL ).size( );
+    }
+
+    uint find_first( const T & t ) const
+    {
+        varray<uint> indices = find( t, FIRST );
+        return ( indices.size( ) ? indices.front( ) : 0 );
+    }
+
+    uint find_last( const T & t ) const
+    {
+        varray<uint> indices = find( t, LAST );
+        return ( indices.size( ) ? indices.front( ) : 0 );
+    }
+
+    varray<uint> find_all( const T & t ) const
+    {
+        return find( t, ALL );
+    }
+
+    varray<uint> find( const T & t, varray_position position ) const
+    {
+        varray<uint> indices;
+
+        if( position != NONE )
+        {
+            for( uint i = 0; i < size( ); ++i )
+            {
+                uint index = ( position == LAST ) ? ( size( ) - 1 - i ) : i;
+
+                if( at( index ) == t )
+                {
+                    if( ( position == FIRST ) || ( position == LAST ) )
+                    {
+                        return varray<uint>( { index } );
+                    }
+                    else if( position == ALL )
+                    {
+                        indices.insert_back( index );
+                    }
+                }
+            }
+        }
+
+        return indices;
     }
 
     virtual T & at( uint index )
@@ -264,25 +381,21 @@ public:
 
     T & front( )
     {
-        assert_index( 0 );
         return at( 0 );
     }
 
     const T & front( ) const
     {
-        assert_index( 0 );
         return at( 0 );
     }
 
     T & back( )
     {
-        assert_index( size( ) - 1 );
         return at( size( ) - 1 );
     }
 
     const T & back( ) const
     {
-        assert_index( size( ) - 1 );
         return at( size( ) - 1 );
     }
 
@@ -316,90 +429,118 @@ public:
         return insert( t, 0 );
     }
 
-    varray<T> & insert_back( const varray<T> & v )
+    void insert_back( const varray<T> & v )
     {
-        return insert_varray( v, size( ) );
+        insert_varray( v, size( ) );
     }
 
-    varray<T> & insert_front( const varray<T> & v )
+    void insert_front( const varray<T> & v )
     {
-        return insert_varray( v, 0 );
+        insert_varray( v, 0 );
     }
 
-    virtual varray<T> & insert_varray( const varray<T> & v, uint index )
+    virtual void insert_varray( const varray<T> & v, uint index )
     {
-        if( index != size( ) )
-            assert_index( index );
+        assert_index( index, false );
         std::vector<T>::insert( begin( ) + index, v.begin( ), v.end( ) );
-        return *this;
     }
 
-    varray<T> & remove_front( )
+    void erase_front( )
     {
-        return remove( 0 );
+        erase( 0 );
     }
 
-    varray<T> & remove_back( )
+    void erase_back( )
     {
-        return remove( size( ) - 1 );
+        erase( size( ) - 1 );
     }
 
-    varray<T> & remove( uint index )
+    void erase( uint index )
     {
-        return remove( index, index + 1 );
+        erase( index, index + 1 );
     }
 
-    virtual varray<T> & remove( uint index_start, uint index_end )
+    virtual void erase( uint index_start, uint index_end )
     {
         assert_index( index_start );
         assert_index( index_end - 1 );
         std::vector<T>::erase( begin( ) + index_start, begin( ) + index_end );
-        return *this;
     }
 
-    varray<T> & resize( uint size, const T & t = T( ) )
+    virtual void erase( const T & t, varray_position position )
+    {
+        if( position != NONE )
+        {
+            uint original_size = size( );
+            uint deleted_count = 0;
+
+            varray<uint> indices = find( t, position );
+            for( uint i = 0; i < indices.size( ); ++i )
+            {
+                uint index = ( position == LAST ) ? ( original_size - 1 - i ) : ( i - deleted_count );
+
+                if( at( index ) == t )
+                {
+                    ++deleted_count;
+                    erase( index );
+                    if( ( position == FIRST ) || ( position == LAST ) )
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    virtual void erase_if( std::function<bool( const T & t )> checker )
+    {
+        std::erase_if( *this, checker );
+    }
+
+    void resize( uint size, const T & t = T( ) )
     {
         std::vector<T>::resize( size, t );
-        return *this;
     }
 
-    varray<T> & resize_more( uint size, const T & t = T( ) )
+    void resize_more( uint size, const T & t = T( ) )
     {
         resize( (uint)std::vector<T>::size( ) + size, t );
-        return *this;
     }
 
-    varray<T> & reserve( uint size )
+    void reserve( uint size )
     {
         std::vector<T>::reserve( size );
-        return *this;
     }
 
-    varray<T> & reserve_more( uint size )
+    void reserve_more( uint size )
     {
-        return reserve( (uint)std::vector<T>::size( ) + size );
+        reserve( (uint)std::vector<T>::size( ) + size );
     }
 
-    virtual varray<T> & clear( bool shrink = false )
+    virtual void clear( bool shrink = false )
     {
         std::vector<T>::clear( );
-        if (shrink)
+        if( shrink )
         {
-            std::vector<T>::shrink_to_fit();
+            std::vector<T>::shrink_to_fit( );
         }
-        return *this;
     }
 
-    virtual varray<T> & reverse( )
+    virtual void reverse( )
     {
         std::reverse( begin( ), end( ) );
-        return *this;
     }
 
-    virtual varray<T> & sort( std::function<bool( const T & t1, const T & t2 )> comparator )
+    virtual void sort( std::function<bool( const T & t1, const T & t2 )> comparator, bool stable = false )
     {
-        std::sort( begin( ), end( ), comparator );
-        return *this;
+        if( stable )
+        {
+            std::stable_sort( begin( ), end( ), comparator );
+        }
+        else
+        {
+            std::sort( begin( ), end( ), comparator );
+        }
     }
 
     auto begin( )
@@ -422,6 +563,11 @@ public:
         return std::vector<T>::end( );
     }
 
+    bool valid_index( uint index ) const
+    {
+        return ( index < size( ) );
+    }
+
     T & operator[]( uint index )
     {
         return at( index );
@@ -440,15 +586,33 @@ public:
         return *this;
     }
 
-    bool valid_index( uint index ) const
+    bool operator==( const varray & v ) const
     {
-        return ( index < size( ) );
+        if( size( ) != v.size( ) )
+        {
+            return false;
+        }
+
+        for( uint i = 0; i < size( ); ++i )
+        {
+            if( at( i ) != v.at( i ) )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool operator!=( const varray & v ) const
+    {
+        return !( *this == v );
     }
 
 private:
-    bool assert_index( uint index ) const
+    bool assert_index( uint index, bool exclude_end = true ) const
     {
-        return Assert( valid_index( index ), "varray index (%ui) out of range, varray size: %ui", index, size( ) );
+        return Assert( valid_index( index ) || ( !exclude_end && ( index == size( ) ) ), "varray index (%ui) out of range, varray size: %ui", index, size( ) );
     }
 };
 

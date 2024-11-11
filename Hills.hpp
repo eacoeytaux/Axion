@@ -11,11 +11,6 @@ class Hills : public Object
 public:
     virtual ~Hills( ) { }
     Hills( World *, Planc base_bottom, dec z );
-
-    virtual const Hills & render( ) const override;
-
-private:
-    Drawing m_hills;
 };
 
 } // namespace mtmercy

@@ -25,19 +25,19 @@ uint random_int_max( )
     return RAND_MAX;
 }
 
-error Random::rseed( )
+error Random::seed( )
 {
-    return rseed( (uint)( Clock( ).total_ms( ) ) );
+    return seed( (uint)( Clock( ).total_ms( ) ) );
 }
 
-error Random::rseed( const string _seed )
+error Random::seed( const string _seed )
 {
     uint seed_uint = 0;
     for_range( i, _seed.length( ) ) { seed_uint ^= ( _seed[ i ] << ( 8 * ( i % sizeof( uint ) ) ) ); }
-    return rseed( seed_uint );
+    return seed( seed_uint );
 }
 
-error Random::rseed( const uint _seed )
+error Random::seed( const uint _seed )
 {
     ::srand( _seed );
     Log( INFO_LOG, "random seed ............ ( %u )", _seed );
@@ -47,13 +47,13 @@ error Random::rseed( const uint _seed )
 
 bool Random::rbool( const dec _true_odds )
 {
-    Assert( _true_odds >= 0.0 );
+    Assert( _true_odds >= ZERO );
 
     if( _true_odds >= 1.0 )
     {
         return true;
     }
-    else if( _true_odds == 0.0 )
+    else if( _true_odds == ZERO )
     {
         return false;
     }

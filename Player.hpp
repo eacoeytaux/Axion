@@ -14,26 +14,32 @@ public:
     virtual ~Player( ) { }
     Player( World * world, const Coordinate & position );
 
-    virtual const Player & render( ) const override;
-    virtual Player & update( ) override;
+    virtual void render( ) override;
 
-    virtual Player & input( Input * ) = 0;
-    virtual Player & clear_input( ) = 0;
+    virtual void update( ) override;
+
+    virtual void input( Input * ) = 0;
+    virtual void clear_input( ) = 0;
 
     virtual Planc light_sight( ) const = 0;
 
-    virtual Player & hurt( dec health ) override;
+    virtual void hurt( dec health ) override;
+    
+    virtual void out_of_bounds( ) override;
 
 protected:
-    virtual Player & die( ) override;
+    virtual void die( ) override;
 
 private:
-    virtual Player & update_movement( ) override;
+    virtual void update_movement( ) override;
 
     // -------------- GOD MODE --------------
 public:
-    bool god( ) const;
-    Player & god( bool, uint64_t = 0 );
+    bool god( ) const { return m_god; }
+    void god( bool god );
+
+private:
+    bool m_god = false;
     // --------------------------------------
 };
 

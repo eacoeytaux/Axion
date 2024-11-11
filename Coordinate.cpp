@@ -9,6 +9,11 @@ Coordinate::Coordinate( const Planc & _x, const Planc & _y )
     xy( _x, _y );
 }
 
+Coordinate::Coordinate( )
+{
+    xy( ZERO, ZERO );
+}
+
 Planc Coordinate::x( ) const { return m_x; }
 Coordinate & Coordinate::x( const Planc & _x )
 {
@@ -30,15 +35,58 @@ Coordinate & Coordinate::xy( const Planc & _x, const Planc & _y )
     return *this;
 }
 
-Planc Coordinate::distance( const Coordinate & c ) const
+Planc Coordinate::distance_to( const Coordinate & c ) const
 {
     Planc dx = x( ) - c.x( );
     Planc dy = y( ) - c.y( );
-    if( dx == 0 )
+
+    if( !dx )
+    {
         return abs( dy );
-    else if( dy == 0 )
+    }
+    else if( !dy )
+    {
         return abs( dx );
+    }
+
     return sqrt( ( dx * dx ) + ( dy * dy ) );
+}
+
+bool Coordinate::in_distance_range( const Coordinate & _coordinate, const Planc _distance, bool _inclusive ) const
+{
+    Planc dx = abs( x( ) - _coordinate.x( ) );
+    Planc dy = abs( y( ) - _coordinate.y( ) );
+    
+    if(!dx && !dy)
+    {
+        return true;
+    }
+    
+    if( !in_range( dx, _distance, _inclusive ) )
+    {
+        return false;
+    }
+    
+    if( !in_range( dy, _distance, _inclusive ) )
+    {
+        return false;
+    }
+    
+    return in_range( distance_to( _coordinate ), _distance, _inclusive );
+}
+
+Coordinate & Coordinate::move( const Planc & _x, const Planc & _y )
+{
+    x( x( ) + _x );
+    y( y( ) + _y );
+    return *this;
+}
+
+Coordinate & Coordinate::move( const Coordinate & _coordinate )
+{
+    x( _coordinate.x( ) );
+    y( _coordinate.y( ) );
+    return *this;
 }
 
 Coordinate & Coordinate::rotate( const Angle & _angle, const Coordinate & _origin )
@@ -64,17 +112,25 @@ Quadrant Coordinate::quadrant( ) const
     if( axis( ) != No_Axis )
         return No_Quadrant;
 
-    bool x_positive = dec_gt( this->x( ), 0 );
-    bool y_positive = dec_gt( this->y( ), 0 );
+    bool x_positive = dec_gt( this->x( ), ZERO );
+    bool y_positive = dec_gt( this->y( ), ZERO );
 
     if( x_positive && y_positive )
+    {
         return Q1;
+    }
     else if( x_positive && !y_positive )
+    {
         return Q4;
+    }
     else if( !x_positive && y_positive )
+    {
         return Q2;
+    }
     else
+    {
         return Q3;
+    }
 }
 
 Axis Coordinate::axis( ) const
@@ -83,13 +139,21 @@ Axis Coordinate::axis( ) const
     bool y_nonzero = y( );
 
     if( x_nonzero && y_nonzero )
+    {
         return No_Axis;
+    }
     else if( x_nonzero && !y_nonzero )
+    {
         return X_Axis;
+    }
     else if( !x_nonzero && y_nonzero )
+    {
         return Y_Axis;
+    }
     else
+    {
         return Origin;
+    }
 }
 
 bool Coordinate::in_quadrant( const Quadrant & _quadrant ) const { return quadrant( ) == _quadrant; }
@@ -110,6 +174,3 @@ Coordinate & Coordinate::operator-=( const Vector & _v )
     y( y( ) - _v.dy( ) );
     return *this;
 }
-
-bool Coordinate::operator==( const Coordinate & c ) const { return ( ( x( ) == c.x( ) ) && ( y( ) == c.y( ) ) ); }
-bool Coordinate::operator!=( const Coordinate & c ) const { return !( *this == c ); }
