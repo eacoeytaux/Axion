@@ -10,7 +10,7 @@ Clock::Clock( ) : m_ms( (uint)system_clock::now( ).time_since_epoch( ).count( ) 
 
 Clock::Clock( uint _ms ) : m_ms( _ms ) { }
 
-string Clock::timestamp( const string _delim ) const
+string Clock::timestamp( const char _delim ) const
 {
     time_t time = m_ms / 1000.0;
 #if defined( OS_WINDOWS )
@@ -23,12 +23,13 @@ string Clock::timestamp( const string _delim ) const
     tm * ptm = nullptr;
     ptm = localtime( &time );
 #endif
-    char time_str[ 7 + (int)( _delim.length( ) * TWO ) ];
-    strftime( time_str, sizeof( time_str ), ( "%H" + _delim + "%M" + _delim + "%S" ).c_str( ), ptm );
-    return string( time_str );
+    char time_str[ 9 ];
+    // strftime( time_str, sizeof( time_str ), ( "%H" + _delim + "%M" + _delim + "%S" ).c_str( ), ptm );
+    // return string( time_str );
+    return "";
 }
 
-string Clock::datestamp( const string _delim ) const
+string Clock::datestamp( const char _delim ) const
 {
     time_t time = m_ms / 1000.0;
 #if defined( OS_WINDOWS )
@@ -41,9 +42,10 @@ string Clock::datestamp( const string _delim ) const
     tm * ptm = nullptr;
     ptm = localtime( &time );
 #endif
-    char time_str[ 9 + (int)( _delim.length( ) * TWO ) ];
-    strftime( time_str, sizeof( time_str ), ( "%m" + _delim + "%d" + _delim + "%Y" ).c_str( ), ptm );
-    return string( time_str );
+    char time_str[ 11 ];
+    // strftime( time_str, sizeof( time_str ), ( "%m" + _delim + "%d" + _delim + "%Y" ).c_str( ), ptm );
+    // return string( time_str );
+    return "";
 }
 
 uint Clock::total_ms( ) const { return m_ms; }

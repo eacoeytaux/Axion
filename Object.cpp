@@ -40,7 +40,7 @@ Object::Object( World * world, const Vector & _position_velocity ) : Matter( _po
 
 void Object::init( )
 {
-    assert( !m_initialized );
+    Assert( !m_initialized );
     m_initialized = true;
     
 #ifdef AXN_DEBUG

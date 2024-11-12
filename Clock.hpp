@@ -18,8 +18,8 @@ public:
     uint minutes( ) const;
     uint hours( ) const;
 
-    string timestamp( string delim = ":" ) const;
-    string datestamp( string delim = "-" ) const;
+    string timestamp( char delim = ':' ) const;
+    string datestamp( char delim = '-' ) const;
 
     Clock operator+( const Clock & c ) const;
     Clock operator-( const Clock & c ) const;

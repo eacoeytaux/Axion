@@ -41,14 +41,14 @@ namespace utility
     if( name##_not_set && !( name##_not_set = false ) )
 
 #define default_equal( Class )                        \
-    bool operator==( const Class & ) const = default; \
+    bool operator==( const Class & c ) const = default; \
     bool operator!=( const Class & c ) const { return !( *this == c ); }
 
 #define default_non_equal( Class ) \
     bool operator!=( const Class & c ) const { return !( *this == c ); }
 
 #define default_virtual_equal( Class )                        \
-    virtual bool operator==( const Class & ) const = default; \
+    virtual bool operator==( const Class & c ) const = default; \
     virtual bool operator!=( const Class & c ) const { return !( *this == c ); }
 
 #define default_virtual_non_equal( Class ) \

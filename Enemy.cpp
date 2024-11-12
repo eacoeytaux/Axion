@@ -31,7 +31,7 @@ bool Enemy::overrides_target( const Player * player ) const
 
 void Enemy::sight_range( const Planc & _range )
 {
-    assert( !is_negative( _range ) );
+    Assert( !is_negative( _range ) );
     m_sight_range = _range;
     
     if ( !alert_range( ) || ( alert_range( ) > sight_range( ) ) )
@@ -47,7 +47,7 @@ bool Enemy::in_sight_range( const Player * player ) const
 
 void Enemy::alert_range( const Planc & _range )
 {
-    assert( !is_negative( _range ) );
+    Assert( !is_negative( _range ) );
     m_alert_range = _range;
     
     if ( sight_range( ) && ( sight_range( ) < alert_range( ) ) )

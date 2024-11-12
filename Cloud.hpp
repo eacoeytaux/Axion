@@ -14,8 +14,7 @@ private:
         Planc radius;
         Vector center_offset;
 
-        bool operator==( const Puff & p ) const = default;
-        bool operator!=( const Puff & p ) const = default;
+        default_equal( Puff );
     };
 
 public:

@@ -23,7 +23,7 @@ Path::Path( const varray<Line> & _lines )
     
     for_range( i, m_lines.size( ) - ONE )
     {
-        assert( m_lines[ i ].c2( ) == m_lines[ i + ONE ].c1( ) );
+        Assert( m_lines[ i ].c2( ) == m_lines[ i + ONE ].c1( ) );
     }
 }
 
@@ -116,7 +116,7 @@ bool Path::below( const Coordinate & _coordinate, bool _inclusive ) const
 
 bool Path::in_box( const Coordinate & _coordinate, bool _inclusive ) const
 {
-    assert( false ); // TODO
+    Assert( false ); // TODO
     return false;
 }
 

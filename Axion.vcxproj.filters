@@ -90,9 +90,6 @@
     <ClCompile Include="Transform.cpp">
       <Filter>Source Files\axn\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="God.cpp">
-      <Filter>Source Files\axn\world</Filter>
-    </ClCompile>
     <ClCompile Include="MountMerciless.cpp">
       <Filter>Source Files\mt</Filter>
     </ClCompile>
@@ -133,12 +130,6 @@
       <Filter>Source Files\axn\world</Filter>
     </ClCompile>
     <ClCompile Include="Terrain.cpp">
-      <Filter>Source Files\axn\world</Filter>
-    </ClCompile>
-    <ClCompile Include="TerrainEdge.cpp">
-      <Filter>Source Files\axn\world</Filter>
-    </ClCompile>
-    <ClCompile Include="TerrainVertex.cpp">
       <Filter>Source Files\axn\world</Filter>
     </ClCompile>
     <ClCompile Include="World.cpp">
@@ -194,6 +185,18 @@
     </ClCompile>
     <ClCompile Include="Waterfall.cpp">
       <Filter>Source Files\mt\environment</Filter>
+    </ClCompile>
+    <ClCompile Include="Path.cpp">
+      <Filter>Source Files\axn\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Gopher.cpp">
+      <Filter>Source Files\mt\mobs</Filter>
+    </ClCompile>
+    <ClCompile Include="Hook.cpp">
+      <Filter>Source Files\mt\mobs\player</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -335,12 +338,6 @@
     <ClInclude Include="Terrain.hpp">
       <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="TerrainEdge.hpp">
-      <Filter>Source Files\axn\world</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainVertex.hpp">
-      <Filter>Source Files\axn\world</Filter>
-    </ClInclude>
     <ClInclude Include="Visible.hpp">
       <Filter>Source Files\axn\graphics</Filter>
     </ClInclude>
@@ -397,6 +394,18 @@
     </ClInclude>
     <ClInclude Include="Waterfall.hpp">
       <Filter>Source Files\mt\environment</Filter>
+    </ClInclude>
+    <ClInclude Include="Path.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Gopher.hpp">
+      <Filter>Source Files\mt\mobs</Filter>
+    </ClInclude>
+    <ClInclude Include="Hook.hpp">
+      <Filter>Source Files\mt\mobs\player</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.hpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

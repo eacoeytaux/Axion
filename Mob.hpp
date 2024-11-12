@@ -58,8 +58,8 @@ protected:
 // eyes
 protected:
     virtual void eye_info( Planc eye_radius, uint blink_duration, const Span<uint> & blink_wait_span, const Color & eye_color = BLACK );
-    virtual void eye_info( Planc eye_radius, const Color & eye_color) { return eye_info( eye_radius, ZERO, { ZERO, ZERO }, eye_color); }
-    virtual void eye_info( Planc eye_radius ) { return eye_info( eye_radius, ZERO, { ZERO, ZERO } ); }
+    virtual void eye_info( Planc eye_radius, const Color & eye_color) { return eye_info( eye_radius, ZERO, { (uint)ZERO, (uint)ZERO }, eye_color); }
+    virtual void eye_info( Planc eye_radius ) { return eye_info( eye_radius, ZERO, { (uint)ZERO, (uint)ZERO } ); }
     
     bool eyes_open( ) const { return !eyes_closed( ); }
     void eyes_open( bool open ) { eyes_closed( !open ); }
