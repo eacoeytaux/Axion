@@ -42,7 +42,7 @@ uint WINDOW_HEIGHT;
 bool ANTI_ALIAS = true;
 
 const dec VOLUME_INCREMENT = 0.0625;
-Slider<dec> VOLUME;
+Slider<dec> VOLUME = { ZERO, ONE };
 bool MUTED = true;
 
 const uint MAX_CONTROLLERS = 4;
