@@ -728,6 +728,7 @@
 					"$(PROJECT_DIR)/libs/osx",
 				);
 				LD_QUOTE_LINKER_ARGUMENTS_FOR_COMPILER_DRIVER = YES;
+				LD_RUNPATH_SEARCH_PATHS = $PROJECT_DIR/libs/osx;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -744,6 +745,7 @@
 					"$(PROJECT_DIR)/libs/osx",
 				);
 				LD_QUOTE_LINKER_ARGUMENTS_FOR_COMPILER_DRIVER = YES;
+				LD_RUNPATH_SEARCH_PATHS = $PROJECT_DIR/libs/osx;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
