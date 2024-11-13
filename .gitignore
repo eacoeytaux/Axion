@@ -21,6 +21,6 @@
 /x64/
 
 # -- OSX --
-/xcuserdata/
+xcuserdata/
 
 # -- LINUX --
