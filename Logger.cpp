@@ -135,7 +135,7 @@ error Logger::log_message( MessageType _type, const char * _entry, ... )
     catch( exception e )
     {
         cout << e.what( ) << endl;
-        return error_todo;
+        return error_system;
     }
 
     return no_error;
@@ -152,7 +152,7 @@ error Logger::close( )
 
     if( log_file )
     {
-        return fclose( log_file ) ? error_todo : no_error;
+        return fclose( log_file ) ? error_system : no_error;
     }
     else
     {

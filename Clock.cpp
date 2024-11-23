@@ -23,7 +23,7 @@ string Clock::timestamp( const char _delim ) const
     tm * ptm = nullptr;
     ptm = localtime( &time );
 #endif
-    char time_str[ 9 ];
+    // char time_str[ 9 ];
     // strftime( time_str, sizeof( time_str ), ( "%H" + _delim + "%M" + _delim + "%S" ).c_str( ), ptm );
     // return string( time_str );
     return "";
@@ -42,7 +42,7 @@ string Clock::datestamp( const char _delim ) const
     tm * ptm = nullptr;
     ptm = localtime( &time );
 #endif
-    char time_str[ 11 ];
+    // char time_str[ 11 ];
     // strftime( time_str, sizeof( time_str ), ( "%m" + _delim + "%d" + _delim + "%Y" ).c_str( ), ptm );
     // return string( time_str );
     return "";

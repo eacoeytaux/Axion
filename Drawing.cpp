@@ -3,14 +3,20 @@
 
 Drawing::Drawing( const Coordinate & _center ) { center( _center ); }
 
-const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( ) const
+const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( const bool _transformed ) const
 {
-    if( !transform( ).identity( ) )
+    if( _transformed && !transform( ).identity( ) )
     {
+        FixedRectangle transformed_bounding_box;
+        
         for_each( colored_polygon, m_colored_polygons )
         {
             colored_polygon.polygon.transform( transform( ) );
+            
+            transformed_bounding_box.union_with( FixedRectangle( colored_polygon.polygon ) );
         }
+        
+        m_bounding_box = transformed_bounding_box;
 
         const_clear_transform( );
     }
@@ -18,13 +24,13 @@ const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( ) const
     return m_colored_polygons;
 }
 
-varray<Drawing::ColoredPolygon> Drawing::colored_polygons_border( ) const
+varray<Drawing::ColoredPolygon> Drawing::colored_polygons_border( const bool _transformed ) const
 {
     varray<ColoredPolygon> colored_polygons_border;
 
     if( has_border( ) )
     {
-        for_each( colored_polygon, colored_polygons( ) )
+        for_each( colored_polygon, colored_polygons( _transformed ) )
         {
             ColoredPolygon border = colored_polygon;
             border.polygon = Polygon::expand( border.polygon, border_width( ) );
@@ -40,7 +46,7 @@ varray<Drawing::ColoredPolygon> Drawing::colored_polygons_border( ) const
     return colored_polygons_border;
 }
 
-uint Drawing::polygon_count( ) const { return colored_polygons( ).size( ); }
+uint Drawing::polygon_count( ) const { return colored_polygons( false ).size( ); }
 
 void Drawing::reserve( const uint _reserve_size ) { m_colored_polygons.reserve( _reserve_size ); }
 
@@ -52,12 +58,18 @@ void Drawing::clear( const bool _reserve_mem )
     
     uint mem_size = ( _reserve_mem ? m_colored_polygons.size( ) : ZERO );
     
-    m_override_color_set = false;
+    clear_override_color( );
+    clear_filter_function( );
+    
     m_colored_polygons.clear( );
     if( _reserve_mem && mem_size )
     {
         m_colored_polygons.reserve( mem_size * TWO );
     }
+    
+    m_bounding_box.width( ZERO );
+    m_bounding_box.height( ZERO );
+    m_bounding_box.center( ORIGIN );
 }
 
 Coordinate Drawing::center( ) const { return m_center; }
@@ -68,11 +80,6 @@ Drawing & Drawing::center( const Coordinate & _center )
     if( d.has_magnitude( ) )
     {
         m_center = _center;
-        // TODO why doesn't move( d ) work?
-        // for_each( colored_polygon, m_colored_polygons )
-        // {
-            // colored_polygon.polygon.move( d );
-        // }
     }
 
     return *this;
@@ -95,6 +102,29 @@ Drawing & Drawing::override_color( const Color & _color )
     return *this;
 }
 
+Drawing & Drawing::clear_override_color( )
+{
+    m_override_color_set = false;
+    
+    return *this;
+}
+
+Drawing & Drawing::filter_function( const function<void ( Color & )> & _filter_function )
+{
+    m_filter_function = _filter_function;
+
+    m_filter_function_set = true;
+    
+    return *this;
+}
+
+Drawing & Drawing::clear_filter_function( )
+{
+    m_filter_function_set = false;
+    
+    return *this;
+}
+
 Drawing & Drawing::draw( const Drawing & _drawing )
 {
     // if (_drawing.has_border( ) )
@@ -106,9 +136,24 @@ Drawing & Drawing::draw( const Drawing & _drawing )
     {
         draw( _drawing, m_override_color );
     }
+    else if( m_filter_function_set )
+    {
+        for_each( colored_polygon, _drawing.colored_polygons( false ) )
+        {
+            ColoredPolygon filtered_colored_polygon = colored_polygon;
+            for_range( i, filtered_colored_polygon.colors.size( ) )
+            {
+                m_filter_function( filtered_colored_polygon.colors[ i ] );
+            }
+            
+            m_colored_polygons.insert_back( filtered_colored_polygon );
+            m_bounding_box.union_with( FixedRectangle( filtered_colored_polygon.polygon ) );
+        }
+    }
     else
     {
         m_colored_polygons.insert_back( _drawing.colored_polygons( ) );
+        m_bounding_box.union_with( _drawing.bounding_box( ) );
     }
     
     return *this;
@@ -116,10 +161,17 @@ Drawing & Drawing::draw( const Drawing & _drawing )
 
 Drawing & Drawing::draw( const Drawing & _drawing, const Color & _color )
 {
-    for_each( colored_polygon, _drawing.colored_polygons( ) )
+    for_each( colored_polygon, _drawing.colored_polygons(  ) )
     {
         m_colored_polygons.insert_back( colored_polygon ).colors = { _color };
     }
+    
+    if( _color.a( ) != ONE )
+    {
+        m_translucent = true;
+    }
+    
+    m_bounding_box.union_with( _drawing.bounding_box( ) );
 
     return *this;
 }
@@ -149,15 +201,22 @@ Drawing & Drawing::draw( const varray<Color> & _colors,
         colored_polygon.colors = _colors;
         
         colored_polygon.opaque = true;
-        for_each( color, _colors )
+        for_range( i, colored_polygon.colors.size( ) )
         {
-            if( color.a( ) != ONE )
+            if( m_filter_function_set )
+            {
+                m_filter_function( colored_polygon.colors[ i ] );
+            }
+            
+            if( colored_polygon.colors[ i ].a( ) != ONE )
             {
                 colored_polygon.opaque = false;
                 break;
             }
         }
     }
+    
+    m_bounding_box.union_with( FixedRectangle( colored_polygon.polygon ) );
 
     return *this;
 }

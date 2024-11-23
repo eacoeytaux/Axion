@@ -34,7 +34,7 @@ int check_errors_gl( )
 
 error ogl::check_errors( )
 {
-    return set_error( ( check_errors_gl( ) == GL_NO_ERROR ) ? no_error : error_todo );
+    return set_error( ( check_errors_gl( ) == GL_NO_ERROR ) ? no_error : error_system );
 }
 
 error ogl::set_error( const error _e )
@@ -348,7 +348,7 @@ error ogl::vertex( const dec _x, const dec _y, const dec _z, const dec _w )
 {
     if( !m_started_sequence )
     {
-        return error_todo;
+        return error_system;
     }
 
     glVertex4d( _x, _y, _z, _w );

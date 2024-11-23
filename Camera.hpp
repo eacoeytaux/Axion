@@ -123,7 +123,8 @@ public:
     dec hud_offset_percentage( ) const;
     void hud_offset_percentage( dec );
 
-    bool in_view( const Coordinate & world_position ) const;
+    bool in_view( const Coordinate & world_position, dec z = ONE ) const;
+    bool in_view( const FixedRectangle & world_bounding_box, dec z = ONE ) const;
 
     Coordinate screen_to_world( const Coordinate & screen_position ) const;
     Coordinate world_to_screen( const Coordinate & world_position ) const;

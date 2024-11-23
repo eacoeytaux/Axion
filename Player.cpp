@@ -9,9 +9,9 @@ const uint PLAYER_HEALTH_START = 100;
 
 Player::Player( World * world, const Coordinate & _position ) : Mob( world, _position, PLAYER_HEALTH_START )
 {
-    terrain_boundaries( true );
-
     god( false );
+    
+    terrain_boundaries( true );
 }
 
 void Player::render( )

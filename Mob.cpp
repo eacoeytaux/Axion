@@ -11,8 +11,7 @@ Mob::Mob( World * world, const Coordinate & _position, const dec _health ) : Obj
 
     health( _health );
     
-    // todo
-    m_hurt_display.set( 1 );
+    m_hurt_display.set( ONE );
 }
 
 void Mob::render( )
@@ -27,7 +26,12 @@ void Mob::render( )
 
 void Mob::hurt_display_settings( )
 {
-    override_color( RED );
+    filter_function( [ ]( Color & color )
+    {
+        color.r( ONE );
+        color.g( ZERO );
+        color.b( ZERO );
+    } );
 }
 
 void Mob::draw_eyes( const Coordinate & _position, const Angle & _angle )
@@ -154,8 +158,8 @@ void Mob::hurt( dec _damage )
         else
         {
             m_health.value( health );
-            // todo invincible_pause( 30 );
             m_hurt_display.reset( );
+            invincible_pause( invincible_duration( ) );
         }
     }
 }
@@ -193,7 +197,7 @@ Drawing Mob::debug_overlay( ) const
     
     const dec RED_START = 0.1;
     const dec YELLOW_START = 0.5;
-    static_once( ) { Assert( RED_START < YELLOW_START ); }
+    Assert( RED_START < YELLOW_START );
     
     Drawing debug_overlay;
     

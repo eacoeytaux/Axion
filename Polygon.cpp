@@ -14,11 +14,13 @@ Polygon::Polygon( ) { }
 
 Polygon::Polygon( const varray<Coordinate> & _coordinates, const bool _assume_is_convex )
 {
+    m_coordinates_dirty = true;
     m_coordinates_raw = m_coordinates = _coordinates;
 }
 
 Polygon::Polygon( const varray<Coordinate> & _coordinates, const Transform & _transform, const bool _assume_is_convex )
 {
+    m_coordinates_dirty = true;
     m_coordinates_raw = m_coordinates = _coordinates;
     transform( _transform );
 }
@@ -374,100 +376,6 @@ void Polygon::process( bool do_transform, bool do_lines, bool do_triangles, bool
             m_coordinates_dirty = false;
         }
 
-        // if( triangles )
-        // {
-        //     if( !m_convex )
-        //     { // else already set in for loop above
-        //         int index = 0;
-        //         varray<Coordinate> coordinates = m_coordinates;
-        //
-        //         m_triangles.clear( );
-        //         m_triangles.reserve( coordinates.size( ) - 2 );
-        //
-        //         int size = coordinates.size( );
-        //
-        //         int cycle = 0;
-        //         int max_cycles = ( size * size ) / 2;
-        //         bool success = true; // todo this shouldn't be necessary
-        //
-        //         while( coordinates.size( ) > 3 )
-        //         {
-        //             ++cycle;
-        //             if( cycle >= max_cycles )
-        //             {
-        //                 success = false;
-        //                 break;
-        //             }
-        //
-        //             Polygon triangle;
-        //             bool is_ear = false;
-        //             Coordinate coordinate = coordinates[ index % coordinates.size( ) ];
-        //             Coordinate next_coordinate = coordinates[ ( index + 1 ) % coordinates.size( ) ];
-        //             Angle next_angle( coordinate, next_coordinate );
-        //
-        // #if 0
-        //             // check if coordinate is colinear and thus can be removed
-        //             Coordinate prev_coordinate = coordinates[ ( index + coordinates.size( ) - 1 ) % coordinates.size( ) ];
-        //             Angle angle_prev( coordinate, prev_coordinate );
-        //             if ( ( next_angle == angle_prev ) || ( next_angle - angle_prev == PI ) ) {
-        //                 coordinates.erase( index );
-        //                 continue;
-        //             }
-        // #endif
-        //
-        //             Coordinate next_next_coordinate = coordinates[ ( index + 2 ) % coordinates.size( ) ];
-        //             Angle next_next_angle( coordinate, next_next_coordinate );
-        //
-        //             // check if next two points are colinear and if so skip so
-        //             // it will be removed in the next iteration
-        //             if( !( ( next_angle == next_next_angle ) || ( ( next_angle - next_next_angle ) == Angle( PI ) ) ) )
-        //             {
-        //                 triangle = Polygon( { coordinate, next_coordinate, next_next_coordinate } );
-        //                 if( ( next_next_angle - next_angle ) < Angle( PI ) )
-        //                 {
-        //                     is_ear = true;
-        //                     for_range( i, coordinates.size( ) )
-        //                     {
-        //                         if( ( i == index ) || ( i == ( index + 1 ) % coordinates.size( ) ) || ( i == ( index + 2 ) % coordinates.size( ) ) )
-        //                             continue;
-        //                         if( triangle.contains( coordinates[ i ] ) )
-        //                         {
-        //                             is_ear = false;
-        //                             break;
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //
-        //             if( is_ear )
-        //             {
-        //                 // check and add to triangle list
-        //                 // Assert( triangle.area( ), "triangle must have some
-        //                 // area or else something is wrong" );
-        //                 m_triangles.insert_back( triangle );
-        //                 coordinates.erase( ( index + 1 ) % coordinates.size( ) );
-        //             }
-        //             else
-        //             {
-        //                 // move index over to continue search
-        //                 ++index;
-        //                 index %= coordinates.size( );
-        //             }
-        //         }
-        //
-        //         if( success )
-        //         {
-        //             Assert( coordinates.size( ) == 3, "all triangularized Triangles should have 3 "
-        //                                               "points, obviously" );
-        //             Polygon triangle = Polygon( { coordinates[ 0 ], coordinates[ 1 ], coordinates[ 2 ] } );
-        //             if( triangle.area( ) )
-        //                 m_triangles.insert_back( triangle );
-        //         }
-        //     }
-        //
-        //     m_triangles_dirty = false;
-        // }
-
         if( do_convex_partitions )
         {
             if( m_convex )
@@ -483,7 +391,7 @@ void Polygon::process( bool do_transform, bool do_lines, bool do_triangles, bool
             }
             else
             {
-                // todo technically this is true but there's definitely a better way
+                // TODO technically this is true but there's definitely a better way
                 m_convex_partitions = m_triangles;
                 m_convex_partitions_indices = m_triangles_indices;
             }
@@ -650,11 +558,25 @@ bool Polygon::contains( const Coordinate & _coordinate, const bool _inclusive ) 
         {
             if( convex_polygon.contains( _coordinate, true ) )
             {
-                // todo need to check if not inclusive and on border
-                return true;
+                if( !_inclusive )
+                {
+                    for_each( line, perimeter( ).lines( ) )
+                    {
+                        if( line.on( _coordinate ) )
+                        {
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                }
+                else
+                {
+                    return true;
+                }
             }
         }
-
+        
         return false;
     }
 }
@@ -765,7 +687,6 @@ Polygon Polygon::operator-( const Vector & _v ) const { return *this + -_v; }
 
 Polygon & Polygon::operator-=( const Vector & _v ) { return *this += -_v; }
 
-// TODO optimize this (no raw?)
 bool Polygon::operator==( const Polygon & _polygon ) const
 {
     if( m_coordinates.size( ) != _polygon.m_coordinates.size( ) )

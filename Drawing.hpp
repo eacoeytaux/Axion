@@ -64,8 +64,14 @@ public:
                     dec thickness = ONE,
                     bool preserve_thickness = false );
 #endif
+    
+    const FixedRectangle & bounding_box( ) const { return m_bounding_box; }
 
     Drawing & override_color( const Color & color );
+    Drawing & clear_override_color( );
+    
+    Drawing & filter_function( const function<void( Color & )> & );
+    Drawing & clear_filter_function( );
     
     bool has_border( ) const { return ( m_border_width && m_border_color.a( ) ); }
     Color border_color( ) const { return m_border_color; }
@@ -82,7 +88,8 @@ public:
 
     bool translucent( ) const;
     
-    default_equal( Drawing );
+    bool operator==( const Drawing & drawing ) const { return false; }
+    bool operator!=( const Drawing & drawing ) const { return true; }
 
 private:
     struct ColoredPolygon
@@ -99,16 +106,21 @@ private:
 
     void add_internal( const varray<Color> & colors, const Polygon &, dec thickness, bool preserve_thickness );
 
-    const varray<ColoredPolygon> & colored_polygons( ) const;
-    varray<ColoredPolygon> colored_polygons_border( ) const;
+    const varray<ColoredPolygon> & colored_polygons( bool transformed = true ) const;
+    varray<ColoredPolygon> colored_polygons_border( bool transformed = true ) const;
+    
+    mutable FixedRectangle m_bounding_box;
 
-    Coordinate m_center;
+    mutable Coordinate m_center;
     mutable varray<ColoredPolygon> m_colored_polygons;
 
-    bool m_translucent = false;
+    mutable bool m_translucent = false;
     
     bool m_override_color_set = false;
     Color m_override_color;
+    
+    bool m_filter_function_set = false;
+    std::function<void( Color & )> m_filter_function = [ ]( Color & ) { };
 
     Planc m_border_width;
     Color m_border_color;

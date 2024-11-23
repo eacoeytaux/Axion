@@ -22,6 +22,7 @@ public:
     FixedRectangle( );
     FixedRectangle( const Planc & width, const Planc & height, const Coordinate & center = ORIGIN );
     FixedRectangle( const Coordinate & bottom, const Coordinate & top );
+    FixedRectangle( const Polygon & );
 
     const Coordinate & center( ) const;
     FixedRectangle & center( const Coordinate & );
@@ -77,9 +78,9 @@ public:
     default_equal( FixedRectangle );
 
 private:
-    Planc m_width;
-    Planc m_height;
-    Coordinate m_center;
+    Planc m_width = ZERO;
+    Planc m_height = ZERO;
+    Coordinate m_center = ORIGIN;
 };
 
 } // namespace geometry

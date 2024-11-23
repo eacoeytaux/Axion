@@ -25,8 +25,11 @@ public:
     bool invincible( ) const { return ( m_invincible_always || m_invincible_counter.remaining( ) ); }
     virtual void invincible_pause( uint invincible_duration ) { m_invincible_counter.reset( max( invincible_duration, m_invincible_counter.remaining( ) ) ); }
     
-    bool invincible_always( ) const { return m_invincible_always; }
+    virtual bool invincible_always( ) const { return m_invincible_always; }
     virtual void invincible_always( bool invincible ) { m_invincible_always = invincible; }
+    
+    virtual uint invincible_duration( ) const { return m_invincible_duration; }
+    virtual void invincible_duration( uint duration ) { m_invincible_duration = duration; }
 
     virtual dec health( ) const;
     virtual void health( dec health ); // will increase max health if necessary
@@ -108,6 +111,7 @@ private:
     Slider<dec> m_health;
     
     bool m_invincible_always = false;
+    uint m_invincible_duration;
     Counter m_invincible_counter;
     Counter m_hurt_display;
 

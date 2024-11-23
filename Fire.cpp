@@ -33,6 +33,10 @@ Fire::Fire( World * world, const Coordinate & _position ) : Object( world, _posi
     space( Rectangle( FLAME_ORANGE_RADIUS.half( ), FLAME_ORANGE_RADIUS.half( ) ) );
 
     flame_timer.reset( FLAME_WAIT.min( ) );
+    
+    add_light_source( position( ), LIGHT_DISTANCE );
+    add_light_source( position( ), TINT_DISTANCE, Color( FLAME_COLOR_ORANGE, TINT_INTENSITY ), TINT_FLICKER );
+    add_light_source( position( ), TINT_DISTANCE * 0.8, Color( FLAME_COLOR_ORANGE, TINT_INTENSITY ), TINT_FLICKER );
 }
 
 void Fire::render( )
@@ -58,12 +62,6 @@ void Fire::render( )
 void Fire::update( )
 {
     Object::update( );
-
-    // todo move to constructor?
-    clear_light_sources( );
-    add_light_source( position( ), LIGHT_DISTANCE );
-    add_light_source( position( ), TINT_DISTANCE, Color( FLAME_COLOR_ORANGE, TINT_INTENSITY ), TINT_FLICKER );
-    add_light_source( position( ), TINT_DISTANCE * 0.8, Color( FLAME_COLOR_ORANGE, TINT_INTENSITY ), TINT_FLICKER );
 
     if( flame_timer.tick( ) )
     {

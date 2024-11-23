@@ -21,6 +21,17 @@ FixedRectangle::FixedRectangle( const Coordinate & _bottom, const Coordinate & _
     center( midpoint( _bottom, _top ) );
 }
 
+FixedRectangle::FixedRectangle( const Polygon & _polygon )
+{
+    Coordinate top( _polygon.upper_bound_x(), _polygon.upper_bound_y( ) );
+    Coordinate bottom( _polygon.lower_bound_x(), _polygon.lower_bound_y( ) );
+    
+    width( abs( top.x( ) - bottom.x( ) ) );
+    height( abs( top.y( ) - bottom.y( ) ) );
+    
+    center( midpoint( bottom, top ) );
+}
+
 const Coordinate & FixedRectangle::center( ) const { return m_center; }
 FixedRectangle & FixedRectangle::center( const Coordinate & _center )
 {
@@ -31,7 +42,8 @@ FixedRectangle & FixedRectangle::center( const Coordinate & _center )
 const Planc & FixedRectangle::width( ) const { return m_width; }
 FixedRectangle & FixedRectangle::width( const Planc & _width )
 {
-    Assert( _width >= ZERO, "cannot have negative width" );
+    // tpdo
+    // Assert( _width >= ZERO, "cannot have negative width" );
     m_width = _width;
     return *this;
 }
@@ -39,7 +51,8 @@ FixedRectangle & FixedRectangle::width( const Planc & _width )
 const Planc & FixedRectangle::height( ) const { return m_height; }
 FixedRectangle & FixedRectangle::height( const Planc & _height )
 {
-    Assert( _height >= ZERO, "cannot have negative height" );
+    // todo
+    // Assert( _height >= ZERO, "cannot have negative height" );
     m_height = _height;
     return *this;
 }
@@ -157,10 +170,10 @@ FixedRectangle & FixedRectangle::intersection_with( const FixedRectangle & _rect
 
 bool FixedRectangle::has_intersection_with( const FixedRectangle & _rect ) const
 {
-    return !( ( upper_bound_x( ) < _rect.lower_bound_x( ) ) ||
-              ( upper_bound_x( ) > _rect.upper_bound_x( ) ) ||
-              ( lower_bound_y( ) < _rect.upper_bound_y( ) ) ||
-              ( upper_bound_y( ) > _rect.lower_bound_y( ) ) );
+    return ( ( lower_bound_x( ) < _rect.upper_bound_x( ) ) &&
+             ( upper_bound_x( ) > _rect.lower_bound_x( ) ) &&
+             ( upper_bound_y( ) > _rect.lower_bound_y( ) ) &&
+             ( lower_bound_y( ) < _rect.upper_bound_y( ) ) );
 }
 
 Planc FixedRectangle::area( ) const

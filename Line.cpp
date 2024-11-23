@@ -157,50 +157,32 @@ Planc Line::x( const Planc & _y ) const
 {
     if( horizontal( ) )
     {
-        // TODO
+        return c1( ).x( );
     }
     else if( vertical( ) )
     {
-        // if( in_range( _y, c1( ).y( ), c2( ).y( ) ) ) // todo
-        {
-            return c1( ).x( );
-        }
+        return c1( ).x( );
     }
     else
     {
-        Planc x = ( _y - b( ) ) / m( );
-        // if( in_box( Coordinate( x, _y ) ) ) // todo
-        {
-            return x;
-        }
+        return ( _y - b( ) ) / m( );
     }
-
-    return P0; // no intersection found
 }
 
 Planc Line::y( const Planc & _x ) const
 {
     if( vertical( ) )
     {
-        // TODO
+        return c1( ).y( );
     }
     else if( horizontal( ) )
     {
-        // if( in_range( _x, c1( ).x( ), c2( ).x( ) ) ) // todo
-        {
-            return c1( ).y( );
-        }
+        return c1( ).y( );
     }
     else
     {
-        Planc y = ( m( ) * _x ) + b( );
-        // if( in_box( Coordinate( _x, y ) ) ) // todo
-        {
-            return y;
-        }
+        return ( m( ) * _x ) + b( );
     }
-
-    return P0; // no intersection found
 }
 
 bool Line::in_box( const Coordinate & _c, const bool _inclusive ) const { return ( in_range( _c.x( ), left( ).x( ), right( ).x( ), _inclusive ) && in_range( _c.y( ), low( ).y( ), high( ).y( ), _inclusive ) ); }
@@ -291,34 +273,20 @@ Coordinate Line::intersection( const Line & _line ) const
 {
     if( vertical( ) && _line.vertical( ) )
     {
-        // if( c1( ).x( ) == _line.c1( ).x( ) ) // todo
-        {
-            return c1( );
-        }
+        return c1( );
     }
     else if( horizontal( ) && _line.horizontal( ) )
     {
-        // if( c1( ).y( ) == _line.c1( ).y( ) ) // todo
-        {
-            return c1( );
-        }
+        return c1( );
     }
     else if( ( m( ) == _line.m( ) ) )
     {
         if( b( ) == _line.b( ) )
         {
-            // if( in_range( c1( ).x( ), _line.left( ).x( ), _line.right( ).x( ) ) ) // todo
-            {
-                return c1( );
-            }
-            // if( in_range( _line.c1( ).x( ), low( ).x( ), high( ).x( ) ) ) // todo
-            // {
-            //    return _line.c1( );
-            // }
+            return c1( );
         }
         else
         {
-            // TODO
             return COORDINATE_INFINITY_NEGATIVE;
         }
     }
@@ -353,15 +321,8 @@ Coordinate Line::intersection( const Line & _line ) const
             y_intersect = ( x_intersect * m( ) ) + b( );
         }
 
-        Coordinate intersect( x_intersect, y_intersect );
-        // TODO MAKE LINE SEGMENT?
-        // if( in_box( intersect ) && _line.in_box( intersect )
-        {
-            return intersect;
-        }
+        return Coordinate( x_intersect, y_intersect );
     }
-
-    return COORDINATE_INFINITY_NEGATIVE;
 }
 
 Line Line::operator+( const Vector & _v ) const { return Line( c1( ) + _v, c2( ) + _v ); }

@@ -16,11 +16,13 @@ Object::~Object( )
     {
         object->unsubscribe_to_movement( this );
     }
+    m_movement_subscribers.clear( );
 
     for_each( object, m_movement_subscriptions )
     {
         object->remove_movement_subscriber( this );
     }
+    m_movement_subscriptions.clear( );
 }
 
 Object::Object( World * world ) : Matter( ORIGIN ), m_world( world )
@@ -53,9 +55,9 @@ void Object::init( )
     background( z( ) < ONE );
 }
 
-Drawing Object::path( const Planc & _distance, const Color & _color, const dec _alpha_start, const dec _alpha_end ) const
+Drawing Object::projectile_drawing( const Planc & _distance, const Color & _color, const dec _alpha_start, const dec _alpha_end ) const
 {
-    Drawing path;
+    Drawing projection;
     
     if ( !Object::ground( ) )
     {
@@ -81,14 +83,14 @@ Drawing Object::path( const Planc & _distance, const Color & _color, const dec _
             
             dec d_a = min<dec>( a, ( _alpha_start - _alpha_end ) * ( v.magnitude( ) / _distance ) );
             
-            path.draw( Color( _color, a ), Color( _color, a - d_a ), Line( c, c + v ) );
+            projection.draw( Color( _color, a ), Color( _color, a - d_a ), Line( c, c + v ) );
             a -= d_a;
             
             c += v;
         }
     }
     
-    return path;
+    return projection;
 }
 
 void Object::render( )
@@ -107,16 +109,6 @@ void Object::render_object( )
 
 void Object::update( )
 {
-    update_movement( );
-}
-
-void Object::update_object( )
-{
-    if( m_last_world_age_update == world( )->age( ) )
-    {
-        return;
-    }
-
     if( m_last_position_count )
     {
         uint last_positions_size = m_last_positions.size( );
@@ -129,9 +121,19 @@ void Object::update_object( )
             m_last_positions[ m_last_position_index++ % last_positions_size ] = position( );
         }
     }
+    
+    update_movement( );
+}
 
+void Object::update_object( )
+{
+    if( m_last_world_age_update == world( )->age( ) )
+    {
+        return;
+    }
+    
     update( );
-
+    
     if( marked_to_delete( ) )
     {
         mark_deleted( );
@@ -300,10 +302,8 @@ void Object::update_movement( )
 
             list<ObjectCollision> collied_objects;
 
-            // todo union with moved hit box
-            // list<Object *> objects = world( )->objects_in_range( hit_box( ) + movement );
-            varray<Object *> objects = world( )->objects_in_range( hit_box( ) );
-
+            varray<Object *> objects = world( )->objects_in_range( hit_box( ).union_with( hit_box( ) + movement ) );
+            
             Line movement_line( movement );
             for_each( object, objects )
             {
@@ -406,7 +406,7 @@ void Object::move( const Vector & _movement )
         {
             FixedRectangle world_bounds = world( )->bounds( );
             
-            // todo seems messy?
+            // todo overshoots
             world_bounds.width( world_bounds.width( ) / ( z( ) * z( ) ) );
             world_bounds.height( world_bounds.height( ) / ( z( ) * z( ) ) );
             
@@ -452,26 +452,6 @@ Planc Object::width( ) const
 Planc Object::height( ) const
 {
     return space( ).bound_height( );
-}
-
-Planc Object::visible_width( ) const
-{
-    return m_visible_width;
-}
-
-void Object::visible_width( const Planc & _visible_width )
-{
-    m_visible_width = _visible_width;
-}
-
-Planc Object::visible_height( ) const
-{
-    return m_visible_height;
-}
-
-void Object::visible_height( const Planc & _visible_height )
-{
-    m_visible_height = _visible_height;
 }
 
 bool Object::foreground( ) const
@@ -583,11 +563,6 @@ FixedRectangle Object::hit_box( ) const
     return FixedRectangle( space.upper_bound_x( ) - space.lower_bound_x( ), space.upper_bound_y( ) - space.lower_bound_y( ), position( ) );
 }
 
-FixedRectangle Object::visible_box( ) const
-{
-    return FixedRectangle( visible_width( ), visible_height( ), position( ) );
-}
-
 void Object::track_position( uint count )
 {
     m_last_position_count = count;
@@ -630,21 +605,25 @@ Drawing Object::debug_overlay( ) const
     const Planc VELOCITY_ARROW_LENGTH = 10.0;
     const Planc VELOCITY_MAGNITUDE_MINIMUM = 1.0;
     const Planc VELOCITY_SCALE = 3.0;
-    const Color COLOR = YELLOW;
+    const Color PHYSICS_COLOR = YELLOW;
+    const Color DRAWING_COLOR = WHITE.a( 0.25 );
 
     Drawing debug_overlay;
+    
+    // drawing bounding box
+    debug_overlay.draw( DRAWING_COLOR, bounding_box( ) );
 
     // hit box
-    debug_overlay.draw( COLOR, hit_box( ) - position( ), HIT_BOX_THICKNESS, true );
+    debug_overlay.draw( PHYSICS_COLOR, hit_box( ) - position( ), HIT_BOX_THICKNESS, true );
 
     // center
-    debug_overlay.draw( COLOR, Circle( DOT_RADIUS ), FILLED );
+    debug_overlay.draw( PHYSICS_COLOR, Circle( DOT_RADIUS ), FILLED );
 
     // velocity
     Vector velocity_graphic = velocity( ) * VELOCITY_SCALE;
     if( velocity_graphic.magnitude( ) >= VELOCITY_MAGNITUDE_MINIMUM )
     {
-        debug_overlay.draw( COLOR, velocity_graphic.origin( ORIGIN ), VELOCITY_ARROW_LENGTH, VELOCITY_THICKNESS, true );
+        debug_overlay.draw( PHYSICS_COLOR, velocity_graphic.origin( ORIGIN ), VELOCITY_ARROW_LENGTH, VELOCITY_THICKNESS, true );
     }
 
     return debug_overlay;

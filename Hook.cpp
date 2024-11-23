@@ -5,7 +5,7 @@
 namespace
 {
 // crossbox / hook
-const Planc DEFAULT_ROPE_MAX_LENGTH = METER * 50.0;
+const Planc DEFAULT_ROPE_MAX_LENGTH = METER * 10.0;
 const Planc DEFAULT_ROPE_GROWTH_SPEED = 33.0;
 const Planc DEFAULT_ROPE_RETRACT_SPEED = 44.0;
 
@@ -34,6 +34,7 @@ Hook::Hook( World * world, const Climber * owner ) : Object( world ), m_owner( o
     position( m_owner->position( ) );
 
     state( LOADED );
+    m_rope_growth_speed = DEFAULT_ROPE_GROWTH_SPEED;
     m_rope_retract_speed = DEFAULT_ROPE_RETRACT_SPEED;
     m_max_rope_length = DEFAULT_ROPE_MAX_LENGTH;
 }
@@ -69,6 +70,16 @@ void Hook::render( )
             draw( ROPE_ALT_COLOR, rope_strip_rect );
         }
     }
+    
+#ifdef AXN_DEBUG
+    // if( Debug::active )
+    {
+        if( m_rope_length >= m_max_rope_length )
+        {
+            draw( RED.a( 0.5 ), Line( rope_vector.origin( ), rope_vector ), ROPE_WIDTH );
+        }
+    }
+#endif
 }
 
 void Hook::update( )
@@ -86,35 +97,40 @@ void Hook::update_velocity( )
         m_angle = m_owner->aim_angle( );
         position( m_owner->position( ) + VectorA( m_angle, HOOK_LENGTH ) );
     }
-    else
+    else if( state( ) == FIRING )
     {
         gravity_ratio( 0.5 );
-        if( state( ) == FIRING )
-        {
-            m_rope_length = m_owner->position( ).distance_to( position( ) );
+        m_rope_length = m_owner->position( ).distance_to( position( ) );
 
-            if( Object::ground( ) )
-            {
-                state( HOOKED );
-                velocity( ZERO_VECTOR );
-            }
-            else if( m_rope_length > m_max_rope_length )
-            {
-                state( RETRACTING );
-                // TODO adjust for overshot with remaining percentage
-            }
-        }
-        else if( state( ) == RETRACTING )
+        if( Object::ground( ) )
         {
-            stationary( false );
-            ground( nullptr );
-            velocity( VectorA( Angle( position( ), m_owner->position( ) ), m_rope_retract_speed ) );
-            m_rope_length -= m_rope_retract_speed;
-            if( m_rope_length <= HOOK_LENGTH )
-            {
-                state( LOADED );
-            }
+            state( HOOKED );
+            velocity( ZERO_VECTOR );
         }
+        else if( m_rope_length > m_max_rope_length )
+        {
+            gravity_ratio( 0 );
+            state( HOOKED );
+            velocity( ZERO_VECTOR );
+            
+            // state( RETRACTING );
+            // TODO adjust for overshot with remaining percentage
+        }
+    }
+    else if( state( ) == RETRACTING )
+    {
+        stationary( false );
+        ground( nullptr );
+        velocity( VectorA( Angle( position( ), m_owner->position( ) ), m_rope_retract_speed ) );
+        m_rope_length -= m_rope_retract_speed;
+        if( m_rope_length <= HOOK_LENGTH )
+        {
+            state( LOADED );
+        }
+    }
+    else if( state( ) == HOOKED )
+    {
+        m_rope_length = m_owner->position( ).distance_to( position( ) );
     }
 
     Object::update_velocity( );

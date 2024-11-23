@@ -2,7 +2,6 @@
 #define MountMerciless_hpp
 
 #include "World.hpp"
-#include "Colors.hpp"
 
 namespace mtmercy
 {

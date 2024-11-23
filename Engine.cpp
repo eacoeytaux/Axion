@@ -58,16 +58,16 @@ error Engine::run( World * world, const string _app_name )
     static bool running = false;
     if( !Assert( !running, "Engine is already running!" ) )
     {
-        return error_todo;
+        return error_system;
     }
 
     running = true;
 
 #ifdef AXN_DEBUG
-    try_return_error( Logger::init( ), error_todo );
+    try_return_error( Logger::init( ), error_not_init );
 #endif
 
-    try_return_error( Random::seed( ), error_todo );
+    try_return_error( Random::seed( ), error_not_init );
 
     varray<Input *> inputs;
     auto clear_inputs = [ & ]( )
@@ -141,7 +141,7 @@ error Engine::run( World * world, const string _app_name )
 
     running = false;
 
-    return errored ? error_todo : no_error;
+    return errored ? error_system : no_error;
 }
 
 } // namespace axn

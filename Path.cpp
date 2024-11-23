@@ -30,8 +30,6 @@ Path::Path( const varray<Line> & _lines )
 Path & Path::transform( const Transform & _transform )
 {
     Transformable::transform( _transform );
-    
-    // TODO
     for_each( line, m_lines )
     {
         line.transform( _transform );
@@ -116,7 +114,30 @@ bool Path::below( const Coordinate & _coordinate, bool _inclusive ) const
 
 bool Path::in_box( const Coordinate & _coordinate, bool _inclusive ) const
 {
-    Assert( false ); // TODO
+    Planc min_x = INFINITY_POSITIVE;
+    Planc max_x = INFINITY_NEGATIVE;
+    Planc min_y = INFINITY_POSITIVE;
+    Planc max_y = INFINITY_NEGATIVE;
+    
+    if( m_lines.size( ) )
+    {
+        min_x = min<Planc>( min_x, m_lines.front( ).c1( ).x( ) );
+        max_x = max<Planc>( max_x, m_lines.front( ).c1( ).x( ) );
+        min_y = min<Planc>( min_y, m_lines.front( ).c1( ).y( ) );
+        max_y = max<Planc>( max_y, m_lines.front( ).c1( ).y( ) );
+        
+        for_each( line, m_lines )
+        {
+            min_x = min<Planc>( min_x, line.c2( ).x( ) );
+            max_x = max<Planc>( max_x, line.c2( ).x( ) );
+            min_y = min<Planc>( min_y, line.c2( ).y( ) );
+            max_y = max<Planc>( max_y, line.c2( ).y( ) );
+        }
+        
+        return ( in_range( _coordinate.x( ), min_x, max_x, _inclusive ) ) &&
+               ( in_range( _coordinate.y( ), min_y, max_y, _inclusive ) );
+    }
+    
     return false;
 }
 

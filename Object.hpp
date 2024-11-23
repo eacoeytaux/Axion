@@ -44,7 +44,7 @@ protected:
 public:
     void render_object( );
     
-    Drawing path( const Planc &, const Color &, const dec alpha_start = ONE, const dec alpha_end = ZERO ) const;
+    Drawing projectile_drawing( const Planc & distance, const Color & path_color, const dec alpha_start = ONE, const dec alpha_end = ZERO ) const;
 
 #ifdef AXN_DEBUG
     bool draw_debug = false;
@@ -84,19 +84,10 @@ public:
     void stationary( bool );
     
     dec gravity_ratio( ) const;
-    bool has_gravity( ) const
-    {
-        return gravity_ratio( );
-    }
     void gravity_ratio( dec );
-    void normal_gravity( )
-    {
-        return gravity_ratio( ONE );
-    }
-    void no_gravity( )
-    {
-        return gravity_ratio( ZERO );
-    }
+    void normal_gravity( ) { return gravity_ratio( ONE ); }
+    void no_gravity( ) { return gravity_ratio( ZERO ); }
+    bool has_gravity( ) const { return gravity_ratio( ); }
     
     bool terrain_boundaries( ) const;
     void terrain_boundaries( bool );
@@ -104,7 +95,6 @@ public:
     TerrainEdge * ground( ) const;
 
     virtual FixedRectangle hit_box( ) const;
-    virtual FixedRectangle visible_box( ) const;
 
     void track_position( uint count );
     Coordinate last_position( uint past = 0 );
@@ -134,32 +124,29 @@ protected:
 
 private:
     World * m_world = nullptr;
-    uint m_age = 0;
-    uint m_last_world_age_update = 0;
+    
+    uint m_age = ZERO;
+    uint m_last_world_age_update = ZERO;
+    
     bool m_deleted = false;
     bool m_marked_to_delete = false;
     
     bool m_foreground = false;
     bool m_background = false;
 
-    Planc m_visible_width = 0.0;
-    Planc m_visible_height = 0.0;
-
-    Planc visible_width( ) const;
-    void visible_width( const Planc & );
-    Planc visible_height( ) const;
-    void visible_height( const Planc & );
+    Planc m_visible_width = ZERO;
+    Planc m_visible_height = ZERO;
 
     TerrainEdge * m_ground = nullptr;
 
-    dec m_gravity_ratio = 1.0;
+    dec m_gravity_ratio = ONE;
     
     bool m_interactive = false;
     bool m_stationary = false;
     bool m_terrain_boundaries = true;
 
-    uint m_last_position_count = 0;
-    uint m_last_position_index = 0;
+    uint m_last_position_count = ZERO;
+    uint m_last_position_index = ZERO;
     varray<Coordinate> m_last_positions;
 
     uset<Object *> m_movement_subscribers;

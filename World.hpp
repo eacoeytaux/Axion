@@ -57,6 +57,9 @@ public:
     const varray<Player *> & players( ) { return m_players; }
     Player * player( uint player_number = 0 );
     Player * player_main( );
+    
+    varray<Coordinate> update_points( ) const;
+    virtual Planc default_update_distance( ) const;
 
     virtual void add_object( Object * object );
     void add_objects( const varray<Object *> & objects )

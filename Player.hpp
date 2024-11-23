@@ -13,7 +13,7 @@ class Player : public Mob
 public:
     virtual ~Player( ) { }
     Player( World * world, const Coordinate & position );
-
+    
     virtual void render( ) override;
 
     virtual void update( ) override;

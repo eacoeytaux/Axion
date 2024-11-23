@@ -92,9 +92,13 @@ const Planc ROPE_WIDTH = 4.0;
 const Color ROPE_BASE_COLOR = Color::rgb( 0xDAA420 );
 const Color ROPE_ALT_COLOR = Color::rgb( 0xB9870F );
 
-const Planc ARROW_PATH_LENGTH = METER * 25;
+const Planc HOOK_PATH_LENGTH = METER * 25;
+const dec HOOK_PATH_ALPHA_START = 0.8;
+const Color HOOK_PATH_COLOR = WHITE;
+
+const Planc ARROW_PATH_LENGTH = HOOK_PATH_LENGTH;
+const dec ARROW_PATH_ALPHA_START = HOOK_PATH_ALPHA_START;
 const Color ARROW_PATH_COLOR = RED;
-const dec ARROW_PATH_ALPHA_START = 0.8;
 } // namespace
 
 Climber::~Climber( )
@@ -237,6 +241,14 @@ void Climber::update_velocity( )
     if( m_moving_left )
     {
         add_velocity( VectorX( -m_movement_speed ) );
+    }
+    
+    if( ( m_hook.state( ) == Hook::HOOKED ) && ( m_hook.rope_length( ) > m_hook.max_rope_length( ) ) )
+    {
+        Vector rope_pull( position( ), m_hook.hook_base( ) );
+        rope_pull.magnitude( m_hook.rope_length( ) - m_hook.max_rope_length( ) );
+        
+        add_velocity( rope_pull );
     }
 
     Player::update_velocity( );
@@ -591,7 +603,7 @@ Drawing Climber::debug_overlay( ) const
     
     if( m_hook.state( ) != Hook::LOADED )
     {
-        debug_overlay.draw( m_hook.debug_overlay( ).move( m_hook.position( ) ) );
+        debug_overlay.draw( m_hook.debug_overlay( ).move( m_hook.position( ) - position( ) ) );
     }
 
     debug_overlay.draw( Player::debug_overlay( ) );
@@ -605,6 +617,7 @@ void Climber::render( )
     Player::render( );
 
     m_hook.render( );
+    // draw( m_hook.projectile_drawing( VectorA( aim_angle( ), DEFAULT_ROPE_GROWTH_SPEED ), HOOK_PATH_LENGTH, HOOK_PATH_COLOR, HOOK_PATH_ALPHA_START ) );
     draw( m_hook );
 
     draw_legs( );
@@ -738,7 +751,7 @@ void Climber::draw_legs( )
                 }
             }
         }
-        else
+        else if( !god( ) )
         {
             foot += VectorY( LEG_HEIGHT / 4.0 );
         }
@@ -869,7 +882,7 @@ void Climber::draw_arrow( )
 
     Vector v = VectorA( aim_angle( ), arrow.length( ) );
 
-    draw( arrow.path( ARROW_PATH_LENGTH, ARROW_PATH_COLOR, ARROW_PATH_ALPHA_START ).move( v ) );
+    draw( arrow.projectile_drawing( ARROW_PATH_LENGTH, ARROW_PATH_COLOR, ARROW_PATH_ALPHA_START ).move( v ) );
     draw( Drawing( arrow ).move( v ) );
 }
 
@@ -938,49 +951,38 @@ void Climber::LowHealthAlertEffect::render( Camera * camera )
 {
     ScreenEffect::render( camera );
 
+    const dec PULSE_DURATION = 15.0;
     const dec SCREEN_FADE_DISTANCE = 0.5;
 
     const Color BASE_COLOR = RED;
-    const Color TRANSPARENT_COLOR = BASE_COLOR.a( 0 );
+    const Color TRANSPARENT_COLOR = BASE_COLOR.a( ZERO );
     const dec BASE_ALPHA = 0.5;
 
     const dec HEALTH_THRESHOLD_UPPER = 0.333;
     const dec HEALTH_THRESHOLD_LOWER = 0.1;
+    
+    Assert( HEALTH_THRESHOLD_UPPER > HEALTH_THRESHOLD_LOWER );
 
     if( m_climber->health_percentage( ) <= HEALTH_THRESHOLD_UPPER )
     {
-        dec alpha_health = 1.0;
+        dec alpha_health = ONE;
         if( m_climber->health_percentage( ) > HEALTH_THRESHOLD_LOWER )
         {
-            alpha_health = 1.0 - ( ( m_climber->health_percentage( ) - HEALTH_THRESHOLD_LOWER ) / ( HEALTH_THRESHOLD_UPPER - HEALTH_THRESHOLD_LOWER ) );
+            alpha_health = ONE - ( ( m_climber->health_percentage( ) - HEALTH_THRESHOLD_LOWER ) / ( HEALTH_THRESHOLD_UPPER - HEALTH_THRESHOLD_LOWER ) );
         }
 
-        dec alpha_time = BASE_ALPHA * abs( sin( (dec)( (dec)m_climber->age( ) / 15.0 ) ) );
+        dec alpha_time = BASE_ALPHA * abs( sin( (dec)( (dec)m_climber->age( ) / PULSE_DURATION ) ) );
         Color color = BASE_COLOR.a( alpha_health * alpha_time );
 
         FixedRectangle screen_bounds = camera->bounds( ) - camera->center( );
         dec effect_distance = SCREEN_FADE_DISTANCE * min( screen_bounds.width( ), screen_bounds.height( ) );
 
         FixedRectangle clear_bounds( screen_bounds.width( ) - effect_distance, screen_bounds.height( ) - effect_distance, screen_bounds.center( ) );
-
-        // corners
-        draw( { color, color, TRANSPARENT_COLOR, color }, FixedRectangle( screen_bounds.top_right( ), clear_bounds.top_right( ) ) );
-        draw( { color, color, color, TRANSPARENT_COLOR }, FixedRectangle( screen_bounds.top_left( ), clear_bounds.top_left( ) ) );
-        draw( { TRANSPARENT_COLOR, color, color, color }, FixedRectangle( screen_bounds.bottom_left( ), clear_bounds.bottom_left( ) ) );
-        draw( { color, TRANSPARENT_COLOR, color, color }, FixedRectangle( screen_bounds.bottom_right( ), clear_bounds.bottom_right( ) ) );
-
-        // sides
-        draw( { color, color, TRANSPARENT_COLOR, TRANSPARENT_COLOR },
-              FixedRectangle( clear_bounds.top_left( ), clear_bounds.top_right( ) + VectorY( half( effect_distance ) ) ) );
-
-        draw( { TRANSPARENT_COLOR, color, color, TRANSPARENT_COLOR },
-              FixedRectangle( clear_bounds.bottom_left( ) - VectorX( half( effect_distance ) ), clear_bounds.top_left( ) ) );
-
-        draw( { TRANSPARENT_COLOR, TRANSPARENT_COLOR, color, color },
-              FixedRectangle( clear_bounds.bottom_left( ) - VectorY( half( effect_distance ) ), clear_bounds.bottom_right( ) ) );
-
-        draw( { color, TRANSPARENT_COLOR, TRANSPARENT_COLOR, color },
-              FixedRectangle( clear_bounds.bottom_right( ), clear_bounds.top_right( ) + VectorX( half( effect_distance ) ) ) );
+        
+        draw( { color, color, TRANSPARENT_COLOR, TRANSPARENT_COLOR }, Polygon( { screen_bounds.top_right( ), screen_bounds.top_left( ), clear_bounds.top_left( ), clear_bounds.top_right( ) } ) );
+        draw( { color, color, TRANSPARENT_COLOR, TRANSPARENT_COLOR }, Polygon( { screen_bounds.top_left( ), screen_bounds.bottom_left( ), clear_bounds.bottom_left( ), clear_bounds.top_left( ) } ) );
+        draw( { color, color, TRANSPARENT_COLOR, TRANSPARENT_COLOR }, Polygon( { screen_bounds.bottom_left( ), screen_bounds.bottom_right( ), clear_bounds.bottom_right( ), clear_bounds.bottom_left( ) } ) );
+        draw( { color, color, TRANSPARENT_COLOR, TRANSPARENT_COLOR }, Polygon( { screen_bounds.bottom_right( ), screen_bounds.top_right( ), clear_bounds.top_right( ), clear_bounds.bottom_right( ) } ) );
     }
 }
 
@@ -1202,30 +1204,30 @@ void Climber::input( Input * _input )
         {
             if( joystick_input->joystick == ControllerJoystickInput::LEFT_JOYSTICK )
             {
-                if( joystick_input->direction == ControllerJoystickInput::LEFT )
-                {
-                    moving_left( true );
-                }
-                else if( joystick_input->direction == ControllerJoystickInput::RIGHT )
-                {
-                    moving_right( true );
-                }
-                else if( joystick_input->direction == ControllerJoystickInput::UP )
-                {
-                    looking_up( true );
-                }
-                else if( joystick_input->direction == ControllerJoystickInput::DOWN )
-                {
-                    looking_down( true );
-                }
-                else
-                {
-                    moving_left( false );
-                    moving_right( false );
-                    looking_up( false );
-                    looking_down( false );
-                }
-            }
+                //if( joystick_input->direction == ControllerJoystickInput::LEFT )
+                //{
+                //    moving_left( true );
+                //}
+                //else if( joystick_input->direction == ControllerJoystickInput::RIGHT )
+                //{
+                //    moving_right( true );
+                //}
+                //else if( joystick_input->direction == ControllerJoystickInput::UP )
+                //{
+                //    looking_up( true );
+                //}
+                //else if( joystick_input->direction == ControllerJoystickInput::DOWN )
+                //{
+                //    looking_down( true );
+                //}
+                //else
+                //{
+                //    moving_left( false );
+                //    moving_right( false );
+                //    looking_up( false );
+                //    looking_down( false );
+                //}
+                //}
 
             if( joystick_input->joystick == ControllerJoystickInput::RIGHT_JOYSTICK )
             {

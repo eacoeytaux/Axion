@@ -9,6 +9,11 @@ namespace
 const uint GRID_BLOCK_SIZE = 256;
 const uint START_AGE = 0; // 1024;
 const dec CAMERA_ZOOM_RATIO = 0.96875;
+#ifdef AXN_DEBUG
+const dec CAMERA_SIDE_BUFFER_RATIO = 0.1;
+#else
+const dec CAMERA_SIDE_BUFFER_RATIO = ZERO;
+#endif
 } // namespace
 
 World::World( )
@@ -35,7 +40,8 @@ void World::create( const FixedRectangle & _bounds )
     m_lighting = new Lighting( );
 
     // TODO camera width / height should be independent of screen size
-    m_camera = new Camera( this, Engine::screen_width( ), Engine::screen_height( ) );
+    uint side_buffer = min( Engine::screen_width( ) * CAMERA_SIDE_BUFFER_RATIO, Engine::screen_height( ) * CAMERA_SIDE_BUFFER_RATIO );
+    m_camera = new Camera( this, Engine::screen_width( ) - side_buffer, Engine::screen_height( ) - side_buffer );
 }
 
 void World::destroy( )
@@ -53,6 +59,8 @@ void World::init( )
 
     create( );
 
+    add_objects_from_queue( );
+    
     // age world before adding player
     for_range( i, START_AGE )
     {
@@ -363,15 +371,30 @@ void World::render( )
 #ifdef AXN_DEBUG
     if( m_display_forebackground )
 #endif
+    {
         for_each( object, m_background_objects )
         {
             object->render_object( );
             
-            if( object->visible( ) )
+            if( camera->in_view( object->bounding_box( ) + object->position( ), object->z( ) ) )
             {
                 camera->capture( object );
             }
+            
+#ifdef AXN_DEBUG
+            if( Debug::active )
+            {
+                if( object->draw_debug )
+                {
+                    Drawing debug_overlay = object->debug_overlay( );
+                    debug_overlay.move( object->position( ) );
+                    
+                    camera->capture_debug( new Visible( debug_overlay ), true );
+                }
+            }
+#endif
         }
+    }
 
     m_terrain->render_object( );
     camera->capture( m_terrain );
@@ -386,23 +409,23 @@ void World::render( )
             camera->capture_debug( new Visible( debug_overlay ), true );
         }
         
-        render_object_grid( camera, true, []( const Grid::Block & block ) { return block.objects.size( ); } );
+        // render_object_grid( camera, true, []( const Grid::Block & block ) { return block.objects.size( ); } );
     }
 #endif
 
     for_each( object, m_objects )
     {
-        for_each( light, object->lights( ) )
-        {
-            m_lighting->add_light_source( light );
-        }
-
         object->render_object( );
-
-        if( object->visible( ) )
+        
+        if( camera->in_view( object->bounding_box( ) + object->position( ) ) )
         {
+            for_each( light, object->lights( ) )
+            {
+                m_lighting->add_light_source( light );
+            }
+            
             camera->capture( object );
-
+            
 #ifdef AXN_DEBUG
             if( Debug::active )
             {
@@ -425,11 +448,20 @@ void World::render( )
         for_each( object, m_foreground_objects )
         {
             object->render_object( );
+            camera->capture( object );
             
-            if( object->visible( ) )
+#ifdef AXN_DEBUG
+            if( Debug::active )
             {
-                camera->capture( object );
+                if( object->draw_debug )
+                {
+                    Drawing debug_overlay = object->debug_overlay( );
+                    debug_overlay.move( object->position( ) );
+                    
+                    camera->capture_debug( new Visible( debug_overlay ), true );
+                }
             }
+#endif
         }
     }
 
@@ -441,6 +473,8 @@ void World::render( )
 void World::update( )
 {
     ++m_age;
+    
+    add_objects_from_queue( );
 
     // update all objects
     static auto object_sort = []( const Object * const & obj1, const Object * const & obj2 )
@@ -463,7 +497,6 @@ void World::update( )
         return false;
     };
 
-    add_objects_from_queue( );
     m_objects.sort( object_sort, true );
     
     update_objects( m_objects );
@@ -684,6 +717,23 @@ Player * World::player( const uint _player_number )
 Player * World::player_main( )
 {
     return player( 0 );
+}
+
+varray<Coordinate> World::update_points( ) const
+{
+    varray<Coordinate> update_points;
+    
+    for_each( player, m_players )
+    {
+        update_points.insert_back( player->position( ) );
+    }
+    
+    return update_points;
+}
+
+Planc World::default_update_distance( ) const
+{
+    return METER * 10; // TODO
 }
 
 void World::wind( const Vector & _wind )

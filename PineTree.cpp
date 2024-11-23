@@ -86,7 +86,8 @@ PineTree::PineTree( World * world, const Coordinate & _root, const dec _z ) : Ob
         m_leave_bunches_rotation_points.insert_back( last_top );
 
         Drawing & leaves = m_leave_bunches_and_trunk.insert_back( );
-        { // todo change to border
+        {
+            // todo change to border
             Polygon leaf_border = Polygon::expand( Polygon( leaf_bunch ), LEAVES_BORDER_WIDTH );
             leaves.draw( LEAVES_BORDER_COLOR, leaf_border );
         }

@@ -6,14 +6,12 @@
 namespace axn
 {
 
-// TODO
-
 enum error
 {
     no_error = 0,
+    error_system,
     error_not_init,
     error_unimplemented,
-    error_todo,
 };
 
 #define return_error( x )    \
