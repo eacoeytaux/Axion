@@ -58,20 +58,24 @@ private:
 public:
     virtual ~Arc( ) { }
     
-    static Arc clockwise( const Coordinate & center, const Planc & radius, const Angle & start, const Angle & end ) { return Arc( center, radius, start, end, true ); }
-    static Arc counterclockwise( const Coordinate & center, const Planc & radius, const Angle & start, const Angle & end ) { return Arc( center, radius, start, end, false ); }
+    static Arc cw( const Coordinate & center, const Planc & radius, const Angle & start, const Angle & end ) { return Arc( center, radius, start, end, true ); }
+    static Arc ccw( const Coordinate & center, const Planc & radius, const Angle & start, const Angle & end ) { return Arc( center, radius, start, end, false ); }
     
-    static Arc clockwise( const Planc & radius, const Angle & start, const Angle & end ) { return Arc( ORIGIN, radius, start, end, true ); }
-    static Arc counterclockwise( const Planc & radius, const Angle & start, const Angle & end ) { return Arc( ORIGIN, radius, start, end, false ); }
-    
-    static Arc cw( const Coordinate & center, const Planc & radius, const Angle & start, const Angle & end ) { return clockwise( center, radius, start, end ); }
-    static Arc ccw( const Coordinate & center, const Planc & radius, const Angle & start, const Angle & end ) { return counterclockwise( center, radius, start, end ); }
-    
-    static Arc cw( const Planc & radius, const Angle & start, const Angle & end ) { return clockwise( ORIGIN, radius, start, end ); }
-    static Arc ccw( const Planc & radius, const Angle & start, const Angle & end ) { return counterclockwise( ORIGIN, radius, start, end ); }
+    static Arc cw( const Planc & radius, const Angle & start, const Angle & end ) { return Arc( ORIGIN, radius, start, end, true ); }
+    static Arc ccw( const Planc & radius, const Angle & start, const Angle & end ) { return Arc( ORIGIN, radius, start, end, false ); }
     
 private:
     static varray<Line> generate( const Coordinate & center, const Planc & radius, const Angle & start, const Angle & end, bool clockwise );
+};
+
+class Beziel : public Path
+{
+public:
+    virtual ~Beziel( ) { }
+    Beziel( const varray<Coordinate> & control_points, const Planc & min_distance = ONE );
+    
+private:
+    static varray<Line> generate( const varray<Coordinate> & control_points, const Planc & min_distance );
 };
 
 } // namespace geometry

@@ -1227,7 +1227,7 @@ void Climber::input( Input * _input )
                 //    looking_up( false );
                 //    looking_down( false );
                 //}
-                //}
+            }
 
             if( joystick_input->joystick == ControllerJoystickInput::RIGHT_JOYSTICK )
             {
