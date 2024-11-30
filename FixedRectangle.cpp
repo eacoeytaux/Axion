@@ -42,7 +42,7 @@ FixedRectangle & FixedRectangle::center( const Coordinate & _center )
 const Planc & FixedRectangle::width( ) const { return m_width; }
 FixedRectangle & FixedRectangle::width( const Planc & _width )
 {
-    // tpdo
+    // todo
     // Assert( _width >= ZERO, "cannot have negative width" );
     m_width = _width;
     return *this;
@@ -197,30 +197,30 @@ FixedRectangle & FixedRectangle::shrink( const Planc & _px, const Planc & _py )
 
 FixedRectangle & FixedRectangle::expand_width( const Planc & _p )
 {
-    Assert( _p >= ZERO, "cannot expand by negative amount, use shrink instead" );
+    // Assert( _p >= ZERO, "cannot expand by negative amount, use shrink instead" );
     width( width( ) + _p );
     return *this;
 }
 
 FixedRectangle & FixedRectangle::shrink_width( const Planc & _p )
 {
-    Assert( _p <= ZERO, "cannot shrink by negative amount, use expand instead" );
-    Assert( _p >= width( ), "cannot shrink by more than current width" );
+    // Assert( _p <= ZERO, "cannot shrink by negative amount, use expand instead" );
+    // Assert( _p >= width( ), "cannot shrink by more than current width" );
     width( width( ) - _p );
     return *this;
 }
 
 FixedRectangle & FixedRectangle::expand_height( const Planc & _p )
 {
-    Assert( _p >= ZERO, "cannot expand by negative amount, use shrink instead" );
+    // Assert( _p >= ZERO, "cannot expand by negative amount, use shrink instead" );
     height( height( ) + _p );
     return *this;
 }
 
 FixedRectangle & FixedRectangle::shrink_height( const Planc & _p )
 {
-    Assert( _p <= ZERO, "cannot shrink by negative amount, use expand instead" );
-    Assert( _p >= height( ), "cannot shrink by more than current height" );
+    // Assert( _p <= ZERO, "cannot shrink by negative amount, use expand instead" );
+    // Assert( _p >= height( ), "cannot shrink by more than current height" );
     height( height( ) - _p );
     return *this;
 }

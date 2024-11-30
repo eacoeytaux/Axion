@@ -5,7 +5,7 @@ Drawing::Drawing( const Coordinate & _center ) { center( _center ); }
 
 const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( const bool _transformed ) const
 {
-    if( _transformed && !transform( ).identity( ) )
+    //if( _transformed && !transform( ).identity( ) )
     {
         const Transform _t = transform();
 
@@ -39,7 +39,7 @@ void Drawing::clear( const bool _reserve_mem )
     uint mem_size = ( _reserve_mem ? m_colored_polygons.size( ) : ZERO );
     
     m_colored_polygons.clear( !_reserve_mem );
-
+    
     m_bounding_box.width( ZERO );
     m_bounding_box.height( ZERO );
     m_bounding_box.center( ORIGIN );
@@ -58,30 +58,6 @@ Drawing & Drawing::center( const Coordinate & _center )
         m_center = _center;
     }
 
-    return *this;
-}
-
-Drawing & Drawing::override_color( const Color & _color )
-{
-    m_override_color = _color;
-    
-    if ( !m_override_color_set )
-    {
-        for_each( colored_polygon, m_colored_polygons )
-        {
-            colored_polygon.colors = { m_override_color };
-        }
-    }
-    
-    m_override_color_set = true;
-    
-    return *this;
-}
-
-Drawing & Drawing::clear_override_color( )
-{
-    m_override_color_set = false;
-    
     return *this;
 }
 
@@ -131,16 +107,7 @@ Drawing& Drawing::clear_bounds()
 
 Drawing & Drawing::draw( const Drawing & _drawing )
 {
-    // if (_drawing.has_border( ) )
-    // {
-    //     m_colored_polygons.insert_back( _drawing.colored_polygons_border( ) );
-    // }
-    
-    if( m_override_color_set )
-    {
-        draw( _drawing, m_override_color );
-    }
-    else if( m_filter_function_set )
+    if( m_filter_function_set )
     {
         for_each( colored_polygon, _drawing.colored_polygons( ) )
         {
@@ -195,28 +162,20 @@ Drawing & Drawing::draw( const varray<Color> & _colors,
     colored_polygon.preserve_thickness = _preserve_thickness;
     colored_polygon.extend_lines = _extend_lines;
     
-    if( m_override_color_set )
+    colored_polygon.colors = _colors;
+    
+    colored_polygon.opaque = true;
+    for_range( i, colored_polygon.colors.size( ) )
     {
-        colored_polygon.colors = { m_override_color };
-        colored_polygon.opaque = m_override_color.opaque( );
-    }
-    else
-    {
-        colored_polygon.colors = _colors;
-        
-        colored_polygon.opaque = true;
-        for_range( i, colored_polygon.colors.size( ) )
+        if( m_filter_function_set )
         {
-            if( m_filter_function_set )
-            {
-                m_filter_function( colored_polygon.colors[ i ] );
-            }
-            
-            if( colored_polygon.colors[ i ].a( ) != ONE )
-            {
-                colored_polygon.opaque = false;
-                break;
-            }
+            m_filter_function( colored_polygon.colors[ i ] );
+        }
+        
+        if( colored_polygon.colors[ i ].a( ) != ONE )
+        {
+            colored_polygon.opaque = false;
+            break;
         }
     }
     
@@ -251,6 +210,20 @@ Drawing & Drawing::draw( const Color & _color,
                          const bool _extend_lines )
 {
     return draw( _color, _color, _line, _thickness, _preserve_thickness, _extend_lines );
+}
+
+Drawing & Drawing::draw( const Color & _color,
+                         const Path & _path,
+                         const dec _thickness,
+                         const bool _preserve_thickness,
+                         const bool _extend_lines )
+{
+    for_each( line, _path.lines( ) )
+    {
+        draw( _color, line, _thickness, _preserve_thickness, _extend_lines );
+    }
+    
+    return *this;
 }
 
 #ifdef AXN_DEBUG

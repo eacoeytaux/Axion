@@ -28,8 +28,9 @@ Hook::Hook( World * world, const Climber * owner ) : Object( world ), m_owner( o
 #endif
     
     Assert( m_owner, "owner cannot be null" );
-
+    
     solid( true );
+    interactive( true );
 
     position( m_owner->position( ) );
 
@@ -151,6 +152,31 @@ void Hook::update_velocity( )
 void Hook::ground( TerrainEdge * ground )
 {
     Object::ground( ground );
+}
+
+bool Hook::collide( Object * object )
+{
+    if( state( ) != LOADED )
+    {
+        Object::collide( object );
+        
+        if( state( ) == FIRING )
+        {
+            if( object->interactive( ) && !dynamic_cast<Hook *>( object ) )
+            {
+                if( Mob * mob = dynamic_cast<Mob *>( object ) )
+                {
+                    mob->hurt( 1000.0 );
+                }
+                
+                state( RETRACTING );
+                
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 Coordinate Hook::hook_tip( ) const

@@ -165,7 +165,7 @@ void Camera::render( )
 
                 ogl::translate( _drawing.center( ).x( ), _drawing.center( ).y( ) );
 
-                for_each( _colored_polygon, _drawing.colored_polygons( false ) )
+                for_each( _colored_polygon, _drawing.colored_polygons( ) )
                 {
                     if ( _colored_polygon.reset )
                     {

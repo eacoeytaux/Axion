@@ -13,6 +13,7 @@ class TerrainNode
 public:
     virtual ~TerrainNode( ) { }
 
+    virtual bool passable( ) const { return true; }
     virtual Angle normal( ) const = 0;
     virtual dec resistance( ) const = 0;
 };

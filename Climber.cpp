@@ -144,6 +144,11 @@ void Climber::update( )
 
     m_reload_timer.tick( );
     m_dust_timer.tick( );
+    
+    if( passing_terrain( ) )
+    {
+        passing_terrain( false );
+    }
 
     const Vector & v = velocity( );
     if( v.has_magnitude( ) )
@@ -349,7 +354,14 @@ void Climber::looking_down( const bool _looking )
 
 void Climber::jump( const bool _jumping )
 {
-    m_jumping = _jumping;
+    if( _jumping && looking_down( ) )
+    {
+        passing_terrain( true );
+    }
+    else
+    {
+        m_jumping = _jumping;
+    }
 }
 
 void Climber::ground( TerrainEdge * ground )
@@ -880,7 +892,7 @@ void Climber::draw_back_hand( )
 
 void Climber::draw_crossbow( )
 {
-    Polygon crossbow_polygon = Polygon( { { 6.0, 0.0 }, Coordinate( 0.0, 0.0 ), Coordinate( -2.0, -2.0 ), Coordinate( -4.0, -2.0 ), Coordinate( -4.0, -4.0 ), Coordinate( 1.0, -1.0 ), Coordinate( 5.0, -1.0 ) } ).scale( 5.0 );
+    Polygon crossbow_polygon = Polygon( { { 6.0, 0.0 }, Coordinate( 0.0, 0.0 ), Coordinate( -2.0, -2.0 ), Coordinate( -4.0, -2.0 ), Coordinate( -4.0, -4.0 ), Coordinate( 2.0, -1.0 ), Coordinate( 5.0, -1.0 ) } ).scale( 5.0 );
 
     if( aiming_left( ) )
     {

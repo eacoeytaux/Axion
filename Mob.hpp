@@ -24,7 +24,7 @@ public:
     bool dead( ) const { return !alive( ); }
 
     bool invincible( ) const { return ( m_invincible_always || m_invincible_counter.remaining( ) ); }
-    virtual void invincible_pause( uint invincible_duration ) { m_invincible_counter.reset( max( invincible_duration, m_invincible_counter.remaining( ) ) ); }
+    virtual void invincible_pause( uint invincible_duration ) { if( invincible_duration ) { m_invincible_counter.reset( max( invincible_duration, m_invincible_counter.remaining( ) ) ) ; } }
     
     virtual bool invincible_always( ) const { return m_invincible_always; }
     virtual void invincible_always( bool invincible ) { m_invincible_always = invincible; }

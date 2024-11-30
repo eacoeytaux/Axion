@@ -57,6 +57,12 @@ public:
                     dec thickness = ONE,
                     bool preserve_thickness = false,
                     bool extend_lines = false );
+    
+    Drawing & draw( const Color & color,
+                    const Path & path,
+                    dec thickness = ONE,
+                    bool preserve_thickness = false,
+                    bool extend_lines = false );
 
 #ifdef AXN_DEBUG
     Drawing & draw( const Color & color,
@@ -101,7 +107,11 @@ private:
     };
 
     const varray<ColoredPolygon> & colored_polygons( bool transformed = true ) const;
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 12b1d6c248f2c345cf2a4a47ac760538a65c6906
     mutable varray<ColoredPolygon> m_colored_polygons;
     
     mutable Coordinate m_center;
@@ -109,9 +119,6 @@ private:
     mutable FixedRectangle m_bounding_box;
 
     mutable bool m_translucent = false;
-    
-    bool m_override_color_set = false;
-    Color m_override_color;
     
     bool m_filter_function_set = false;
     std::function<void( Color & )> m_filter_function = [ ]( Color & ) { };

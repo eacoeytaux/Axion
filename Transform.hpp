@@ -115,12 +115,14 @@ public:
 
     virtual Transformable & clear_transform( )
     {
+        dirty( );
         m_transform = IDENTITY_TRANSFORM;
         return *this;
     }
 
     virtual const Transformable & const_clear_transform( ) const
     {
+        dirty( );
         m_transform = IDENTITY_TRANSFORM;
         return *this;
     }
