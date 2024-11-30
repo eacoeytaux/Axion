@@ -29,6 +29,9 @@ public:
     void fire( const Vector & launch_speed );
     void retract( );
     void load( );
+    
+protected:
+    virtual bool collide( Object * ) override;
 
 private:
     const Climber * m_owner;

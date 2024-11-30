@@ -207,18 +207,26 @@ bool Line::above( const Coordinate & _c, const bool _inclusive ) const
 {
     Planc eq = line_eq( *this, _c );
     if( _inclusive && ( eq == ZERO ) )
+    {
         return true;
+    }
     else
+    {
         return ( eq < ZERO );
+    }
 }
 
 bool Line::below( const Coordinate & _c, const bool _inclusive ) const
 {
     Planc eq = line_eq( *this, _c );
     if( _inclusive && ( eq == ZERO ) )
+    {
         return true;
+    }
     else
+    {
         return ( eq > ZERO );
+    }
 }
 
 bool Line::intersects( const Line & _line, const bool _inclusive ) const
@@ -275,9 +283,17 @@ Coordinate Line::intersection( const Line & _line ) const
     {
         return c1( );
     }
+    if( vertical( ) && _line.horizontal( ) )
+    {
+        return Coordinate( c1( ).x( ), _line.c1( ).y( ) );
+    }
     else if( horizontal( ) && _line.horizontal( ) )
     {
         return c1( );
+    }
+    else if( horizontal( ) && _line.vertical( ) )
+    {
+        return Coordinate( _line.c1( ).x( ), c1( ).y( ) );
     }
     else if( ( m( ) == _line.m( ) ) )
     {

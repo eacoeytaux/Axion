@@ -19,7 +19,7 @@ public:
     virtual ~Path( ) { }
 
     Path( const varray<Coordinate> & coordinates = { } );
-    Path( const varray<Line> & lines = { } );
+    Path( const varray<Line> & lines );
     Path( const Line & line ) { *this = Path( { line } ); }
     
     const varray<Line> & lines( ) const { return m_lines; }
@@ -68,14 +68,15 @@ private:
     static varray<Line> generate( const Coordinate & center, const Planc & radius, const Angle & start, const Angle & end, bool clockwise );
 };
 
-class Beziel : public Path
+class Bezier : public Path
 {
 public:
-    virtual ~Beziel( ) { }
-    Beziel( const varray<Coordinate> & control_points, const Planc & min_distance = ONE );
+    virtual ~Bezier( ) { }
+    Bezier( const varray<Coordinate> & control_points, uint point_count );
+    Bezier( const varray<Coordinate> & control_points ) { *this = Bezier( control_points, (uint)( control_points.size( ) ) ); }
     
 private:
-    static varray<Line> generate( const varray<Coordinate> & control_points, const Planc & min_distance );
+    static varray<Line> generate( const varray<Coordinate> & control_points, uint _point_count );
 };
 
 } // namespace geometry

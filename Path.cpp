@@ -23,7 +23,8 @@ Path::Path( const varray<Line> & _lines )
     
     for_range( i, m_lines.size( ) - ONE )
     {
-        Assert( m_lines[ i ].c2( ) == m_lines[ i + ONE ].c1( ) );
+        // todo
+        // Assert( m_lines[ i ].c2( ) == m_lines[ i + ONE ].c1( ) );
     }
 }
 
@@ -229,12 +230,47 @@ varray<Line> Arc::generate( const Coordinate & _center, const Planc & _radius, c
 Arc::Arc( const Coordinate & _center, const Planc & _radius, const Angle & _start, const Angle & _end, const bool _clockwise )
 : Path( generate( _center, _radius, _start, _end, _clockwise ) ) { }
 
-varray<Line> Beziel::generate( const varray<Coordinate> & _control_points, const Planc & _min_distance )
+varray<Line> Bezier::generate( const varray<Coordinate> & _control_points, const uint _point_count )
 {
+    uint control_point_count = _control_points.size( );
+    
+    if( !control_point_count )
+    {
+        return { };
+    }
+    else if( control_point_count == ONE )
+    {
+        return { Line( _control_points.front( ), _control_points.front( ) ) };
+    }
+    else if( control_point_count == TWO )
+    {
+        return { Line( _control_points.front( ), _control_points.back( ) ) };
+    }
+    
     varray<Line> lines;
- 
+    Coordinate last = _control_points.front( );
+    
+    dec dt = ONE / _point_count;
+    
+    for_range( x, _point_count - ONE )
+    {
+        dec t = dt * ( x + ONE );
+        
+        Vector v;
+        varray<uint> p = pascal( control_point_count - ONE );
+        for_range( i, control_point_count )
+        {
+            v += (Vector)_control_points[ i ] * (dec)p[ i ] * pow( t, i ) * pow( ( ONE - t ), control_point_count - i - ONE );
+        }
+        
+        lines.insert_back( Line( last, v ) );
+        last = v;
+    }
+    
+    lines.insert_back( Line( last, _control_points.back( ) ) );
+    
     return lines;
 }
 
-Beziel::Beziel( const varray<Coordinate> & _control_points, const Planc & _min_distance )
-: Path( generate( _control_points, _min_distance ) ) { }
+Bezier::Bezier( const varray<Coordinate> & _control_points, const uint _point_count )
+: Path( generate( _control_points, _point_count ) ) { }

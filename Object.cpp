@@ -153,11 +153,14 @@ void Object::update_velocity( )
 
     Vector velocity = Matter::velocity( );
 
-    if( m_ground && terrain_boundaries( ) )
+    if( terrain_boundaries( ) && m_ground )
     {
-        if( velocity.has_magnitude( ) )
+        if( !m_passing_terrain || !m_ground->passable( ) )
         {
-            velocity.flatten( m_ground->line( ).angle( ).flip( ) );
+            if( velocity.has_magnitude( ) )
+            {
+                velocity.flatten( m_ground->line( ).angle( ).flip( ) );
+            }
         }
     }
     else if( !m_ground && m_gravity_ratio )
@@ -181,6 +184,11 @@ void Object::update_movement( )
     if( m_ground )
     {
         checked_edges.insert( m_ground );
+        
+        if( m_passing_terrain && m_ground->passable( ) )
+        {
+            m_ground = nullptr;
+        }
     }
 
     dec remaining_percentage = ONE;

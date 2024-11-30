@@ -18,24 +18,23 @@ class Polygon : public Transformable
 {
 public:
     static uint circle_precision( dec perimeter = TAU );
+    
+    static Polygon equilateral( uint side_count, const Planc & radius = 1.0, const Coordinate & center = ORIGIN, Angle rotation = Angle( 0 ) );
+    
+    static Polygon expand( const Polygon & polygon, const Planc & expansion );
 
     virtual ~Polygon( ) { }
 
-    Polygon( );
-    Polygon( const varray<Coordinate> & coordinates, bool assume_is_convex = false );
-    Polygon( const varray<Coordinate> & coordinates, const Transform &, bool assume_is_convex = false );
+    Polygon( const varray<Coordinate> & coordinates = { }, const Transform & = IDENTITY_TRANSFORM );
     
     transform_functions( Polygon );
+
+    const varray<Coordinate> & coordinates( ) const;
+
+    Path perimeter( ) const;
     
-    static Polygon equilateral( uint side_count, const Planc & radius = 1.0, const Coordinate & center = ORIGIN, Angle rotation = Angle( 0 ) );
-    static Polygon expand( const Polygon & polygon, const Planc & expansion );
-
-    const varray<Coordinate> & coordinates( bool raw = false ) const;
-
-    Path perimeter( bool raw = false ) const;
-    varray<Polygon> triangles( bool raw = false ) const;
-    varray<Polygon> convex_partitions( bool raw = false ) const;
-    Polygon convex_hull( bool raw = false ) const;
+    varray<Polygon> triangles( ) const;
+    varray<Polygon> convex_partitions( ) const;
 
     Planc area( ) const;
     uint sides( ) const;
@@ -49,8 +48,8 @@ public:
     Planc lower_bound_x( ) const;
     Planc lower_bound_y( ) const;
 
-    bool contains( const Coordinate & coordinate, bool inclusive = true ) const;
-    bool intersects( const Line & line ) const { return ( intersection( line ).size( ) > 0 ); }
+    bool contains( const Coordinate & coordinate, bool border_inclusive = true ) const;
+    bool intersects( const Line & line ) const { return intersection( line ).size( ); }
     varray<Line> intersection( const Line & line ) const;
 
     Polygon operator+( const Vector & ) const;
@@ -61,34 +60,28 @@ public:
     bool operator==( const Polygon & _polygon ) const;
     default_non_equal( Polygon );
 
+#ifdef AXN_DEBUG
+    const varray<Coordinate> & coordinates_raw( ) const { return m_coordinates_raw; }
+#endif
+    
 private:
+    varray<Coordinate> m_coordinates_raw;
     mutable varray<Coordinate> m_coordinates;
-    mutable varray<Coordinate> m_coordinates_raw;
     mutable bool m_coordinates_dirty = true;
 
-    mutable varray<Line> m_lines;
-    mutable bool m_lines_dirty = true;
-
-    mutable varray<Polygon> m_triangles;
-    mutable varray<varray<uint>> m_triangles_indices;
-    mutable bool m_triangles_dirty = true;
-
-    mutable varray<Polygon> m_convex_partitions;
-    mutable varray<varray<uint>> m_convex_partitions_indices;
-    mutable bool m_convex_partitions_dirty = true;
-
-    mutable varray<Coordinate> m_convex_hull;
-    mutable varray<uint> m_convex_hull_indices;
-    mutable bool m_convex_hull_dirty = true;
-
-    mutable bool m_convex = true;
     mutable Planc m_lower_bound_x = P0;
     mutable Planc m_lower_bound_y = P0;
     mutable Planc m_upper_bound_x = P0;
     mutable Planc m_upper_bound_y = P0;
     
+    bool m_convex;
+    
+    bool m_processed = false;
+    void process( const varray<Coordinate> & );
+    
+    void apply_transform( ) const;
+    
     virtual const Polygon & dirty( ) const override;
-    void process( bool transform, bool lines, bool triangles, bool convex_partitions, bool convex_hull ) const;
 };
 
 class Triangle : public Polygon
@@ -116,7 +109,7 @@ class Circle : public Polygon
 {
 public:
     virtual ~Circle( ) { }
-    Circle( const Planc & radius = 1.0, const Coordinate & center = ORIGIN );
+    Circle( const Planc & radius = ONE, const Coordinate & center = ORIGIN );
 };
 
 } // namespace geometry

@@ -93,6 +93,9 @@ public:
     void terrain_boundaries( bool );
     
     TerrainEdge * ground( ) const;
+    
+    bool passing_terrain( ) const { return m_passing_terrain; }
+    void passing_terrain( bool b ) { m_passing_terrain = b; }
 
     virtual FixedRectangle hit_box( ) const;
 
@@ -138,6 +141,7 @@ private:
     Planc m_visible_height = ZERO;
 
     TerrainEdge * m_ground = nullptr;
+    bool m_passing_terrain = false;
 
     dec m_gravity_ratio = ONE;
     

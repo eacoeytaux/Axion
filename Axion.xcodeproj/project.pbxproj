@@ -13,6 +13,7 @@
 		AA13ACA32BD33859005DAD3C /* Snail.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA13ACA12BD33859005DAD3C /* Snail.cpp */; };
 		AA13ACA62BD34405005DAD3C /* AspenTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA13ACA42BD34405005DAD3C /* AspenTree.cpp */; };
 		AA13ACA92BD357D4005DAD3C /* Bush.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA13ACA72BD357D4005DAD3C /* Bush.cpp */; };
+		AA173FF32CF6F1E70078E160 /* Polygon_old.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA173FF12CF6F1E70078E160 /* Polygon_old.cpp */; };
 		AA22A1812BCA2DD10048F445 /* Dust.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA22A17F2BCA2DD10048F445 /* Dust.cpp */; };
 		AA22A1842BD038B40048F445 /* Skull.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA22A1822BD038B30048F445 /* Skull.cpp */; };
 		AA269A9729D790B90093CF81 /* Waterfall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA269A9529D790B90093CF81 /* Waterfall.cpp */; };
@@ -91,6 +92,8 @@
 		AA13ACA52BD34405005DAD3C /* AspenTree.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AspenTree.hpp; sourceTree = "<group>"; };
 		AA13ACA72BD357D4005DAD3C /* Bush.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Bush.cpp; sourceTree = "<group>"; };
 		AA13ACA82BD357D4005DAD3C /* Bush.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Bush.hpp; sourceTree = "<group>"; };
+		AA173FF12CF6F1E70078E160 /* Polygon_old.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Polygon_old.cpp; sourceTree = "<group>"; };
+		AA173FF22CF6F1E70078E160 /* Polygon_old.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Polygon_old.hpp; sourceTree = "<group>"; };
 		AA22A1762BC617DC0048F445 /* STD.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = STD.hpp; sourceTree = "<group>"; };
 		AA22A1792BC6517C0048F445 /* STDc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = STDc.hpp; sourceTree = "<group>"; };
 		AA22A17C2BC65A090048F445 /* STDptr.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = STDptr.hpp; sourceTree = "<group>"; };
@@ -413,6 +416,8 @@
 				AADC31CB2C855FCB00CD1417 /* Path.cpp */,
 				AA7A3E0A29B6E2540005EEA7 /* Polygon.hpp */,
 				AA93208F2C38984C0018540D /* Polygon.cpp */,
+				AA173FF22CF6F1E70078E160 /* Polygon_old.hpp */,
+				AA173FF12CF6F1E70078E160 /* Polygon_old.cpp */,
 				AA597D862BF02B050032B3BC /* FixedRectangle.hpp */,
 				AA597D852BF02B050032B3BC /* FixedRectangle.cpp */,
 			);
@@ -565,6 +570,7 @@
 				AAA436BC2A243F58001FA92C /* Engine.cpp in Sources */,
 				AA97521F2BB2C0D6003289EF /* LightSource.cpp in Sources */,
 				AA7A3E5229B6E2540005EEA7 /* World.cpp in Sources */,
+				AA173FF32CF6F1E70078E160 /* Polygon_old.cpp in Sources */,
 				AA7A3E5029B6E2540005EEA7 /* Terrain.cpp in Sources */,
 				AA9752172BB2BF6B003289EF /* main.cpp in Sources */,
 				AA5EC1112A81A6B9006EE411 /* Transform.cpp in Sources */,

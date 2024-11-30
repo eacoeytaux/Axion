@@ -160,40 +160,28 @@ void Camera::render( )
 
                 ogl::translate( _drawing.center( ).x( ), _drawing.center( ).y( ) );
 
-                for_each( _colored_polygon, _drawing.colored_polygons( false ) )
+                for_each( _colored_polygon, _drawing.colored_polygons( ) )
                 {
-                    const Polygon & _polygon = _colored_polygon.polygon;
-
                     if( _colored_polygon.thickness == FILLED )
                     {
-                        if( _drawing.has_border( ) )
+                        if( _colored_polygon.polygon.convex( ) )
                         {
-                            // TODO
-
-                            // const dec _border_width = _drawing.border_width( );
-                            // const Color _border_color = _drawing.border_color( );
-
-                            // Polygon polygon_border = Polygon::expand( _polygon, _border_width );
-
-                            // for_each( polygon, polygon_border.convex_partitions( ) )
-                            // {
-                            //     draw_convex_coordinates( { _border_color }, polygon.coordinates_raw( ), polygon.transform( ) );
-                            // }
+                            render_convex_polygon( _colored_polygon.colors, _colored_polygon.polygon.coordinates( ) );
                         }
-
-                        const varray<Polygon> & _convex_polygons = _polygon.convex_partitions( );
-                        for_each( _convex_polygon, _convex_polygons )
+                        else
                         {
-                            Transform t = _drawing.transform( ) * _convex_polygon.transform( );
-                            render_convex_polygon( _colored_polygon.colors, _convex_polygon.coordinates( true ), t ); // TODO need convex indices
+                            const varray<Polygon> & _convex_polygons = _colored_polygon.polygon.convex_partitions( );
+                            for_each( _convex_polygon, _convex_polygons )
+                            {
+                                render_convex_polygon( _colored_polygon.colors, _convex_polygon.coordinates( ) ); // TODO need convex indices for color
+                            }
                         }
                     }
                     else
                     {
-                        const Transform _transform = _colored_polygon.polygon.transform( );
                         const dec _thickness = _colored_polygon.thickness / ( _colored_polygon.preserve_thickness ? _zoom : ONE );
 
-                        const varray<Line> & _lines = _polygon.perimeter( );
+                        const varray<Line> & _lines = _colored_polygon.polygon.perimeter( );
                         for_range( i, _lines.size( ) )
                         {
                             const Line & _line = _lines[ i ];
@@ -223,29 +211,9 @@ void Camera::render( )
                                 Coordinate c3 = Line( c1, c1 + VectorA( _line_angle ) ).intersection( Line( c2, c2 - VectorA( _next_line_angle ) ) );
                                 corner_polygon = Polygon( { c0, c1, c3, c2 } );
                             }
-
-                            if( _drawing.has_border( ) )
-                            {
-                                // TODO
-
-                                // const dec _border_width = _drawing.border_width( );
-                                // const Color _border_color = _drawing.border_color( );
-
-                                // Polygon polygon_border_corner = Polygon::expand( _corner_polygon, _border_width );
-                                // for_each( polygon, polygon_border_corner.convex_partitions( ) )
-                                // {
-                                //     draw_convex_coordinates( { _border_color }, polygon.coordinates( true ), polygon.transform( ) );
-                                // }
-
-                                // Polygon polygon_border = Polygon::expand( line_polygon, _border_width );
-                                // for_each( polygon, polygon_border.convex_partitions( ) )
-                                // {
-                                //     draw_convex_coordinates( { _border_color }, polygon.coordinates( true ), polygon.transform( ) );
-                                // }
-                            }
-
-                            render_convex_polygon( { _colored_polygon.colors[ i ] }, corner_polygon.coordinates( true ), _drawing.transform( ) * corner_polygon.transform( ) );
-                            render_convex_polygon( { _colored_polygon.colors[ i ] }, line_polygon.coordinates( true ), _drawing.transform( ) * line_polygon.transform( ) );
+                            
+                            render_convex_polygon( { _colored_polygon.colors[ i ] }, corner_polygon.coordinates( ) );
+                            render_convex_polygon( { _colored_polygon.colors[ i ] }, line_polygon.coordinates( ) );
                         }
                     }
                 }
