@@ -46,6 +46,8 @@ public:
 protected:
     void update_velocity( ) override;
 
+    void movement_stop( );
+
     void moving_right( bool );
     void moving_left( bool );
     void looking_up( bool );
@@ -57,8 +59,8 @@ protected:
     void aim( const Angle & );
     void aim_shake( const Angle & );
 
-    void fire_hook( );
-    void fire_arrow( );
+    void loose_hook( );
+    void loose_arrow( );
     void release_bow( );
 
     // all of these are offsets from position
@@ -120,19 +122,20 @@ private:
     
     Hook m_hook;
 
-    Planc m_movement_speed = 0.0;
+    Planc m_movement_speed_ground = ZERO;
+    Planc m_movement_speed_air = ZERO;
     bool m_moving_right = false;
     bool m_moving_left = false;
     bool m_looking_up = false;
     bool m_looking_down = false;
     bool m_jumping = false;
-    dec m_jump_degradation = 0.0;
+    dec m_jump_degradation = ZERO;
     Counter m_jumping_timer;
     Counter m_jump_reset_timer;
 
     bool m_aiming = true;
-    Angle m_aim_angle = 0.0;
-    Angle m_aim_shake_angle = 0.0;
+    Angle m_aim_angle = ZERO;
+    Angle m_aim_shake_angle = ZERO;
     bool m_firing_hook = false;
     bool m_firing_arrow = false;
     bool m_slashing = false;

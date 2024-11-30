@@ -9,8 +9,8 @@ namespace physics
 {
 
 const Planc METER = 32.0;
-const Vector GRAVITY = VectorY( -2.5 );
-const dec AIR_RESISTANCE = 0.001;
+const Vector GRAVITY = VectorY( -1.0 );
+const dec AIR_RESISTANCE = 0.01;
 
 } // namespace physics
 } // namespace axn

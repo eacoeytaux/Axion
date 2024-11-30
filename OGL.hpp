@@ -21,12 +21,10 @@ private:
 public:
     static error clear( );
 
-    static error clear_color( );
+    static error clear_color( dec r, dec g, dec b );
+    static error clear_color( ) { return ogl::clear_color( ZERO, ZERO, ZERO ); }
     static error clear_depth( );
     static error clear_stencil( );
-
-    static error clear_screen( ) { return ogl::clear_screen( ZERO, ZERO, ZERO ); }
-    static error clear_screen( dec r, dec g, dec b );
 
     static error load_identity( );
 
@@ -85,7 +83,7 @@ public:
     static error color( dec r, dec g, dec b, dec a = 1.0 );
 
     static error blend_normal( );
-    static error blend_func( );
+    static error blend_clear( );
 
     static error enable_anti_alias( );
     static error disable_anti_alias( );
@@ -98,11 +96,38 @@ public:
     static error depth_never( );
     static error depth_equal( );
     static error depth_not_equal( );
-    static error depth_greater( bool equal );
-    static error depth_less( bool equal );
+    static error depth_equal_greater( );
+    static error depth_greater( );
+    static error depth_equal_less( );
+    static error depth_less( );
+
+    static error depth_mask(bool);
+    static bool depth_mask();
+
+private:
+    static error stencil_func( int gl_enum );
+
+public:
+    static error stencil_always();
+    static error stencil_never();
+    static error stencil_equal();
+    static error stencil_not_equal();
+    static error stencil_equal_greater();
+    static error stencil_greater();
+    static error stencil_equal_less();
+    static error stencil_less();
+
+    static error stencil_mask(bool);
+    static bool stencil_mask();
+
+    static error stencil_add();
+    static error stencil_remove();
 
 private:
     static error m_error;
+    static int m_error_code;
+    static bool m_disable_error_check;
+
     static bool m_initialized;
     static bool m_initializing;
 
@@ -110,6 +135,9 @@ private:
     static uint m_matrix_stack_count;
 
     static bool m_started_sequence;
+    
+    static bool m_depth_mask;
+    static bool m_stencil_mask;
 
     static error reset( );
 
@@ -126,8 +154,7 @@ private:
     static bool disabled( int gl_enum );
 
 public:
-    static error check_errors( );
-    static error set_error( error );
+    static error error_check( );
 };
 
 } // namespace axn

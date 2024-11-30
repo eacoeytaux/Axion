@@ -5,16 +5,16 @@ using mtmercy::Fire;
 
 namespace
 {
-const Span<uint> FLAME_WAIT = { 4, 4 };
+const Span<uint> FLAME_WAIT = { 8 };
 const Angle FLAME_DEVIATION = RIGHT_ANGLE / 2.0;
-const Planc FLAME_ORANGE_SPEED = 2.5;
+const Planc FLAME_ORANGE_SPEED = 1.25;
 const Planc FLAME_ORANGE_RADIUS = METER * 1.8;
-const Planc FLAME_ORANGE_SHRINK_RATE = 1.5;
-const Planc FLAME_YELLOW_SPEED = 2.0;
+const Planc FLAME_ORANGE_SHRINK_RATE = 0.75;
+const Planc FLAME_YELLOW_SPEED = 1.0;
 const Planc FLAME_YELLOW_RADIUS = FLAME_ORANGE_RADIUS / 3.33 * 2.0;
 const Planc FLAME_YELLOW_SHRINK_RATE = FLAME_ORANGE_SHRINK_RATE;
 const Planc FLAME_YELLOW_OUTLINE_RATIO = 1.5;
-const Planc FLAME_WIND_RESISTANCE = 2.0;
+const Planc FLAME_WIND_RESISTANCE = 2.1;
 const Planc FLAME_RADIUS_MIN = 0.1;
 
 const Planc LIGHT_DISTANCE = FLAME_ORANGE_RADIUS * 2.0;

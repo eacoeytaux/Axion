@@ -89,141 +89,130 @@ void World::input( const varray<Input *> & _inputs )
             bool held = ( dynamic == KeyInput::HELD );
             bool down = ( pressed || held );
 
-            switch( key )
+            if ( pressed )
             {
-                case 27 :
+                switch ( key )
+                {
+                default:
+                {
+                    break;
+                }
+                case 27:
                 { // esc key
                     Engine::quit( );
                     return;
                 }
-                case ';' :
+                case 'p':
                 {
-                    if( pressed )
-                    {
-                        reset( );
-                    }
+                    Engine::pause( !Engine::paused( ) );
+                    break;
+                };
+                case '\\':
+                {
+                    Engine::sync_controllers( );
+                    break;
+                };
+
+                case ';':
+                {
+                    reset( );
                     break;
                 }
-                case 'p' :
-                {
-                    if( pressed )
-                    {
-                        Engine::pause( !Engine::paused( ) );
-                    }
+
+                case 9:
+                { // tab
+                    m_camera->show_hud( !m_camera->show_hud( ) );
                     break;
-                };
-                case 'c' :
-                {
-                    if( pressed )
-                    {
-                        Engine::sync_controllers( );
-                    }
-                    break;
-                };
+                }
+
 #ifdef AXN_DEBUG
-                case '\'' :
+                case '\'':
                 {
-                    if( pressed )
-                    {
-                        Engine::step( );
-                    }
+                    Engine::step( );
                     break;
                 };
-#endif
-                case 'm' :
+
+                case 'l':
                 {
-                    if( pressed )
-                    {
-                        Engine::mute( !Engine::muted( ) );
-                    }
+                    m_lighting_active = !m_lighting_active;
                     break;
                 }
-                case 'z' :
+
+                case '.':
                 {
-                    if( pressed )
-                    {
-                        m_camera->zoom( 1.0 );
-                    }
+                    m_camera->zoom( m_camera->zoom( ) / CAMERA_ZOOM_RATIO );
+                    break;
+                }
+                case ',':
+                {
+                    m_camera->zoom( m_camera->zoom( ) * CAMERA_ZOOM_RATIO );
+                    break;
+                }
+                case '/':
+                {
+                    m_camera->zoom( ONE );
                     break;
                 };
-                case 'o' :
-                {
-                    if( pressed )
-                    {
-                        Engine::anti_alias( !Engine::anti_alias( ) );
-                    }
-                    break;
-                }
-                case 'l' :
-                {
-                    if( pressed )
-                    {
-                        m_lighting_active = !m_lighting_active;
-                    }
-                    break;
-                }
-                case 'h' :
-                {
-                    if( pressed )
-                    {
-                        m_camera->show_hud( !m_camera->show_hud( ) );
-                    }
-                    break;
-                }
-#ifdef AXN_DEBUG
-                case 'b' :
-                {
-                    if( pressed )
-                    {
-                        m_display_forebackground = !m_display_forebackground;
-                    }
-                    break;
-                }
-#endif
-                case '=' :
+
+                case '=':
                 {
                     Engine::volume_up( );
                     break;
                 }
-                case '-' :
+                case '-':
                 {
                     Engine::volume_down( );
                     break;
                 }
-                case '.' :
+                case '0':
                 {
-                    if( down )
-                    {
-                        m_camera->zoom( m_camera->zoom( ) / CAMERA_ZOOM_RATIO );
-                    }
+                    Engine::mute( !Engine::muted( ) );
                     break;
                 }
-                case ',' :
+
+                case '1':
                 {
-                    if( down )
-                    {
-                        m_camera->zoom( m_camera->zoom( ) * CAMERA_ZOOM_RATIO );
-                    }
+                    Mob::draw_health = !Mob::draw_health;
                     break;
                 }
-                case '\\' :
+
+                case '2':
                 {
-                    if( pressed )
-                    {
-                        Engine::show_cursor( !Engine::show_cursor( ) );
-                    }
+                    Object::draw_physics = !Object::draw_physics;
                     break;
                 }
-#ifdef AXN_DEBUG
-                case '`' :
+
+                case '3':
                 {
-                    if( pressed )
-                    {
-                        Debug::active = !Debug::active;
-                    }
+                    m_draw_grid = !m_draw_grid;
+                    break;
+                }
+
+                case '4':
+                {
+                    m_display_forebackground = !m_display_forebackground;
+                    break;
+                }
+
+                case '8':
+                {
+                    m_camera->m_draw_debug = !m_camera->m_draw_debug;
+                    break;
+                }
+
+                case '9':
+                {
+                    Engine::anti_alias( !Engine::anti_alias( ) );
+                    break;
+                }
+
+                case '`':
+                {
+                    Debug::active = !Debug::active;
                     break;
                 }
 #endif
+                }
             }
         }
 
@@ -250,6 +239,41 @@ void World::input( const varray<Input *> & _inputs )
                 {
                     m_camera->cursor_world_position( position );
                 }
+            }
+        }
+
+        if( ControllerButtonInput * button_input = dynamic_cast<ControllerButtonInput *>( input ) )
+        {
+            if ( button_input->dynamic == ControllerButtonInput::PRESSED )
+            {
+                switch ( button_input->button )
+                {
+                    case ControllerButtonInput::START_BUTTON:
+                    {
+                        Engine::pause( !Engine::paused( ) );
+                        break;
+                    }
+#ifdef AXN_DEBUG
+                    case ControllerButtonInput::START_OPPOSITE_BUTTON:
+                    {
+                        Engine::step( );
+                        break;
+                    }
+#endif
+                }
+            }
+        }
+
+        if( ControllerJoystickInput * joystick_input = dynamic_cast<ControllerJoystickInput *>( input ) )
+        {
+            if( joystick_input->joystick == ControllerJoystickInput::LEFT_JOYSTICK )
+            {
+      
+            }
+
+            if( joystick_input->joystick == ControllerJoystickInput::RIGHT_JOYSTICK )
+            {
+
             }
         }
     }
@@ -384,7 +408,7 @@ void World::render( )
 #ifdef AXN_DEBUG
             if( Debug::active )
             {
-                if( object->draw_debug )
+                if( object->m_draw_debug )
                 {
                     Drawing debug_overlay = object->debug_overlay( );
                     debug_overlay.move( object->position( ) );
@@ -400,16 +424,19 @@ void World::render( )
     camera->capture( m_terrain );
     
 #ifdef AXN_DEBUG
-    if( Debug::active )
+    if (Debug::active)
     {
-        if( m_terrain->draw_debug )
+        if (m_terrain->m_draw_debug)
         {
-            Drawing debug_overlay = m_terrain->debug_overlay( );
-            debug_overlay.move( m_terrain->position( ) );
-            camera->capture_debug( new Visible( debug_overlay ), true );
+            Drawing debug_overlay = m_terrain->debug_overlay();
+            debug_overlay.move(m_terrain->position());
+            camera->capture_debug(new Visible(debug_overlay), true);
         }
-        
-        // render_object_grid( camera, true, []( const Grid::Block & block ) { return block.objects.size( ); } );
+
+        if (m_draw_grid)
+        {
+            render_object_grid(camera, true, [](const Grid::Block& block) { return block.objects.size(); });
+        }
     }
 #endif
 
@@ -429,7 +456,7 @@ void World::render( )
 #ifdef AXN_DEBUG
             if( Debug::active )
             {
-                if( object->draw_debug )
+                if( object->m_draw_debug )
                 {
                     Drawing debug_overlay = object->debug_overlay( );
                     debug_overlay.move( object->position( ) );
@@ -453,7 +480,7 @@ void World::render( )
 #ifdef AXN_DEBUG
             if( Debug::active )
             {
-                if( object->draw_debug )
+                if( object->m_draw_debug )
                 {
                     Drawing debug_overlay = object->debug_overlay( );
                     debug_overlay.move( object->position( ) );

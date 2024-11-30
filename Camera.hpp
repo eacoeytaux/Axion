@@ -136,6 +136,9 @@ public:
 private:
     Drawing cursor_drawing( ) const;
 #ifdef AXN_DEBUG
+public:
+    bool m_draw_debug = false;
+private:
     Drawing debug_overlay_drawing( ) const;
 #endif
 

@@ -12,6 +12,7 @@ namespace graphics
 class Drawing : public Transformable
 {
     friend class Camera; // be friendly to the camera and smile
+
 public:
     virtual ~Drawing( ) { }
     Drawing( const Coordinate & center = ORIGIN );
@@ -67,29 +68,20 @@ public:
     
     const FixedRectangle & bounding_box( ) const { return m_bounding_box; }
 
-    Drawing & override_color( const Color & color );
+    Drawing & override_color( const Color & );
     Drawing & clear_override_color( );
     
     Drawing & filter_function( const function<void( Color & )> & );
     Drawing & clear_filter_function( );
-    
-    bool has_border( ) const { return ( m_border_width && m_border_color.a( ) ); }
-    Color border_color( ) const { return m_border_color; }
-    void border_color( const Color & color ) { m_border_color = color; }
 
-    Planc border_width( ) const { return m_border_width; }
-    void border_width( const Planc & width ) { m_border_width = width; }
-
-    void border( const Color & color, const Planc & width )
-    {
-        border_color( color );
-        border_width( width );
-    }
+    Drawing & erase( const Polygon & );
+    Drawing & add_bound( const Polygon & );
+    Drawing & clear_bounds( );
 
     bool translucent( ) const;
     
-    bool operator==( const Drawing & drawing ) const { return false; }
-    bool operator!=( const Drawing & drawing ) const { return true; }
+    bool operator==( const Drawing & ) const { return false; }
+    bool operator!=( const Drawing & ) const { return true; }
 
 private:
     struct ColoredPolygon
@@ -101,18 +93,20 @@ private:
         bool extend_lines = false;
         bool opaque = true;
 
+        bool fill = false;
+        bool hole = false;
+        bool reset = false;
+
         default_equal( ColoredPolygon );
     };
 
-    void add_internal( const varray<Color> & colors, const Polygon &, dec thickness, bool preserve_thickness );
-
     const varray<ColoredPolygon> & colored_polygons( bool transformed = true ) const;
-    varray<ColoredPolygon> colored_polygons_border( bool transformed = true ) const;
+
+    mutable varray<ColoredPolygon> m_colored_polygons;
+    
+    mutable Coordinate m_center;
     
     mutable FixedRectangle m_bounding_box;
-
-    mutable Coordinate m_center;
-    mutable varray<ColoredPolygon> m_colored_polygons;
 
     mutable bool m_translucent = false;
     
@@ -121,9 +115,6 @@ private:
     
     bool m_filter_function_set = false;
     std::function<void( Color & )> m_filter_function = [ ]( Color & ) { };
-
-    Planc m_border_width;
-    Color m_border_color;
 };
 
 } // namespace graphics

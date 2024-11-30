@@ -44,10 +44,11 @@ protected:
 public:
     void render_object( );
     
-    Drawing projectile_drawing( const Planc & distance, const Color & path_color, const dec alpha_start = ONE, const dec alpha_end = ZERO ) const;
+    Drawing trajection_drawing( const Planc & distance, const Color & path_color, const dec alpha_start = ONE, const dec alpha_end = ZERO ) const;
 
 #ifdef AXN_DEBUG
-    bool draw_debug = false;
+    bool m_draw_debug = false;
+    static bool draw_physics;
     virtual Drawing debug_overlay( ) const;
 #endif
 

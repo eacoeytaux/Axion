@@ -21,29 +21,40 @@ namespace axn
 {
 
 error ogl::m_error = no_error;
+int ogl::m_error_code = GL_NO_ERROR;
+bool ogl::m_disable_error_check = false;
 bool ogl::m_initialized = false;
 bool ogl::m_initializing = false;
 uint ogl::m_attrib_stack_count = 0;
 uint ogl::m_matrix_stack_count = 0;
 bool ogl::m_started_sequence = false;
+bool ogl::m_depth_mask = false;
+bool ogl::m_stencil_mask = false;
 
-int check_errors_gl( )
+int error_check_gl( )
 {
     return glGetError( );
 }
 
-error ogl::check_errors( )
+error ogl::error_check( )
 {
-    return set_error( ( check_errors_gl( ) == GL_NO_ERROR ) ? no_error : error_system );
-}
+    if (!m_disable_error_check)
+    {
+        m_error_code = error_check_gl();
+        if (m_error_code)
+        {
+            m_error = error_system;
+            Assert();
+        }
+    }
 
-error ogl::set_error( const error _e )
-{
-    return m_error = ( m_error == no_error ) ? _e : m_error;
+    return m_error;
 }
 
 error ogl::reset( )
 {
+    error_check();
+
     while( m_matrix_stack_count )
     {
         pop_matrix( );
@@ -57,13 +68,19 @@ error ogl::reset( )
 
     m_initializing = true;
 
-    clear_screen( );
+    clear( );
 
     faces_counterclockwise( true );
     blend_normal( );
 
     enable( GL_DEPTH_TEST );
+    depth_mask( true );
     depth_always( );
+
+    enable( GL_STENCIL_TEST );
+    stencil_add( );
+    stencil_mask( false );
+    stencil_always();
 
     {
         // GLchar * shader_vertex_text[] = {
@@ -117,46 +134,46 @@ error ogl::reset( )
 
     load_identity( );
     m_initializing = false;
-    return check_errors( );
+    return error_check( );
 }
 
 bool ogl::state_bool( const int _gl_enum )
 {
-    check_errors( );
+    error_check( );
     GLboolean b;
     glGetBooleanv( _gl_enum, &b );
-    check_errors( );
+    error_check( );
     return b;
 }
 
 int ogl::state_int( const int _gl_enum )
 {
-    check_errors( );
+    error_check( );
     GLint i;
     glGetIntegerv( _gl_enum, &i );
-    check_errors( );
+    error_check( );
     return i;
 }
 
 double ogl::state_double( const int _gl_enum )
 {
-    check_errors( );
+    error_check( );
     GLdouble d;
     glGetDoublev( _gl_enum, &d );
-    check_errors( );
+    error_check( );
     return d;
 }
 
 error ogl::hint( const int _gl_enum_target, const int _gl_enum )
 {
     glHint( _gl_enum_target, _gl_enum );
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::enable( const int _gl_enum )
 {
     glEnable( _gl_enum );
-    return check_errors( );
+    return error_check( );
 }
 
 bool ogl::enabled( const int _gl_enum )
@@ -167,7 +184,7 @@ bool ogl::enabled( const int _gl_enum )
 error ogl::disable( const int _gl_enum )
 {
     glDisable( _gl_enum );
-    return check_errors( );
+    return error_check( );
 }
 
 bool ogl::disabled( const int _gl_enum )
@@ -191,51 +208,69 @@ error ogl::close( )
 error ogl::clear( const int _gl_bit )
 {
     glClear( _gl_bit );
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::clear( )
 {
-    clear_screen( );
-    clear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
-    return check_errors( );
+    clear_color( );
+    clear_depth( );
+    clear_stencil( );
+
+    return error_check( );
 }
 
-error ogl::clear_color( )
+error ogl::clear_color( const dec _r, const dec _g, const dec _b )
 {
-    clear( GL_COLOR_BUFFER_BIT );
-    return check_errors( );
+    glClearColor( _r, _g, _b, 1.0 );
+    error_check();
+
+    return clear( GL_COLOR_BUFFER_BIT );
 }
 
 error ogl::clear_depth( )
 {
+    bool mask = m_depth_mask;
+
+    depth_mask( true );
+
+    glClearDepth( 0 );
+    error_check();
+    
     clear( GL_DEPTH_BUFFER_BIT );
-    return check_errors( );
+
+    depth_mask(mask);
+    
+    return error_check();
 }
 
 error ogl::clear_stencil( )
 {
-    clear( GL_STENCIL_BUFFER_BIT );
-    return check_errors( );
-}
+    bool mask = m_stencil_mask;
 
-error ogl::clear_screen( const dec _r, const dec _g, const dec _b )
-{
-    glClearColor( _r, _g, _b, 1.0 );
-    return clear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT );
+    stencil_mask( true );
+
+    glClearStencil( 0 );
+    error_check();
+
+    clear( GL_STENCIL_BUFFER_BIT );
+
+    stencil_mask( mask );
+    
+    return error_check();
 }
 
 error ogl::load_identity( )
 {
     glLoadIdentity( );
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::push_attribute( )
 {
     ++m_attrib_stack_count;
     glPushAttrib( GL_ALL_ATTRIB_BITS );
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::pop_attribute( )
@@ -246,14 +281,14 @@ error ogl::pop_attribute( )
         --m_attrib_stack_count;
     }
 
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::push_matrix( )
 {
     glPushMatrix( );
     ++m_matrix_stack_count;
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::pop_matrix( )
@@ -264,7 +299,7 @@ error ogl::pop_matrix( )
         --m_matrix_stack_count;
     }
 
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::matrix_modelview_mode( const bool _load_identity )
@@ -276,7 +311,7 @@ error ogl::matrix_modelview_mode( const bool _load_identity )
         load_identity( );
     }
 
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::matrix_projection_mode( const bool _load_identity )
@@ -288,7 +323,7 @@ error ogl::matrix_projection_mode( const bool _load_identity )
         load_identity( );
     }
 
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::transform( const Transform & _transform )
@@ -306,19 +341,19 @@ error ogl::transform( const Transform & _transform )
         0, 0, 0, 0, 1 };
 
     glMultMatrixd( matrix );
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::translate( const dec _x, const dec _y )
 {
     glTranslated( _x, _y, ZERO );
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::scale( const dec _x, const dec _y )
 {
     glScaled( _x, _y, 1.0 );
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::begin_points( ) { return begin( GL_POINTS ); }
@@ -333,15 +368,20 @@ error ogl::begin_polygons( ) { return begin( GL_POLYGON ); }
 error ogl::begin( const int _gl_enum )
 {
     glBegin( _gl_enum );
+    m_disable_error_check = true;
     m_started_sequence = true;
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::end( )
 {
     glEnd( );
+    if (m_disable_error_check)
+    {
+        m_disable_error_check = false;
+    }
     m_started_sequence = false;
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::vertex( const dec _x, const dec _y, const dec _z, const dec _w )
@@ -352,13 +392,13 @@ error ogl::vertex( const dec _x, const dec _y, const dec _z, const dec _w )
     }
 
     glVertex4d( _x, _y, _z, _w );
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::faces_counterclockwise( const bool _ccw )
 {
     glFrontFace( _ccw ? GL_CCW : GL_CW );
-    return check_errors( );
+    return error_check( );
 }
 
 bool ogl::faces_counterclockwise( )
@@ -369,7 +409,7 @@ bool ogl::faces_counterclockwise( )
 error ogl::shade_flat( )
 {
     glShadeModel( GL_FLAT );
-    return check_errors( );
+    return error_check( );
 }
 
 bool ogl::shaded_flat( )
@@ -380,7 +420,7 @@ bool ogl::shaded_flat( )
 error ogl::shade_smooth( )
 {
     glShadeModel( GL_SMOOTH );
-    return check_errors( );
+    return error_check( );
 }
 
 bool ogl::shaded_smooth( )
@@ -401,7 +441,7 @@ dec ogl::point_radius( )
 error ogl::point_diameter( const dec _d )
 {
     glPointSize( _d );
-    return check_errors( );
+    return error_check( );
 }
 
 dec ogl::point_diameter( )
@@ -412,7 +452,7 @@ dec ogl::point_diameter( )
 error ogl::line_width( const dec _d )
 {
     glLineWidth( _d );
-    return check_errors( );
+    return error_check( );
 }
 
 dec ogl::line_width( )
@@ -423,7 +463,7 @@ dec ogl::line_width( )
 error ogl::color( const dec _r, const dec _g, const dec _b, const dec _a )
 {
     glColor4d( _r, _g, _b, _a );
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::blend_normal( )
@@ -431,7 +471,15 @@ error ogl::blend_normal( )
     enable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     // glBlendEquation( GL_FUNC_ADD );
-    return check_errors( );
+    return error_check( );
+}
+
+error ogl::blend_clear( )
+{
+    enable( GL_BLEND );
+    glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    // glBlendEquation( GL_FUNC_ADD );
+    return error_check( );
 }
 
 error ogl::enable_anti_alias( )
@@ -449,7 +497,7 @@ error ogl::enable_anti_alias( )
         hint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
     }
 
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::disable_anti_alias( )
@@ -461,13 +509,13 @@ error ogl::disable_anti_alias( )
     disable( GL_LINE_SMOOTH );
     disable( GL_POLYGON_SMOOTH );
 
-    return check_errors( );
+    return error_check( );
 }
 
 error ogl::depth_func( const int _gl_enum )
 {
     glDepthFunc( _gl_enum );
-    return ogl::check_errors( );
+    return ogl::error_check( );
 }
 
 error ogl::depth_always( )
@@ -490,14 +538,106 @@ error ogl::depth_not_equal( )
     return depth_func( GL_NOTEQUAL );
 }
 
-error ogl::depth_greater( const bool _equal )
+error ogl::depth_equal_greater( )
 {
-    return depth_func( _equal ? GL_GEQUAL : GL_GREATER );
+    return depth_func( GL_GEQUAL );
 }
 
-error ogl::depth_less( const bool _equal )
+error ogl::depth_greater( )
 {
-    return depth_func( _equal ? GL_LEQUAL : GL_LESS );
+    return depth_func( GL_GREATER );
+}
+
+error ogl::depth_equal_less( )
+{
+    return depth_func( GL_LEQUAL );
+}
+
+error ogl::depth_less( )
+{
+    return depth_func( GL_LESS );
+}
+
+error ogl::depth_mask(const bool b)
+{
+    m_depth_mask = b;
+    glDepthMask(m_depth_mask ? 0xFF : 0x0);
+    return ogl::error_check();
+}
+
+bool ogl::depth_mask()
+{
+    return m_depth_mask;
+}
+
+error ogl::stencil_func(const int _gl_enum)
+{
+    glStencilFunc(_gl_enum, 1, 0xFF);
+    return ogl::error_check();
+}
+
+error ogl::stencil_always()
+{
+    return stencil_func(GL_ALWAYS);
+}
+
+error ogl::stencil_never()
+{
+    return stencil_func(GL_NEVER);
+}
+
+error ogl::stencil_equal()
+{
+    return stencil_func(GL_EQUAL);
+}
+
+error ogl::stencil_not_equal()
+{
+    return stencil_func(GL_NOTEQUAL);
+}
+
+error ogl::stencil_equal_greater()
+{
+    return stencil_func(GL_GEQUAL);
+}
+
+error ogl::stencil_greater()
+{
+    return stencil_func(GL_GREATER);
+}
+
+error ogl::stencil_equal_less()
+{
+    return stencil_func(GL_LEQUAL);
+}
+
+error ogl::stencil_less()
+{
+    return stencil_func(GL_LESS);
+}
+
+error ogl::stencil_mask(const bool b)
+{
+    m_stencil_mask = b;
+    glStencilMask(m_stencil_mask ? 0xFF : 0x0);
+    return error_check();
+}
+
+bool ogl::stencil_mask()
+{
+    return m_stencil_mask;
+}
+
+error ogl::stencil_add()
+{
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    return error_check();
+}
+
+error ogl::stencil_remove()
+{
+    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+    return error_check();
 }
 
 } // namespace axn

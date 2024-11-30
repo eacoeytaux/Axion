@@ -198,6 +198,9 @@
     <ClCompile Include="Enemy.cpp">
       <Filter>Source Files\axn\world</Filter>
     </ClCompile>
+    <ClCompile Include="Porcupine.cpp">
+      <Filter>Source Files\mt\mobs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Angle.hpp">
@@ -406,6 +409,9 @@
     </ClInclude>
     <ClInclude Include="Enemy.hpp">
       <Filter>Source Files\axn\world</Filter>
+    </ClInclude>
+    <ClInclude Include="Porcupine.hpp">
+      <Filter>Source Files\mt\mobs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

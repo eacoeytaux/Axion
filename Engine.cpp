@@ -4,6 +4,8 @@
 namespace axn
 {
 
+dec ControllerJoystickInput::DEAD_ZONE = 0.25;
+
 #ifdef AXN_DEBUG
 // define debug global statics here
 bool Debug::active = false;
@@ -92,6 +94,8 @@ error Engine::run( World * world, const string _app_name )
             input_eng( inputs, world );
             world->input( inputs );
             clear_inputs( );
+            
+            sync_controllers( );
 
             if( !paused( ) )
             {

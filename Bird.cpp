@@ -14,17 +14,17 @@ const Planc FEATHER_BASE_LENGTH = 5.0;
 const Planc FEATHER_STEM_LENGTH = 3.0;
 const Planc FEATHER_STEM_THICKNESS = 2.0;
 
-const Planc SPEED = 3.0;
-const Planc ROTATIONAL_SPEED = 2.0;
+const Planc SPEED = 1.5;
+const Planc ROTATIONAL_SPEED = 1.0;
 const Planc ROTATIONAL_RADIUS = 160.0;
-const Planc LIFT_SPEED = 1.0;
+const Planc LIFT_SPEED = 0.5;
 const Planc LIFT_DISTANCE = 16.0;
 } // namespace
 
 Feather::Feather( World * world, const Coordinate & _position ) : Object( world, _position )
 {
     m_color = Random::rColor( );
-    gravity_ratio( 0.05 );
+    gravity_ratio( 0.025 );
 }
 
 void Feather::render( )

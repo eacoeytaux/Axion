@@ -29,13 +29,14 @@ private:
 public:
     virtual ~Engine( ) { }
 
-    static const uint FPS = 30; // frames per second
+    static const uint FPS = 60; // frames per second
 
     static error run( World * world, const string app_name = "" );
     static error quit( );
 
     static bool paused( ) { return paused_eng( ); }
     static void pause( bool p ) { pause_eng( p ); }
+
 #ifdef AXN_DEBUG
     static void step( );
 #endif
@@ -45,7 +46,7 @@ public:
     // graphics
     static uint screen_width( ) { return screen_width_eng( ); }
     static uint screen_height( ) { return screen_height_eng( ); }
-    static void screen_resize( uint width, uint height ) { screen_resize_eng( width, height ); }
+    // static void screen_resize( uint width, uint height ) { screen_resize_eng( width, height ); }
 
     static bool show_cursor( ) { return show_cursor_eng( ); }
     static void show_cursor( bool show ) { show_cursor_eng( show ); }
@@ -79,7 +80,7 @@ private:
     // graphics
     static uint screen_width_eng( );
     static uint screen_height_eng( );
-    static void screen_resize_eng( uint width, uint height );
+    // static void screen_resize_eng( uint width, uint height );
 
     static bool show_cursor_eng( );
     static void show_cursor_eng( bool );
@@ -184,6 +185,18 @@ struct ControllerButtonInput : public ControllerInput
 
 struct ControllerJoystickInput : public ControllerInput
 {
+    static dec DEAD_ZONE;
+
+    inline static bool in_dead_zone(const dec d)
+    {
+        return ( d < DEAD_ZONE );
+    }
+
+    inline static bool in_dead_zone(const Vector& v)
+    {
+        return !v.has_magnitude() || in_dead_zone(abs(v.magnitude()));
+    }
+
     enum Joystick
     {
         NO_JOYSTICK,
@@ -191,26 +204,12 @@ struct ControllerJoystickInput : public ControllerInput
         LEFT_JOYSTICK,
     };
 
-    enum Direction
-    {
-        NO_DIRECTION,
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT,
-    };
-
-    ControllerJoystickInput( Joystick j, const Vector & v )
-        : vector( v ),
-          joystick( j ),
-          direction( v.destination( ).rotate( -half( RIGHT_ANGLE ) ).in_quadrant( Q1 ) ? UP : v.destination( ).rotate( -half( RIGHT_ANGLE ) ).in_quadrant( Q3 ) ? DOWN
-                                                                                          : v.destination( ).rotate( -half( RIGHT_ANGLE ) ).in_quadrant( Q2 )   ? LEFT
-                                                                                          : v.destination( ).rotate( -half( RIGHT_ANGLE ) ).in_quadrant( Q4 )   ? RIGHT
-                                                                                                                                                                : NO_DIRECTION ) { }
-
-    const Vector vector;
+    ControllerJoystickInput(Joystick j) : joystick(j), dead_zone(true) { }
+    ControllerJoystickInput(Joystick j, const Vector& v) : vector(v), joystick(j), dead_zone(false) { }
+    
     const Joystick joystick;
-    const Direction direction;
+    const Vector vector;
+    const bool dead_zone;
 };
 
 } // namespace axn

@@ -66,6 +66,7 @@
     <ClCompile Include="PineTree.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Polygon.cpp" />
+    <ClCompile Include="Porcupine.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Skull.cpp" />
     <ClCompile Include="Sky.cpp" />
@@ -132,6 +133,7 @@
     <ClInclude Include="Planc.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="Polygon.hpp" />
+    <ClInclude Include="Porcupine.hpp" />
     <ClInclude Include="Random.hpp" />
     <ClInclude Include="Skull.hpp" />
     <ClInclude Include="Sky.hpp" />

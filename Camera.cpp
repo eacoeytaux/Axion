@@ -24,8 +24,8 @@ Camera::Camera( World * world, const Planc & _width, const Planc & _height, cons
     height( _height );
     zoom( _zoom );
 
-    show_hud( false );
     hud_offset_percentage( DEFAULT_HUD_OFFSET );
+    show_hud(false);
 }
 
 void Camera::clear_all( )
@@ -94,29 +94,29 @@ void Camera::render( )
 
         Engine::anti_alias( ) ? ogl::enable_anti_alias( ) : ogl::disable_anti_alias( );
 
-        auto render_convex_polygon = [ & ]( const varray<Color> & _colors, const varray<Coordinate> & _coordinates, const Transform & _transform = IDENTITY_TRANSFORM, const dec _z = 0.0 )
+        auto render_convex_polygon = [ & ] ( const varray<Color> & _colors, const varray<Coordinate> & _coordinates, const Transform & _transform = IDENTITY_TRANSFORM, const dec _z = 0.0 )
         {
-            if( !_colors.size( ) || !_coordinates.size( ) )
+            if ( !_colors.size( ) || !_coordinates.size( ) )
             {
                 return;
             }
 
-            if( !_transform.identity( ) )
+            if ( !_transform.identity( ) )
             {
                 ogl::push_matrix( );
-                
+
                 ogl::translate( _transform.get( 0, 2 ), _transform.get( 1, 2 ) );
                 ogl::transform( _transform );
             }
 
             ogl::begin_polygons( );
             {
-                if( _colors.size( ) == 1 )
+                if ( _colors.size( ) == 1 )
                 {
                     ogl::color( _colors[ 0 ].r( ), _colors[ 0 ].g( ), _colors[ 0 ].b( ), _colors[ 0 ].a( ) );
                     for_range( i, _coordinates.size( ) )
                     {
-                        ogl::vertex( _coordinates[ i ].x( ), _coordinates[ i ].y( ), -_z );
+                        ogl::vertex( _coordinates[ i ].x( ), _coordinates[ i ].y( ), _z );
                     }
                 }
                 else
@@ -124,35 +124,40 @@ void Camera::render( )
                     for_range( i, _coordinates.size( ) )
                     {
                         ogl::color( _colors[ i ].r( ), _colors[ i ].g( ), _colors[ i ].b( ), _colors[ i ].a( ) );
-                        ogl::vertex( _coordinates[ i ].x( ), _coordinates[ i ].y( ), -_z );
+                        ogl::vertex( _coordinates[ i ].x( ), _coordinates[ i ].y( ), _z );
                     }
                 }
             }
             ogl::end( );
-            
-            if( !_transform.identity( ) )
+
+            if ( !_transform.identity( ) )
             {
                 ogl::pop_matrix( );
             }
         };
 
-        auto render_visible = [ & ]( Visible * visible, bool fixed )
+        auto render_visible = [ & ] ( Visible * visible, bool fixed )
         {
-            if( !visible || !visible->polygon_count( ) )
+            if ( !visible || !visible->polygon_count( ) )
             {
                 return;
             }
 
+            ogl::clear_depth( );
             ogl::depth_always( );
+
+            ogl::clear_stencil( );
+            ogl::stencil_always( );
+
             ogl::push_matrix( );
             {
-                if( !fixed )
+                if ( !fixed )
                 {
-                    if( const dec _z = visible->z( ) )
+                    if ( const dec _z = visible->z( ) )
                     {
                         ogl::scale( _zoom * _z );
                         ogl::translate( -_camera_center.x( ),
-                                        -_camera_center.y( ) );
+                            -_camera_center.y( ) );
                     }
                 }
 
@@ -162,90 +167,86 @@ void Camera::render( )
 
                 for_each( _colored_polygon, _drawing.colored_polygons( false ) )
                 {
-                    const Polygon & _polygon = _colored_polygon.polygon;
-
-                    if( _colored_polygon.thickness == FILLED )
+                    if ( _colored_polygon.reset )
                     {
-                        if( _drawing.has_border( ) )
-                        {
-                            // TODO
-
-                            // const dec _border_width = _drawing.border_width( );
-                            // const Color _border_color = _drawing.border_color( );
-
-                            // Polygon polygon_border = Polygon::expand( _polygon, _border_width );
-
-                            // for_each( polygon, polygon_border.convex_partitions( ) )
-                            // {
-                            //     draw_convex_coordinates( { _border_color }, polygon.coordinates_raw( ), polygon.transform( ) );
-                            // }
-                        }
-
-                        const varray<Polygon> & _convex_polygons = _polygon.convex_partitions( );
-                        for_each( _convex_polygon, _convex_polygons )
-                        {
-                            Transform t = _drawing.transform( ) * _convex_polygon.transform( );
-                            render_convex_polygon( _colored_polygon.colors, _convex_polygon.coordinates( true ), t ); // TODO need convex indices
-                        }
+                        ogl::clear_stencil( );
+                        ogl::stencil_always( );
+                        ogl::stencil_mask( false );
                     }
                     else
                     {
-                        const Transform _transform = _colored_polygon.polygon.transform( );
-                        const dec _thickness = _colored_polygon.thickness / ( _colored_polygon.preserve_thickness ? _zoom : ONE );
-
-                        const varray<Line> & _lines = _polygon.perimeter( );
-                        for_range( i, _lines.size( ) )
+                        if ( _colored_polygon.fill )
                         {
-                            const Line & _line = _lines[ i ];
-                            const Angle _line_angle = _line.angle( );
-                            const Vector _line_vector( _line.c1( ), _line.c2( ) );
+                            ogl::stencil_add( );
+                            ogl::stencil_always( );
+                            ogl::stencil_mask( true );
+                        }
+                        else if ( _colored_polygon.hole )
+                        {
+                            ogl::stencil_remove( );
+                            ogl::stencil_always( );
+                            ogl::stencil_mask( true );
+                        }
+                        else
+                        {
+                            ogl::stencil_mask( false );
+                        }
 
-                            const Line & _next_line = _lines[ ( i + 1 ) % _lines.size( ) ];
-                            const Angle _next_line_angle = _next_line.angle( );
-                            const Vector _next_line_vector( _next_line.c1( ), _next_line.c2( ) );
+                        const Polygon & _polygon = _colored_polygon.polygon;
 
-                            Polygon line_polygon;
-                            if( _colored_polygon.extend_lines )
+                        if ( _colored_polygon.thickness == FILLED )
+                        {
+                            const varray<Polygon> & _convex_polygons = _polygon.convex_partitions( );
+                            for_each( _convex_polygon, _convex_polygons )
                             {
-                                line_polygon = Rectangle( _line_vector.magnitude( ) + _thickness, _thickness, _line_vector.half( ), _line_angle );
+                                Transform t = _drawing.transform( ) * _convex_polygon.transform( );
+                                render_convex_polygon( _colored_polygon.colors, _convex_polygon.coordinates( true ), t ); // TODO need convex indices
                             }
-                            else
+                        }
+                        else
+                        {
+                            const Transform _transform = _colored_polygon.polygon.transform( );
+                            const dec _thickness = _colored_polygon.thickness / ( _colored_polygon.preserve_thickness ? _zoom : ONE );
+
+                            const varray<Line> & _lines = _polygon.perimeter( );
+                            for_range( i, _lines.size( ) )
                             {
-                                line_polygon = Rectangle( _line_vector.magnitude( ), _thickness, _line_vector.half( ), _line_angle );
+                                const Line & _line = _lines[ i ];
+                                const Angle _line_angle = _line.angle( );
+                                const Vector _line_vector( _line.c1( ), _line.c2( ) );
+
+                                const Line & _next_line = _lines[ ( i + 1 ) % _lines.size( ) ];
+                                const Angle _next_line_angle = _next_line.angle( );
+                                const Vector _next_line_vector( _next_line.c1( ), _next_line.c2( ) );
+
+                                Polygon line_polygon;
+                                if ( _colored_polygon.extend_lines )
+                                {
+                                    line_polygon = Rectangle( _line_vector.magnitude( ) + _thickness, _thickness, _line_vector.half( ), _line_angle );
+                                }
+                                else
+                                {
+                                    line_polygon = Rectangle( _line_vector.magnitude( ), _thickness, _line_vector.half( ), _line_angle );
+                                }
+
+                                Polygon corner_polygon;
+                                if ( ( _line.c1( ) != _line.c2( ) ) && ( _next_line.c1( ) != _next_line.c2( ) ) )
+                                {
+                                    Coordinate c0 = _line.c2( );
+                                    Coordinate c1 = c0 + VectorA( _line_angle - RIGHT_ANGLE, half( _thickness ) );
+                                    Coordinate c2 = c0 + VectorA( _next_line_angle - RIGHT_ANGLE, half( _thickness ) );
+                                    Coordinate c3 = Line( c1, c1 + VectorA( _line_angle ) ).intersection( Line( c2, c2 - VectorA( _next_line_angle ) ) );
+                                    corner_polygon = Polygon( { c0, c1, c3, c2 } );
+                                }
+
+                                render_convex_polygon( { _colored_polygon.colors[ i ] }, corner_polygon.coordinates( true ), _drawing.transform( ) * corner_polygon.transform( ) );
+                                render_convex_polygon( { _colored_polygon.colors[ i ] }, line_polygon.coordinates( true ), _drawing.transform( ) * line_polygon.transform( ) );
                             }
+                        }
 
-                            Polygon corner_polygon;
-                            if( ( _line.c1( ) != _line.c2( ) ) && ( _next_line.c1( ) != _next_line.c2( ) ) )
-                            {
-                                Coordinate c0 = _line.c2( );
-                                Coordinate c1 = c0 + VectorA( _line_angle - RIGHT_ANGLE, half( _thickness ) );
-                                Coordinate c2 = c0 + VectorA( _next_line_angle - RIGHT_ANGLE, half( _thickness ) );
-                                Coordinate c3 = Line( c1, c1 + VectorA( _line_angle ) ).intersection( Line( c2, c2 - VectorA( _next_line_angle ) ) );
-                                corner_polygon = Polygon( { c0, c1, c3, c2 } );
-                            }
-
-                            if( _drawing.has_border( ) )
-                            {
-                                // TODO
-
-                                // const dec _border_width = _drawing.border_width( );
-                                // const Color _border_color = _drawing.border_color( );
-
-                                // Polygon polygon_border_corner = Polygon::expand( _corner_polygon, _border_width );
-                                // for_each( polygon, polygon_border_corner.convex_partitions( ) )
-                                // {
-                                //     draw_convex_coordinates( { _border_color }, polygon.coordinates( true ), polygon.transform( ) );
-                                // }
-
-                                // Polygon polygon_border = Polygon::expand( line_polygon, _border_width );
-                                // for_each( polygon, polygon_border.convex_partitions( ) )
-                                // {
-                                //     draw_convex_coordinates( { _border_color }, polygon.coordinates( true ), polygon.transform( ) );
-                                // }
-                            }
-
-                            render_convex_polygon( { _colored_polygon.colors[ i ] }, corner_polygon.coordinates( true ), _drawing.transform( ) * corner_polygon.transform( ) );
-                            render_convex_polygon( { _colored_polygon.colors[ i ] }, line_polygon.coordinates( true ), _drawing.transform( ) * line_polygon.transform( ) );
+                        if ( _colored_polygon.fill || _colored_polygon.hole )
+                        {
+                            ogl::stencil_equal( );
                         }
                     }
                 }
@@ -253,7 +254,7 @@ void Camera::render( )
             ogl::pop_matrix( );
         };
 
-        auto render_subjects = [ & ]( )
+        auto render_subjects = [ & ] ( )
         {
             m_subjects.sort( Visible::sort, true );
             for_each( visible, m_subjects )
@@ -262,13 +263,13 @@ void Camera::render( )
             }
         };
 
-        auto render_lighting = [ & ]( )
+        auto render_lighting = [ & ] ( )
         {
-            if( m_world->lighting_active( ) )
+            if ( m_world->lighting_active( ) )
             {
-                if( const Lighting * lighting = m_world->lighting( ) )
+                if ( const Lighting * lighting = m_world->lighting( ) )
                 {
-                    if( lighting->ambient_color( ).a( ) )
+                    if ( lighting->ambient_color( ).a( ) )
                     {
                         ogl::depth_always( );
                         render_convex_polygon( { lighting->ambient_color( ) }, Rectangle( screen_width, screen_height ).coordinates( ) );
@@ -286,32 +287,32 @@ void Camera::render( )
 
                             ogl::scale( _zoom );
                             ogl::translate( -_camera_center.x( ),
-                                            -_camera_center.y( ) );
+                                -_camera_center.y( ) );
 
                             for_each( light, _light_sources )
                             {
                                 render_convex_polygon( { TRANSPARENT },
-                                                       Circle( light.radius( ) * ( ( i * LIGHTING_RADIUS_GROW * pow( LIGHTING_RADIUS_GROW_EXPONENT, i ) ) + 1 ), light.position( ) ).coordinates( ) );
+                                    Circle( light.radius( ) * ( ( i * LIGHTING_RADIUS_GROW * pow( LIGHTING_RADIUS_GROW_EXPONENT, i ) ) + 1 ), light.position( ) ).coordinates( ) );
                             }
                         }
                         ogl::pop_matrix( );
 
                         ogl::depth_not_equal( );
                         render_convex_polygon( { BLACK.a( min( ONE, ( (dec)( i + 1 ) / (dec)LIGHTING_LAYERS ) ) * lighting->darkness_intensity( ) ) },
-                                               Rectangle( screen_width, screen_height ).coordinates( ) );
+                            Rectangle( screen_width, screen_height ).coordinates( ) );
                     }
                 }
             }
         };
 
-        auto render_world_bounds = [ & ]( )
+        auto render_world_bounds = [ & ] ( )
         {
 #ifdef AXN_DEBUG
             const Color COLOR = BLACK.a( 0.5 );
 #else
             const Color COLOR = WHITE;
 #endif
-            
+
             ogl::clear_depth( );
             ogl::depth_not_equal( );
 
@@ -321,15 +322,15 @@ void Camera::render( )
             render_convex_polygon( { TRANSPARENT }, world_bounds_polygon.coordinates( ) );
             render_convex_polygon( { COLOR }, Rectangle( screen_width, screen_height ).coordinates( ) );
         };
-        
-        auto render_camera_bounds = [ & ]( )
+
+        auto render_camera_bounds = [ & ] ( )
         {
 #ifdef AXN_DEBUG
-            const Color COLOR = Debug::active ? BLACK.a( 0.5 ) : BLACK;
+            const Color COLOR = ( Debug::active && m_draw_debug ) ? BLACK.a( 0.5 ) : BLACK;
 #else
             const Color COLOR = BLACK;
 #endif
-            
+
             ogl::clear_depth( );
             ogl::depth_not_equal( );
 
@@ -339,7 +340,7 @@ void Camera::render( )
             render_convex_polygon( { COLOR }, Rectangle( screen_width, screen_height ).coordinates( ) );
         };
 
-        auto render_screen_effects = [ & ]( )
+        auto render_screen_effects = [ & ] ( )
         {
             for_each( screen_effect, m_screen_effects )
             {
@@ -348,9 +349,9 @@ void Camera::render( )
             }
         };
 
-        auto render_hud_elements = [ & ]( )
+        auto render_hud_elements = [ & ] ( )
         {
-            if( show_hud( ) )
+            if ( show_hud( ) )
             {
                 for_each( hud_element, m_hud_elements )
                 {
@@ -360,22 +361,22 @@ void Camera::render( )
             }
         };
 
-        auto render_cursor = [ & ]( )
+        auto render_cursor = [ & ] ( )
         {
-            if( !is_infinity( cursor_world_position( ).x( ) ) && !is_infinity( cursor_world_position( ).y( ) ) )
+            if ( !is_infinity( cursor_world_position( ).x( ) ) && !is_infinity( cursor_world_position( ).y( ) ) )
             {
                 Drawing cursor = cursor_drawing( );
                 cursor.scale( inverse( _zoom ) );
                 cursor.move( Vector( cursor_world_position( ) ) );
-                
+
                 render_visible( new Visible( cursor ), false );
             }
         };
 
-        auto render_debug_elements = [ & ]( )
+        auto render_debug_elements = [ & ] ( )
         {
 #ifdef AXN_DEBUG
-            if( Debug::active )
+            if ( Debug::active )
             {
                 // // todo move to world probably
                 // // update bounds
@@ -398,13 +399,16 @@ void Camera::render( )
                 //        render_convex_polygon( { COLOR }, Rectangle( screen_width, screen_height ).coordinates( ) );
                 //    }
                 //}
-                
+
                 for_each( visible, m_debug_subjects )
                 {
                     render_visible( visible, false );
                 }
 
-                render_visible( new Visible( debug_overlay_drawing( ) ), true );
+                if ( m_draw_debug )
+                {
+                    render_visible( new Visible( debug_overlay_drawing( ) ), true );
+                }
             }
 #endif
         };

@@ -64,26 +64,32 @@ bool Enemy::in_alert_range( const Player * player ) const
 #ifdef AXN_DEBUG
 Drawing Enemy::debug_overlay( ) const
 {
-    Drawing debug_overlay;
-    
     const Planc SIGHT_LINE_THICKNESS = 0.8;
     const Planc ALERT_LINE_THICKNESS = SIGHT_LINE_THICKNESS;
     const dec ALPHA = 0.75;
+    const dec ALPHA_INNER = ALPHA * 0.1;
     const Color SIGHT_LINE_COLOR = GREEN.a( ALPHA );
     const Color ALERT_LINE_COLOR = RED.a( ALPHA );
     
-    if( has_target( ) )
+    Drawing debug_overlay;
+
+    if (Object::draw_physics)
     {
-        debug_overlay.draw( SIGHT_LINE_COLOR, Line( ORIGIN, target( )->position( ) - position( ) ), SIGHT_LINE_THICKNESS, true );
-        
-        if( sight_range( ) )
+        if (has_target())
         {
-            debug_overlay.draw( SIGHT_LINE_COLOR, Circle( sight_range( ) ), SIGHT_LINE_THICKNESS, true );
+            debug_overlay.draw(SIGHT_LINE_COLOR, Line(ORIGIN, target()->position() - position()), SIGHT_LINE_THICKNESS, true);
+
+            if (sight_range())
+            {
+                debug_overlay.draw(SIGHT_LINE_COLOR.a(ALPHA_INNER), Circle(sight_range()));
+                debug_overlay.draw(SIGHT_LINE_COLOR, Circle(sight_range()), ALERT_LINE_THICKNESS, true);
+            }
         }
-    }
-    else if( alert_range( ) )
-    {
-        debug_overlay.draw( ALERT_LINE_COLOR, Circle( alert_range( ) ), ALERT_LINE_THICKNESS, true );
+        else if (alert_range())
+        {
+            debug_overlay.draw(ALERT_LINE_COLOR.a(ALPHA_INNER), Circle(alert_range()));
+            debug_overlay.draw(ALERT_LINE_COLOR, Circle(alert_range()), ALERT_LINE_THICKNESS, true);
+        }
     }
 
     debug_overlay.draw( Mob::debug_overlay( ) );

@@ -6,11 +6,11 @@ using mtmercy::Dust;
 namespace
 {
 const Span<Planc> RADIUS_START = { 0.5, 0.75 };
-const Planc RADIUS_INCREASE_RATE = 0.2;
+const Planc RADIUS_INCREASE_RATE = 0.1;
 const Span<dec> ALPHA_START = { 0.75, 1.0 };
-const dec ALPHA_DECREASE_RATE = 0.0525;
+const dec ALPHA_DECREASE_RATE = 0.02625;
 const Span<uint> SIDE_COUNT = { 6, 9 };
-const Span<dec> ROTATION_SPEED = { TAU / 24.0, TAU / 4. };
+const Span<dec> ROTATION_SPEED = { TAU / 28.0, TAU / 8.0 };
 } // namespace
 
 Dust::Dust( World * world, const Coordinate & _position, const Vector & _velocity, const Color & _color ) : Object( world )

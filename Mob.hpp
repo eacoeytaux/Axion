@@ -15,6 +15,7 @@ public:
     Mob( World * world, const Coordinate & position, dec health = 1 );
 
 #ifdef AXN_DEBUG
+    static bool draw_health;
     virtual Drawing debug_overlay( ) const override;
 #endif
 

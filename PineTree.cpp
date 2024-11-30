@@ -45,7 +45,6 @@ PineTree::PineTree( World * world, const Coordinate & _root, const dec _z ) : Ob
     Vector trunk_vector( Vector( base, base + VectorA( RIGHT_ANGLE_1, TRUNK_HEIGHT ) ) );
     trunk.draw( TRUNK_BORDER_COLOR, Line( trunk_vector ), TRUNK_THICKNESS + LEAVES_BORDER_WIDTH * 2.0 );
     trunk.draw( TRUNK_COLOR, Line( trunk_vector ), TRUNK_THICKNESS );
-    trunk.border( TRUNK_BORDER_COLOR, LEAVES_BORDER_WIDTH );
 
     m_leave_bunches_rotation_points.insert_back( base );
 

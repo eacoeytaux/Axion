@@ -10,9 +10,9 @@ namespace
 const Planc HEIGHT = METER * 1.85;
 const Planc WIDTH = HEIGHT / 2.5;
 
-const Planc DEFAULT_SPEED = 2.0;
-const Planc TURN_SPEED = 3.0;
-const Planc JUMP_STRENGTH = METER / 4.0;
+const Planc DEFAULT_SPEED_GROUND = 1.0;
+const Planc DEFAULT_SPEED_AIR = 0.25;
+const Planc JUMP_STRENGTH = METER / 7.0;
 const dec JUMP_DEGRATION_RATIO = 0.9;
 const uint JUMP_MAX_DURATION = 15;
 const uint JUMP_RESET_WAIT_TIME = 0;
@@ -20,17 +20,18 @@ const uint JUMP_RESET_WAIT_TIME = 0;
 const Planc LIGHT_SIGHT = HEIGHT * 3.0;
 
 // crossbox / hook
-const Planc DEFAULT_ARROW_LAUNCH_SPEED = 32.0;
-const Planc DEFAULT_ROPE_GROWTH_SPEED = 33.0;
-const Planc DEFAULT_ROPE_RETRACT_SPEED = 44.0;
-const uint RELOAD_TIME = 10;
+const Planc DEFAULT_ARROW_LAUNCH_SPEED = 16.0;
+const Planc DEFAULT_ROPE_GROWTH_SPEED = 16.0;
+const Planc DEFAULT_ROPE_RETRACT_SPEED = 32.0;
+const uint RELOAD_TIME = 20;
 
-const Planc DUST_MINIMUM_SPEED = METER / 12.0;
+const Planc DUST_MINIMUM_SPEED = METER / 6.0;
 const dec DUST_VELOCITY_DAMPEN_RATIO = 0.1;
-const Span<Planc> DUST_RISE = { 0.5, 1.2 };
+const Span<Planc> DUST_RISE = { 0.25, 0.75 };
 const Span<uint> DUST_LANDING_COUNT = { 9, 15 };
-const Span<dec> DUST_LANDING_ANGLE = { 0.0, RIGHT_ANGLE / 3. };
-const Span<uint> DUST_TIME = { 0, 5 };
+const Span<dec> DUST_LANDING_ANGLE = { 0.0, RIGHT_ANGLE / 3.0 };
+const Span<uint> DUST_WALKING_COUNT = { 1, 3 };
+const Span<uint> DUST_WALKING_TIME = { 0, 5 };
 
 const Planc HEAD_RADIUS = HEIGHT / 3.9;
 const Planc HEAD_Y_OFFSET = HEAD_RADIUS * 0.05;
@@ -72,13 +73,13 @@ const Planc BOOT_SOLE_SUB_HEIGHT = 0.75;
 const Planc BELT_THICKNESS = 3.0;
 const Planc BELT_BUCKLE_WIDTH = 5.0;
 
-const uint BOB_PERIOD = 10;
+const uint BOB_PERIOD = 20;
 const Planc HEAD_BOB_DISTANCE = 1.0;
 const Planc SHOULDER_BOB_DISTANCE = 0.8;
 const dec SHOULDER_BOB_OFFSET = 0.75;
 
-static uint BLINK_DURATION = 3;
-static Span<uint> BLINK_WAIT = { 120, 240 };
+static uint BLINK_DURATION = 6;
+static Span<uint> BLINK_WAIT = { 240, 480 };
 
 const Color CROSSBOW_COLOR = Color::rgb( 0xA54B23 );
 
@@ -123,7 +124,8 @@ Climber::Climber( World * world, const Coordinate & _position )
     
     m_skin = MOHAWK;
 
-    m_movement_speed = DEFAULT_SPEED;
+    m_movement_speed_ground = DEFAULT_SPEED_GROUND;
+    m_movement_speed_air = DEFAULT_SPEED_AIR;
 
     m_reload_timer.reset( 0 );
     m_dust_timer.reset( 0 );
@@ -138,7 +140,7 @@ void Climber::update( )
 {
     Player::update( );
 
-    //heal( 0.1 );
+    heal( 0.01 );
 
     m_reload_timer.tick( );
     m_dust_timer.tick( );
@@ -152,8 +154,12 @@ void Climber::update( )
             {
                 if( !m_dust_timer.remaining( ) )
                 {
-                    world( )->add_object( new Dust( world( ), position( ) + front_foot( ), ( velocity( ) * DUST_VELOCITY_DAMPEN_RATIO ) + VectorY( Random::rPlanc( DUST_RISE ) ), world( )->terrain( )->dust_color( ) ) );
-                    m_dust_timer.reset( Random::rint( DUST_TIME ) );
+                    uint dust_count = Random::rint(DUST_WALKING_COUNT);
+                    for_range(i, dust_count)
+                    {
+                        world()->add_object(new Dust(world(), position() + front_foot(), (velocity() * DUST_VELOCITY_DAMPEN_RATIO) + VectorY(Random::rPlanc(DUST_RISE)), world()->terrain()->dust_color()));
+                    }
+                    m_dust_timer.reset(Random::rint(DUST_WALKING_TIME));
                 }
             }
         }
@@ -175,6 +181,8 @@ void Climber::update( )
                 world( )->add_object( arrow );
 
                 m_arrow_feather_color = Random::rColor( );
+
+                m_firing_arrow = false;
             }
             else if( m_firing_hook )
             {
@@ -200,47 +208,49 @@ void Climber::update( )
 
 void Climber::update_velocity( )
 {
+    const Planc _movement_speed = Object::ground( ) ? m_movement_speed_ground : m_movement_speed_air;
+
     if( !gravity_ratio( ) )
     { // can fly?
         if( m_looking_up )
         {
             if( m_moving_right && !m_moving_left )
             {
-                add_velocity( VectorA( Angle( half( RIGHT_ANGLE_1 ) ), m_movement_speed ) - VectorX( m_movement_speed ) );
+                add_velocity( VectorA( Angle( half( RIGHT_ANGLE_1 ) ), _movement_speed ) - VectorX( _movement_speed ) );
             }
             else if( m_moving_left && !m_moving_right )
             {
-                add_velocity( VectorA( Angle( half( RIGHT_ANGLE_3 ) ), m_movement_speed ) - VectorX( -m_movement_speed ) );
+                add_velocity( VectorA( Angle( half( RIGHT_ANGLE_3 ) ), _movement_speed ) - VectorX( -_movement_speed ) );
             }
             else
             {
-                add_velocity( VectorY( m_movement_speed ) );
+                add_velocity( VectorY( _movement_speed ) );
             }
         }
         if( m_looking_down )
         {
             if( m_moving_right && !m_moving_left )
             {
-                add_velocity( VectorA( Angle( -half( RIGHT_ANGLE_1 ) ), m_movement_speed ) - VectorX( m_movement_speed ) );
+                add_velocity( VectorA( Angle( -half( RIGHT_ANGLE_1 ) ), _movement_speed ) - VectorX( _movement_speed ) );
             }
             else if( m_moving_left && !m_moving_right )
             {
-                add_velocity( VectorA( Angle( -half( RIGHT_ANGLE_3 ) ), m_movement_speed ) - VectorX( -m_movement_speed ) );
+                add_velocity( VectorA( Angle( -half( RIGHT_ANGLE_3 ) ), _movement_speed ) - VectorX( -_movement_speed ) );
             }
             else
             {
-                add_velocity( VectorY( -m_movement_speed ) );
+                add_velocity( VectorY( -_movement_speed ) );
             }
         }
     }
 
     if( m_moving_right )
     {
-        add_velocity( VectorX( m_movement_speed ) );
+        add_velocity( VectorX( _movement_speed ) );
     }
     if( m_moving_left )
     {
-        add_velocity( VectorX( -m_movement_speed ) );
+        add_velocity( VectorX( -_movement_speed ) );
     }
     
     if( ( m_hook.state( ) == Hook::HOOKED ) && ( m_hook.rope_length( ) > m_hook.max_rope_length( ) ) )
@@ -273,18 +283,28 @@ void Climber::update_velocity( )
             m_jump_degradation = 1.0 - ( ( 1.0 - m_jump_degradation ) * JUMP_DEGRATION_RATIO );
             ground( nullptr );
         }
+        else
+        {
+            m_jumping = false;
+        }
     }
     else
     {
         m_jumping_timer.reset( 0 );
     }
-
-    velocity( velocity( ) * 0.9 );
 }
 
 Planc Climber::light_sight( ) const
 {
     return LIGHT_SIGHT;
+}
+
+void Climber::movement_stop()
+{
+    moving_right(false);
+    moving_left(false);
+    looking_up(false);
+    looking_down(false);
 }
 
 bool Climber::moving_right( ) const
@@ -400,12 +420,12 @@ Angle Climber::aim_shake_range( ) const
     return m_aim_shake_angle;
 }
 
-void Climber::fire_hook( )
+void Climber::loose_hook( )
 {
     m_firing_hook = true;
 }
 
-void Climber::fire_arrow( )
+void Climber::loose_arrow( )
 {
     m_firing_arrow = true;
 }
@@ -527,72 +547,65 @@ Climber::Skin Climber::skin( ) const
 
 Color Climber::color( ColorPiece component ) const
 {
-    if( hurt_display( ).remaining( ) )
+    switch (component)
     {
-        return RED;
-    }
-    else
-    {
-        switch( component )
+    case SKIN:
+        switch (skin())
         {
-            case SKIN:
-                switch( skin( ) )
-                {
-                    // case:
-                    //     return Color::rgb( 0x9B5032 );
-                    //     break;
-                    case MOHAWK :
-                        return Color::rgb( 0xFFE1BE );
-                        break;
-                    case NO_SKIN :
-                    default :
-                        return WHITE;
-                        break;
-                }
-                break;
-            case HAIR:
-                switch( skin( ) )
-                {
-                    case MOHAWK :
-                        return RED;
-                        break;
-                    case NO_SKIN :
-                    default :
-                        return BLACK;
-                        break;
-                }
-                break;
-            case EYE:
-                return BLACK;
-                break;
-            case UNDERSHIRT:
-                return GRAY_LIGHT;
-                break;
-            case JACKET:
-                return Color::rgb( 0x8C4B2D );
-                break;
-            case PANTS:
-                return Color::rgb( 0xCD8741 );
-                break;
-            case BELT:
-                return BLACK;
-                break;
-            case BELT_BUCKLE:
-                return YELLOW;
-                break;
-            case BOOT:
-                return BLACK;
-                break;
-            case BOOT_SOLE:
-                return GRAY_MID;
-                break;
-            case BOOT_LACE:
-                return WHITE;
-                break;
-            default:
-                return WHITE;
-                break;
+        // case:
+        //     return Color::rgb( 0x9B5032 );
+        //     break;
+        case MOHAWK:
+            return Color::rgb(0xFFE1BE);
+            break;
+        case NO_SKIN:
+        default:
+            return WHITE;
+            break;
         }
+        break;
+    case HAIR:
+        switch (skin())
+        {
+        case MOHAWK:
+            return RED;
+            break;
+        case NO_SKIN:
+        default:
+            return BLACK;
+            break;
+        }
+        break;
+    case EYE:
+        return BLACK;
+        break;
+    case UNDERSHIRT:
+        return GRAY_LIGHT;
+        break;
+    case JACKET:
+        return Color::rgb(0x8C4B2D);
+        break;
+    case PANTS:
+        return Color::rgb(0xCD8741);
+        break;
+    case BELT:
+        return BLACK;
+        break;
+    case BELT_BUCKLE:
+        return YELLOW;
+        break;
+    case BOOT:
+        return BLACK;
+        break;
+    case BOOT_SOLE:
+        return GRAY_MID;
+        break;
+    case BOOT_LACE:
+        return WHITE;
+        break;
+    default:
+        return WHITE;
+        break;
     }
 }
 
@@ -654,7 +667,11 @@ void Climber::draw_head( )
 
     // eyes
     draw_eyes( face_center( ) + Vector( EYE_SPACING, 0.0 ), face_center( ) + Vector( -EYE_SPACING, 0.0 ) );
-    
+
+    // eyebrows
+    draw( color( HAIR ), Line( face_center( ) + Vector( EYE_SPACING + 3.0, 2.1 ), face_center( ) + Vector( EYE_SPACING - 4.0, 2.1 ) ), EYE_RADIUS * 2.0 );
+    draw( color( HAIR ), Line( face_center( ) + Vector( -EYE_SPACING + 4.0, 2.1 ), face_center( ) + Vector( -EYE_SPACING - 3.0, 2.1 ) ), EYE_RADIUS * 2.0 );
+
     if( m_skin == MOHAWK )
     {
         { // mohawk
@@ -727,10 +744,10 @@ void Climber::draw_legs( )
     boot_drawing.draw( color( BOOT_LACE ), lace_1, 1.0 );
     boot_drawing.draw( color( BOOT_LACE ), lace_2, 1.0 );
 
-    Planc foot_offset_x = ( sin( world( )->age( ) / 2.0 ) * 4.0 );
-    Planc foot_offset_y = ( cos( world( )->age( ) / 2.0 ) * 2.0 );
-    Planc foot_offset_y_back = max( -foot_offset_y, (Planc)0.0 );
-    Planc foot_offset_y_front = max( foot_offset_y, (Planc)0.0 );
+    Planc foot_offset_x = ( sin( world( )->age( ) / 4.0 ) * 4.0 );
+    Planc foot_offset_y = ( cos( world( )->age( ) / 4.0 ) * 2.0 );
+    Planc foot_offset_y_back = max( -foot_offset_y, P0 );
+    Planc foot_offset_y_front = max( foot_offset_y, P0 );
 
     // back leg
     {
@@ -873,6 +890,7 @@ void Climber::draw_crossbow( )
     crossbow_polygon.rotate( aim_angle( ) );
 
     draw( CROSSBOW_COLOR, crossbow_polygon );
+    draw( CYAN, crossbow_polygon, 2.0 );
 }
 
 void Climber::draw_arrow( )
@@ -882,7 +900,13 @@ void Climber::draw_arrow( )
 
     Vector v = VectorA( aim_angle( ), arrow.length( ) );
 
-    draw( arrow.projectile_drawing( ARROW_PATH_LENGTH, ARROW_PATH_COLOR, ARROW_PATH_ALPHA_START ).move( v ) );
+#ifdef AXN_DEBUG
+    if (Debug::active && Object::draw_physics)
+    {
+        draw(arrow.trajection_drawing(ARROW_PATH_LENGTH, ARROW_PATH_COLOR, ARROW_PATH_ALPHA_START).move(v));
+    }
+#endif
+    
     draw( Drawing( arrow ).move( v ) );
 }
 
@@ -1103,11 +1127,11 @@ void Climber::input( Input * _input )
             {
                 if( button == MouseInput::LEFT_BUTTON )
                 {
-                    fire_arrow( );
+                    loose_arrow( );
                 }
                 else if( button == MouseInput::RIGHT_BUTTON )
                 {
-                    fire_hook( );
+                    loose_hook( );
                 }
             }
         }
@@ -1131,7 +1155,7 @@ void Climber::input( Input * _input )
             {
                 if( dynamic == ControllerButtonInput::PRESSED )
                 {
-                    fire_arrow( );
+                    loose_arrow( );
                 }
                 else
                 {
@@ -1143,7 +1167,7 @@ void Climber::input( Input * _input )
             {
                 if( dynamic == ControllerButtonInput::PRESSED )
                 {
-                    fire_hook( );
+                    loose_hook( );
                 }
                 else
                 {
@@ -1204,34 +1228,33 @@ void Climber::input( Input * _input )
         {
             if( joystick_input->joystick == ControllerJoystickInput::LEFT_JOYSTICK )
             {
-                //if( joystick_input->direction == ControllerJoystickInput::LEFT )
-                //{
-                //    moving_left( true );
-                //}
-                //else if( joystick_input->direction == ControllerJoystickInput::RIGHT )
-                //{
-                //    moving_right( true );
-                //}
-                //else if( joystick_input->direction == ControllerJoystickInput::UP )
-                //{
-                //    looking_up( true );
-                //}
-                //else if( joystick_input->direction == ControllerJoystickInput::DOWN )
-                //{
-                //    looking_down( true );
-                //}
-                //else
-                //{
-                //    moving_left( false );
-                //    moving_right( false );
-                //    looking_up( false );
-                //    looking_down( false );
-                //}
-                //}
+                if (joystick_input->dead_zone)
+                {
+                    movement_stop();
+                }
+                else
+                {
+                    Vector v = joystick_input->vector;
 
-            if( joystick_input->joystick == ControllerJoystickInput::RIGHT_JOYSTICK )
+                    if (v.dx() > ZERO)
+                    {
+                        moving_left(false);
+                        moving_right(true);
+                    }
+                    else if (v.dx() < ZERO)
+                    {
+                        moving_left(true);
+                        moving_right(false);
+                    }
+                }
+            }
+
+            if (joystick_input->joystick == ControllerJoystickInput::RIGHT_JOYSTICK)
             {
-                aim( joystick_input->vector.angle( ) );
+                if (!joystick_input->dead_zone)
+                {
+                    aim(joystick_input->vector.angle());
+                }
             }
         }
         

@@ -227,6 +227,7 @@ private:
 #ifdef AXN_DEBUG
 public:
     bool m_display_forebackground = true;
+    bool m_draw_grid = false;
 #endif
 };
 

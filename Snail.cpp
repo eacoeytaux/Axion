@@ -5,10 +5,10 @@ using mtmercy::Snail;
 
 namespace
 {
-const Planc SPEED = 0.05;
+const Planc SPEED = 0.025;
 const Planc SHELL_RADIUS = 10.0;
 const Planc SLUG_THICKNESS = 5.0;
-const uint STRETCH_PERIOD = 5;
+const uint STRETCH_PERIOD = 10;
 
 const Color SLUG_COLOR = BLACK;
 const Color SHELL_COLOR = RED;

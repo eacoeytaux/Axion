@@ -17,6 +17,7 @@
 #include "Bird.hpp"
 #include "Fox.hpp"
 #include "Butterfly.hpp"
+#include "Porcupine.hpp"
 #include "Gopher.hpp"
 #include "Snail.hpp"
 
@@ -100,7 +101,7 @@ void MountMerciless::create( )
 {
     World::create( FixedRectangle( 5000.0, 2500.0 ) );
 
-    wind( Vector( 1.5, 0.0 ) );
+    wind( Vector( 0.75, 0.0 ) );
 
     add_object( new Sky( this ) );
 
@@ -119,9 +120,9 @@ void MountMerciless::create( )
                             [ & ]( const Coordinate & c, const TerrainEdge * e )
                             { add_object( new AspenTree( this, c ) ); } );
     
-    terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
-                            [ & ]( const Coordinate & c, const TerrainEdge * e )
-                            { add_object( new AspenTree( this, c, 0.5 ) ); } );
+    // terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
+    //                        [ & ]( const Coordinate & c, const TerrainEdge * e )
+    //                        { add_object( new AspenTree( this, c, 0.5 ) ); } );
     
     // terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
     //                         [ & ]( const Coordinate & c, const TerrainEdge * e )
@@ -136,15 +137,16 @@ void MountMerciless::create( )
     // add_object( new Bird( this, Coordinate( -100.0, 100.0 ) ) );
     // add_object( new Fox( this, Coordinate( 200.0, 150.0 ) ) );
     add_object( new Gopher( this, Coordinate( 150, 20 ) ) );
+    add_object( new Porcupine( this, Coordinate( 100, 20 ) ) );
     // add_object( new Butterfly( this, Coordinate( 200, 50 ) ) );
     // add_object( new Snail( this, Coordinate( 200.0, 150.0 ) ) );
 }
 
 Terrain * MountMerciless::generate_terrain( )
 {
-    varray<varray<Coordinate>> terrain_coordinates = { { Coordinate( -1100.0, 1000.0 ),
-                                                         Coordinate( -1000.0, 0.0 ),
-                                                         Coordinate( 0.0, 10.0 ),
+    varray<varray<Coordinate>> terrain_coordinates = { { // Coordinate( -1100.0, 1000.0 ),
+                                                         Coordinate(-1000.0, 0.0),
+                                                         Coordinate(0.0, 10.0),
                                                          // Coordinate( -800.0, 5.0 ),
                                                          // Coordinate( -100.0, 15.0 ),
                                                          // Coordinate( 100.0, 25.0 ),
@@ -152,8 +154,8 @@ Terrain * MountMerciless::generate_terrain( )
                                                          // Coordinate( 350.0, 75.0 ),
                                                          // Coordinate( 500.0, 25.0 ),
                                                          // Coordinate( 800.0, 5.0 ),
-                                                         Coordinate( 1000.0, 0.0 ),
-                                                         Coordinate( 1100.0, 1000.0 ) } }; //, {
+                                                         Coordinate(1000.0, 0.0) } };
+                                                         // Coordinate( 1100.0, 1000.0 ) } }; //, {
                                                                                            // Coordinate( 200.0, 100.0 ),
                                                                                            // Coordinate( 150.0, 150.0 ),
                                                                                            // Coordinate( 100.0, 100.0 ) } };

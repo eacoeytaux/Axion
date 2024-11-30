@@ -7,11 +7,13 @@ const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( const bool _t
 {
     if( _transformed && !transform( ).identity( ) )
     {
+        const Transform _t = transform();
+
         FixedRectangle transformed_bounding_box;
         
         for_each( colored_polygon, m_colored_polygons )
         {
-            colored_polygon.polygon.transform( transform( ) );
+            colored_polygon.polygon.transform( _t );
             
             transformed_bounding_box.union_with( FixedRectangle( colored_polygon.polygon ) );
         }
@@ -24,29 +26,7 @@ const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( const bool _t
     return m_colored_polygons;
 }
 
-varray<Drawing::ColoredPolygon> Drawing::colored_polygons_border( const bool _transformed ) const
-{
-    varray<ColoredPolygon> colored_polygons_border;
-
-    if( has_border( ) )
-    {
-        for_each( colored_polygon, colored_polygons( _transformed ) )
-        {
-            ColoredPolygon border = colored_polygon;
-            border.polygon = Polygon::expand( border.polygon, border_width( ) );
-
-            border.colors.clear( );
-            border.colors.reserve( border.polygon.sides( ) );
-            for_range( i, border.polygon.sides( ) ) border.colors.insert_back( border_color( ) );
-
-            colored_polygons_border.insert_back( border );
-        }
-    }
-
-    return colored_polygons_border;
-}
-
-uint Drawing::polygon_count( ) const { return colored_polygons( false ).size( ); }
+uint Drawing::polygon_count( ) const { return m_colored_polygons.size( ); }
 
 void Drawing::reserve( const uint _reserve_size ) { m_colored_polygons.reserve( _reserve_size ); }
 
@@ -58,18 +38,14 @@ void Drawing::clear( const bool _reserve_mem )
     
     uint mem_size = ( _reserve_mem ? m_colored_polygons.size( ) : ZERO );
     
-    clear_override_color( );
-    clear_filter_function( );
-    
-    m_colored_polygons.clear( );
-    if( _reserve_mem && mem_size )
-    {
-        m_colored_polygons.reserve( mem_size * TWO );
-    }
-    
+    m_colored_polygons.clear( !_reserve_mem );
+
     m_bounding_box.width( ZERO );
     m_bounding_box.height( ZERO );
     m_bounding_box.center( ORIGIN );
+    
+    clear_override_color( );
+    clear_filter_function( );
 }
 
 Coordinate Drawing::center( ) const { return m_center; }
@@ -125,6 +101,34 @@ Drawing & Drawing::clear_filter_function( )
     return *this;
 }
 
+Drawing & Drawing::erase( const Polygon & _polygon )
+{
+    ColoredPolygon& colored_polygon = m_colored_polygons.insert_back();
+    colored_polygon.polygon = _polygon;
+    colored_polygon.colors = { TRANSPARENT };
+    colored_polygon.hole = true;
+
+    return *this;
+}
+
+Drawing& Drawing::add_bound(const Polygon& _polygon)
+{
+    ColoredPolygon& colored_polygon = m_colored_polygons.insert_back();
+    colored_polygon.polygon = _polygon;
+    colored_polygon.colors = { TRANSPARENT };
+    colored_polygon.fill = true;
+
+    return *this;
+}
+
+Drawing& Drawing::clear_bounds()
+{
+    ColoredPolygon& colored_polygon = m_colored_polygons.insert_back();
+    colored_polygon.reset = true;
+
+    return *this;
+}
+
 Drawing & Drawing::draw( const Drawing & _drawing )
 {
     // if (_drawing.has_border( ) )
@@ -138,7 +142,7 @@ Drawing & Drawing::draw( const Drawing & _drawing )
     }
     else if( m_filter_function_set )
     {
-        for_each( colored_polygon, _drawing.colored_polygons( false ) )
+        for_each( colored_polygon, _drawing.colored_polygons( ) )
         {
             ColoredPolygon filtered_colored_polygon = colored_polygon;
             for_range( i, filtered_colored_polygon.colors.size( ) )

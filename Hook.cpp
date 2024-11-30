@@ -24,7 +24,7 @@ using mtmercy::Hook;
 Hook::Hook( World * world, const Climber * owner ) : Object( world ), m_owner( owner )
 {
 #ifdef AXN_DEBUG
-    draw_debug = true;
+    m_draw_debug = true;
 #endif
     
     Assert( m_owner, "owner cannot be null" );
@@ -99,7 +99,7 @@ void Hook::update_velocity( )
     }
     else if( state( ) == FIRING )
     {
-        gravity_ratio( 0.5 );
+        gravity_ratio( 0.25 );
         m_rope_length = m_owner->position( ).distance_to( position( ) );
 
         if( Object::ground( ) )
@@ -109,7 +109,7 @@ void Hook::update_velocity( )
         }
         else if( m_rope_length > m_max_rope_length )
         {
-            gravity_ratio( 0 );
+            no_gravity();
             state( HOOKED );
             velocity( ZERO_VECTOR );
             

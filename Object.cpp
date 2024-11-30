@@ -4,6 +4,8 @@
 
 #ifdef AXN_DEBUG
 uint Object::total_objects = 0;
+
+bool Object::draw_physics = true;
 #endif
 
 Object::~Object( )
@@ -55,9 +57,9 @@ void Object::init( )
     background( z( ) < ONE );
 }
 
-Drawing Object::projectile_drawing( const Planc & _distance, const Color & _color, const dec _alpha_start, const dec _alpha_end ) const
+Drawing Object::trajection_drawing( const Planc & _distance, const Color & _color, const dec _alpha_start, const dec _alpha_end ) const
 {
-    Drawing projection;
+    Drawing trajection;
     
     if ( !Object::ground( ) )
     {
@@ -68,8 +70,8 @@ Drawing Object::projectile_drawing( const Planc & _distance, const Color & _colo
         
         while( d > ZERO && v.has_magnitude( ) )
         {
-            v += GRAVITY * gravity_ratio( );
-            v *= ONE - friction_resistance( );
+            v += ( GRAVITY * gravity_ratio( ) );
+            v *= ( ONE - friction_resistance( ) );
             
             if( d > v.magnitude( ) )
             {
@@ -83,14 +85,14 @@ Drawing Object::projectile_drawing( const Planc & _distance, const Color & _colo
             
             dec d_a = min<dec>( a, ( _alpha_start - _alpha_end ) * ( v.magnitude( ) / _distance ) );
             
-            projection.draw( Color( _color, a ), Color( _color, a - d_a ), Line( c, c + v ) );
+            trajection.draw( Color( _color, a ), Color( _color, a - d_a ), Line( c, c + v ) );
             a -= d_a;
             
             c += v;
         }
     }
     
-    return projection;
+    return trajection;
 }
 
 void Object::render( )
@@ -511,7 +513,7 @@ dec Object::friction_resistance( ) const
         return m_ground->resistance( );
     }
 
-    return ZERO; // TODO AIR_RESISTANCE;
+    return AIR_RESISTANCE;
 }
 
 TerrainEdge * Object::ground( ) const
@@ -606,24 +608,25 @@ Drawing Object::debug_overlay( ) const
     const Planc VELOCITY_MAGNITUDE_MINIMUM = 1.0;
     const Planc VELOCITY_SCALE = 3.0;
     const Color PHYSICS_COLOR = YELLOW;
-    const Color DRAWING_COLOR = WHITE.a( 0.25 );
 
     Drawing debug_overlay;
-    
-    // drawing bounding box
-    debug_overlay.draw( DRAWING_COLOR, bounding_box( ) );
 
-    // hit box
-    debug_overlay.draw( PHYSICS_COLOR, hit_box( ) - position( ), HIT_BOX_THICKNESS, true );
-
-    // center
-    debug_overlay.draw( PHYSICS_COLOR, Circle( DOT_RADIUS ), FILLED );
-
-    // velocity
-    Vector velocity_graphic = velocity( ) * VELOCITY_SCALE;
-    if( velocity_graphic.magnitude( ) >= VELOCITY_MAGNITUDE_MINIMUM )
+    // physics
+    // (only for objects on plane)
+    if (draw_physics && (z() == ONE))
     {
-        debug_overlay.draw( PHYSICS_COLOR, velocity_graphic.origin( ORIGIN ), VELOCITY_ARROW_LENGTH, VELOCITY_THICKNESS, true );
+        // hit box
+        debug_overlay.draw(PHYSICS_COLOR, hit_box() - position(), HIT_BOX_THICKNESS, true);
+
+        // center
+        debug_overlay.draw(PHYSICS_COLOR, Circle(DOT_RADIUS), FILLED);
+
+        // velocity
+        Vector velocity_graphic = velocity() * VELOCITY_SCALE;
+        if (velocity_graphic.magnitude() >= VELOCITY_MAGNITUDE_MINIMUM)
+        {
+            debug_overlay.draw(PHYSICS_COLOR, velocity_graphic.origin(ORIGIN), VELOCITY_ARROW_LENGTH, VELOCITY_THICKNESS, true);
+        }
     }
 
     return debug_overlay;

@@ -1,9 +1,13 @@
 #include "Mob.hpp"
 
+#ifdef AXN_DEBUG
+bool Mob::draw_health = true;
+#endif
+
 Mob::Mob( World * world, const Coordinate & _position, const dec _health ) : Object( world, _position )
 {
 #ifdef AXN_DEBUG
-    draw_debug = true;
+    m_draw_debug = true;
 #endif
 
     solid( true );
@@ -28,7 +32,7 @@ void Mob::hurt_display_settings( )
 {
     filter_function( [ ]( Color & color )
     {
-        color.r( ONE );
+        color.r( ( ( ONE - color.r() ) * 0.25 ) + color.r() );
         color.g( ZERO );
         color.b( ZERO );
     } );
@@ -201,42 +205,45 @@ Drawing Mob::debug_overlay( ) const
     
     Drawing debug_overlay;
     
-    if( !invincible_always( ) )
+    if (draw_health)
     {
-        Planc health_width = max( HEALTH_BAR_WIDTH_MIN, hit_box( ).width( ) * HEALTH_BAR_TO_OBJECT_RATIO );
-        Planc health_height = HEALTH_BAR_HEIGHT;
-        Coordinate offset( ZERO, -( hit_box( ).height( ).half( ) + ( health_height * 1.5 ) + HEALTH_BAR_BORDER_WIDTH ) );
-        
-        debug_overlay.draw( BLACK, Rectangle( health_width, health_height, offset ) );
-        
-        if( alive( ) )
+        // if( !invincible_always( ) )
         {
-            dec health_percentage = health( ) / max_health( );
-            Assert( in_range( health_percentage, ZERO, ONE, true ) );
-            
-            Color health_color;
-            if( health_percentage == ONE )
+            Planc health_width = max(HEALTH_BAR_WIDTH_MIN, hit_box().width() * HEALTH_BAR_TO_OBJECT_RATIO);
+            Planc health_height = HEALTH_BAR_HEIGHT;
+            Coordinate offset(ZERO, -(hit_box().height().half() + (health_height * 1.5) + HEALTH_BAR_BORDER_WIDTH));
+
+            debug_overlay.draw(BLACK, Rectangle(health_width, health_height, offset));
+
+            if (alive())
             {
-                health_color = GREEN;
+                dec health_percentage = health() / max_health();
+                Assert(in_range(health_percentage, ZERO, ONE, true));
+
+                Color health_color;
+                if (health_percentage == ONE)
+                {
+                    health_color = GREEN;
+                }
+                else if (health_percentage >= YELLOW_START)
+                {
+                    health_color = ColorSlider(YELLOW, GREEN).color_at((health_percentage - YELLOW_START) * inverse(ONE - YELLOW_START));
+                }
+                else if (health_percentage >= RED_START)
+                {
+                    health_color = ColorSlider(RED, YELLOW).color_at((health_percentage - RED_START) * inverse(ONE - RED_START));
+                }
+                else
+                {
+                    health_color = RED;
+                }
+
+                debug_overlay.draw(health_color, Rectangle(health_width * health_percentage, health_height,
+                    offset + VectorX((health_width.half() * health_percentage) - health_width.half())));
             }
-            else if( health_percentage >= YELLOW_START )
-            {
-                health_color = ColorSlider( YELLOW, GREEN ).color_at( ( health_percentage - YELLOW_START ) * inverse( ONE - YELLOW_START ) );
-            }
-            else if( health_percentage >= RED_START )
-            {
-                health_color = ColorSlider( RED, YELLOW ).color_at( ( health_percentage - RED_START ) * inverse( ONE - RED_START ) );
-            }
-            else
-            {
-                health_color = RED;
-            }
-            
-            debug_overlay.draw( health_color, Rectangle( health_width * health_percentage, health_height,
-                                                        offset + VectorX( ( health_width.half( ) * health_percentage ) - health_width.half( ) ) ) );
+
+            debug_overlay.draw(WHITE, Rectangle(health_width, health_height, offset), HEALTH_BAR_BORDER_WIDTH, true);
         }
-        
-        debug_overlay.draw( WHITE, Rectangle( health_width, health_height, offset ), HEALTH_BAR_BORDER_WIDTH, true );
     }
 
     debug_overlay.draw( Object::debug_overlay( ) );

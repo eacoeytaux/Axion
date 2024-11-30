@@ -145,7 +145,7 @@ error Logger::close( )
 {
     if( b_initialized )
     {
-        log_message( INFO_LOG, "complete ...............\n" );
+        log_message( INFO_LOG, "complete ............... ( :\n" );
     }
 
     b_initialized = false;
