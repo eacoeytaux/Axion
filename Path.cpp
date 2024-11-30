@@ -228,3 +228,13 @@ varray<Line> Arc::generate( const Coordinate & _center, const Planc & _radius, c
 
 Arc::Arc( const Coordinate & _center, const Planc & _radius, const Angle & _start, const Angle & _end, const bool _clockwise )
 : Path( generate( _center, _radius, _start, _end, _clockwise ) ) { }
+
+varray<Line> Beziel::generate( const varray<Coordinate> & _control_points, const Planc & _min_distance )
+{
+    varray<Line> lines;
+ 
+    return lines;
+}
+
+Beziel::Beziel( const varray<Coordinate> & _control_points, const Planc & _min_distance )
+: Path( generate( _control_points, _min_distance ) ) { }

@@ -188,13 +188,13 @@ T pow( const T & t, const uint p )
     {
         return T( );
     }
-    else if( p == 1 )
+    else if( p == ONE )
     {
         return t;
     }
 
     T ret = t;
-    for_range( i, p - 1 ) ret *= t;
+    for_range( i, p - ONE ) ret *= t;
     return ret;
 }
 
@@ -243,11 +243,11 @@ const T & min( const varray<T> & list )
 
     int min_i = ZERO;
 
-    for_range( i, list.size( ) - 1 )
+    for_range( i, list.size( ) - ONE )
     {
-        if( list[ i + 1 ] < list[ min_i ] )
+        if( list[ i + ONE ] < list[ min_i ] )
         {
-            min_i = i + 1;
+            min_i = i + ONE;
         }
     }
 
@@ -261,11 +261,11 @@ const T & max( const varray<T> & list )
 
     int max_i = ZERO;
 
-    for_range( i, list.size( ) - 1 )
+    for_range( i, list.size( ) - ONE )
     {
-        if( list[ i + 1 ] > list[ max_i ] )
+        if( list[ i + ONE ] > list[ max_i ] )
         {
-            max_i = i + 1;
+            max_i = i + ONE;
         }
     }
 
@@ -282,6 +282,49 @@ template <typename T>
 T log_base( const T & base, const T & t )
 {
     return ( log( t ) / log( base ) );
+}
+
+inline uint factorial( const uint n )
+{
+    uint f = ONE;
+    if( n )
+    {
+        for_range( i, n - ONE )
+        {
+            f *= ( i + TWO );
+        }
+    }
+    return f;
+}
+
+inline uint pascal( const uint row, const uint col )
+{
+    Assert( col <= row );
+    
+    if( !row || !col || ( col == row ) )
+    {
+        return ONE;
+    }
+    else if( ( col == ONE ) || ( col == ( row - ONE ) ) )
+    {
+        return row;
+    }
+    else
+    {
+        return ( factorial( row ) / ( factorial( col ) * factorial( row - col ) ) );
+    }
+}
+
+inline varray<uint> pascal( const uint row )
+{
+    varray<uint> v( row + ONE );
+    
+    for_range( i, half( row ) + ONE )
+    {
+        v[ i ] = v[ row - i ] = pascal( row, i );
+    }
+    
+    return v;
 }
 
 // -- labels --
@@ -312,9 +355,9 @@ public:
     virtual ~Identifiable( ) { }
     Identifiable( )
     {
-        static uint total_ids = 0;
+        static uint total_ids = ZERO;
         m_id = ++total_ids;
-        Assert( m_id != 0 );
+        Assert( m_id != ZERO );
     }
 
     operator uint( ) const { return m_id; }
@@ -353,7 +396,7 @@ private:
 
 public:
     virtual ~Counter( ) { }
-    Counter( const uint countdown = 0 ) : m_countdown_top( countdown ), m_countdown_remaining( countdown ) { }
+    Counter( const uint countdown = ZERO ) : m_countdown_top( countdown ), m_countdown_remaining( countdown ) { }
 
     bool tick( )
     {
@@ -397,7 +440,7 @@ private:
 public:
     virtual ~Span( ) { }
 
-    Span( ) : m_min( T( 0 ) ), m_max( T( 0 ) ) { }
+    Span( ) : m_min( T( ZERO ) ), m_max( T( ZERO ) ) { }
     Span( const T & value ) : m_min( value ), m_max( value ) { }
     Span( const T & min_value, const T & max_value ) : m_min( min_value ), m_max( max_value )
     {
@@ -415,17 +458,17 @@ public:
     template <typename T2>
     Span & operator=( const varray<T2> & v )
     {
-        Assert( ( v.size( ) == 1 ) || ( v.size( ) == 2 ), "varray must have exactly 1 or 2 elements" );
+        Assert( ( v.size( ) == ONE ) || ( v.size( ) == 2 ), "varray must have exactly 1 or 2 elements" );
 
-        m_min = T( v[ 0 ] );
+        m_min = T( v[ ZERO ] );
 
-        if( v.size( ) == 1 )
+        if( v.size( ) == ONE )
         {
             m_max = m_min;
         }
         else
         {
-            m_max = T( v[ 1 ] );
+            m_max = T( v[ ONE ] );
 
             if( m_min > m_max )
             {
@@ -448,8 +491,8 @@ private:
 public:
     virtual ~Slider( ) { }
 
-    Slider( ) : m_min_value( 0 ), m_max_value( 0 ) { value( min( ) ); }
-    Slider( const T & max_value ) : m_min_value( 0 ), m_max_value( max_value ) { value( min( ) ); }
+    Slider( ) : m_min_value( ZERO ), m_max_value( ZERO ) { value( min( ) ); }
+    Slider( const T & max_value ) : m_min_value( ZERO ), m_max_value( max_value ) { value( min( ) ); }
     Slider( const T & min_value, const T & max_value ) : m_min_value( ( min_value < max_value ) ? min_value : max_value ), m_max_value( ( min_value < max_value ) ? max_value : min_value ) { value( min( ) ); }
 
     const T & value( ) const { return m_value; }
@@ -540,7 +583,7 @@ bool in_range( const T & t, const T & low, const T & high, bool inclusive = true
 template <typename T>
 bool in_range( const T & t, const T & high, bool inclusive = true )
 {
-    return in_range<T>( t, T( 0 ), high, inclusive, inclusive );
+    return in_range<T>( t, T( ZERO ), high, inclusive, inclusive );
 }
 
 template <typename T>
