@@ -10,7 +10,7 @@ const uint PLAYER_HEALTH_START = 100;
 Player::Player( World * world, const Coordinate & _position ) : Mob( world, _position, PLAYER_HEALTH_START )
 {
     god( false );
-    
+
     terrain_boundaries( true );
 }
 
@@ -80,9 +80,9 @@ void Player::hurt( dec _health )
 
 void Player::out_of_bounds( )
 {
-#ifndef AXN_DEBUG
+    #ifndef AXN_DEBUG
     Object::out_of_bounds( );
-#endif
+    #endif
 }
 
 void Player::god( const bool _god )

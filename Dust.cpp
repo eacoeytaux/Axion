@@ -40,7 +40,7 @@ void Dust::update( )
     {
         mark_deleted( );
     }
-    
+
     Object::update( );
 }
 

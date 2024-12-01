@@ -1,34 +1,36 @@
-#include "Porcupine.hpp"
+#include "Porkupine.hpp"
 
 #include "Player.hpp"
 
-using mtmercy::Porcupine;
+using mtmercy::Porkupine;
 
 namespace
 {
-    Span<uint> QUILL_COUNT = { 16, 24 };
-    Angle QUILL_FAR = PI;
-    Angle QUILL_CLOSE = PI / 5.0;
+Span<uint> QUILL_COUNT = { 16, 24 };
+Angle QUILL_FAR = PI;
+Angle QUILL_CLOSE = PI / 5.0;
 }
 
-Porcupine::Porcupine( World * world, const Coordinate & _position ) : Enemy( world, _position, 10000.0 )
+Porkupine::Porkupine( World * world, const Coordinate & _position ) : Enemy( world, _position, 10000.0 )
 {
+    space( FixedRectangle( 25.0, 25.0 ) );
+
     uint quill_count = Random::rint( QUILL_COUNT );
- 
+
     Angle d_angle = ( QUILL_FAR - QUILL_CLOSE ) / quill_count;
-    
+
     for_range( i, quill_count + ONE )
     {
         m_quills.insert_back( Line( ORIGIN, VectorA( QUILL_CLOSE + ( d_angle * i ), METER ) ) );
     }
 }
 
-void Porcupine::update( )
+void Porkupine::update( )
 {
     Enemy::update( );
 }
 
-void Porcupine::render( )
+void Porkupine::render( )
 {
     Enemy::render( );
 

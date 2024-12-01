@@ -23,9 +23,9 @@ Terrain::~Terrain( )
 
 Terrain::Terrain( World * world, const varray<varray<Coordinate>> & _vertices ) : Object( world )
 {
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     m_draw_debug = true;
-#endif
+    #endif
 
     no_gravity( );
 

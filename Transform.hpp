@@ -20,7 +20,7 @@ public:
     Planc get( uint, uint ) const;
     Transform & set( uint, uint, Planc );
     Transform & set( const Transform & t );
-    
+
     Transform & clear( bool identity = true );
 
     Coordinate transform( const Coordinate & ) const;
@@ -102,12 +102,12 @@ class Transformable
 public:
     virtual ~Transformable( ) { }
     Transformable( ) { }
-    
+
     const Transform & transform( ) const
     {
         return m_transform;
     }
-    
+
     const Transform & cumulative_transform( ) const
     {
         return m_cumulative_transform;
@@ -150,42 +150,42 @@ public:
     Transformable & mirror( const Vector & axis ) { return transform( ReflectionTransform( axis ) ); }
     Transformable & mirror_x( ) { return mirror( X_HAT ); }
     Transformable & mirror_y( ) { return mirror( Y_HAT ); }
-    
+
     Coordinate transform( const Coordinate & coordinate ) const
     {
         return transform( ).transform( coordinate );
     }
-    
+
     Coordinate cumulative_transform( const Coordinate & coordinate ) const
     {
         return cumulative_transform( ).transform( coordinate );
     }
-    
+
     bool is_dirty( ) const
     {
         return m_dirty;
     }
-    
+
     bool is_clean( ) const
     {
         return !is_dirty( );
     }
 
     default_equal( Transformable );
-    
+
 protected:
     virtual const Transformable & dirty( ) const
     {
         m_dirty = true;
         return *this;
     }
-    
+
     virtual const Transformable & clean( ) const
     {
         m_dirty = false;
         return *this;
     }
-    
+
 private:
     mutable bool m_dirty = false;
     mutable Transform m_transform;

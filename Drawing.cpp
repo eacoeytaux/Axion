@@ -7,17 +7,17 @@ const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( const bool _t
 {
     //if( _transformed && !transform( ).identity( ) )
     {
-        const Transform _t = transform();
+        const Transform _t = transform( );
 
         FixedRectangle transformed_bounding_box;
-        
+
         for_each( colored_polygon, m_colored_polygons )
         {
             colored_polygon.polygon.transform( _t );
-            
+
             transformed_bounding_box.union_with( FixedRectangle( colored_polygon.polygon ) );
         }
-        
+
         m_bounding_box = transformed_bounding_box;
 
         const_clear_transform( );
@@ -35,16 +35,15 @@ void Drawing::reserve_more( const uint _reserve_size ) { m_colored_polygons.rese
 void Drawing::clear( const bool _reserve_mem )
 {
     Transformable::clear_transform( );
-    
+
     uint mem_size = ( _reserve_mem ? m_colored_polygons.size( ) : ZERO );
-    
+
     m_colored_polygons.clear( !_reserve_mem );
-    
-    m_bounding_box.width( ZERO );
-    m_bounding_box.height( ZERO );
-    m_bounding_box.center( ORIGIN );
-    
-    clear_override_color( );
+
+    //m_bounding_box.width( ZERO );
+    //m_bounding_box.height( ZERO );
+    //m_bounding_box.center( ORIGIN );
+
     clear_filter_function( );
 }
 
@@ -61,25 +60,25 @@ Drawing & Drawing::center( const Coordinate & _center )
     return *this;
 }
 
-Drawing & Drawing::filter_function( const function<void ( Color & )> & _filter_function )
+Drawing & Drawing::filter_function( const function<void( Color & )> & _filter_function )
 {
     m_filter_function = _filter_function;
 
     m_filter_function_set = true;
-    
+
     return *this;
 }
 
 Drawing & Drawing::clear_filter_function( )
 {
     m_filter_function_set = false;
-    
+
     return *this;
 }
 
 Drawing & Drawing::erase( const Polygon & _polygon )
 {
-    ColoredPolygon& colored_polygon = m_colored_polygons.insert_back();
+    ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
     colored_polygon.polygon = _polygon;
     colored_polygon.colors = { TRANSPARENT };
     colored_polygon.hole = true;
@@ -87,9 +86,9 @@ Drawing & Drawing::erase( const Polygon & _polygon )
     return *this;
 }
 
-Drawing& Drawing::add_bound(const Polygon& _polygon)
+Drawing & Drawing::add_bound( const Polygon & _polygon )
 {
-    ColoredPolygon& colored_polygon = m_colored_polygons.insert_back();
+    ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
     colored_polygon.polygon = _polygon;
     colored_polygon.colors = { TRANSPARENT };
     colored_polygon.fill = true;
@@ -97,9 +96,9 @@ Drawing& Drawing::add_bound(const Polygon& _polygon)
     return *this;
 }
 
-Drawing& Drawing::clear_bounds()
+Drawing & Drawing::clear_bounds( )
 {
-    ColoredPolygon& colored_polygon = m_colored_polygons.insert_back();
+    ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
     colored_polygon.reset = true;
 
     return *this;
@@ -116,9 +115,13 @@ Drawing & Drawing::draw( const Drawing & _drawing )
             {
                 m_filter_function( filtered_colored_polygon.colors[ i ] );
             }
-            
+
             m_colored_polygons.insert_back( filtered_colored_polygon );
-            m_bounding_box.union_with( FixedRectangle( filtered_colored_polygon.polygon ) );
+
+            if( !filtered_colored_polygon.reset )
+            {
+                m_bounding_box.union_with( FixedRectangle( filtered_colored_polygon.polygon ) );
+            }
         }
     }
     else
@@ -126,22 +129,22 @@ Drawing & Drawing::draw( const Drawing & _drawing )
         m_colored_polygons.insert_back( _drawing.colored_polygons( ) );
         m_bounding_box.union_with( _drawing.bounding_box( ) );
     }
-    
+
     return *this;
 }
 
 Drawing & Drawing::draw( const Drawing & _drawing, const Color & _color )
 {
-    for_each( colored_polygon, _drawing.colored_polygons(  ) )
+    for_each( colored_polygon, _drawing.colored_polygons( ) )
     {
         m_colored_polygons.insert_back( colored_polygon ).colors = { _color };
     }
-    
+
     if( _color.a( ) != ONE )
     {
         m_translucent = true;
     }
-    
+
     m_bounding_box.union_with( _drawing.bounding_box( ) );
 
     return *this;
@@ -161,9 +164,9 @@ Drawing & Drawing::draw( const varray<Color> & _colors,
     colored_polygon.thickness = _thickness;
     colored_polygon.preserve_thickness = _preserve_thickness;
     colored_polygon.extend_lines = _extend_lines;
-    
+
     colored_polygon.colors = _colors;
-    
+
     colored_polygon.opaque = true;
     for_range( i, colored_polygon.colors.size( ) )
     {
@@ -171,14 +174,14 @@ Drawing & Drawing::draw( const varray<Color> & _colors,
         {
             m_filter_function( colored_polygon.colors[ i ] );
         }
-        
+
         if( colored_polygon.colors[ i ].a( ) != ONE )
         {
             colored_polygon.opaque = false;
             break;
         }
     }
-    
+
     m_bounding_box.union_with( FixedRectangle( colored_polygon.polygon ) );
 
     return *this;
@@ -222,7 +225,7 @@ Drawing & Drawing::draw( const Color & _color,
     {
         draw( _color, line, _thickness, _preserve_thickness, _extend_lines );
     }
-    
+
     return *this;
 }
 

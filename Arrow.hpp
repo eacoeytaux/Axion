@@ -20,7 +20,7 @@ public:
     void angle( const Angle & );
 
     dec length( ) const;
-    
+
 protected:
     virtual void ground( TerrainEdge * ) override;
     virtual void react_to_movement( Object *, const Vector & ) override;

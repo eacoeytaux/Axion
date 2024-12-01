@@ -29,7 +29,7 @@
   <ItemGroup>
     <ClCompile Include="Angle.cpp" />
     <ClCompile Include="Arrow.cpp" />
-    <ClCompile Include="AspenTree.cpp" />
+    <ClCompile Include="AspineTree.cpp" />
     <ClCompile Include="Bird.cpp" />
     <ClCompile Include="Bush.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -66,7 +66,7 @@
     <ClCompile Include="PineTree.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Polygon.cpp" />
-    <ClCompile Include="Porcupine.cpp" />
+    <ClCompile Include="Porkupine.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Skull.cpp" />
     <ClCompile Include="Sky.cpp" />
@@ -82,7 +82,7 @@
   <ItemGroup>
     <ClInclude Include="Angle.hpp" />
     <ClInclude Include="Arrow.hpp" />
-    <ClInclude Include="AspenTree.hpp" />
+    <ClInclude Include="AspineTree.hpp" />
     <ClInclude Include="Assert.hpp" />
     <ClInclude Include="Audio.hpp" />
     <ClInclude Include="AXN.hpp" />
@@ -133,7 +133,7 @@
     <ClInclude Include="Planc.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="Polygon.hpp" />
-    <ClInclude Include="Porcupine.hpp" />
+    <ClInclude Include="Porkupine.hpp" />
     <ClInclude Include="Random.hpp" />
     <ClInclude Include="Skull.hpp" />
     <ClInclude Include="Sky.hpp" />

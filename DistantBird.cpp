@@ -21,7 +21,7 @@ const Color BIRD_COLOR = BLACK;
 DistantBird::DistantBird( World * world, const Coordinate & _position ) : Object( world, _position )
 {
     background( true );
-    
+
     needs_render_always( true );
 
     z( 0.5 );

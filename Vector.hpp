@@ -54,7 +54,7 @@ public:
     Vector operator/( dec scale ) const;
     Vector & operator*=( dec scale );
     Vector & operator/=( dec scale );
-    
+
     Vector & operator=( const Coordinate & );
 
     default_equal( Vector );

@@ -32,9 +32,9 @@ const ColorSlider SKY_SUNSET_TO_MIDNIGHT = ColorSlider( SUNSET_COLOR, MIDNIGHT_C
 Sky::Sky( World * world ) : Object( world )
 {
     background( true );
-    
+
     needs_render_always( true );
-    
+
     gravity_ratio( ZERO );
     terrain_boundaries( false );
 

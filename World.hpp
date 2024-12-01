@@ -57,7 +57,7 @@ public:
     const varray<Player *> & players( ) { return m_players; }
     Player * player( uint player_number = 0 );
     Player * player_main( );
-    
+
     varray<Coordinate> update_points( ) const;
     virtual Planc default_update_distance( ) const;
 
@@ -144,7 +144,7 @@ protected: // todo make private?
 
     varray<Object *> m_objects;
     queue<Object *> m_object_queue;
-    
+
     varray<Object *> m_foreground_objects;
     varray<Object *> m_background_objects;
 
@@ -209,26 +209,28 @@ public:
         varray<varray<Block>> m_grid;
         FixedRectangle m_bounds;
     };
-    
+
 private:
     Grid m_object_grid;
 
 public:
     Grid & object_grid( ) { return m_object_grid; }
-    
+
 private:
     virtual void render_bounds( Camera * camera );
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     void render_object_grid( Camera * camera ) { return render_object_grid( camera, false ); }
-    void render_object_grid( Camera * camera, bool fill_blocks, function<bool( const Grid::Block & block )> = []( const Grid::Block & block )
-                                                                { return false; } );
-#endif
-    
-#ifdef AXN_DEBUG
+    void render_object_grid( Camera * camera, bool fill_blocks, function<bool( const Grid::Block & block )> = [ ] ( const Grid::Block & block )
+    {
+        return false;
+    } );
+    #endif
+
+    #ifdef AXN_DEBUG
 public:
     bool m_display_forebackground = true;
     bool m_draw_grid = false;
-#endif
+    #endif
 };
 
 } // namespace reality

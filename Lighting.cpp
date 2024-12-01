@@ -27,12 +27,12 @@ void Lighting::darkness_active( const bool _darkness_active )
 
 dec Lighting::darkness_intensity( ) const
 {
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     if( Debug::active )
     {
         return min( m_darkness_slider.value( ), LIGHT_DEBUG_MAX_INTENSITY );
     }
-#endif
+    #endif
     return m_darkness_slider.value( );
 }
 

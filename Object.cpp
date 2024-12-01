@@ -10,9 +10,9 @@ bool Object::draw_physics = true;
 
 Object::~Object( )
 {
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     --total_objects;
-#endif
+    #endif
 
     for_each( object, m_movement_subscribers )
     {
@@ -46,13 +46,13 @@ void Object::init( )
 {
     Assert( !m_initialized );
     m_initialized = true;
-    
-#ifdef AXN_DEBUG
+
+    #ifdef AXN_DEBUG
     ++total_objects;
-#endif
+    #endif
 
     m_age = 0;
-    
+
     foreground( z( ) > ONE );
     background( z( ) < ONE );
 }
@@ -60,19 +60,19 @@ void Object::init( )
 Drawing Object::trajection_drawing( const Planc & _distance, const Color & _color, const dec _alpha_start, const dec _alpha_end ) const
 {
     Drawing trajection;
-    
-    if ( !Object::ground( ) )
+
+    if( !Object::ground( ) )
     {
         Coordinate c;
         Vector v = velocity( );
         Planc d = _distance;
         dec a = _alpha_start;
-        
+
         while( d > ZERO && v.has_magnitude( ) )
         {
             v += ( GRAVITY * gravity_ratio( ) );
             v *= ( ONE - friction_resistance( ) );
-            
+
             if( d > v.magnitude( ) )
             {
                 d -= v.magnitude( );
@@ -82,16 +82,16 @@ Drawing Object::trajection_drawing( const Planc & _distance, const Color & _colo
                 v.magnitude( d );
                 d = ZERO;
             }
-            
+
             dec d_a = min<dec>( a, ( _alpha_start - _alpha_end ) * ( v.magnitude( ) / _distance ) );
-            
+
             trajection.draw( Color( _color, a ), Color( _color, a - d_a ), Line( c, c + v ) );
             a -= d_a;
-            
+
             c += v;
         }
     }
-    
+
     return trajection;
 }
 
@@ -123,7 +123,7 @@ void Object::update( )
             m_last_positions[ m_last_position_index++ % last_positions_size ] = position( );
         }
     }
-    
+
     update_movement( );
 }
 
@@ -133,9 +133,9 @@ void Object::update_object( )
     {
         return;
     }
-    
+
     update( );
-    
+
     if( marked_to_delete( ) )
     {
         mark_deleted( );
@@ -186,7 +186,7 @@ void Object::update_movement( )
     if( m_ground )
     {
         checked_edges.insert( m_ground );
-        
+
         if( m_passing_terrain && m_ground->passable( ) )
         {
             m_ground = nullptr;
@@ -258,7 +258,7 @@ void Object::update_movement( )
                     Coordinate intersection = movement_line.intersection( terrain_edge->line( ) + VectorY( space( ).bound_height( ).half( ) ) );
 
                     movement = Vector( center, intersection );
-                    
+
                     if( velocity.magnitude( ) )
                     {
                         movement_percentage = movement.magnitude( ) / velocity.magnitude( );
@@ -313,7 +313,7 @@ void Object::update_movement( )
             list<ObjectCollision> collied_objects;
 
             varray<Object *> objects = world( )->objects_in_range( hit_box( ).union_with( hit_box( ) + movement ) );
-            
+
             Line movement_line( movement );
             for_each( object, objects )
             {
@@ -411,21 +411,21 @@ void Object::move( const Vector & _movement )
     if( _movement.has_magnitude( ) )
     {
         position( position( ) + _movement );
-        
+
         if( z( ) )
         {
             FixedRectangle world_bounds = world( )->bounds( );
-            
+
             // todo overshoots
             world_bounds.width( world_bounds.width( ) / ( z( ) * z( ) ) );
             world_bounds.height( world_bounds.height( ) / ( z( ) * z( ) ) );
-            
+
             if( !world_bounds.contains( position( ) ) )
             {
                 out_of_bounds( );
             }
         }
-        
+
         for_each( object, m_movement_subscribers )
         {
             object->react_to_movement( this, _movement );
@@ -444,10 +444,10 @@ void Object::position( const Coordinate & _position )
     {
         world( )->object_grid( ).erase( this );
     }
-    
+
     Visible::center( _position );
     Matter::position( _position );
-    
+
     if( interactive( ) )
     {
         world( )->object_grid( ).add( this );
@@ -492,7 +492,7 @@ bool Object::interactive( ) const
 void Object::interactive( const bool _interactive )
 {
     m_interactive = _interactive;
-    
+
     if( !m_interactive )
     {
         world( )->object_grid( ).erase( this );
@@ -507,7 +507,7 @@ bool Object::stationary( ) const
 void Object::stationary( const bool _stationary )
 {
     m_stationary = _stationary;
-    
+
     if( m_stationary )
     {
         velocity( ZERO_VECTOR );
@@ -521,7 +521,7 @@ dec Object::friction_resistance( ) const
         return m_ground->resistance( );
     }
 
-    return AIR_RESISTANCE;
+    return m_air_resistance_ratio;
 }
 
 TerrainEdge * Object::ground( ) const
@@ -565,6 +565,14 @@ dec Object::gravity_ratio( ) const { return m_gravity_ratio; }
 void Object::gravity_ratio( const dec _gravity_ratio )
 {
     m_gravity_ratio = _gravity_ratio;
+}
+
+
+dec Object::air_resistance_ratio( ) const { return m_air_resistance_ratio; }
+
+void Object::air_resistance_ratio( const dec _air_resistance_ratio )
+{
+    m_air_resistance_ratio = _air_resistance_ratio;
 }
 
 FixedRectangle Object::hit_box( ) const
@@ -621,19 +629,19 @@ Drawing Object::debug_overlay( ) const
 
     // physics
     // (only for objects on plane)
-    if (draw_physics && (z() == ONE))
+    if( draw_physics && ( z( ) == ONE ) )
     {
         // hit box
-        debug_overlay.draw(PHYSICS_COLOR, hit_box() - position(), HIT_BOX_THICKNESS, true);
+        debug_overlay.draw( PHYSICS_COLOR, hit_box( ) - position( ), HIT_BOX_THICKNESS, true );
 
         // center
-        debug_overlay.draw(PHYSICS_COLOR, Circle(DOT_RADIUS), FILLED);
+        debug_overlay.draw( PHYSICS_COLOR, Circle( DOT_RADIUS ), FILLED );
 
         // velocity
-        Vector velocity_graphic = velocity() * VELOCITY_SCALE;
-        if (velocity_graphic.magnitude() >= VELOCITY_MAGNITUDE_MINIMUM)
+        Vector velocity_graphic = velocity( ) * VELOCITY_SCALE;
+        if( velocity_graphic.magnitude( ) >= VELOCITY_MAGNITUDE_MINIMUM )
         {
-            debug_overlay.draw(PHYSICS_COLOR, velocity_graphic.origin(ORIGIN), VELOCITY_ARROW_LENGTH, VELOCITY_THICKNESS, true);
+            debug_overlay.draw( PHYSICS_COLOR, velocity_graphic.origin( ORIGIN ), VELOCITY_ARROW_LENGTH, VELOCITY_THICKNESS, true );
         }
     }
 

@@ -66,13 +66,13 @@ void Gopher::update( )
 
     m_reload.tick( );
 
-    if ( state( ) == EXPOSED )
+    if( state( ) == EXPOSED )
     {
-        if ( has_target( ) )
+        if( has_target( ) )
         {
             facing_left( target( )->position( ).x( ) < position( ).x( ) );
 
-            if ( !m_reload.remaining( ) )
+            if( !m_reload.remaining( ) )
             {
                 world( )->add_object( new DirtBall( world( ), 5.0, position( ), VectorA( Angle( position( ), target( )->position( ) ), 5.0 ) ) );
                 m_reload.reset( RELOAD_TIME );
@@ -85,7 +85,7 @@ void Gopher::render( )
 {
     Enemy::render( );
 
-    if ( state( ) == EXPOSED )
+    if( state( ) == EXPOSED )
     {
         draw( FUR_COLOR1, Rectangle( BODY_WIDTH, BODY_HEIGHT ) );
 
@@ -114,7 +114,7 @@ void Gopher::render( )
 
         draw_eyes( NOSE_OFFSET + Vector( EYE_SPACING_SIDE, EYE_SPACING_UP ) + head_offset, NOSE_OFFSET + Vector( -EYE_SPACING_SIDE, EYE_SPACING_UP ) + head_offset );
 
-        if ( facing_left( ) )
+        if( facing_left( ) )
         {
             mirror_y( );
         }

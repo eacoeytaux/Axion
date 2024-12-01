@@ -300,7 +300,7 @@ inline uint factorial( const uint n )
 inline uint pascal( const uint row, const uint col )
 {
     Assert( col <= row );
-    
+
     if( !row || !col || ( col == row ) )
     {
         return ONE;
@@ -318,12 +318,12 @@ inline uint pascal( const uint row, const uint col )
 inline varray<uint> pascal( const uint row )
 {
     varray<uint> v( row + ONE );
-    
+
     for_range( i, half( row ) + ONE )
     {
         v[ i ] = v[ row - i ] = pascal( row, i );
     }
-    
+
     return v;
 }
 
@@ -420,14 +420,14 @@ public:
         set( countdown );
         reset( );
     }
-    
+
     void set( const uint countdown )
     {
         m_countdown_top = countdown;
     }
 
     uint remaining( ) const { return m_countdown_remaining; }
-    
+
     default_equal( Counter );
 };
 
@@ -478,7 +478,7 @@ public:
 
         return *this;
     }
-    
+
     default_equal( Span );
 };
 
@@ -550,7 +550,7 @@ public:
     {
         value( m_value + delta, set_new_min_max_value );
     }
-    
+
     default_equal( Slider );
 };
 

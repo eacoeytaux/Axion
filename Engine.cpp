@@ -65,14 +65,14 @@ error Engine::run( World * world, const string _app_name )
 
     running = true;
 
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     try_return_error( Logger::init( ), error_not_init );
-#endif
+    #endif
 
     try_return_error( Random::seed( ), error_not_init );
 
     varray<Input *> inputs;
-    auto clear_inputs = [ & ]( )
+    auto clear_inputs = [ & ] ( )
     {
         for_each( input, inputs ) { safe_delete( input ); }
         inputs.clear( );
@@ -94,8 +94,8 @@ error Engine::run( World * world, const string _app_name )
             input_eng( inputs, world );
             world->input( inputs );
             clear_inputs( );
-            
-            sync_controllers( );
+
+            //sync_controllers( );
 
             if( !paused( ) )
             {
@@ -103,13 +103,13 @@ error Engine::run( World * world, const string _app_name )
             }
             else
             {
-#ifdef AXN_DEBUG
+                #ifdef AXN_DEBUG
                 if( b_step )
                 {
                     check_quit( world->update( ); );
                     b_step = false;
                 }
-#endif
+                #endif
                 world->pause( true );
             }
 
@@ -137,9 +137,9 @@ error Engine::run( World * world, const string _app_name )
     try_catch_error( clear_inputs( ) );
     try_catch_error( safe_delete( world ); );
 
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     try_catch_error( Logger::close( ) );
-#endif
+    #endif
 
     try_catch_error( close_eng( ) );
 

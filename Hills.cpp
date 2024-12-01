@@ -92,14 +92,14 @@ Hills::Hills( World * world, const Planc _base_bottom, const dec _z ) : Object( 
         }
     }
     
-    auto draw_tree_line = [ & ]( const Planc & _base, const Planc & _penumbra, const Color & _color )
+    auto draw_tree_line = [ & ] ( const Planc & _base, const Planc & _penumbra, const Color & _color )
     {
         draw( _color, Polygon( { Coordinate( start_x, _base ),
                                   Coordinate( start_x, bottom ),
                                   Coordinate( end_x, bottom ),
                                   Coordinate( end_x, _base ) } ) );
-        
-        auto fill_tree_line = [ & ]( const Planc & _y_raise, uint loops = 1 )
+
+        auto fill_tree_line = [ & ] ( const Planc & _y_raise, uint loops = 1 )
         {
             for_range( i, loops )
             {
@@ -107,18 +107,18 @@ Hills::Hills( World * world, const Planc _base_bottom, const dec _z ) : Object( 
                 while( center_x <= end_x )
                 {
                     center_x += Random::rPlanc( TREE_BASE );
-                    
+
                     Planc y = ZERO;
-                    if ( _y_raise )
+                    if( _y_raise )
                     {
                         y = _y_raise - ( log_base( _y_raise, Random::rPlanc( _y_raise ) + ONE ) * _y_raise );
                     }
-                    
+
                     draw( _color, Polygon( tree ).move( Vector( center_x, _base + y ) ) );
                 }
             }
         };
-        
+
         fill_tree_line( ZERO );
         fill_tree_line( TREE_LINE_PENUMBRA, TREE_LINE_PENUMBRA_PASSES );
     };

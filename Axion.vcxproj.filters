@@ -144,7 +144,7 @@
     <ClCompile Include="Fox.cpp">
       <Filter>Source Files\mt\mobs</Filter>
     </ClCompile>
-    <ClCompile Include="AspenTree.cpp">
+    <ClCompile Include="AspineTree.cpp">
       <Filter>Source Files\mt\environment</Filter>
     </ClCompile>
     <ClCompile Include="Bush.cpp">
@@ -198,7 +198,7 @@
     <ClCompile Include="Enemy.cpp">
       <Filter>Source Files\axn\world</Filter>
     </ClCompile>
-    <ClCompile Include="Porcupine.cpp">
+    <ClCompile Include="Porkupine.cpp">
       <Filter>Source Files\mt\mobs</Filter>
     </ClCompile>
   </ItemGroup>
@@ -356,7 +356,7 @@
     <ClInclude Include="Fox.hpp">
       <Filter>Source Files\mt\mobs</Filter>
     </ClInclude>
-    <ClInclude Include="AspenTree.hpp">
+    <ClInclude Include="AspineTree.hpp">
       <Filter>Source Files\mt\environment</Filter>
     </ClInclude>
     <ClInclude Include="Bush.hpp">
@@ -410,7 +410,7 @@
     <ClInclude Include="Enemy.hpp">
       <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="Porcupine.hpp">
+    <ClInclude Include="Porkupine.hpp">
       <Filter>Source Files\mt\mobs</Filter>
     </ClInclude>
   </ItemGroup>

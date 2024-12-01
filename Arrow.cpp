@@ -38,15 +38,17 @@ const Color SHAFT_COLOR = Color::rgb( 0x8B4513 );
 
 Arrow::Arrow( World * world, const Coordinate & tip, const Vector & launch_speed, const Color & _feather_color ) : Object( world, tip )
 {
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     m_draw_debug = true;
-#endif
-    
+    #endif
+
     interactive( true );
 
     solid( true );
 
-    gravity_ratio( 0.25 );
+    gravity_ratio( 0.5 );
+    air_resistance_ratio( 0.001 );
+
     velocity( launch_speed );
 
     m_feather_color = _feather_color;

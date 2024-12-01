@@ -6,22 +6,22 @@ bool Mob::draw_health = true;
 
 Mob::Mob( World * world, const Coordinate & _position, const dec _health ) : Object( world, _position )
 {
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     m_draw_debug = true;
-#endif
+    #endif
 
     solid( true );
     interactive( true );
 
     health( _health );
-    
+
     m_hurt_display.set( ONE );
 }
 
 void Mob::render( )
 {
     Object::render( );
-    
+
     if( m_hurt_display.remaining( ) )
     {
         hurt_display_settings( );
@@ -30,9 +30,9 @@ void Mob::render( )
 
 void Mob::hurt_display_settings( )
 {
-    filter_function( [ ]( Color & color )
+    filter_function( [ ] ( Color & color )
     {
-        color.r( ( ( ONE - color.r() ) * 0.25 ) + color.r() );
+        color.r( ( ( ONE - color.r( ) ) * 0.25 ) + color.r( ) );
         color.g( ZERO );
         color.b( ZERO );
     } );
@@ -44,10 +44,10 @@ void Mob::draw_eyes( const Coordinate & _position, const Angle & _angle )
     {
         Planc eye_width = m_eye_radius * TWO;
         Planc eye_height = eyes_closed( ) ? (Planc)ONE : ( eye_width * ( squinting( ) ? HALF : ONE ) );
-        
+
         Rectangle eye( eye_width, eye_height );
         eye.rotate( _angle ).move( _position );
-        
+
         draw( eye_color( ), eye );
     }
 }
@@ -60,17 +60,17 @@ void Mob::eye_info( const Planc _eye_radius, const uint _blink_duration, const S
     m_blink_duration = _blink_duration;
     m_blink_wait_span = _blink_wait_span;
     m_eye_color = _eye_color;
-    
+
     m_blink_wait_counter.reset( Random::rint( m_blink_wait_span ) );
     m_blink_duration_counter.reset( m_blink_duration );
-    
+
     m_eye_info_set = true;
 }
 
 void Mob::update( )
 {
     Object::update( );
-    
+
     m_hurt_display.tick( );
     m_invincible_counter.tick( );
 
@@ -198,51 +198,51 @@ Drawing Mob::debug_overlay( ) const
     const dec HEALTH_BAR_TO_OBJECT_RATIO = 1.2;
     const Planc HEALTH_BAR_HEIGHT = 5.0;
     const Planc HEALTH_BAR_OFFSET = HEALTH_BAR_HEIGHT;
-    
+
     const dec RED_START = 0.1;
     const dec YELLOW_START = 0.5;
     Assert( RED_START < YELLOW_START );
-    
+
     Drawing debug_overlay;
-    
-    if (draw_health)
+
+    if( draw_health )
     {
         // if( !invincible_always( ) )
         {
-            Planc health_width = max(HEALTH_BAR_WIDTH_MIN, hit_box().width() * HEALTH_BAR_TO_OBJECT_RATIO);
+            Planc health_width = max( HEALTH_BAR_WIDTH_MIN, hit_box( ).width( ) * HEALTH_BAR_TO_OBJECT_RATIO );
             Planc health_height = HEALTH_BAR_HEIGHT;
-            Coordinate offset(ZERO, -(hit_box().height().half() + (health_height * 1.5) + HEALTH_BAR_BORDER_WIDTH));
+            Coordinate offset( ZERO, -( hit_box( ).height( ).half( ) + ( health_height * 1.5 ) + HEALTH_BAR_BORDER_WIDTH ) );
 
-            debug_overlay.draw(BLACK, Rectangle(health_width, health_height, offset));
+            debug_overlay.draw( BLACK, Rectangle( health_width, health_height, offset ) );
 
-            if (alive())
+            if( alive( ) )
             {
-                dec health_percentage = health() / max_health();
-                Assert(in_range(health_percentage, ZERO, ONE, true));
+                dec health_percentage = health( ) / max_health( );
+                Assert( in_range( health_percentage, ZERO, ONE, true ) );
 
                 Color health_color;
-                if (health_percentage == ONE)
+                if( health_percentage == ONE )
                 {
                     health_color = GREEN;
                 }
-                else if (health_percentage >= YELLOW_START)
+                else if( health_percentage >= YELLOW_START )
                 {
-                    health_color = ColorSlider(YELLOW, GREEN).color_at((health_percentage - YELLOW_START) * inverse(ONE - YELLOW_START));
+                    health_color = ColorSlider( YELLOW, GREEN ).color_at( ( health_percentage - YELLOW_START ) * inverse( ONE - YELLOW_START ) );
                 }
-                else if (health_percentage >= RED_START)
+                else if( health_percentage >= RED_START )
                 {
-                    health_color = ColorSlider(RED, YELLOW).color_at((health_percentage - RED_START) * inverse(ONE - RED_START));
+                    health_color = ColorSlider( RED, YELLOW ).color_at( ( health_percentage - RED_START ) * inverse( ONE - RED_START ) );
                 }
                 else
                 {
                     health_color = RED;
                 }
 
-                debug_overlay.draw(health_color, Rectangle(health_width * health_percentage, health_height,
-                    offset + VectorX((health_width.half() * health_percentage) - health_width.half())));
+                debug_overlay.draw( health_color, Rectangle( health_width * health_percentage, health_height,
+                                                             offset + VectorX( ( health_width.half( ) * health_percentage ) - health_width.half( ) ) ) );
             }
 
-            debug_overlay.draw(WHITE, Rectangle(health_width, health_height, offset), HEALTH_BAR_BORDER_WIDTH, true);
+            debug_overlay.draw( WHITE, Rectangle( health_width, health_height, offset ), HEALTH_BAR_BORDER_WIDTH, true );
         }
     }
 

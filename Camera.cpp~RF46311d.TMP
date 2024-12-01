@@ -25,7 +25,7 @@ Camera::Camera( World * world, const Planc & _width, const Planc & _height, cons
     zoom( _zoom );
 
     hud_offset_percentage( DEFAULT_HUD_OFFSET );
-    show_hud( false );
+    show_hud(false);
 }
 
 void Camera::clear_all( )
@@ -45,7 +45,7 @@ void Camera::clear_subjects( )
     m_owned_subjects.clear( );
     m_subjects.clear( );
 
-    #ifdef AXN_DEBUG
+#ifdef AXN_DEBUG
     for_each( subject, m_owned_debug_subjects )
     {
         safe_delete( subject );
@@ -53,7 +53,7 @@ void Camera::clear_subjects( )
 
     m_owned_debug_subjects.clear( );
     m_debug_subjects.clear( );
-    #endif
+#endif
 }
 
 void Camera::clear_screen_effects( )
@@ -157,7 +157,7 @@ void Camera::render( )
                     {
                         ogl::scale( _zoom * _z );
                         ogl::translate( -_camera_center.x( ),
-                                        -_camera_center.y( ) );
+                            -_camera_center.y( ) );
                     }
                 }
 
@@ -290,19 +290,19 @@ void Camera::render( )
 
                             ogl::scale( _zoom );
                             ogl::translate( -_camera_center.x( ),
-                                            -_camera_center.y( ) );
+                                -_camera_center.y( ) );
 
                             for_each( light, _light_sources )
                             {
                                 render_convex_polygon( { TRANSPARENT },
-                                                       Circle( light.radius( ) * ( ( i * LIGHTING_RADIUS_GROW * pow( LIGHTING_RADIUS_GROW_EXPONENT, i ) ) + 1 ), light.position( ) ).coordinates( ) );
+                                    Circle( light.radius( ) * ( ( i * LIGHTING_RADIUS_GROW * pow( LIGHTING_RADIUS_GROW_EXPONENT, i ) ) + 1 ), light.position( ) ).coordinates( ) );
                             }
                         }
                         ogl::pop_matrix( );
 
                         ogl::depth_not_equal( );
                         render_convex_polygon( { BLACK.a( min( ONE, ( (dec)( i + 1 ) / (dec)LIGHTING_LAYERS ) ) * lighting->darkness_intensity( ) ) },
-                                               Rectangle( screen_width, screen_height ).coordinates( ) );
+                            Rectangle( screen_width, screen_height ).coordinates( ) );
                     }
                 }
             }
@@ -310,11 +310,11 @@ void Camera::render( )
 
         auto render_world_bounds = [ & ] ( )
         {
-            #ifdef AXN_DEBUG
+#ifdef AXN_DEBUG
             const Color COLOR = BLACK.a( 0.5 );
-            #else
+#else
             const Color COLOR = WHITE;
-            #endif
+#endif
 
             ogl::clear_depth( );
             ogl::depth_not_equal( );
@@ -328,11 +328,11 @@ void Camera::render( )
 
         auto render_camera_bounds = [ & ] ( )
         {
-            #ifdef AXN_DEBUG
+#ifdef AXN_DEBUG
             const Color COLOR = ( Debug::active && m_draw_debug ) ? BLACK.a( 0.5 ) : BLACK;
-            #else
+#else
             const Color COLOR = BLACK;
-            #endif
+#endif
 
             ogl::clear_depth( );
             ogl::depth_not_equal( );
@@ -378,7 +378,7 @@ void Camera::render( )
 
         auto render_debug_elements = [ & ] ( )
         {
-            #ifdef AXN_DEBUG
+#ifdef AXN_DEBUG
             if( Debug::active )
             {
                 // // todo move to world probably
@@ -413,7 +413,7 @@ void Camera::render( )
                     render_visible( new Visible( debug_overlay_drawing( ) ), true );
                 }
             }
-            #endif
+#endif
         };
 
         render_subjects( );
@@ -466,7 +466,7 @@ Drawing Camera::debug_overlay_drawing( ) const
 
     const Planc _width = width( );
     const Planc _height = height( );
-
+    
     const Planc _half_width = half( _width );
     const Planc _half_height = half( _height );
 
@@ -485,19 +485,19 @@ Drawing Camera::debug_overlay_drawing( ) const
     overlay_drawing.draw( MAIN_COLOR,
                           Line( Coordinate( -_half_width, -_half_height ),
                                 Coordinate( _half_width, -_half_height ) ),
-                          BORDER_LINE_THICKNESS, true, true );
+                         BORDER_LINE_THICKNESS, true, true );
     overlay_drawing.draw( MAIN_COLOR,
                           Line( Coordinate( -_half_width, _half_height ),
                                 Coordinate( _half_width, _half_height ) ),
-                          BORDER_LINE_THICKNESS, true, true );
+                         BORDER_LINE_THICKNESS, true, true );
     overlay_drawing.draw( MAIN_COLOR,
                           Line( Coordinate( -_half_width, -_half_height ),
                                 Coordinate( -_half_width, _half_height ) ),
-                          BORDER_LINE_THICKNESS, true, true );
+                         BORDER_LINE_THICKNESS, true, true );
     overlay_drawing.draw( MAIN_COLOR,
                           Line( Coordinate( _half_width, -_half_height ),
                                 Coordinate( _half_width, _half_height ) ),
-                          BORDER_LINE_THICKNESS, true, true );
+                         BORDER_LINE_THICKNESS, true, true );
 
     overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
                           Line( Coordinate( -_half_width, ZERO ),
@@ -621,7 +621,7 @@ void Camera::zoom( const dec _zoom )
     {
         return;
     }
-
+    
     Coordinate pre_target_offset = target_offset( );
 
     Coordinate cursor_screen_position = world_to_screen( cursor_world_position( ) );
@@ -671,7 +671,7 @@ bool Camera::in_view( const Coordinate & _world_position, const dec _z ) const
     {
         return true;
     }
-
+    
     Coordinate screen_position = world_to_screen( _world_position );
     return in_range( screen_position.x( ), width( ) / _z ) && in_range( screen_position.y( ), height( ) / _z );
 }
@@ -682,13 +682,13 @@ bool Camera::in_view( const FixedRectangle & _world_bounding_box, const dec _z )
     {
         return true;
     }
-
+    
     Coordinate top = world_to_screen( _world_bounding_box.top( ) );
     Coordinate bottom = world_to_screen( _world_bounding_box.bottom( ) );
-
+    
     FixedRectangle bounds( bottom, top );
     FixedRectangle screen( width( ) / _z, height( ) / _z, world_to_screen( center( ) ) );
-
+    
     return screen.has_intersection_with( bounds );
 }
 

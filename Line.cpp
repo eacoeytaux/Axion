@@ -90,10 +90,10 @@ Vector Line::vector( ) const
 Line & Line::transform( const Transform & _transform )
 {
     Transformable::transform( _transform );
-    
+
     m_c1 = _transform.transform( m_c1 );
     m_c2 = _transform.transform( m_c2 );
-    
+
     return evaluate( );
 }
 

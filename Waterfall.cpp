@@ -25,7 +25,7 @@ const Color FOAM_COLOR = WHITE;
 Waterfall::Waterfall( World * _world, const Coordinate & _bottom, const Planc _width, const Planc _height, const dec _z ) : Object( _world, _bottom )
 {
     background( true );
-    
+
     needs_render_always( true );
 
     z( _z );
@@ -78,6 +78,8 @@ void Waterfall::update( )
         foam.position += foam.movement;
         foam.alpha -= FOAM_ALPHA_SHRINK;
     }
-    m_foam.erase_if( []( const Foam & foam )
-                     { return ( ( foam.alpha <= ZERO ) || ( foam.radius <= FOAM_RADIUS_MIN ) || ( foam.position.y( ) < -foam.radius ) ); } );
+    m_foam.erase_if( [ ] ( const Foam & foam )
+    {
+        return ( ( foam.alpha <= ZERO ) || ( foam.radius <= FOAM_RADIUS_MIN ) || ( foam.position.y( ) < -foam.radius ) );
+    } );
 }

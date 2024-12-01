@@ -19,17 +19,17 @@ public:
 
     Coordinate position( ) const;
     void position( const Coordinate & position );
-    
+
     Polygon space( ) const;
     void space( const Polygon & space );
-    
+
     dec mass( ) const;
     void mass( dec mass );
-    
+
     Vector velocity( ) const;
     void velocity( const Vector & velocity );
     void add_velocity( const Vector & velocity );
-    
+
     void move( const Vector & );
 
     bool solid( ) const;

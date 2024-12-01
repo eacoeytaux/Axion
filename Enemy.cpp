@@ -33,8 +33,8 @@ void Enemy::sight_range( const Planc & _range )
 {
     Assert( !is_negative( _range ) );
     m_sight_range = _range;
-    
-    if ( !alert_range( ) || ( alert_range( ) > sight_range( ) ) )
+
+    if( !alert_range( ) || ( alert_range( ) > sight_range( ) ) )
     {
         alert_range( sight_range( ) );
     }
@@ -42,15 +42,15 @@ void Enemy::sight_range( const Planc & _range )
 
 bool Enemy::in_sight_range( const Player * player ) const
 {
-    return !sight_range( ) || position( ).in_distance_range( player->position( ), sight_range( ) );
+    return ( !sight_range( ) || position( ).in_distance_range( player->position( ), sight_range( ) ) );
 }
 
 void Enemy::alert_range( const Planc & _range )
 {
     Assert( !is_negative( _range ) );
     m_alert_range = _range;
-    
-    if ( sight_range( ) && ( sight_range( ) < alert_range( ) ) )
+
+    if( sight_range( ) && ( sight_range( ) < alert_range( ) ) )
     {
         sight_range( alert_range( ) );
     }
@@ -58,7 +58,7 @@ void Enemy::alert_range( const Planc & _range )
 
 bool Enemy::in_alert_range( const Player * player ) const
 {
-    return !alert_range( ) || position( ).in_distance_range( player->position( ), alert_range( ) );
+    return ( !alert_range( ) || position( ).in_distance_range( player->position( ), alert_range( ) ) );
 }
 
 #ifdef AXN_DEBUG
@@ -70,25 +70,25 @@ Drawing Enemy::debug_overlay( ) const
     const dec ALPHA_INNER = ALPHA * 0.1;
     const Color SIGHT_LINE_COLOR = GREEN.a( ALPHA );
     const Color ALERT_LINE_COLOR = RED.a( ALPHA );
-    
+
     Drawing debug_overlay;
 
-    if (Object::draw_physics)
+    if( Object::draw_physics )
     {
-        if (has_target())
+        if( has_target( ) )
         {
-            debug_overlay.draw(SIGHT_LINE_COLOR, Line(ORIGIN, target()->position() - position()), SIGHT_LINE_THICKNESS, true);
+            debug_overlay.draw( SIGHT_LINE_COLOR, Line( ORIGIN, target( )->position( ) - position( ) ), SIGHT_LINE_THICKNESS, true );
 
-            if (sight_range())
+            if( sight_range( ) )
             {
-                debug_overlay.draw(SIGHT_LINE_COLOR.a(ALPHA_INNER), Circle(sight_range()));
-                debug_overlay.draw(SIGHT_LINE_COLOR, Circle(sight_range()), ALERT_LINE_THICKNESS, true);
+                debug_overlay.draw( SIGHT_LINE_COLOR.a( ALPHA_INNER ), Circle( sight_range( ) ) );
+                debug_overlay.draw( SIGHT_LINE_COLOR, Circle( sight_range( ) ), ALERT_LINE_THICKNESS, true );
             }
         }
-        else if (alert_range())
+        else if( alert_range( ) )
         {
-            debug_overlay.draw(ALERT_LINE_COLOR.a(ALPHA_INNER), Circle(alert_range()));
-            debug_overlay.draw(ALERT_LINE_COLOR, Circle(alert_range()), ALERT_LINE_THICKNESS, true);
+            debug_overlay.draw( ALERT_LINE_COLOR.a( ALPHA_INNER ), Circle( alert_range( ) ) );
+            debug_overlay.draw( ALERT_LINE_COLOR, Circle( alert_range( ) ), ALERT_LINE_THICKNESS, true );
         }
     }
 

@@ -39,13 +39,13 @@ error Logger::init( const bool _file )
     {
         Clock clock;
 
-#if defined( OS_WINDOWS )
+        #if defined( OS_WINDOWS )
         fopen_s( &log_file, ( LOG_DIRECTORY + clock.timestamp( '.' ) + "." + clock.datestamp( '.' ) + ".log" ).c_str( ), "w + " );
-#elif defined( OS_APPLE )
+        #elif defined( OS_APPLE )
         log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( '.' ) + "." + clock.datestamp( '.' ) + ".log" ).c_str( ), "w+" );
-#elif defined( OS_LINUX )
+        #elif defined( OS_LINUX )
         log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( '.' ) + "." + clock.datestamp( '.' ) + ".log" ).c_str( ), "w+" );
-#endif
+        #endif
 
         if( !( b_using_file = log_file ) )
         {
@@ -76,31 +76,31 @@ error Logger::log_message( MessageType _type, const char * _entry, ... )
         char * type_str;
         switch( _type )
         {
-            case INFO_LOG :
+            case INFO_LOG:
             {
                 type = true;
                 type_str = (char *)"INFO";
                 break;
             }
-            case WARNING_LOG :
+            case WARNING_LOG:
             {
                 type = true;
                 type_str = (char *)"WARNING";
                 break;
             }
-            case ERROR_LOG :
+            case ERROR_LOG:
             {
                 type = true;
                 type_str = (char *)"ERROR";
                 break;
             }
-            case DEBUG_LOG :
+            case DEBUG_LOG:
             {
                 type = true;
                 type_str = (char *)"DEBUG";
                 break;
             }
-            default :
+            default:
             {
                 type = false;
                 type_str = (char *)"";

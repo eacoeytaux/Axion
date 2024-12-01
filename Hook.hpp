@@ -22,14 +22,14 @@ public:
 
     Coordinate hook_tip( ) const;
     Coordinate hook_base( ) const;
-    
+
     Planc rope_length( ) const { return m_rope_length; }
     Planc max_rope_length( ) const { return m_max_rope_length; }
 
     void fire( const Vector & launch_speed );
     void retract( );
     void load( );
-    
+
 protected:
     virtual bool collide( Object * ) override;
 
@@ -41,7 +41,7 @@ private:
     Planc m_max_rope_length;
     Planc m_rope_growth_speed;
     Planc m_rope_retract_speed;
-    
+
     STATE( LOADED,
            HOOKED,
            FIRING,

@@ -18,21 +18,21 @@ class Polygon : public Transformable
 {
 public:
     static uint circle_precision( dec perimeter = TAU );
-    
+
     static Polygon equilateral( uint side_count, const Planc & radius = 1.0, const Coordinate & center = ORIGIN, Angle rotation = Angle( 0 ) );
-    
+
     static Polygon expand( const Polygon & polygon, const Planc & expansion );
 
     virtual ~Polygon( ) { }
 
     Polygon( const varray<Coordinate> & coordinates = { }, const Transform & = IDENTITY_TRANSFORM );
-    
+
     transform_functions( Polygon );
 
     const varray<Coordinate> & coordinates( ) const;
 
     Path perimeter( ) const;
-    
+
     varray<Polygon> triangles( ) const;
     varray<Polygon> convex_partitions( ) const;
 
@@ -60,10 +60,10 @@ public:
     bool operator==( const Polygon & _polygon ) const;
     default_non_equal( Polygon );
 
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     const varray<Coordinate> & coordinates_raw( ) const { return m_coordinates_raw; }
-#endif
-    
+    #endif
+
 private:
     varray<Coordinate> m_coordinates_raw;
     mutable varray<Coordinate> m_coordinates;
@@ -73,14 +73,14 @@ private:
     mutable Planc m_lower_bound_y = P0;
     mutable Planc m_upper_bound_x = P0;
     mutable Planc m_upper_bound_y = P0;
-    
+
     bool m_convex;
-    
+
     bool m_processed = false;
     void process( const varray<Coordinate> & );
-    
+
     void apply_transform( ) const;
-    
+
     virtual const Polygon & dirty( ) const override;
 };
 

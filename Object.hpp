@@ -18,24 +18,24 @@ class TerrainEdge;
 class Object : public Identifiable, public Visible, public Matter
 {
 
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
 private:
     static uint total_objects;
-#endif
+    #endif
 public:
     virtual ~Object( );
-    
+
     Object( World * world );
     Object( World * world, const Coordinate & position, const Vector & velocity = ZERO_VECTOR );
     Object( World * world, const Vector & position_velocity );
-    
+
 private:
     bool m_initialized = false;
     void init( );
-    
+
 public:
     uint age( ) const { return m_age; }
-    
+
     World * world( ) const { return m_world; }
 
 protected:
@@ -43,14 +43,14 @@ protected:
 
 public:
     void render_object( );
-    
+
     Drawing trajection_drawing( const Planc & distance, const Color & path_color, const dec alpha_start = ONE, const dec alpha_end = ZERO ) const;
 
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     bool m_draw_debug = false;
     static bool draw_physics;
     virtual Drawing debug_overlay( ) const;
-#endif
+    #endif
 
 protected:
     virtual void update( );
@@ -63,38 +63,41 @@ public:
 
     virtual Planc width( ) const;
     virtual Planc height( ) const;
-    
+
     bool deleted( ) const { return m_deleted; }
     virtual void mark_deleted( ) { m_deleted = true; }
 
     bool marked_to_delete( ) const { return m_marked_to_delete; }
     virtual void mark_to_delete( ) { m_marked_to_delete = true; }
-    
+
     // todo make setters protected?
-    
+
     bool foreground( ) const;
     void foreground( bool );
-    
+
     bool background( ) const;
     void background( bool );
 
     bool interactive( ) const;
     void interactive( bool );
-    
+
     bool stationary( ) const;
     void stationary( bool );
-    
+
     dec gravity_ratio( ) const;
     void gravity_ratio( dec );
     void normal_gravity( ) { return gravity_ratio( ONE ); }
     void no_gravity( ) { return gravity_ratio( ZERO ); }
     bool has_gravity( ) const { return gravity_ratio( ); }
-    
+
+    dec air_resistance_ratio( ) const;
+    void air_resistance_ratio( dec );
+
     bool terrain_boundaries( ) const;
     void terrain_boundaries( bool );
-    
+
     TerrainEdge * ground( ) const;
-    
+
     bool passing_terrain( ) const { return m_passing_terrain; }
     void passing_terrain( bool b ) { m_passing_terrain = b; }
 
@@ -128,13 +131,13 @@ protected:
 
 private:
     World * m_world = nullptr;
-    
+
     uint m_age = ZERO;
     uint m_last_world_age_update = ZERO;
-    
+
     bool m_deleted = false;
     bool m_marked_to_delete = false;
-    
+
     bool m_foreground = false;
     bool m_background = false;
 
@@ -145,7 +148,8 @@ private:
     bool m_passing_terrain = false;
 
     dec m_gravity_ratio = ONE;
-    
+    dec m_air_resistance_ratio = AIR_RESISTANCE;
+
     bool m_interactive = false;
     bool m_stationary = false;
     bool m_terrain_boundaries = true;

@@ -38,13 +38,13 @@ int error_check_gl( )
 
 error ogl::error_check( )
 {
-    if (!m_disable_error_check)
+    if( !m_disable_error_check )
     {
-        m_error_code = error_check_gl();
-        if (m_error_code)
+        m_error_code = error_check_gl( );
+        if( m_error_code )
         {
             m_error = error_system;
-            Assert();
+            Assert( );
         }
     }
 
@@ -53,7 +53,7 @@ error ogl::error_check( )
 
 error ogl::reset( )
 {
-    error_check();
+    error_check( );
 
     while( m_matrix_stack_count )
     {
@@ -80,7 +80,7 @@ error ogl::reset( )
     enable( GL_STENCIL_TEST );
     stencil_add( );
     stencil_mask( false );
-    stencil_always();
+    stencil_always( );
 
     {
         // GLchar * shader_vertex_text[] = {
@@ -223,7 +223,7 @@ error ogl::clear( )
 error ogl::clear_color( const dec _r, const dec _g, const dec _b )
 {
     glClearColor( _r, _g, _b, 1.0 );
-    error_check();
+    error_check( );
 
     return clear( GL_COLOR_BUFFER_BIT );
 }
@@ -235,13 +235,13 @@ error ogl::clear_depth( )
     depth_mask( true );
 
     glClearDepth( 0 );
-    error_check();
-    
+    error_check( );
+
     clear( GL_DEPTH_BUFFER_BIT );
 
-    depth_mask(mask);
-    
-    return error_check();
+    depth_mask( mask );
+
+    return error_check( );
 }
 
 error ogl::clear_stencil( )
@@ -251,13 +251,13 @@ error ogl::clear_stencil( )
     stencil_mask( true );
 
     glClearStencil( 0 );
-    error_check();
+    error_check( );
 
     clear( GL_STENCIL_BUFFER_BIT );
 
     stencil_mask( mask );
-    
-    return error_check();
+
+    return error_check( );
 }
 
 error ogl::load_identity( )
@@ -376,7 +376,7 @@ error ogl::begin( const int _gl_enum )
 error ogl::end( )
 {
     glEnd( );
-    if (m_disable_error_check)
+    if( m_disable_error_check )
     {
         m_disable_error_check = false;
     }
@@ -477,16 +477,16 @@ error ogl::blend_normal( )
 error ogl::blend_clear( )
 {
     enable( GL_BLEND );
-    glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
     // glBlendEquation( GL_FUNC_ADD );
     return error_check( );
 }
 
 error ogl::enable_anti_alias( )
 {
-#ifndef OS_WINDOWS
+    #ifndef OS_WINDOWS
     enable( GL_MULTISAMPLE );
-#endif
+    #endif
 
     enable( GL_LINE_SMOOTH );
     enable( GL_POLYGON_SMOOTH );
@@ -502,9 +502,9 @@ error ogl::enable_anti_alias( )
 
 error ogl::disable_anti_alias( )
 {
-#ifndef OS_WINDOWS
+    #ifndef OS_WINDOWS
     disable( GL_MULTISAMPLE );
-#endif
+    #endif
 
     disable( GL_LINE_SMOOTH );
     disable( GL_POLYGON_SMOOTH );
@@ -558,86 +558,86 @@ error ogl::depth_less( )
     return depth_func( GL_LESS );
 }
 
-error ogl::depth_mask(const bool b)
+error ogl::depth_mask( const bool b )
 {
     m_depth_mask = b;
-    glDepthMask(m_depth_mask ? 0xFF : 0x0);
-    return ogl::error_check();
+    glDepthMask( m_depth_mask ? 0xFF : 0x0 );
+    return ogl::error_check( );
 }
 
-bool ogl::depth_mask()
+bool ogl::depth_mask( )
 {
     return m_depth_mask;
 }
 
-error ogl::stencil_func(const int _gl_enum)
+error ogl::stencil_func( const int _gl_enum )
 {
-    glStencilFunc(_gl_enum, 1, 0xFF);
-    return ogl::error_check();
+    glStencilFunc( _gl_enum, 1, 0xFF );
+    return ogl::error_check( );
 }
 
-error ogl::stencil_always()
+error ogl::stencil_always( )
 {
-    return stencil_func(GL_ALWAYS);
+    return stencil_func( GL_ALWAYS );
 }
 
-error ogl::stencil_never()
+error ogl::stencil_never( )
 {
-    return stencil_func(GL_NEVER);
+    return stencil_func( GL_NEVER );
 }
 
-error ogl::stencil_equal()
+error ogl::stencil_equal( )
 {
-    return stencil_func(GL_EQUAL);
+    return stencil_func( GL_EQUAL );
 }
 
-error ogl::stencil_not_equal()
+error ogl::stencil_not_equal( )
 {
-    return stencil_func(GL_NOTEQUAL);
+    return stencil_func( GL_NOTEQUAL );
 }
 
-error ogl::stencil_equal_greater()
+error ogl::stencil_equal_greater( )
 {
-    return stencil_func(GL_GEQUAL);
+    return stencil_func( GL_GEQUAL );
 }
 
-error ogl::stencil_greater()
+error ogl::stencil_greater( )
 {
-    return stencil_func(GL_GREATER);
+    return stencil_func( GL_GREATER );
 }
 
-error ogl::stencil_equal_less()
+error ogl::stencil_equal_less( )
 {
-    return stencil_func(GL_LEQUAL);
+    return stencil_func( GL_LEQUAL );
 }
 
-error ogl::stencil_less()
+error ogl::stencil_less( )
 {
-    return stencil_func(GL_LESS);
+    return stencil_func( GL_LESS );
 }
 
-error ogl::stencil_mask(const bool b)
+error ogl::stencil_mask( const bool b )
 {
     m_stencil_mask = b;
-    glStencilMask(m_stencil_mask ? 0xFF : 0x0);
-    return error_check();
+    glStencilMask( m_stencil_mask ? 0xFF : 0x0 );
+    return error_check( );
 }
 
-bool ogl::stencil_mask()
+bool ogl::stencil_mask( )
 {
     return m_stencil_mask;
 }
 
-error ogl::stencil_add()
+error ogl::stencil_add( )
 {
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-    return error_check();
+    glStencilOp( GL_KEEP, GL_KEEP, GL_REPLACE );
+    return error_check( );
 }
 
-error ogl::stencil_remove()
+error ogl::stencil_remove( )
 {
-    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
-    return error_check();
+    glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO );
+    return error_check( );
 }
 
 } // namespace axn

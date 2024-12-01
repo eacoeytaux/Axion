@@ -60,7 +60,7 @@ void World::init( )
     create( );
 
     add_objects_from_queue( );
-    
+
     // age world before adding player
     for_range( i, START_AGE )
     {
@@ -89,129 +89,129 @@ void World::input( const varray<Input *> & _inputs )
             bool held = ( dynamic == KeyInput::HELD );
             bool down = ( pressed || held );
 
-            if ( pressed )
+            if( pressed )
             {
-                switch ( key )
+                switch( key )
                 {
-                default:
-                {
-                    break;
-                }
-                case 27:
-                { // esc key
-                    Engine::quit( );
-                    return;
-                }
-                case 'p':
-                {
-                    Engine::pause( !Engine::paused( ) );
-                    break;
-                };
-                case '\\':
-                {
-                    Engine::sync_controllers( );
-                    break;
-                };
+                    default:
+                    {
+                        break;
+                    }
+                    case 27:
+                    { // esc key
+                        Engine::quit( );
+                        return;
+                    }
+                    case 'p':
+                    {
+                        Engine::pause( !Engine::paused( ) );
+                        break;
+                    };
+                    case '\\':
+                    {
+                        Engine::sync_controllers( );
+                        break;
+                    };
 
-                case ';':
-                {
-                    reset( );
-                    break;
-                }
+                    case ';':
+                    {
+                        reset( );
+                        break;
+                    }
 
-                case 9:
-                { // tab
-                    m_camera->show_hud( !m_camera->show_hud( ) );
-                    break;
-                }
+                    case 9:
+                    { // tab
+                        m_camera->show_hud( !m_camera->show_hud( ) );
+                        break;
+                    }
 
-#ifdef AXN_DEBUG
-                case '\'':
-                {
-                    Engine::step( );
-                    break;
-                };
+                    #ifdef AXN_DEBUG
+                    case '\'':
+                    {
+                        Engine::step( );
+                        break;
+                    };
 
-                case 'l':
-                {
-                    m_lighting_active = !m_lighting_active;
-                    break;
-                }
+                    case 'l':
+                    {
+                        m_lighting_active = !m_lighting_active;
+                        break;
+                    }
 
-                case '.':
-                {
-                    m_camera->zoom( m_camera->zoom( ) / CAMERA_ZOOM_RATIO );
-                    break;
-                }
-                case ',':
-                {
-                    m_camera->zoom( m_camera->zoom( ) * CAMERA_ZOOM_RATIO );
-                    break;
-                }
-                case '/':
-                {
-                    m_camera->zoom( ONE );
-                    break;
-                };
+                    case '.':
+                    {
+                        m_camera->zoom( m_camera->zoom( ) / CAMERA_ZOOM_RATIO );
+                        break;
+                    }
+                    case ',':
+                    {
+                        m_camera->zoom( m_camera->zoom( ) * CAMERA_ZOOM_RATIO );
+                        break;
+                    }
+                    case '/':
+                    {
+                        m_camera->zoom( ONE );
+                        break;
+                    };
 
-                case '=':
-                {
-                    Engine::volume_up( );
-                    break;
-                }
-                case '-':
-                {
-                    Engine::volume_down( );
-                    break;
-                }
-                case '0':
-                {
-                    Engine::mute( !Engine::muted( ) );
-                    break;
-                }
+                    case '=':
+                    {
+                        Engine::volume_up( );
+                        break;
+                    }
+                    case '-':
+                    {
+                        Engine::volume_down( );
+                        break;
+                    }
+                    case '0':
+                    {
+                        Engine::mute( !Engine::muted( ) );
+                        break;
+                    }
 
-                case '1':
-                {
-                    Mob::draw_health = !Mob::draw_health;
-                    break;
-                }
+                    case '1':
+                    {
+                        Mob::draw_health = !Mob::draw_health;
+                        break;
+                    }
 
-                case '2':
-                {
-                    Object::draw_physics = !Object::draw_physics;
-                    break;
-                }
+                    case '2':
+                    {
+                        Object::draw_physics = !Object::draw_physics;
+                        break;
+                    }
 
-                case '3':
-                {
-                    m_draw_grid = !m_draw_grid;
-                    break;
-                }
+                    case '3':
+                    {
+                        m_draw_grid = !m_draw_grid;
+                        break;
+                    }
 
-                case '4':
-                {
-                    m_display_forebackground = !m_display_forebackground;
-                    break;
-                }
+                    case '4':
+                    {
+                        m_display_forebackground = !m_display_forebackground;
+                        break;
+                    }
 
-                case '8':
-                {
-                    m_camera->m_draw_debug = !m_camera->m_draw_debug;
-                    break;
-                }
+                    case '8':
+                    {
+                        m_camera->m_draw_debug = !m_camera->m_draw_debug;
+                        break;
+                    }
 
-                case '9':
-                {
-                    Engine::anti_alias( !Engine::anti_alias( ) );
-                    break;
-                }
+                    case '9':
+                    {
+                        Engine::anti_alias( !Engine::anti_alias( ) );
+                        break;
+                    }
 
-                case '`':
-                {
-                    Debug::active = !Debug::active;
-                    break;
-                }
-#endif
+                    case '`':
+                    {
+                        Debug::active = !Debug::active;
+                        break;
+                    }
+                    #endif
                 }
             }
         }
@@ -244,22 +244,22 @@ void World::input( const varray<Input *> & _inputs )
 
         if( ControllerButtonInput * button_input = dynamic_cast<ControllerButtonInput *>( input ) )
         {
-            if ( button_input->dynamic == ControllerButtonInput::PRESSED )
+            if( button_input->dynamic == ControllerButtonInput::PRESSED )
             {
-                switch ( button_input->button )
+                switch( button_input->button )
                 {
                     case ControllerButtonInput::START_BUTTON:
                     {
                         Engine::pause( !Engine::paused( ) );
                         break;
                     }
-#ifdef AXN_DEBUG
+                    #ifdef AXN_DEBUG
                     case ControllerButtonInput::START_OPPOSITE_BUTTON:
                     {
                         Engine::step( );
                         break;
                     }
-#endif
+                    #endif
                 }
             }
         }
@@ -268,7 +268,7 @@ void World::input( const varray<Input *> & _inputs )
         {
             if( joystick_input->joystick == ControllerJoystickInput::LEFT_JOYSTICK )
             {
-      
+
             }
 
             if( joystick_input->joystick == ControllerJoystickInput::RIGHT_JOYSTICK )
@@ -357,8 +357,8 @@ void World::render_object_grid( Camera * camera, const bool _fill_blocks, functi
 
     if( _fill_blocks )
     {
-        grid.traverse( [ & ]( Grid::Block & block )
-                       {
+        grid.traverse( [ & ] ( Grid::Block & block )
+        {
             if( fill_block( block ) )
             {
                 grid_drawing.draw( FILLED_BLOCK_COLOR, Polygon( {
@@ -366,7 +366,8 @@ void World::render_object_grid( Camera * camera, const bool _fill_blocks, functi
                     Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x + 1 ) ), top.x( ) ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y ) ),
                     Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x + 1 ) ), top.x( ) ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y + 1 ) ), top.y( ) ) ),
                     Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y + 1 ) ), top.y( ) ) ) } ) );
-            } } );
+            }
+        } );
     }
 
     for_range( x, grid.x_range( ).range( ) - 1 )
@@ -391,104 +392,108 @@ void World::render( )
     camera->clear_subjects( );
 
     m_lighting->clear_light_sources( );
-    
-#ifdef AXN_DEBUG
+
+    #ifdef AXN_DEBUG
     if( m_display_forebackground )
-#endif
+        #endif
     {
         for_each( object, m_background_objects )
         {
             object->render_object( );
-            
-            if( camera->in_view( object->bounding_box( ) + object->position( ), object->z( ) ) )
+
+            // if( !object->z( ) || camera->in_view( object->bounding_box( ) + object->position( ), object->z( ) ) )
             {
                 camera->capture( object );
             }
-            
-#ifdef AXN_DEBUG
+
+            #ifdef AXN_DEBUG
             if( Debug::active )
             {
                 if( object->m_draw_debug )
                 {
                     Drawing debug_overlay = object->debug_overlay( );
                     debug_overlay.move( object->position( ) );
-                    
+
                     camera->capture_debug( new Visible( debug_overlay ), true );
                 }
             }
-#endif
+            #endif
         }
     }
 
     m_terrain->render_object( );
     camera->capture( m_terrain );
-    
-#ifdef AXN_DEBUG
-    if (Debug::active)
+
+    #ifdef AXN_DEBUG
+    if( Debug::active )
     {
-        if (m_terrain->m_draw_debug)
+        if( m_terrain->m_draw_debug )
         {
-            Drawing debug_overlay = m_terrain->debug_overlay();
-            debug_overlay.move(m_terrain->position());
-            camera->capture_debug(new Visible(debug_overlay), true);
+            Drawing debug_overlay = m_terrain->debug_overlay( );
+            debug_overlay.move( m_terrain->position( ) );
+            camera->capture_debug( new Visible( debug_overlay ), true );
         }
 
-        if (m_draw_grid)
+        if( m_draw_grid )
         {
-            render_object_grid(camera, true, [](const Grid::Block& block) { return block.objects.size(); });
+            render_object_grid( camera, true, [ ] ( const Grid::Block & block ) { return block.objects.size( ); } );
         }
     }
-#endif
+    #endif
 
     for_each( object, m_objects )
     {
         object->render_object( );
-        
+
         if( camera->in_view( object->bounding_box( ) + object->position( ) ) )
         {
             for_each( light, object->lights( ) )
             {
                 m_lighting->add_light_source( light );
             }
-            
+
             camera->capture( object );
-            
-#ifdef AXN_DEBUG
+
+            #ifdef AXN_DEBUG
             if( Debug::active )
             {
                 if( object->m_draw_debug )
                 {
                     Drawing debug_overlay = object->debug_overlay( );
                     debug_overlay.move( object->position( ) );
-                    
+
                     camera->capture_debug( new Visible( debug_overlay ), true );
                 }
             }
-#endif
+            #endif
         }
     }
-    
-#ifdef AXN_DEBUG
+
+    #ifdef AXN_DEBUG
     if( m_display_forebackground )
-#endif
+        #endif
     {
         for_each( object, m_foreground_objects )
         {
             object->render_object( );
-            camera->capture( object );
-            
-#ifdef AXN_DEBUG
+
+            if( camera->in_view( object->bounding_box( ) + object->position( ), object->z( ) ) )
+            {
+                camera->capture( object );
+            }
+
+            #ifdef AXN_DEBUG
             if( Debug::active )
             {
                 if( object->m_draw_debug )
                 {
                     Drawing debug_overlay = object->debug_overlay( );
                     debug_overlay.move( object->position( ) );
-                    
+
                     camera->capture_debug( new Visible( debug_overlay ), true );
                 }
             }
-#endif
+            #endif
         }
     }
 
@@ -500,11 +505,11 @@ void World::render( )
 void World::update( )
 {
     ++m_age;
-    
+
     add_objects_from_queue( );
 
     // update all objects
-    static auto object_sort = []( const Object * const & obj1, const Object * const & obj2 )
+    static auto object_sort = [ ] ( const Object * const & obj1, const Object * const & obj2 )
     {
         if( obj1->z( ) != obj2->z( ) )
         {
@@ -525,29 +530,31 @@ void World::update( )
     };
 
     m_objects.sort( object_sort, true );
-    
+
     update_objects( m_objects );
-    
-#ifdef AXN_DEBUG
+
+    #ifdef AXN_DEBUG
     if( m_display_forebackground )
-#endif
+        #endif
     {
         m_foreground_objects.sort( object_sort, true );
         update_objects( m_foreground_objects );
-        
+
         m_background_objects.sort( object_sort, true );
         update_objects( m_background_objects );
     }
 
     update_object( m_terrain );
 
-    m_players.erase_if( [ & ]( Player * player )
-                        { return player->deleted( ); } );
-
-    auto erase_deleted_objects = [ & ]( varray<Object *> & objects )
+    m_players.erase_if( [ & ] ( Player * player )
     {
-        objects.erase_if( [ & ]( Object * object )
-                           {
+        return player->deleted( );
+    } );
+
+    auto erase_deleted_objects = [ & ] ( varray<Object *> & objects )
+    {
+        objects.erase_if( [ & ] ( Object * object )
+        {
             if( !object )
             {
                 return true;
@@ -560,9 +567,10 @@ void World::update( )
             else
             {
                 return false;
-            } } );
+            }
+        } );
     };
-    
+
     erase_deleted_objects( m_objects );
     erase_deleted_objects( m_foreground_objects );
     erase_deleted_objects( m_background_objects );
@@ -595,12 +603,13 @@ varray<Object *> World::objects_in_range( const FixedRectangle & _range )
 {
     uset<Object *> objects_set;
 
-    m_object_grid.traverse( [ & ]( Grid::Block & block )
-                            {
+    m_object_grid.traverse( [ & ] ( Grid::Block & block )
+    {
         for_each( object, block.objects )
         {
             objects_set.insert( object );
-        } } );
+        }
+    } );
 
     varray<Object *> objects;
     for_each( object, objects_set )
@@ -627,7 +636,7 @@ void World::remove_object( Object * object )
         {
             m_object_grid.erase( object );
         }
-        
+
         safe_delete( object );
     }
 }
@@ -639,7 +648,7 @@ void World::add_objects_from_queue( )
         Object * object = m_object_queue.front( );
 
         assign_layer_position( object );
-        
+
         if( object->foreground( ) )
         {
             m_foreground_objects.insert_back( object );
@@ -651,7 +660,7 @@ void World::add_objects_from_queue( )
         else
         {
             m_objects.insert_back( object );
-            
+
             if( object->interactive( ) )
             {
                 m_object_grid.add( object );
@@ -686,7 +695,7 @@ void World::clear_objects( )
     {
         remove_object( object );
     }
-    
+
     m_players.clear( );
     m_objects.clear( );
     m_foreground_objects.clear( );
@@ -749,12 +758,12 @@ Player * World::player_main( )
 varray<Coordinate> World::update_points( ) const
 {
     varray<Coordinate> update_points;
-    
+
     for_each( player, m_players )
     {
         update_points.insert_back( player->position( ) );
     }
-    
+
     return update_points;
 }
 
@@ -879,8 +888,10 @@ void World::Grid::add( Object * object )
 {
     if( object->z( ) == ONE )
     {
-        traverse( object->hit_box( ), [ & ]( Grid::Block & block )
-                        { block.objects.insert( object ); } );
+        traverse( object->hit_box( ), [ & ] ( Grid::Block & block )
+        {
+            block.objects.insert( object );
+        } );
     }
 }
 
@@ -888,13 +899,17 @@ void World::Grid::erase( Object * object )
 {
     if( object->z( ) == ONE )
     {
-        traverse( object->hit_box( ), [ & ]( Grid::Block & block )
-                         { block.objects.erase( object ); } );
+        traverse( object->hit_box( ), [ & ] ( Grid::Block & block )
+        {
+            block.objects.erase( object );
+        } );
     }
 }
 
 void World::Grid::clear( )
 {
-    return traverse( [ & ]( Grid::Block & block )
-                     { block.objects.clear( ); } );
+    return traverse( [ & ] ( Grid::Block & block )
+    {
+        block.objects.clear( );
+    } );
 }

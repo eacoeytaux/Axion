@@ -14,21 +14,21 @@ public:
     virtual ~Mob( ) { }
     Mob( World * world, const Coordinate & position, dec health = 1 );
 
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     static bool draw_health;
     virtual Drawing debug_overlay( ) const override;
-#endif
+    #endif
 
     virtual void die( );
     virtual bool alive( ) const;
     bool dead( ) const { return !alive( ); }
 
     bool invincible( ) const { return ( m_invincible_always || m_invincible_counter.remaining( ) ); }
-    virtual void invincible_pause( uint invincible_duration ) { if( invincible_duration ) { m_invincible_counter.reset( max( invincible_duration, m_invincible_counter.remaining( ) ) ) ; } }
-    
+    virtual void invincible_pause( uint invincible_duration ) { if( invincible_duration ) { m_invincible_counter.reset( max( invincible_duration, m_invincible_counter.remaining( ) ) ); } }
+
     virtual bool invincible_always( ) const { return m_invincible_always; }
     virtual void invincible_always( bool invincible ) { m_invincible_always = invincible; }
-    
+
     virtual uint invincible_duration( ) const { return m_invincible_duration; }
     virtual void invincible_duration( uint duration ) { m_invincible_duration = duration; }
 
@@ -58,23 +58,23 @@ protected:
     virtual void update( ) override;
     virtual void update_movement( ) override;
     virtual void update_velocity( ) override;
-    
-// eyes
+
+    // eyes
 protected:
     virtual void eye_info( Planc eye_radius, uint blink_duration, const Span<uint> & blink_wait_span, const Color & eye_color = BLACK );
-    virtual void eye_info( Planc eye_radius, const Color & eye_color) { return eye_info( eye_radius, ZERO, { (uint)ZERO, (uint)ZERO }, eye_color); }
+    virtual void eye_info( Planc eye_radius, const Color & eye_color ) { return eye_info( eye_radius, ZERO, { (uint)ZERO, (uint)ZERO }, eye_color ); }
     virtual void eye_info( Planc eye_radius ) { return eye_info( eye_radius, ZERO, { (uint)ZERO, (uint)ZERO } ); }
-    
+
     bool eyes_open( ) const { return !eyes_closed( ); }
     void eyes_open( bool open ) { eyes_closed( !open ); }
     virtual bool eyes_closed( ) const { return m_eyes_closed || ( m_blink_duration && !m_blink_wait_counter.remaining( ) ); }
     virtual void eyes_closed( bool closed ) { m_eyes_closed = closed; }
     void open_eyes( ) { eyes_open( true ); }
     void close_eyes( ) { eyes_closed( true ); }
-    
+
     virtual bool squinting( ) const { return m_eyes_squinting; }
     virtual void squinting( bool squinting ) { m_eyes_squinting = squinting; }
-    
+
     virtual void draw_eyes( const Coordinate & eye_position, const Angle & angle = ZERO );
     virtual void draw_eyes( const Coordinate & eye_position1, const Coordinate & eye_position2, const Angle & angle = ZERO )
     {
@@ -88,9 +88,9 @@ protected:
             draw_eyes( position, angle );
         }
     }
-    
+
     virtual Color eye_color( ) const { return m_eye_color; }
-    
+
     bool m_eye_info_set = false;
     Planc m_eye_radius;
     bool m_eyes_closed;
@@ -103,14 +103,14 @@ protected:
 
 protected:
     const Counter & invincible_counter( ) const { return m_invincible_counter; }
-    
+
     const Counter & hurt_display( ) const { return m_hurt_display; }
     void hurt_display_length( uint ticks ) { m_hurt_display.set( ticks ); }
 
 private:
     bool m_alive = true;
     Slider<dec> m_health;
-    
+
     bool m_invincible_always = false;
     uint m_invincible_duration;
     Counter m_invincible_counter;

@@ -85,7 +85,7 @@ public:
         }
     }
 
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     void capture_debug( Visible * subject, bool should_delete = false );
     void capture_debug( varray<Visible *> & subjects, bool should_delete = false )
     {
@@ -94,7 +94,7 @@ public:
             capture_debug( subject, should_delete );
         }
     }
-#endif
+    #endif
 
     Planc width( ) const;
     void width( const Planc & );
@@ -113,7 +113,7 @@ public:
 
     dec zoom( ) const;
     void zoom( dec );
-    
+
     dec min_zoom( ) const;
     dec max_zoom( ) const;
 
@@ -135,12 +135,12 @@ public:
 
 private:
     Drawing cursor_drawing( ) const;
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
 public:
     bool m_draw_debug = false;
 private:
     Drawing debug_overlay_drawing( ) const;
-#endif
+    #endif
 
     World * m_world = nullptr;
     uint m_age = 0;
@@ -164,10 +164,10 @@ private:
     dec m_hud_offset_percentage;
     bool m_show_hud;
 
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     varray<Visible *> m_debug_subjects;
     varray<Visible *> m_owned_debug_subjects; // subset of debug subjects that camera needs to delete
-#endif
+    #endif
 
 public:
     class HeadUpDisplay : public Visible
@@ -175,9 +175,9 @@ public:
     public:
         virtual ~HeadUpDisplay( ) { }
         HeadUpDisplay( dec center_x_percent, dec center_y_percent, dec width_percent, dec height_percent );
-        
+
         virtual void render( Camera * ) { Visible::render( ); }
-        
+
         FixedRectangle bounds( Camera * ) const;
 
     private:

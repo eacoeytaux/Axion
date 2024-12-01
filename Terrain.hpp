@@ -73,9 +73,9 @@ public:
     virtual ~Terrain( );
     Terrain( World *, const varray<varray<Coordinate>> & vertices = { } );
 
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     virtual Drawing debug_overlay( ) const override;
-#endif
+    #endif
 
     const varray<varray<TerrainVertex *>> & vertices( ) const;
     const varray<varray<TerrainEdge *>> & edges( ) const;

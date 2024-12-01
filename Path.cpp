@@ -20,7 +20,7 @@ Path::Path( const varray<Coordinate> & _coordinates )
 Path::Path( const varray<Line> & _lines )
 {
     m_lines = _lines;
-    
+
     for_range( i, m_lines.size( ) - ONE )
     {
         // todo
@@ -44,14 +44,14 @@ varray<Coordinate> Path::points( ) const
     {
         return { };
     }
-    
+
     varray<Coordinate> points;
     for_each( line, m_lines )
     {
         points.insert_back( line.c1( ) );
     }
     points.insert_back( m_lines.back( ).c2( ) );
-    
+
     return points;
 }
 
@@ -119,14 +119,14 @@ bool Path::in_box( const Coordinate & _coordinate, bool _inclusive ) const
     Planc max_x = INFINITY_NEGATIVE;
     Planc min_y = INFINITY_POSITIVE;
     Planc max_y = INFINITY_NEGATIVE;
-    
+
     if( m_lines.size( ) )
     {
         min_x = min<Planc>( min_x, m_lines.front( ).c1( ).x( ) );
         max_x = max<Planc>( max_x, m_lines.front( ).c1( ).x( ) );
         min_y = min<Planc>( min_y, m_lines.front( ).c1( ).y( ) );
         max_y = max<Planc>( max_y, m_lines.front( ).c1( ).y( ) );
-        
+
         for_each( line, m_lines )
         {
             min_x = min<Planc>( min_x, line.c2( ).x( ) );
@@ -134,11 +134,11 @@ bool Path::in_box( const Coordinate & _coordinate, bool _inclusive ) const
             min_y = min<Planc>( min_y, line.c2( ).y( ) );
             max_y = max<Planc>( max_y, line.c2( ).y( ) );
         }
-        
+
         return ( in_range( _coordinate.x( ), min_x, max_x, _inclusive ) ) &&
-               ( in_range( _coordinate.y( ), min_y, max_y, _inclusive ) );
+            ( in_range( _coordinate.y( ), min_y, max_y, _inclusive ) );
     }
-    
+
     return false;
 }
 
@@ -175,17 +175,17 @@ varray<Line> Arc::generate( const Coordinate & _center, const Planc & _radius, c
     {
         return { };
     }
-    
+
     varray<Line> lines;
-    
+
     Angle d_angle;
-    
+
     Angle start_angle = _start_angle;
     Angle end_angle = _end_angle;
-    
+
     start_angle.truncate( true );
     end_angle.truncate( true );
-    
+
     if( _clockwise )
     {
         if( start_angle < end_angle )
@@ -208,32 +208,34 @@ varray<Line> Arc::generate( const Coordinate & _center, const Planc & _radius, c
             d_angle = end_angle - start_angle;
         }
     }
-    
+
     uint line_count = max( ONE, ceil( ( d_angle.radians( ) / TAU ) * (dec)Polygon::circle_precision( _radius ) ) );
     Angle dd_angle = d_angle / (dec)line_count;
-    
+
     Coordinate start = _center + VectorA( start_angle, _radius );
-    
+
     for_range( i, line_count - ONE )
     {
         Coordinate c = _center + VectorA( negative( start_angle + ( dd_angle * (dec)i ), _clockwise ), _radius );
         lines.insert_back( Line( start, c ) );
         start = c;
     }
-    
+
     Coordinate end = _center + VectorA( end_angle, _radius );
     lines.insert_back( Line( start, end ) );
-    
+
     return lines;
 }
 
 Arc::Arc( const Coordinate & _center, const Planc & _radius, const Angle & _start, const Angle & _end, const bool _clockwise )
-: Path( generate( _center, _radius, _start, _end, _clockwise ) ) { }
+    : Path( generate( _center, _radius, _start, _end, _clockwise ) )
+{
+}
 
 varray<Line> Bezier::generate( const varray<Coordinate> & _control_points, const uint _point_count )
 {
     uint control_point_count = _control_points.size( );
-    
+
     if( !control_point_count )
     {
         return { };
@@ -246,31 +248,33 @@ varray<Line> Bezier::generate( const varray<Coordinate> & _control_points, const
     {
         return { Line( _control_points.front( ), _control_points.back( ) ) };
     }
-    
+
     varray<Line> lines;
     Coordinate last = _control_points.front( );
-    
+
     dec dt = ONE / _point_count;
-    
+
     for_range( x, _point_count - ONE )
     {
         dec t = dt * ( x + ONE );
-        
+
         Vector v;
         varray<uint> p = pascal( control_point_count - ONE );
         for_range( i, control_point_count )
         {
             v += (Vector)_control_points[ i ] * (dec)p[ i ] * pow( t, i ) * pow( ( ONE - t ), control_point_count - i - ONE );
         }
-        
+
         lines.insert_back( Line( last, v ) );
         last = v;
     }
-    
+
     lines.insert_back( Line( last, _control_points.back( ) ) );
-    
+
     return lines;
 }
 
 Bezier::Bezier( const varray<Coordinate> & _control_points, const uint _point_count )
-: Path( generate( _control_points, _point_count ) ) { }
+    : Path( generate( _control_points, _point_count ) )
+{
+}

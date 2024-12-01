@@ -45,7 +45,7 @@ public:
     Planc y( ) const;
     Coordinate & y( const Planc & y );
     Coordinate & xy( const Planc & x, const Planc & y );
-    
+
     Planc distance_to_origin( ) const { return distance_to( Coordinate( ) ); }
     Planc distance_to( const Coordinate & coordinate ) const;
     bool in_distance_range( const Coordinate & coordinate, Planc distance, bool inclusive = true ) const;

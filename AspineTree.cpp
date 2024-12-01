@@ -1,7 +1,7 @@
-#include "AspenTree.hpp"
+#include "AspineTree.hpp"
 #include "World.hpp"
 
-using mtmercy::AspenTree;
+using mtmercy::AspineTree;
 
 namespace
 {
@@ -33,7 +33,7 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
 
     dec branch_height = Random::rdec( BRANCH_BASE_HEIGHT );
 
-    if ( _draw_leaves )
+    if( _draw_leaves )
     {
         dec leaves_top = 1.0;
         dec leaves_bottom = 0.8;
@@ -45,10 +45,10 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
             Coordinate bottom = VectorA( RIGHT_ANGLE, _length * leaves_bottom + Random::rPlanc( -5.0, 5.0 ) );
 
             tree_drawing.draw( LEAF_COLOR,
-                Polygon( { top,
-                           bottom + VectorA( BRANCH_OFFSET, ( _length * 0.5 * ( 1.0 - leaves_bottom ) ) + Random::rPlanc( 2.0 ) ),
-                           bottom,
-                           bottom + VectorA( ( PI - BRANCH_OFFSET ), ( _length * 0.5 * ( 1.0 - leaves_bottom ) ) + Random::rPlanc( 2.0 ) ) } ) );
+                               Polygon( { top,
+                                          bottom + VectorA( BRANCH_OFFSET, ( _length * 0.5 * ( 1.0 - leaves_bottom ) ) + Random::rPlanc( 2.0 ) ),
+                                          bottom,
+                                          bottom + VectorA( ( PI - BRANCH_OFFSET ), ( _length * 0.5 * ( 1.0 - leaves_bottom ) ) + Random::rPlanc( 2.0 ) ) } ) );
 
             leaves_top -= 0.025;
             leaves_bottom -= 0.06;
@@ -60,10 +60,10 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
             Coordinate bottom = VectorA( RIGHT_ANGLE, _length * leaves_bottom + Random::rPlanc( -5.0, 5.0 ) );
 
             tree_drawing.draw( LEAF_COLOR,
-                Polygon( { top,
-                           bottom + VectorA( BRANCH_OFFSET, ( _length * 0.5 * ( 1.0 - leaves_bottom ) * ( (dec)( 5 - i ) / 5.0 ) ) + Random::rPlanc( 2.0 ) ),
-                           bottom,
-                           bottom + VectorA( ( PI - BRANCH_OFFSET ), ( _length * 0.5 * ( 1.0 - leaves_bottom ) * ( (dec)( 5 - i ) / 5.0 ) ) + Random::rPlanc( 2.0 ) ) } ) );
+                               Polygon( { top,
+                                          bottom + VectorA( BRANCH_OFFSET, ( _length * 0.5 * ( 1.0 - leaves_bottom ) * ( (dec)( 5 - i ) / 5.0 ) ) + Random::rPlanc( 2.0 ) ),
+                                          bottom,
+                                          bottom + VectorA( ( PI - BRANCH_OFFSET ), ( _length * 0.5 * ( 1.0 - leaves_bottom ) * ( (dec)( 5 - i ) / 5.0 ) ) + Random::rPlanc( 2.0 ) ) } ) );
 
             leaves_top += 0.01;
             leaves_bottom -= 0.01;
@@ -85,7 +85,7 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
         bool left;
         bool right;
         bool both = Random::rbool( 0 ); // todo
-        if ( both )
+        if( both )
         {
             left = true;
             right = true;
@@ -105,12 +105,12 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
             tree_drawing.draw( branch_drawing );
         };
 
-        if ( left )
+        if( left )
         {
             draw_branch( true );
         }
 
-        if ( right )
+        if( right )
         {
             draw_branch( false );
         }
@@ -121,7 +121,7 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
     tree_drawing.add_bound( trunk_polygon );
 
     branch_height = 0.0;
-    while ( branch_height < 1.0 )
+    while( branch_height < 1.0 )
     {
         dec branch_remaining = ( 1.0 - branch_height );
         branch_height += Random::rdec( 0.02, 0.1 );
@@ -135,10 +135,10 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
 };
 } // namespace
 
-AspenTree::AspenTree( World * world, const Coordinate & _root, const dec _z ) : Object( world, _root )
+AspineTree::AspineTree( World * world, const Coordinate & _root, const dec _z ) : Object( world, _root )
 {
     background( true );
-    
+
     persist_render( true );
 
     stationary( true );

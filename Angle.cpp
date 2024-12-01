@@ -46,11 +46,11 @@ dec Angle::radians( ) const
 }
 dec Angle::degrees( ) const
 {
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     return m_degrees;
-#else
+    #else
     return radians_to_degrees( m_radians );
-#endif
+    #endif
 }
 
 Angle & Angle::radians( const Planc & _dx, const Planc & _dy )
@@ -72,9 +72,9 @@ Angle & Angle::radians( const dec _radians )
     }
 
     m_radians = radians;
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     m_degrees = radians_to_degrees( radians );
-#endif
+    #endif
     return *this;
 }
 

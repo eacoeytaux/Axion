@@ -56,22 +56,22 @@ bool Coordinate::in_distance_range( const Coordinate & _coordinate, const Planc 
 {
     Planc dx = abs( x( ) - _coordinate.x( ) );
     Planc dy = abs( y( ) - _coordinate.y( ) );
-    
-    if(!dx && !dy)
+
+    if( !dx && !dy )
     {
         return true;
     }
-    
+
     if( !in_range( dx, _distance, _inclusive ) )
     {
         return false;
     }
-    
+
     if( !in_range( dy, _distance, _inclusive ) )
     {
         return false;
     }
-    
+
     return in_range( distance_to( _coordinate ), _distance, _inclusive );
 }
 

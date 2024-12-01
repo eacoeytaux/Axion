@@ -17,24 +17,32 @@ Polygon::Polygon( const varray<Coordinate> & _coordinates, const Transform & _tr
 }
 
 Triangle::Triangle( const Coordinate & c1, const Coordinate & c2, const Coordinate & c3 )
-    : Polygon( { c1, c2, c3 } ) { }
+    : Polygon( { c1, c2, c3 } )
+{
+}
 
 Rectangle::Rectangle( const Planc & _width, const Planc & _height, const Coordinate & _center, const Angle _rotation )
     : Polygon( { _center + Vector( _width, _height ).half( ).rotate( _rotation ),
                  _center + Vector( -_width, _height ).half( ).rotate( _rotation ),
                  _center + Vector( -_width, -_height ).half( ).rotate( _rotation ),
                  _center + Vector( _width, -_height ).half( ).rotate( _rotation ) },
-               true ) { }
+               true )
+{
+}
 
 Square::Square( const Planc & _width, const Coordinate & _center, const Angle _rotation )
     : Polygon( { _center + Vector( _width, _width ).half( ).rotate( _rotation ),
                  _center + Vector( -_width, _width ).half( ).rotate( _rotation ),
                  _center + Vector( -_width, -_width ).half( ).rotate( _rotation ),
                  _center + Vector( _width, -_width ).half( ).rotate( _rotation ) },
-               true ) { }
+               true )
+{
+}
 
 Circle::Circle( const Planc & _radius, const Coordinate & _center )
-    : Polygon( Polygon::equilateral( Polygon::circle_precision( _radius ) ).coordinates_raw( ), ScaleTransform( _radius ).chain( MoveTransform( _center ) ) ) { }
+    : Polygon( Polygon::equilateral( Polygon::circle_precision( _radius ) ).coordinates_raw( ), ScaleTransform( _radius ).chain( MoveTransform( _center ) ) )
+{
+}
 
 Polygon Polygon::equilateral( const uint _side_count, const Planc & _radius, const Coordinate & _center, const Angle _rotation )
 {
@@ -59,7 +67,7 @@ Polygon Polygon::equilateral( const uint _side_count, const Planc & _radius, con
     equilateral.scale( _radius );
     equilateral.rotate( _rotation );
     equilateral.move( _center );
-    
+
     return equilateral;
 }
 
@@ -104,9 +112,9 @@ Polygon Polygon::expand( const Polygon & _polygon, const Planc & _expansion )
 const Polygon & Polygon::dirty( ) const
 {
     Transformable::dirty( );
-    
+
     m_coordinates_dirty = true;
-    
+
     return *this;
 }
 
@@ -116,19 +124,19 @@ void Polygon::process( const varray<Coordinate> & _coordinates )
     {
         return;
     }
-    
+
     m_coordinates = _coordinates;
     uint coordinate_count = m_coordinates.size( );
-    
+
     m_convex = true;
-    
+
     if( coordinate_count )
     {
         m_lower_bound_x = INFINITY_POSITIVE;
         m_lower_bound_y = INFINITY_POSITIVE;
         m_upper_bound_x = INFINITY_NEGATIVE;
         m_upper_bound_y = INFINITY_NEGATIVE;
-        
+
         if( coordinate_count <= 3 )
         {
             for_range( i, coordinate_count )
@@ -138,7 +146,7 @@ void Polygon::process( const varray<Coordinate> & _coordinates )
                 m_upper_bound_x = max( m_upper_bound_x, m_coordinates[ i ].x( ) );
                 m_upper_bound_y = max( m_upper_bound_y, m_coordinates[ i ].y( ) );
             }
-            
+
             if( coordinate_count == 3 )
             {
                 if( Line( m_coordinates[ 0 ], m_coordinates[ 1 ] ).above( m_coordinates[ 2 ] ) )
@@ -152,30 +160,30 @@ void Polygon::process( const varray<Coordinate> & _coordinates )
         {
             // iterate through coordinates and determine xy boundaries, convex, and clockwise see
             // https://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
-            
+
             // default to true then check for violations
             bool convex_cw = true;
             bool convex_ccw = true;
-            
+
             dec edge_curve = ZERO;
-            
+
             for_range( i, coordinate_count )
             {
                 Coordinate & coordinate = m_coordinates[ i ];
-                
+
                 // TODO
                 // Assert( !is_infinity( coordinate.x( ) ) && !is_infinity( coordinate.y( ) ), "no infinities allowed (for now)" );
-                
+
                 m_lower_bound_x = min( m_lower_bound_x, coordinate.x( ) );
                 m_lower_bound_y = min( m_lower_bound_y, coordinate.y( ) );
                 m_upper_bound_x = max( m_upper_bound_x, coordinate.x( ) );
                 m_upper_bound_y = max( m_upper_bound_y, coordinate.y( ) );
-                
+
                 Coordinate & prev_coordinate = m_coordinates[ ( i + coordinate_count - 1 ) % coordinate_count ];
                 Coordinate & prev_prev_coordinate = m_coordinates[ ( i + coordinate_count - 2 ) % coordinate_count ];
-                
+
                 edge_curve += (dec)( ( coordinate.x( ) - prev_coordinate.x( ) ) * ( coordinate.y( ) + prev_coordinate.y( ) ) );
-                
+
                 if( convex_cw || convex_ccw )
                 {
                     if( i > 2 )
@@ -191,20 +199,20 @@ void Polygon::process( const varray<Coordinate> & _coordinates )
                     }
                 }
             }
-            
+
             bool clockwise = ( edge_curve > 0 );
-            
+
             if( clockwise )
             {
                 m_coordinates.reverse( );
             }
-            
+
             m_convex = clockwise ? convex_cw : convex_ccw;
         }
     }
 
     m_coordinates_raw = m_coordinates;
-    
+
     m_processed = true;
 }
 
@@ -219,17 +227,17 @@ void Polygon::apply_transform( ) const
             m_lower_bound_y = INFINITY_POSITIVE;
             m_upper_bound_x = INFINITY_NEGATIVE;
             m_upper_bound_y = INFINITY_NEGATIVE;
-            
+
             for_range( i, m_coordinates.size( ) )
             {
                 m_coordinates[ i ] = t.transform( m_coordinates_raw[ i ] );
-                
+
                 m_lower_bound_x = min( m_lower_bound_x, m_coordinates[ i ].x( ) );
                 m_lower_bound_y = min( m_lower_bound_y, m_coordinates[ i ].y( ) );
                 m_upper_bound_x = max( m_upper_bound_x, m_coordinates[ i ].x( ) );
                 m_upper_bound_y = max( m_upper_bound_y, m_coordinates[ i ].y( ) );
             }
-            
+
             m_coordinates_dirty = false;
         }
     }
@@ -242,7 +250,7 @@ Planc Polygon::area( ) const
     if( convex( ) )
     {
         const varray<Coordinate> & c = coordinates( );
-        
+
         area += ( ( c.back( ).x( ) * c.front( ).y( ) ) - ( c.back( ).y( ) * c.front( ).x( ) ) );
 
         for_range( i, c.size( ) - 2 )
@@ -326,7 +334,7 @@ bool Polygon::contains( const Coordinate & _coordinate, const bool _inclusive ) 
                             return false;
                         }
                     }
-                    
+
                     return true;
                 }
                 else
@@ -335,7 +343,7 @@ bool Polygon::contains( const Coordinate & _coordinate, const bool _inclusive ) 
                 }
             }
         }
-        
+
         return false;
     }
 }
@@ -370,7 +378,7 @@ varray<Line> Polygon::intersection( const Line & _line ) const
         Coordinate origin;
         bool operator( )( const Coordinate & c1, const Coordinate & c2 ) { return ( c1.distance_to( origin ) < c2.distance_to( origin ) ); }
     } line_intersection_distance;
-    
+
     line_intersection_distance.origin = _line.c1( );
     intersection_coordinates.sort( line_intersection_distance );
 
@@ -423,9 +431,9 @@ varray<Polygon> Polygon::triangles( ) const
     else
     {
         apply_transform( );
-        
+
         varray<Polygon> t;
-        
+
         if( convex( ) )
         {
             for_range( i, m_coordinates.size( ) - THREE )
@@ -437,21 +445,21 @@ varray<Polygon> Polygon::triangles( ) const
         {
             uint i = ZERO;
             varray<Coordinate> temp_coordinates = m_coordinates;
-            
+
             while( temp_coordinates.size( ) > THREE )
             {
                 i %= temp_coordinates.size( );
                 uint i_prev = ( i + ( temp_coordinates.size( ) - 1 ) ) % temp_coordinates.size( );
                 uint i_next = ( i + 1 ) % temp_coordinates.size( );
-                
+
                 Coordinate c = temp_coordinates[ i ];
-                
+
                 Coordinate c_prev = temp_coordinates[ i_prev ];
                 Coordinate c_next = temp_coordinates[ i_next ];
-                
+
                 bool is_ear = true;
                 Triangle ear( c, c_next, c_prev );
-                
+
                 for_range( j, temp_coordinates.size( ) )
                 {
                     if( ( j != i ) && ( j != i_prev ) && ( j != i_next ) )
@@ -463,7 +471,7 @@ varray<Polygon> Polygon::triangles( ) const
                         }
                     }
                 }
-                
+
                 if( is_ear )
                 {
                     temp_coordinates.erase( i );
@@ -474,10 +482,10 @@ varray<Polygon> Polygon::triangles( ) const
                     ++i;
                 }
             }
-            
+
             t.insert_back( temp_coordinates );
         }
-        
+
         return t;
     }
 }

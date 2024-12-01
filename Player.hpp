@@ -13,7 +13,7 @@ class Player : public Mob
 public:
     virtual ~Player( ) { }
     Player( World * world, const Coordinate & position );
-    
+
     virtual void render( ) override;
 
     virtual void update( ) override;
@@ -24,7 +24,7 @@ public:
     virtual Planc light_sight( ) const = 0;
 
     virtual void hurt( dec health ) override;
-    
+
     virtual void out_of_bounds( ) override;
 
 protected:

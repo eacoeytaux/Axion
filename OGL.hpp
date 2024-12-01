@@ -101,27 +101,27 @@ public:
     static error depth_equal_less( );
     static error depth_less( );
 
-    static error depth_mask(bool);
-    static bool depth_mask();
+    static error depth_mask( bool );
+    static bool depth_mask( );
 
 private:
     static error stencil_func( int gl_enum );
 
 public:
-    static error stencil_always();
-    static error stencil_never();
-    static error stencil_equal();
-    static error stencil_not_equal();
-    static error stencil_equal_greater();
-    static error stencil_greater();
-    static error stencil_equal_less();
-    static error stencil_less();
+    static error stencil_always( );
+    static error stencil_never( );
+    static error stencil_equal( );
+    static error stencil_not_equal( );
+    static error stencil_equal_greater( );
+    static error stencil_greater( );
+    static error stencil_equal_less( );
+    static error stencil_less( );
 
-    static error stencil_mask(bool);
-    static bool stencil_mask();
+    static error stencil_mask( bool );
+    static bool stencil_mask( );
 
-    static error stencil_add();
-    static error stencil_remove();
+    static error stencil_add( );
+    static error stencil_remove( );
 
 private:
     static error m_error;
@@ -135,7 +135,7 @@ private:
     static uint m_matrix_stack_count;
 
     static bool m_started_sequence;
-    
+
     static bool m_depth_mask;
     static bool m_stencil_mask;
 

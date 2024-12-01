@@ -23,12 +23,12 @@ const Color ROPE_ALT_COLOR = Color::rgb( 0xB9870F );
 using mtmercy::Hook;
 Hook::Hook( World * world, const Climber * owner ) : Object( world ), m_owner( owner )
 {
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     m_draw_debug = true;
-#endif
-    
+    #endif
+
     Assert( m_owner, "owner cannot be null" );
-    
+
     solid( true );
     interactive( true );
 
@@ -71,8 +71,8 @@ void Hook::render( )
             draw( ROPE_ALT_COLOR, rope_strip_rect );
         }
     }
-    
-#ifdef AXN_DEBUG
+
+    #ifdef AXN_DEBUG
     // if( Debug::active )
     {
         if( m_rope_length >= m_max_rope_length )
@@ -80,7 +80,7 @@ void Hook::render( )
             draw( RED.a( 0.5 ), Line( rope_vector.origin( ), rope_vector ), ROPE_WIDTH );
         }
     }
-#endif
+    #endif
 }
 
 void Hook::update( )
@@ -110,10 +110,10 @@ void Hook::update_velocity( )
         }
         else if( m_rope_length > m_max_rope_length )
         {
-            no_gravity();
+            no_gravity( );
             state( HOOKED );
             velocity( ZERO_VECTOR );
-            
+
             // state( RETRACTING );
             // TODO adjust for overshot with remaining percentage
         }
@@ -159,7 +159,7 @@ bool Hook::collide( Object * object )
     if( state( ) != LOADED )
     {
         Object::collide( object );
-        
+
         if( state( ) == FIRING )
         {
             if( object->interactive( ) && !dynamic_cast<Hook *>( object ) )
@@ -168,9 +168,9 @@ bool Hook::collide( Object * object )
                 {
                     mob->hurt( 1000.0 );
                 }
-                
+
                 state( RETRACTING );
-                
+
                 return true;
             }
         }
@@ -200,7 +200,7 @@ void Hook::fire( const Vector & _launch_speed )
 {
     switch( state( ) )
     {
-        case LOADED :
+        case LOADED:
         {
             velocity( _launch_speed );
             state( FIRING );
@@ -208,13 +208,13 @@ void Hook::fire( const Vector & _launch_speed )
             // twang.play( );
             break;
         }
-        case FIRING :
-        case HOOKED :
-        case RETRACTING :
+        case FIRING:
+        case HOOKED:
+        case RETRACTING:
         {
             break;
         }
-        default :
+        default:
         {
             // Assert( "invalid_state" );
             break;
@@ -226,21 +226,21 @@ void Hook::retract( )
 {
     switch( state( ) )
     {
-        case LOADED :
+        case LOADED:
         {
             break;
         }
-        case FIRING :
-        case HOOKED :
+        case FIRING:
+        case HOOKED:
         {
             state( RETRACTING );
             break;
         }
-        case RETRACTING :
+        case RETRACTING:
         {
             break;
         }
-        default :
+        default:
         {
             // Assert( "invalid_state" );
             break;

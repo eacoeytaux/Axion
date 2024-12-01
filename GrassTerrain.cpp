@@ -47,7 +47,7 @@ GrassTerrain::GrassTerrain( World * world, const varray<varray<Coordinate>> & _v
                                  v1 + Vector( 0, -DEPTH_LENGTH ),
                                  v2 + Vector( 0, -DEPTH_LENGTH ) } ) );
 
-                auto generate_grass = [ & ]( varray<Polygon> & grass )
+                auto generate_grass = [ & ] ( varray<Polygon> & grass )
                 {
                     Vector v = edge->vector( );
                     Planc magnitude = v.magnitude( );

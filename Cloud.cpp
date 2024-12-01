@@ -27,7 +27,7 @@ const Span<Planc> SMALL_PUFF_DISTANCE = { ( LARGE_PUFF_RADIUS.max( ) * PUFF_OUTL
 Cloud::Cloud( World * world ) : Object( world )
 {
     background( true );
-    
+
     needs_render_always( true );
 
     z( 0.1 );

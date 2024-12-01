@@ -11,14 +11,14 @@ class Gopher : public Enemy
 public:
     virtual ~Gopher( ) { }
     Gopher( World *, const Coordinate & position );
-    
+
     virtual void render( ) override;
-    
+
     virtual void update( ) override;
 
-private:    
+private:
     Counter m_reload;
-    
+
     STATE( EXPOSED,
            BURIED,
            ASCENDING,

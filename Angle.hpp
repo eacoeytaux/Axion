@@ -38,12 +38,12 @@ public:
     Angle flipped( ) const;
 
     Angle half( ) const;
-    
+
     Quadrant quadrant( ) const;
     Axis axis( ) const;
     bool in_quadrant( Quadrant quadrant ) const;
     bool on_axis( Axis axis ) const;
-    
+
     bool right( ) const;
     bool straight( ) const;
     bool acute( ) const;
@@ -127,9 +127,9 @@ private:
     bool m_truncate = TRUNCATE_ANGLE_DEFAULT; // keeps radians within [ 0, 2 * pi )
 
     dec m_radians = 0.0;
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     dec m_degrees = 0.0;
-#endif
+    #endif
 };
 
 } // namespace geometry

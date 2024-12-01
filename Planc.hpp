@@ -30,7 +30,7 @@ public:
     operator int( ) const { return value( ); }
     operator uint( ) const { return abs( value( ) ); }
     operator dec( ) const { return value( ); }
-    
+
     Planc & invert( ) { return value( inverse( ) ); }
     Planc inverse( ) const
     {
@@ -39,7 +39,7 @@ public:
     }
 
     Planc half( ) const { return Planc( value( ) / TWO ); }
-    
+
     Planc & operator=( dec d ) { return value( d ); }
     Planc & operator=( const Planc & p ) { return value( p.value( ) ); }
     Planc operator-( ) const { return Planc( -value( ) ); }
