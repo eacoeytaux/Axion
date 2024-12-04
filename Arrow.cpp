@@ -164,7 +164,7 @@ bool Arrow::collide( Object * object )
 
         subscribe_to_movement( object );
         stationary( true );
-        interactive( false );
+        //interactive( false );
         solid( false );
 
         return true;

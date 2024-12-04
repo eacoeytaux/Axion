@@ -36,8 +36,6 @@ void Fox::render( )
 
     Drawing head_drawing;
 
-    // todo combine head1 and head2 and one convex polygon
-
     Polygon head1 = Polygon( { Coordinate( -12.0, 3.0 ),
                                Coordinate( -20.0, 0.0 ),
                                Coordinate( -16.0, -3.0 ),

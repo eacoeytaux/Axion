@@ -343,44 +343,52 @@ void World::render_bounds( Camera * camera )
 }
 
 #ifdef AXN_DEBUG
-void World::render_object_grid( Camera * camera, const bool _fill_blocks, function<bool( const Grid::Block & block )> fill_block )
+void World::render_object_grid( Camera * camera ) const
 {
-    const dec GRID_THICKNESS = 1.0;
-    const Color GRID_COLOR = WHITE.a( 0.25 );
-    const Color FILLED_BLOCK_COLOR = GREEN.a( 0.25 );
+    const dec GRID_LINE_THICKNESS = 1.0;
+    const Color GRID_LINE_COLOR = WHITE.a( 0.25 );
+    const Color HAS_OBJECTS_COLOR = GREEN.a( 0.15 );
+    const Color HAS_TERRAIN_COLOR = YELLOW.a( 0.15 );
 
-    Grid & grid = object_grid( );
+    const Grid & grid = m_object_grid;
     Coordinate top = bounds( ).top( );
     Coordinate bottom = bounds( ).bottom( );
 
     Drawing grid_drawing;
 
-    if( _fill_blocks )
+    grid.traverse_const( [ & ] ( const Grid::Block & block )
     {
-        grid.traverse( [ & ] ( Grid::Block & block )
+        if( block.objects.size( ) || block.terrain_nodes.size( ) )
         {
-            if( fill_block( block ) )
+            Polygon grid( {
+                Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y ) ),
+                Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x + 1 ) ), top.x( ) ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y ) ),
+                Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x + 1 ) ), top.x( ) ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y + 1 ) ), top.y( ) ) ),
+                Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y + 1 ) ), top.y( ) ) ) } );
+
+            if( block.objects.size( ) )
             {
-                grid_drawing.draw( FILLED_BLOCK_COLOR, Polygon( {
-                    Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y ) ),
-                    Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x + 1 ) ), top.x( ) ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y ) ),
-                    Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x + 1 ) ), top.x( ) ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y + 1 ) ), top.y( ) ) ),
-                    Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y + 1 ) ), top.y( ) ) ) } ) );
+                grid_drawing.draw( HAS_OBJECTS_COLOR, grid );
             }
-        } );
-    }
+
+            if( block.terrain_nodes.size( ) )
+            {
+                grid_drawing.draw( HAS_TERRAIN_COLOR, grid );
+            }
+        }
+    } );
 
     for_range( x, grid.x_range( ).range( ) - 1 )
     {
-        grid_drawing.draw( GRID_COLOR, Line( Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * ( x + 1 ) ), bottom.y( ) ), Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * ( x + 1 ) ), top.y( ) ) ), GRID_THICKNESS, true );
+        grid_drawing.draw( GRID_LINE_COLOR, Line( Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * ( x + 1 ) ), bottom.y( ) ), Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * ( x + 1 ) ), top.y( ) ) ), GRID_LINE_THICKNESS, true );
     }
 
     for_range( y, grid.y_range( ).range( ) - 1 )
     {
-        grid_drawing.draw( GRID_COLOR, Line( Coordinate( bottom.x( ), bottom.y( ) + ( GRID_BLOCK_SIZE * ( y + 1 ) ) ), Coordinate( top.x( ), bottom.y( ) + ( GRID_BLOCK_SIZE * ( y + 1 ) ) ) ), GRID_THICKNESS, true );
+        grid_drawing.draw( GRID_LINE_COLOR, Line( Coordinate( bottom.x( ), bottom.y( ) + ( GRID_BLOCK_SIZE * ( y + 1 ) ) ), Coordinate( top.x( ), bottom.y( ) + ( GRID_BLOCK_SIZE * ( y + 1 ) ) ) ), GRID_LINE_THICKNESS, true );
     }
 
-    grid_drawing.draw( GRID_COLOR, bounds( ), GRID_THICKNESS, true );
+    grid_drawing.draw( GRID_LINE_COLOR, bounds( ), GRID_LINE_THICKNESS, true );
 
     camera->capture_debug( new Visible( grid_drawing ), true );
 }
@@ -394,7 +402,7 @@ void World::render( )
     m_lighting->clear_light_sources( );
 
     #ifdef AXN_DEBUG
-    if( m_display_forebackground )
+    if( !Debug::active || m_display_forebackground )
         #endif
     {
         for_each( object, m_background_objects )
@@ -436,7 +444,7 @@ void World::render( )
 
         if( m_draw_grid )
         {
-            render_object_grid( camera, true, [ ] ( const Grid::Block & block ) { return block.objects.size( ); } );
+            render_object_grid( camera );
         }
     }
     #endif
@@ -470,7 +478,7 @@ void World::render( )
     }
 
     #ifdef AXN_DEBUG
-    if( m_display_forebackground )
+    if( !Debug::active || m_display_forebackground )
         #endif
     {
         for_each( object, m_foreground_objects )
@@ -602,22 +610,41 @@ const varray<Object *> & World::objects( ) const
 varray<Object *> World::objects_in_range( const FixedRectangle & _range )
 {
     uset<Object *> objects_set;
+    varray<Object *> objects;
 
-    m_object_grid.traverse( [ & ] ( Grid::Block & block )
+    m_object_grid.traverse( _range, [ & ] ( Grid::Block & block )
     {
         for_each( object, block.objects )
         {
-            objects_set.insert( object );
+            if( !objects_set.contains( object ) )
+            {
+                objects_set.insert( object );
+                objects.insert_back( object );
+            }
         }
     } );
 
-    varray<Object *> objects;
-    for_each( object, objects_set )
-    {
-        objects.insert_back( object );
-    }
-
     return objects;
+}
+
+varray<TerrainNode *> World::terrain_in_range( const FixedRectangle & _range )
+{
+    uset<TerrainNode *> terrain_set;
+    varray<TerrainNode *> terrain;
+
+    m_object_grid.traverse( _range, [ & ] ( Grid::Block & block )
+    {
+        for_each( node, block.terrain_nodes )
+        {
+            if( !terrain_set.contains( node ) )
+            {
+                terrain_set.insert( node );
+                terrain.insert_back( node );
+            }
+        }
+    } );
+
+    return terrain;
 }
 
 void World::add_object( Object * object )
@@ -755,23 +782,6 @@ Player * World::player_main( )
     return player( 0 );
 }
 
-varray<Coordinate> World::update_points( ) const
-{
-    varray<Coordinate> update_points;
-
-    for_each( player, m_players )
-    {
-        update_points.insert_back( player->position( ) );
-    }
-
-    return update_points;
-}
-
-Planc World::default_update_distance( ) const
-{
-    return METER * 10; // TODO
-}
-
 void World::wind( const Vector & _wind )
 {
     m_wind = _wind;
@@ -821,6 +831,18 @@ void World::Grid::init( const FixedRectangle & _bounds )
 }
 
 World::Grid::Block & World::Grid::block( const uint _x, const uint _y )
+{
+    if( valid_x( _x ) && valid_y( _y ) )
+    {
+        return m_grid[ _x ][ _y ];
+    }
+    else
+    {
+        return m_out_of_bounds_block;
+    }
+}
+
+const World::Grid::Block & World::Grid::block_const( const uint _x, const uint _y ) const
 {
     if( valid_x( _x ) && valid_y( _y ) )
     {
@@ -884,6 +906,20 @@ void World::Grid::traverse( const FixedRectangle & _range, function<void( World:
     }
 }
 
+void World::Grid::traverse_const( const FixedRectangle & _range, function<void( const World::Grid::Block & )> f ) const
+{
+    Span<uint> xx = x_range( _range );
+    Span<uint> yy = y_range( _range );
+
+    for_range( x, xx.range( ) + 1 )
+    {
+        for_range( y, yy.range( ) + 1 )
+        {
+            f( block_const( x + xx.min( ), y + yy.min( ) ) );
+        }
+    }
+}
+
 void World::Grid::add( Object * object )
 {
     if( object->z( ) == ONE )
@@ -906,10 +942,27 @@ void World::Grid::erase( Object * object )
     }
 }
 
+void World::Grid::add( TerrainNode * terrain_node )
+{
+    traverse( terrain_node->bounding_box( ), [ & ] ( Grid::Block & block )
+    {
+        block.terrain_nodes.insert( terrain_node );
+    } );
+}
+
+void World::Grid::erase( TerrainNode * terrain_node )
+{
+    traverse( terrain_node->bounding_box( ), [ & ] ( Grid::Block & block )
+    {
+        block.terrain_nodes.erase( terrain_node );
+    } );
+}
+
 void World::Grid::clear( )
 {
     return traverse( [ & ] ( Grid::Block & block )
     {
         block.objects.clear( );
+        block.terrain_nodes.clear( );
     } );
 }

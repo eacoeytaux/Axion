@@ -1,5 +1,5 @@
-// #include "Speaker.hpp"
+//#include "Speaker.hpp"
 //
-// using axn::audio::Speaker;
+//using axn::audio::Speaker;
 //
-// Speaker::Speaker( ) { }
+//Speaker::Speaker( ) { }

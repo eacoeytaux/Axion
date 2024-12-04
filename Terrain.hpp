@@ -16,6 +16,8 @@ public:
     virtual bool passable( ) const { return true; }
     virtual Angle normal( ) const = 0;
     virtual dec resistance( ) const = 0;
+
+    virtual FixedRectangle bounding_box( ) const = 0;
 };
 
 class TerrainEdge;
@@ -25,7 +27,7 @@ public:
     virtual ~TerrainVertex( ) { }
     TerrainVertex( const Coordinate & pos );
 
-    Coordinate position( ) const;
+    const Coordinate & position( ) const;
 
     TerrainEdge * edge1( ) const;
     TerrainEdge * edge2( ) const;
@@ -35,6 +37,8 @@ public:
 
     Angle normal( ) const override;
     dec resistance( ) const override;
+
+    FixedRectangle bounding_box( ) const;
 
 private:
     Coordinate m_position;
@@ -60,6 +64,8 @@ public:
     Angle normal( ) const override;
     dec resistance( ) const override;
 
+    FixedRectangle bounding_box( ) const;
+
 private:
     TerrainVertex * m_v1 = nullptr;
     TerrainVertex * m_v2 = nullptr;
@@ -79,8 +85,6 @@ public:
 
     const varray<varray<TerrainVertex *>> & vertices( ) const;
     const varray<varray<TerrainEdge *>> & edges( ) const;
-
-    varray<TerrainEdge *> edges( const FixedRectangle & ) const;
 
     void traverse_x( const Span<Planc> & _distance_x, const function<void( const Coordinate &, const TerrainEdge * )> & f ) const;
     void traverse_x( const Planc & _distance_x, const function<void( const Coordinate &, const TerrainEdge * )> & f ) const { traverse_x( Span<Planc>( _distance_x, _distance_x ), f ); }

@@ -15,17 +15,17 @@ public:
     Climber( World * world, const Coordinate & position );
 
     virtual void render( ) override;
-    
-#ifdef AXN_DEBUG
+
+    #ifdef AXN_DEBUG
     virtual Drawing debug_overlay( ) const override;
-#endif
+    #endif
 
     void update( ) override;
     void input( Input * ) override;
     void clear_input( ) override;
-    
+
     const Hook & hook( ) const { return m_hook; }
-    
+
     void hurt( dec health ) override;
 
     Planc light_sight( ) const override;
@@ -59,8 +59,8 @@ protected:
     void aim( const Angle & );
     void aim_shake( const Angle & );
 
-    void loose_hook( );
-    void loose_arrow( );
+    void launch_hook( );
+    void launch_arrow( );
     void release_bow( );
 
     // all of these are offsets from position
@@ -93,7 +93,7 @@ protected:
     void draw_back_hand( );
     void draw_crossbow( );
     void draw_arrow( );
-    
+
     enum ColorPiece
     {
         SKIN,
@@ -108,7 +108,7 @@ protected:
         BOOT_SOLE,
         BOOT_LACE,
     };
-    
+
     Color color( ColorPiece ) const;
     Color eye_color( ) const override { return color( EYE ); }
 
@@ -119,7 +119,7 @@ private:
         MOHAWK,
     } m_skin;
     Skin skin( ) const;
-    
+
     Hook m_hook;
 
     Planc m_movement_speed_ground = ZERO;
@@ -136,8 +136,8 @@ private:
     bool m_aiming = true;
     Angle m_aim_angle = ZERO;
     Angle m_aim_shake_angle = ZERO;
-    bool m_firing_hook = false;
-    bool m_firing_arrow = false;
+    bool m_launching_hook = false;
+    bool m_launching_arrow = false;
     bool m_slashing = false;
     Counter m_reload_timer;
     Color m_arrow_feather_color;

@@ -181,23 +181,6 @@ T half( const T & t )
     return ( t / TWO );
 }
 
-//template <typename T>
-//T pow( const T & t, const uint p )
-//{
-//    if( !p )
-//    {
-//        return ONE;
-//    }
-//    else if( p == ONE )
-//    {
-//        return t;
-//    }
-//
-//    T ret = t;
-//    for_range( i, p - ONE ) ret *= t;
-//    return ret;
-//}
-
 template <typename T>
 T square( const T & t )
 {

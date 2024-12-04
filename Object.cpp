@@ -177,10 +177,10 @@ void Object::update_velocity( )
 
 void Object::update_movement( )
 {
-    // if( stationary( ) )
-    // {
-    //    return;
-    // }
+    if( stationary( ) )
+    {
+        return;
+    }
 
     uset<TerrainEdge *> checked_edges;
     if( m_ground )
@@ -237,35 +237,38 @@ void Object::update_movement( )
             }
 
             // check if object is colliding with any edges
-            for_each( terrain_edge, m_world->terrain( )->edges( hit_box( ) ) )
+            for_each( terrain_node, m_world->terrain_in_range( hit_box( ).union_with( hit_box( ) + movement ) ) )
             {
-                // skip if terrain_edge is current ground or adjacent as these are already dealt with
-                if( checked_edges.contains( terrain_edge ) ||
-                    ( terrain_edge == m_ground ) ||
-                    ( terrain_edge == ground_left ) ||
-                    ( terrain_edge == ground_right ) )
+                if( TerrainEdge * terrain_edge = dynamic_cast<TerrainEdge *>( terrain_node ) )
                 {
-                    continue;
-                }
-
-                checked_edges.insert( terrain_edge );
-
-                Line movement_line = movement;
-                if( movement_line.intersects( terrain_edge->line( ) + VectorY( space( ).bound_height( ).half( ) ) ) )
-                {
-                    next_ground = terrain_edge;
-
-                    Coordinate intersection = movement_line.intersection( terrain_edge->line( ) + VectorY( space( ).bound_height( ).half( ) ) );
-
-                    movement = Vector( center, intersection );
-
-                    if( velocity.magnitude( ) )
+                    // skip if terrain_edge is current ground or adjacent as these are already dealt with
+                    if( checked_edges.contains( terrain_edge ) ||
+                        ( terrain_edge == m_ground ) ||
+                        ( terrain_edge == ground_left ) ||
+                        ( terrain_edge == ground_right ) )
                     {
-                        movement_percentage = movement.magnitude( ) / velocity.magnitude( );
+                        continue;
                     }
-                    else
+
+                    checked_edges.insert( terrain_edge );
+
+                    Line movement_line = movement;
+                    if( movement_line.intersects( terrain_edge->line( ) + VectorY( space( ).bound_height( ).half( ) ) ) )
                     {
-                        movement_percentage = ONE;
+                        next_ground = terrain_edge;
+
+                        Coordinate intersection = movement_line.intersection( terrain_edge->line( ) + VectorY( space( ).bound_height( ).half( ) ) );
+
+                        movement = Vector( center, intersection );
+
+                        if( velocity.magnitude( ) )
+                        {
+                            movement_percentage = movement.magnitude( ) / velocity.magnitude( );
+                        }
+                        else
+                        {
+                            movement_percentage = ONE;
+                        }
                     }
                 }
             }

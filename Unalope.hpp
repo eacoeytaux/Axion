@@ -1,0 +1,22 @@
+#ifndef Unalope_hpp
+#define Unalope_hpp
+
+#include "Enemy.hpp"
+
+namespace mtmercy
+{
+
+class Unalope : public Enemy
+{
+public:
+    virtual ~Unalope( ) { }
+    Unalope( World *, const Coordinate & position );
+
+    virtual void render( ) override;
+
+    virtual void update( ) override;
+};
+
+} // namespace mtmercy
+
+#endif /* Unalope_hpp */

@@ -32,6 +32,7 @@
     <ClCompile Include="AspineTree.cpp" />
     <ClCompile Include="Bird.cpp" />
     <ClCompile Include="Bush.cpp" />
+    <ClCompile Include="Butterfly.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Climber.cpp" />
     <ClCompile Include="Clock.cpp" />
@@ -75,6 +76,7 @@
     <ClCompile Include="Speaker.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="Unalope.cpp" />
     <ClCompile Include="Vector.cpp" />
     <ClCompile Include="Waterfall.cpp" />
     <ClCompile Include="World.cpp" />
@@ -90,6 +92,7 @@
     <ClInclude Include="Bedrock.hpp" />
     <ClInclude Include="Bird.hpp" />
     <ClInclude Include="Bush.hpp" />
+    <ClInclude Include="Butterfly.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="Climber.hpp" />
     <ClInclude Include="Clock.hpp" />
@@ -145,6 +148,7 @@
     <ClInclude Include="STDptr.hpp" />
     <ClInclude Include="Terrain.hpp" />
     <ClInclude Include="Transform.hpp" />
+    <ClInclude Include="Unalope.hpp" />
     <ClInclude Include="Utility.hpp" />
     <ClInclude Include="Vector.hpp" />
     <ClInclude Include="Visible.hpp" />
@@ -246,6 +250,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -261,6 +266,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -279,6 +285,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>Default</LanguageStandard_C>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -295,6 +302,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -313,6 +321,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -334,6 +343,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>Default</LanguageStandard_C>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

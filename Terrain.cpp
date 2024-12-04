@@ -55,11 +55,14 @@ void Terrain::make( const varray<Coordinate> & _positions, const bool _loop )
         const Coordinate & coordinate = _positions[ i ];
         TerrainVertex * vertex = new TerrainVertex( coordinate );
         m_vertices.back( ).insert_back( vertex );
+        world( )->object_grid( ).add( vertex );
 
         if( i )
         {
             Assert( (bool)previous );
-            m_edges.back( ).insert_back( new TerrainEdge( previous, vertex ) );
+            TerrainEdge * edge = new TerrainEdge( previous, vertex );
+            m_edges.back( ).insert_back( edge );
+            world( )->object_grid( ).add( edge );
         }
 
         previous = vertex;
@@ -81,7 +84,9 @@ void Terrain::make( const varray<Coordinate> & _positions, const bool _loop )
     {
         if( first && last )
         {
-            m_edges.back( ).insert_back( new TerrainEdge( last, first ) );
+            TerrainEdge * edge = new TerrainEdge( last, first );
+            m_edges.back( ).insert_back( edge );
+            world( )->object_grid( ).add( edge );
         }
     }
 }
@@ -89,25 +94,6 @@ void Terrain::make( const varray<Coordinate> & _positions, const bool _loop )
 const varray<varray<TerrainVertex *>> & Terrain::vertices( ) const { return m_vertices; }
 
 const varray<varray<TerrainEdge *>> & Terrain::edges( ) const { return m_edges; }
-
-varray<TerrainEdge *> Terrain::edges( const FixedRectangle & _rect ) const
-{
-    varray<TerrainEdge *> matches_edges;
-
-    for_each( edges, m_edges )
-    {
-        for_each( edge, edges )
-        {
-            // TODO
-            // if( _rect.intersects( edge->line( ) ) )
-            {
-                matches_edges.insert_back( edge );
-            }
-        }
-    }
-
-    return matches_edges;
-}
 
 void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( const Coordinate &, const TerrainEdge * )> & f ) const
 {
@@ -144,15 +130,28 @@ void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( 
 Drawing Terrain::debug_overlay( ) const
 {
     const Planc GROUND_WIDTH = 1.5;
+    const Planc GROUND_VERTEX_WIDTH = 2.5;
     const Color COLOR = CYAN;
 
     Drawing debug_overlay;
 
-    for_each( edges, edges( ) )
+    if( Object::draw_physics )
     {
-        for_each( edge, edges )
+        for_each( edges, edges( ) )
         {
-            debug_overlay.draw( COLOR, edge->line( ), GROUND_WIDTH );
+            for_each( edge, edges )
+            {
+                debug_overlay.draw( COLOR, edge->line( ), GROUND_WIDTH, true );
+
+            }
+        }
+
+        for_each( vertices, vertices( ) )
+        {
+            for_each( vertex, vertices )
+            {
+                debug_overlay.draw( COLOR, Circle( GROUND_VERTEX_WIDTH / world( )->camera( )->zoom( ), vertex->position( ) ), FILLED, true );
+            }
         }
     }
 
@@ -162,7 +161,7 @@ Drawing Terrain::debug_overlay( ) const
 
 TerrainVertex::TerrainVertex( const Coordinate & _position ) { m_position = _position; }
 
-Coordinate TerrainVertex::position( ) const { return m_position; }
+const Coordinate & TerrainVertex::position( ) const { return m_position; }
 
 TerrainEdge * TerrainVertex::edge1( ) const { return m_e1; }
 TerrainEdge * TerrainVertex::edge2( ) const { return m_e2; }
@@ -201,6 +200,11 @@ Angle TerrainVertex::normal( ) const
 
 dec TerrainVertex::resistance( ) const { return m_resistance; }
 
+FixedRectangle TerrainVertex::bounding_box( ) const
+{
+    return FixedRectangle( ZERO, ZERO, position( ) );
+}
+
 TerrainEdge::TerrainEdge( TerrainVertex * _v1, TerrainVertex * _v2, const dec _resistance ) : m_v1( _v1 ), m_v2( _v2 ), m_resistance( _resistance )
 {
     Assert( (bool)m_v1 );
@@ -235,3 +239,8 @@ Angle TerrainEdge::normal( ) const
 }
 
 dec TerrainEdge::resistance( ) const { return m_resistance; }
+
+FixedRectangle TerrainEdge::bounding_box( ) const
+{
+    return FixedRectangle( m_v1->position( ), m_v2->position( ) );
+}

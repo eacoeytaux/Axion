@@ -19,6 +19,7 @@
 #include "Butterfly.hpp"
 #include "Porkupine.hpp"
 #include "Gopher.hpp"
+#include "Unalope.hpp"
 #include "Snail.hpp"
 
 using namespace mtmercy;
@@ -138,8 +139,9 @@ void MountMerciless::create( )
 
     // add_object( new Bird( this, Coordinate( -100.0, 100.0 ) ) );
     // add_object( new Fox( this, Coordinate( 200.0, 150.0 ) ) );
-    add_object( new Gopher( this, Coordinate( 150, 20 ) ) );
-    add_object( new Porkupine( this, Coordinate( 100, 30 ) ) );
+    // add_object( new Gopher( this, Coordinate( 150, 20 ) ) );
+    add_object( new Unalope( this, Coordinate( 150, 20 ) ) );
+    // add_object( new Porkupine( this, Coordinate( 100, 30 ) ) );
     // add_object( new Butterfly( this, Coordinate( 200, 50 ) ) );
     // add_object( new Snail( this, Coordinate( 200.0, 150.0 ) ) );
 }
@@ -157,10 +159,6 @@ Terrain * MountMerciless::generate_terrain( )
                                                          // Coordinate( 500.0, 25.0 ),
                                                          // Coordinate( 800.0, 5.0 ),
                                                          Coordinate( 1000.0, 0.0 ) } };
-    // Coordinate( 1100.0, 1000.0 ) } }; //, {
-                                      // Coordinate( 200.0, 100.0 ),
-                                      // Coordinate( 150.0, 150.0 ),
-                                      // Coordinate( 100.0, 100.0 ) } };
 
     return new GrassTerrain( this, terrain_coordinates );
 }

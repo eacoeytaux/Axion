@@ -17,6 +17,7 @@ namespace reality
 class Object;
 class Player;
 class Terrain;
+class TerrainNode;
 } // namespace reality
 
 class Event
@@ -57,9 +58,6 @@ public:
     const varray<Player *> & players( ) { return m_players; }
     Player * player( uint player_number = 0 );
     Player * player_main( );
-
-    varray<Coordinate> update_points( ) const;
-    virtual Planc default_update_distance( ) const;
 
     virtual void add_object( Object * object );
     void add_objects( const varray<Object *> & objects )
@@ -114,6 +112,8 @@ public:
     const varray<Object *> & objects( ) const;
 
     varray<Object *> objects_in_range( const FixedRectangle & );
+
+    varray<TerrainNode *> terrain_in_range( const FixedRectangle & );
 
 protected:
     virtual void create( ) { return create( FixedRectangle( ) ); }
@@ -171,6 +171,7 @@ public:
             uint y = 0;
 
             uset<Object *> objects;
+            uset<TerrainNode *> terrain_nodes;
 
             default_equal( Block );
         };
@@ -181,6 +182,7 @@ public:
         void init( const FixedRectangle & bounds );
 
         Block & block( uint x, uint y );
+        const Block & block_const( uint x, uint y ) const;
 
         bool valid_x( uint x ) const { return ( x < m_grid_x_size ); }
         bool valid_y( uint y ) const { return ( y < m_grid_y_size ); }
@@ -197,8 +199,14 @@ public:
         void traverse( const FixedRectangle & range, function<void( Block & )> f );
         void traverse( function<void( Block & )> f ) { return traverse( m_bounds, f ); }
 
+        void traverse_const( const FixedRectangle & range, function<void( const Block & )> f ) const;
+        void traverse_const( function<void( const Block & )> f ) const { return traverse_const( m_bounds, f ); }
+
         void add( Object * object );
         void erase( Object * object );
+
+        void add( TerrainNode * terrain_node );
+        void erase( TerrainNode * terrain_node );
 
         void clear( );
 
@@ -219,11 +227,7 @@ public:
 private:
     virtual void render_bounds( Camera * camera );
     #ifdef AXN_DEBUG
-    void render_object_grid( Camera * camera ) { return render_object_grid( camera, false ); }
-    void render_object_grid( Camera * camera, bool fill_blocks, function<bool( const Grid::Block & block )> = [ ] ( const Grid::Block & block )
-    {
-        return false;
-    } );
+    void render_object_grid( Camera * camera ) const;
     #endif
 
     #ifdef AXN_DEBUG

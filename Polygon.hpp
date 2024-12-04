@@ -67,7 +67,7 @@ public:
 private:
     varray<Coordinate> m_coordinates_raw;
     mutable varray<Coordinate> m_coordinates;
-    mutable bool m_coordinates_dirty = true;
+    mutable bool m_coordinates_dirty = false;
 
     mutable Planc m_lower_bound_x = P0;
     mutable Planc m_lower_bound_y = P0;

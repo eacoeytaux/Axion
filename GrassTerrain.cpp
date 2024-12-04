@@ -165,8 +165,6 @@ GrassTerrain::GrassTerrain( World * world, const varray<varray<Coordinate>> & _v
         }
     }
 
-    // todo use drawing outline instead
-
     for_each( polygon, grass_bottom ) draw( GRASS_COLOR_DARK, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
     for_each( polygon, grass_top ) draw( GRASS_COLOR_DARK, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
     for_each( polygon, grass_top ) draw( GRASS_COLOR_LIGHT, polygon );

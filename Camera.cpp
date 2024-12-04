@@ -381,28 +381,6 @@ void Camera::render( )
             #ifdef AXN_DEBUG
             if( Debug::active )
             {
-                // // todo move to world probably
-                // // update bounds
-                //{
-                //    const Color COLOR = RED.a( 0.25 );
-                //
-                //    varray<Coordinate> update_points = m_world->update_points( );
-                //    if( update_points.size( ) )
-                //    {
-                //        ogl::clear_depth( );
-                //        ogl::depth_not_equal( );
-                //
-                //        Planc d = m_world->default_update_distance( ) * _zoom;
-                //        for_each( update_point, update_points )
-                //        {
-                //            Polygon update_bounds_polygon = Circle( d, update_point - Vector( _camera_center ) );
-                //            render_convex_polygon( { TRANSPARENT }, update_bounds_polygon.coordinates( ) );
-                //        }
-                //
-                //        render_convex_polygon( { COLOR }, Rectangle( screen_width, screen_height ).coordinates( ) );
-                //    }
-                //}
-
                 for_each( visible, m_debug_subjects )
                 {
                     render_visible( visible, false );
@@ -617,16 +595,14 @@ void Camera::height( const Planc & _height ) { m_height = _height; }
 dec Camera::zoom( ) const { return m_zoom; }
 void Camera::zoom( const dec _zoom )
 {
-    if( !in_range( _zoom, MIN_ZOOM, MAX_ZOOM ) )
-    {
-        return;
-    }
+    Assert( _zoom, "zoom cannot be zero" );
+
+    dec zoom = max( MIN_ZOOM, min( MAX_ZOOM, _zoom ) );
 
     Coordinate pre_target_offset = target_offset( );
-
     Coordinate cursor_screen_position = world_to_screen( cursor_world_position( ) );
 
-    m_zoom = _zoom;
+    m_zoom = zoom;
 
     Coordinate post_target_offset = target_offset( );
     Coordinate d_target_offset = post_target_offset - pre_target_offset;

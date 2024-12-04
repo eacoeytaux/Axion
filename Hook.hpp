@@ -44,7 +44,7 @@ private:
 
     STATE( LOADED,
            HOOKED,
-           FIRING,
+           LAUNCHING,
            RETRACTING );
 };
 

@@ -98,7 +98,7 @@ void Hook::update_velocity( )
         m_angle = m_owner->aim_angle( );
         position( m_owner->position( ) + VectorA( m_angle, HOOK_LENGTH ) );
     }
-    else if( state( ) == FIRING )
+    else if( state( ) == LAUNCHING )
     {
         gravity_ratio( 0.25 );
         m_rope_length = m_owner->position( ).distance_to( position( ) );
@@ -138,7 +138,7 @@ void Hook::update_velocity( )
 
     if( !Object::ground( ) )
     {
-        if( state( ) == FIRING )
+        if( state( ) == LAUNCHING )
         {
             m_angle = velocity( ).angle( );
         }
@@ -160,7 +160,7 @@ bool Hook::collide( Object * object )
     {
         Object::collide( object );
 
-        if( state( ) == FIRING )
+        if( state( ) == LAUNCHING )
         {
             if( object->interactive( ) && !dynamic_cast<Hook *>( object ) )
             {
@@ -203,12 +203,12 @@ void Hook::fire( const Vector & _launch_speed )
         case LOADED:
         {
             velocity( _launch_speed );
-            state( FIRING );
+            state( LAUNCHING );
             // static SoundClip twang( "twang.wav" );
             // twang.play( );
             break;
         }
-        case FIRING:
+        case LAUNCHING:
         case HOOKED:
         case RETRACTING:
         {
@@ -230,7 +230,7 @@ void Hook::retract( )
         {
             break;
         }
-        case FIRING:
+        case LAUNCHING:
         case HOOKED:
         {
             state( RETRACTING );

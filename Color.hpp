@@ -12,12 +12,6 @@ namespace graphics
 
 const dec FILLED = ZERO;
 
-namespace
-{
-const uint RGB_DEPTH = 255;
-const uint ALPHA_DEPTH = 255;
-} // namespace
-
 // https://www.calculatorology.com/conversion/color/
 
 class Color
@@ -25,19 +19,27 @@ class Color
 public:
     virtual ~Color( ) { }
 
-    Color( ) : m_r( ZERO ), m_g( ZERO ), m_b( ZERO ), m_a( ONE ) { }
-
-    Color( const Color & c ) : m_r( round( c.m_r * (dec)RGB_DEPTH ) / (dec)RGB_DEPTH ),
-        m_g( round( c.m_g * (dec)RGB_DEPTH ) / (dec)RGB_DEPTH ),
-        m_b( round( c.m_b * (dec)RGB_DEPTH ) / (dec)RGB_DEPTH ),
-        m_a( round( c.m_a * (dec)ALPHA_DEPTH ) / (dec)ALPHA_DEPTH )
+    Color( ) :
+        m_r( ZERO ),
+        m_g( ZERO ),
+        m_b( ZERO ),
+        m_a( ONE )
     {
     }
 
-    Color( const Color & c, dec a ) : m_r( round( c.m_r * (dec)RGB_DEPTH ) / (dec)RGB_DEPTH ),
-        m_g( round( c.m_g * (dec)RGB_DEPTH ) / (dec)RGB_DEPTH ),
-        m_b( round( c.m_b * (dec)RGB_DEPTH ) / (dec)RGB_DEPTH ),
-        m_a( round( a * (dec)ALPHA_DEPTH ) / (dec)ALPHA_DEPTH )
+    Color( const Color & c ) :
+        m_r( c.m_r ),
+        m_g( c.m_g ),
+        m_b( c.m_b ),
+        m_a( c.m_a )
+    {
+    }
+
+    Color( const Color & c, dec a ) :
+        m_r( c.m_r ),
+        m_g( c.m_g ),
+        m_b( c.m_b ),
+        m_a( a )
     {
     }
 
@@ -55,11 +57,6 @@ public:
         c.m_g = g;
         c.m_b = b;
         c.m_a = a;
-
-        //c.m_r = ( round( c.m_r * (dec)RGB_DEPTH ) / (dec)RGB_DEPTH );
-        //c.m_g = ( round( c.m_g * (dec)RGB_DEPTH ) / (dec)RGB_DEPTH );
-        //c.m_b = ( round( c.m_b * (dec)RGB_DEPTH ) / (dec)RGB_DEPTH );
-        //c.m_a = ( round( c.m_a * (dec)ALPHA_DEPTH ) / (dec)ALPHA_DEPTH );
 
         return c;
     }

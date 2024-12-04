@@ -172,11 +172,11 @@ void Climber::update( )
         }
     }
 
-    if( m_firing_arrow || m_firing_hook )
+    if( m_launching_arrow || m_launching_hook )
     {
         if( !m_reload_timer.remaining( ) )
         {
-            if( m_firing_arrow )
+            if( m_launching_arrow )
             {
                 // static SoundClip twang( "twang.wav" );
                 // twang.play( 0.5 );
@@ -189,9 +189,9 @@ void Climber::update( )
 
                 m_arrow_feather_color = Random::rColor( );
 
-                m_firing_arrow = false;
+                m_launching_arrow = false;
             }
-            else if( m_firing_hook )
+            else if( m_launching_hook )
             {
                 m_hook.fire( VectorA( aim_angle( ), DEFAULT_HOOK_LAUNCH_SPEED ) + ( velocity( ) * ARROW_VELOCITY_DAMPEN ) );
             }
@@ -200,7 +200,7 @@ void Climber::update( )
     }
     else
     {
-        if( !m_firing_hook )
+        if( !m_launching_hook )
         {
             m_hook.retract( );
         }
@@ -434,20 +434,20 @@ Angle Climber::aim_shake_range( ) const
     return m_aim_shake_angle;
 }
 
-void Climber::loose_hook( )
+void Climber::launch_hook( )
 {
-    m_firing_hook = true;
+    m_launching_hook = true;
 }
 
-void Climber::loose_arrow( )
+void Climber::launch_arrow( )
 {
-    m_firing_arrow = true;
+    m_launching_arrow = true;
 }
 
 void Climber::release_bow( )
 {
-    m_firing_hook = false;
-    m_firing_arrow = false;
+    m_launching_hook = false;
+    m_launching_arrow = false;
 }
 
 Coordinate Climber::head_center( ) const
@@ -644,7 +644,6 @@ void Climber::render( )
     Player::render( );
 
     m_hook.render( );
-    // draw( m_hook.projectile_drawing( VectorA( aim_angle( ), DEFAULT_ROPE_GROWTH_SPEED ), HOOK_PATH_LENGTH, HOOK_PATH_COLOR, HOOK_PATH_ALPHA_START ) );
     draw( m_hook );
 
     draw_legs( );
@@ -1140,11 +1139,11 @@ void Climber::input( Input * _input )
             {
                 if( button == MouseInput::LEFT_BUTTON )
                 {
-                    loose_arrow( );
+                    launch_arrow( );
                 }
                 else if( button == MouseInput::RIGHT_BUTTON )
                 {
-                    loose_hook( );
+                    launch_hook( );
                 }
             }
         }
@@ -1168,7 +1167,7 @@ void Climber::input( Input * _input )
             {
                 if( dynamic == ControllerButtonInput::PRESSED )
                 {
-                    loose_arrow( );
+                    launch_arrow( );
                 }
                 else
                 {
@@ -1180,7 +1179,7 @@ void Climber::input( Input * _input )
             {
                 if( dynamic == ControllerButtonInput::PRESSED )
                 {
-                    loose_hook( );
+                    launch_hook( );
                 }
                 else
                 {

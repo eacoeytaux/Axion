@@ -89,6 +89,12 @@ void Engine::init_eng( const string _app_name )
     WINDOW_WIDTH = display_mode.w;
     WINDOW_HEIGHT = display_mode.h;
 
+    #ifdef AXN_DEBUG
+    SDL_SetWindowFullscreen( WINDOW, 0 );
+    SDL_SetWindowSize( WINDOW, WINDOW_WIDTH, WINDOW_HEIGHT );
+    SDL_SetWindowPosition( WINDOW, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED );
+    #endif
+
     assert_check = SDL_GL_CreateContext( WINDOW );
     Assert( assert_check, "SDL window context creation failed: ", SDL_GetErrorStr( ) );
 

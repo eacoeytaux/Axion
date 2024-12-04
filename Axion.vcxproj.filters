@@ -201,6 +201,12 @@
     <ClCompile Include="Porkupine.cpp">
       <Filter>Source Files\mt\mobs</Filter>
     </ClCompile>
+    <ClCompile Include="Butterfly.cpp">
+      <Filter>Source Files\mt\mobs</Filter>
+    </ClCompile>
+    <ClCompile Include="Unalope.cpp">
+      <Filter>Source Files\mt\mobs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Angle.hpp">
@@ -411,6 +417,12 @@
       <Filter>Source Files\axn\world</Filter>
     </ClInclude>
     <ClInclude Include="Porkupine.hpp">
+      <Filter>Source Files\mt\mobs</Filter>
+    </ClInclude>
+    <ClInclude Include="Butterfly.hpp">
+      <Filter>Source Files\mt\mobs</Filter>
+    </ClInclude>
+    <ClInclude Include="Unalope.hpp">
       <Filter>Source Files\mt\mobs</Filter>
     </ClInclude>
   </ItemGroup>

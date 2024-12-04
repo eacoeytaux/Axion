@@ -1,19 +1,19 @@
-// #ifndef SoundClip_hpp
-// #define SoundClip_hpp
+//#ifndef SoundClip_hpp
+//#define SoundClip_hpp
 //
-// namespace axn
-// {
-// namespace audio
-// {
+//namespace axn
+//{
+//namespace audio
+//{
 //
-// class SoundClip
-// {
-// public:
-//     virtual ~SoundClip( ) { }
-//     SoundClip( string load_name );
-// };
+//class SoundClip
+//{
+//public:
+//    virtual ~SoundClip( ) { }
+//    SoundClip( string load_name );
+//};
 //
-// } // namespace axn
-// } // namespace audio
+//} // namespace axn
+//} // namespace audio
 //
-// #endif /* SoundClip_hpp */
+//#endif /* SoundClip_hpp */

@@ -578,6 +578,19 @@ public:
         return at( index );
     }
 
+    varray operator+( const varray & _v ) const
+    {
+        varray v = *this;
+        v.insert_back( _v );
+        return v;
+    }
+
+    varray & operator+=( const varray & _v )
+    {
+        insert_back( _v );
+        return *this;
+    }
+
     virtual varray & operator=( const varray & v )
     {
         clear( );
