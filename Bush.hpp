@@ -9,7 +9,6 @@ namespace mtmercy
 class Bush : public Object
 {
 public:
-    virtual ~Bush( ) { }
     Bush( World *, const Coordinate & root, dec z = 1.0 );
 };
 

@@ -32,7 +32,7 @@ const Color LEAVES_BORDER_COLOR = Color::rgb( 0x008000 );
 PineTree::PineTree( World * world, const Coordinate & _root, const dec _z ) : Object( world, _root )
 {
     background( true );
-    
+
     needs_render_always( true );
 
     z( _z );
@@ -42,10 +42,10 @@ PineTree::PineTree( World * world, const Coordinate & _root, const dec _z ) : Ob
     Drawing & trunk = m_leave_bunches_and_trunk.insert_back( );
 
     Coordinate base;
-    Vector trunk_vector( Vector( base, base + VectorA( RIGHT_ANGLE_1, TRUNK_HEIGHT ) ) );
+    Vector trunk_vector( Vector( base, base + Vector::A( RIGHT_ANGLE_1, TRUNK_HEIGHT ) ) );
     trunk.draw( TRUNK_BORDER_COLOR, Line( trunk_vector ), TRUNK_THICKNESS + LEAVES_BORDER_WIDTH * 2.0 );
     trunk.draw( TRUNK_COLOR, Line( trunk_vector ), TRUNK_THICKNESS );
-    
+
     m_leave_bunches_rotation_points.insert_back( base );
 
     Coordinate last_top = trunk_vector.destination( );
@@ -53,31 +53,31 @@ PineTree::PineTree( World * world, const Coordinate & _root, const dec _z ) : Ob
     uint leaves_count = Random::rint( LEAVES_COUNT );
     for_range( i, leaves_count )
     {
-        Vector sub_trunk( last_top, last_top + VectorA( RIGHT_ANGLE_1, SUB_TRUNK_HEIGHT_INITIAL * shrink_ratio ) );
+        Vector sub_trunk( last_top, last_top + Vector::A( RIGHT_ANGLE_1, SUB_TRUNK_HEIGHT_INITIAL * shrink_ratio ) );
 
         varray<Coordinate> leaf_bunch_coords;
         leaf_bunch_coords.insert_back( ORIGIN );
 
         Angle leaves_angle = -( LEAVES_SPAN / 2.0 ) + RIGHT_ANGLE_3;
-        leaf_bunch_coords.insert_back( VectorA( leaves_angle, ( LEAVES_HEIGHT_BASE_LENGTH + Random::rdec( -SPIKE_OFFSET_OUTER, SPIKE_OFFSET_OUTER ) ) * shrink_ratio ) );
+        leaf_bunch_coords.insert_back( Vector::A( leaves_angle, ( LEAVES_HEIGHT_BASE_LENGTH + Random::rdec( -SPIKE_OFFSET_OUTER, SPIKE_OFFSET_OUTER ) ) * shrink_ratio ) );
 
         uint spike_count = Random::rint( SPIKE_COUNT ) - ( SPIKE_SHRINK_RATE * i );
         Angle leaves_sub_angle = LEAVES_SPAN / ( spike_count + 1 );
         leaves_sub_angle /= 2.0;
 
-        for_range( i, spike_count )
+        do_count( spike_count )
         {
             leaves_angle += leaves_sub_angle;
-            leaf_bunch_coords.insert_back( VectorA( leaves_angle, LEAVES_HEIGHT_BASE_LENGTH * SPIKE_INNER_RATIO * shrink_ratio ) + VectorA( Random::rAngle( ), SPIKE_OFFSET_INNER * shrink_ratio ) );
+            leaf_bunch_coords.insert_back( Vector::A( leaves_angle, LEAVES_HEIGHT_BASE_LENGTH * SPIKE_INNER_RATIO * shrink_ratio ) + Vector::A( Random::rAngle( ), SPIKE_OFFSET_INNER * shrink_ratio ) );
 
             leaves_angle += leaves_sub_angle;
-            leaf_bunch_coords.insert_back( VectorA( leaves_angle, LEAVES_HEIGHT_BASE_LENGTH * shrink_ratio ) + VectorA( Random::rAngle( ), SPIKE_OFFSET_OUTER * shrink_ratio ) );
+            leaf_bunch_coords.insert_back( Vector::A( leaves_angle, LEAVES_HEIGHT_BASE_LENGTH * shrink_ratio ) + Vector::A( Random::rAngle( ), SPIKE_OFFSET_OUTER * shrink_ratio ) );
         }
 
         leaves_angle += leaves_sub_angle;
-        leaf_bunch_coords.insert_back( VectorA( leaves_angle, LEAVES_HEIGHT_BASE_LENGTH * SPIKE_INNER_RATIO * shrink_ratio ) + VectorA( Random::rAngle( ), SPIKE_OFFSET_INNER * shrink_ratio ) );
+        leaf_bunch_coords.insert_back( Vector::A( leaves_angle, LEAVES_HEIGHT_BASE_LENGTH * SPIKE_INNER_RATIO * shrink_ratio ) + Vector::A( Random::rAngle( ), SPIKE_OFFSET_INNER * shrink_ratio ) );
 
-        leaf_bunch_coords.insert_back( VectorA( ( LEAVES_SPAN / 2.0 ) + RIGHT_ANGLE_3, ( LEAVES_HEIGHT_BASE_LENGTH + Random::rdec( SPIKE_OFFSET_OUTER, -SPIKE_OFFSET_OUTER ) ) * shrink_ratio ) );
+        leaf_bunch_coords.insert_back( Vector::A( ( LEAVES_SPAN / 2.0 ) + RIGHT_ANGLE_3, ( LEAVES_HEIGHT_BASE_LENGTH + Random::rdec( SPIKE_OFFSET_OUTER, -SPIKE_OFFSET_OUTER ) ) * shrink_ratio ) );
 
         Polygon leaf_bunch = Polygon( leaf_bunch_coords );
         leaf_bunch += last_top + sub_trunk;

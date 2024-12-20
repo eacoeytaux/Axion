@@ -97,19 +97,22 @@ void World::input( const varray<Input *> & _inputs )
                     {
                         break;
                     }
+
                     case 27:
                     { // esc key
                         Engine::quit( );
                         return;
                     }
-                    case 'p':
-                    {
-                        Engine::pause( !Engine::paused( ) );
-                        break;
-                    };
+
                     case '\\':
                     {
                         Engine::sync_controllers( );
+                        break;
+                    };
+
+                    case 'p':
+                    {
+                        Engine::pause( !Engine::paused( ) );
                         break;
                     };
 
@@ -226,11 +229,11 @@ void World::input( const varray<Input *> & _inputs )
             {
                 if( button == MouseInput::SCROLL_BUTTON )
                 {
-                    if( is_positive( position.y( ) ) )
+                    if( is_pos( position.y( ) ) )
                     {
                         m_camera->zoom( m_camera->zoom( ) / CAMERA_ZOOM_RATIO );
                     }
-                    else if( is_negative( position.y( ) ) )
+                    else if( is_neg( position.y( ) ) )
                     {
                         m_camera->zoom( m_camera->zoom( ) * CAMERA_ZOOM_RATIO );
                     }
@@ -554,14 +557,14 @@ void World::update( )
 
     update_object( m_terrain );
 
-    m_players.erase_if( [ & ] ( Player * player )
+    m_players.remove_if( [ & ] ( Player * player )
     {
         return player->deleted( );
     } );
 
-    auto erase_deleted_objects = [ & ] ( varray<Object *> & objects )
+    auto remove_deleted_objects = [ & ] ( varray<Object *> & objects )
     {
-        objects.erase_if( [ & ] ( Object * object )
+        objects.remove_if( [ & ] ( Object * object )
         {
             if( !object )
             {
@@ -579,9 +582,9 @@ void World::update( )
         } );
     };
 
-    erase_deleted_objects( m_objects );
-    erase_deleted_objects( m_foreground_objects );
-    erase_deleted_objects( m_background_objects );
+    remove_deleted_objects( m_objects );
+    remove_deleted_objects( m_foreground_objects );
+    remove_deleted_objects( m_background_objects );
 
     if( m_camera )
     {
@@ -661,7 +664,7 @@ void World::remove_object( Object * object )
     {
         if( object->z( ) == ONE )
         {
-            m_object_grid.erase( object );
+            m_object_grid.remove( object );
         }
 
         safe_delete( object );
@@ -931,7 +934,7 @@ void World::Grid::add( Object * object )
     }
 }
 
-void World::Grid::erase( Object * object )
+void World::Grid::remove( Object * object )
 {
     if( object->z( ) == ONE )
     {
@@ -950,7 +953,7 @@ void World::Grid::add( TerrainNode * terrain_node )
     } );
 }
 
-void World::Grid::erase( TerrainNode * terrain_node )
+void World::Grid::remove( TerrainNode * terrain_node )
 {
     traverse( terrain_node->bounding_box( ), [ & ] ( Grid::Block & block )
     {

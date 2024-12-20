@@ -14,7 +14,6 @@ class Drawing : public Transformable
     friend class Camera; // be friendly to the camera and smile
 
 public:
-    virtual ~Drawing( ) { }
     Drawing( const Coordinate & center = ORIGIN );
 
     transform_functions( Drawing );

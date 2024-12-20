@@ -25,7 +25,7 @@ ptr<T> make_ptr( T * t )
 }
 
 template <class T, class U>
-ptr<T> is_pointer( const ptr<U> & u ) noexcept
+ptr<T> is_ptr( const ptr<U> & u ) noexcept
 {
     return std::dynamic_pointer_cast<T *>( u );
 }

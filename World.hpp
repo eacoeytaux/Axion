@@ -203,10 +203,10 @@ public:
         void traverse_const( function<void( const Block & )> f ) const { return traverse_const( m_bounds, f ); }
 
         void add( Object * object );
-        void erase( Object * object );
+        void remove( Object * object );
 
         void add( TerrainNode * terrain_node );
-        void erase( TerrainNode * terrain_node );
+        void remove( TerrainNode * terrain_node );
 
         void clear( );
 

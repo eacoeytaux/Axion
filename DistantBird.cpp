@@ -28,7 +28,7 @@ DistantBird::DistantBird( World * world, const Coordinate & _position ) : Object
     no_gravity( );
     terrain_boundaries( false );
 
-    velocity( VectorX( X_SPEED ) );
+    velocity( Vector::X( X_SPEED ) );
 
     m_wing_cycle_offset = Random::rdec( WING_CYCLE ) * TAU;
     m_flight_cycle_offset = Random::rdec( FLIGHT_HEIGHT_CYCLE ) * half( PI );
@@ -47,8 +47,8 @@ void DistantBird::render( )
     bird_polygon.scale( SCALE );
     bird_wing.scale( SCALE );
 
-    bird_polygon.move( VectorY( flight_y ) );
-    bird_wing.move( VectorY( flight_y ) );
+    bird_polygon.move( Vector::Y( flight_y ) );
+    bird_wing.move( Vector::Y( flight_y ) );
 
     if( velocity( ).dx( ) < 0.0 )
     {

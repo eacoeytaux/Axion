@@ -337,8 +337,8 @@ error ogl::transform( const Transform & _transform )
         _transform.get( 2, 1 ), 0,
         _transform.get( 0, 2 ),
         _transform.get( 1, 2 ),
-        _transform.get( 2, 2 ),
-        0, 0, 0, 0, 1 };
+        _transform.get( 2, 2 ), 0,
+        0, 0, 0, 1 };
 
     glMultMatrixd( matrix );
     return error_check( );

@@ -25,16 +25,16 @@ uint random_int_max( )
     return RAND_MAX;
 }
 
-error Random::seed( )
-{
-    return seed( (uint)( Clock( ).total_ms( ) ) );
-}
-
 error Random::seed( const string _seed )
 {
     uint seed_uint = 0;
     for_range( i, _seed.length( ) ) { seed_uint ^= ( _seed[ i ] << ( 8 * ( i % sizeof( uint ) ) ) ); }
     return seed( seed_uint );
+}
+
+error Random::seed( )
+{
+    return seed( (uint)( Clock( ).total_ms( ) ) );
 }
 
 error Random::seed( const uint _seed )

@@ -27,11 +27,11 @@ Skull::Skull( World * world, const Coordinate & _position ) : Object( world, _po
 {
     needs_render_always( true );
 
-    m_skull_drawing.draw( BONE_COLOR, Rectangle( JAW_WIDTH, JAW_HEIGHT, Coordinate( SKULL_RADIUS - half( JAW_WIDTH ), -half( JAW_HEIGHT ) ) ) );
-    m_skull_drawing.draw( BONE_COLOR, Circle( SKULL_RADIUS ) );
+    m_skull_drawing.draw( BONE_COLOR, Polygon::rectangle( JAW_WIDTH, JAW_HEIGHT, Coordinate( SKULL_RADIUS - half( JAW_WIDTH ), -half( JAW_HEIGHT ) ) ) );
+    m_skull_drawing.draw( BONE_COLOR, Polygon::circle( SKULL_RADIUS ) );
 
-    m_skull_drawing.draw( HOLE_COLOR, Circle( EYE_RADIUS, Coordinate( ( SKULL_RADIUS * EYE_OFFSET_X ) + ( SKULL_RADIUS * half( EYE_SPACING ) ), -( SKULL_RADIUS * EYE_OFFSET_Y ) ) ) );
-    m_skull_drawing.draw( HOLE_COLOR, Circle( EYE_RADIUS, Coordinate( ( SKULL_RADIUS * EYE_OFFSET_X ) - ( SKULL_RADIUS * half( EYE_SPACING ) ), -( SKULL_RADIUS * EYE_OFFSET_Y ) ) ) );
+    m_skull_drawing.draw( HOLE_COLOR, Polygon::circle( EYE_RADIUS, Coordinate( ( SKULL_RADIUS * EYE_OFFSET_X ) + ( SKULL_RADIUS * half( EYE_SPACING ) ), -( SKULL_RADIUS * EYE_OFFSET_Y ) ) ) );
+    m_skull_drawing.draw( HOLE_COLOR, Polygon::circle( EYE_RADIUS, Coordinate( ( SKULL_RADIUS * EYE_OFFSET_X ) - ( SKULL_RADIUS * half( EYE_SPACING ) ), -( SKULL_RADIUS * EYE_OFFSET_Y ) ) ) );
 
     m_skull_drawing.rotate( Random::rAngle( ) );
 }
@@ -50,7 +50,7 @@ void Skull::update( )
     if( ground( ) )
     {
         Planc distance = velocity( ).magnitude( );
-        dec ratio = Random::negative( distance / SKULL_CIRCUMFERENCE, is_negative( velocity( ).dx( ) ) );
+        dec ratio = Random::negate( distance / SKULL_CIRCUMFERENCE, is_neg( velocity( ).dx( ) ) );
         m_skull_drawing.rotate( Angle( TAU * ratio ) );
     }
 }

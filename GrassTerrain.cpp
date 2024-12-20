@@ -30,7 +30,8 @@ GrassTerrain::GrassTerrain( World * world, const varray<varray<Coordinate>> & _v
     {
         for_each( edge, edges )
         {
-            if( abs( edge->line( ).angle( ) ) <= GLASS_MAX_ANGLE )
+            // TODO
+            if( abs( edge->line( ).angle( ).radians( ) ) <= GLASS_MAX_ANGLE.radians( ) )
             {
                 Coordinate v1 = edge->vertex1( )->position( );
                 Coordinate v2 = edge->vertex2( )->position( );
@@ -56,7 +57,7 @@ GrassTerrain::GrassTerrain( World * world, const varray<varray<Coordinate>> & _v
                     Planc radius = Random::rPlanc( GRASS_RADIUS );
                     Planc d = radius;
 
-                    Vector base_offset = VectorA( normal, GRASS_BASE );
+                    Vector base_offset = Vector::A( normal, GRASS_BASE );
 
                     bool last = false;
                     do_until_break( )
@@ -72,7 +73,7 @@ GrassTerrain::GrassTerrain( World * world, const varray<varray<Coordinate>> & _v
                         Vector v4 = v2;
                         v4.rotate( -RIGHT_ANGLE );
 
-                        Vector v5 = v4 + VectorA( Random::rAngle( ), radius * Random::rPlanc( GRASS_TIP_SWAY ) );
+                        Vector v5 = v4 + Vector::A( Random::rAngle( ), radius * Random::rPlanc( GRASS_TIP_SWAY ) );
 
                         grass.insert_back( Polygon( { v1 + v2,
                                                       v1 + v3,
@@ -118,8 +119,8 @@ GrassTerrain::GrassTerrain( World * world, const varray<varray<Coordinate>> & _v
             Angle normal = vertex->normal( );
 
             Planc radius = Random::rPlanc( GRASS_RADIUS );
-            Vector offset = VectorA( Random::rAngle( ), radius * Random::rPlanc( GRASS_TIP_SWAY ) );
-            Coordinate tip = base + VectorA( normal, radius, offset );
+            Vector offset = Vector::A( Random::rAngle( ), radius * Random::rPlanc( GRASS_TIP_SWAY ) );
+            Coordinate tip = base + Vector::A( normal, radius, offset );
 
             Coordinate intersect1 = base;
             Coordinate intersect2 = base;
@@ -133,7 +134,7 @@ GrassTerrain::GrassTerrain( World * world, const varray<varray<Coordinate>> & _v
             {
                 Line edge_line = edge->line( );
 
-                Vector edge_intersect = VectorA( normal - ( RIGHT_ANGLE * 1.5 ), tip );
+                Vector edge_intersect = Vector::A( normal - ( RIGHT_ANGLE * 1.5 ), tip );
                 intersect1 = edge_line.intersection( Line( edge_intersect ) );
 
                 base_offset1 = edge->normal( ).flipped( );
@@ -143,7 +144,7 @@ GrassTerrain::GrassTerrain( World * world, const varray<varray<Coordinate>> & _v
             {
                 Line edge_line = edge->line( );
 
-                Vector edge_intersect = VectorA( normal + ( RIGHT_ANGLE * 1.5 ), tip );
+                Vector edge_intersect = Vector::A( normal + ( RIGHT_ANGLE * 1.5 ), tip );
                 intersect2 = edge_line.intersection( Line( edge_intersect ) );
 
                 base_offset2 = edge->normal( ).flipped( );
@@ -151,16 +152,16 @@ GrassTerrain::GrassTerrain( World * world, const varray<varray<Coordinate>> & _v
 
             grass_top.insert_back( Polygon( { base,
                                               intersect1,
-                                              intersect1 + VectorA( base_offset1, GRASS_BASE ),
-                                              tip + VectorA( base_offset, GRASS_BASE ),
-                                              intersect2 + VectorA( base_offset2, GRASS_BASE ),
+                                              intersect1 + Vector::A( base_offset1, GRASS_BASE ),
+                                              tip + Vector::A( base_offset, GRASS_BASE ),
+                                              intersect2 + Vector::A( base_offset2, GRASS_BASE ),
                                               intersect2 } ) );
 
             grass_bottom.insert_back( Polygon( { base,
                                                  intersect1,
-                                                 intersect1 + VectorA( base_offset1, GRASS_BASE ),
-                                                 tip + VectorA( normal, OUTLINE_THICKNESS ) + VectorA( base_offset, GRASS_BASE ),
-                                                 intersect2 + VectorA( base_offset2, GRASS_BASE ),
+                                                 intersect1 + Vector::A( base_offset1, GRASS_BASE ),
+                                                 tip + Vector::A( normal, OUTLINE_THICKNESS ) + Vector::A( base_offset, GRASS_BASE ),
+                                                 intersect2 + Vector::A( base_offset2, GRASS_BASE ),
                                                  intersect2 } ) );
         }
     }

@@ -23,11 +23,11 @@ typedef unsigned int uint;
 
 #define use_std_dec( s )  \
     template <typename T> \
-    T s( const T & t ) { return std::s( (dec)t ); }
+    dec s( const T & t ) { return std::s( (dec)t ); }
 
 #define use_std_dec2( s ) \
     template <typename T> \
-    T s( const T & t1, const T & t2 ) { return std::s( (dec)t1, (dec)t2 ); }
+    dec s( const T & t1, const T & t2 ) { return std::s( (dec)t1, (dec)t2 ); }
 
 namespace axn
 {
@@ -38,6 +38,7 @@ use_std( endl );
 use_std( exception );
 use_std( runtime_error );
 
+use_std( array );
 use_std( function );
 
 use_std( string );
@@ -86,8 +87,8 @@ const dec RIGHT_ANGLE_1 = RIGHT_ANGLE * ONE;
 const dec RIGHT_ANGLE_2 = RIGHT_ANGLE * TWO;
 const dec RIGHT_ANGLE_3 = RIGHT_ANGLE * THREE;
 
-const dec INFINITY_POSITIVE = INFINITY;
-const dec INFINITY_NEGATIVE = -INFINITY;
+const dec INFINITY_POS = INFINITY;
+const dec INFINITY_NEG = -INFINITY;
 
 } // namespace axn
 

@@ -149,7 +149,7 @@ void Object::update_velocity( )
 {
     if( stationary( ) )
     {
-        Matter::velocity( ZERO_VECTOR );
+        Matter::velocity( V0 );
         return;
     }
 
@@ -194,7 +194,7 @@ void Object::update_movement( )
     }
 
     dec remaining_percentage = ONE;
-    while( ( dec_gt( remaining_percentage, ZERO ) && !isnan( remaining_percentage ) ) )
+    while( ( greater( remaining_percentage, ZERO ) && !isnan( remaining_percentage ) ) )
     {
         update_velocity( );
         Vector velocity = Object::velocity( ) * remaining_percentage;
@@ -253,11 +253,11 @@ void Object::update_movement( )
                     checked_edges.insert( terrain_edge );
 
                     Line movement_line = movement;
-                    if( movement_line.intersects( terrain_edge->line( ) + VectorY( space( ).bound_height( ).half( ) ) ) )
+                    if( movement_line.intersects( terrain_edge->line( ) + Vector::Y( half( space( ).bound_height( ) ) ) ) )
                     {
                         next_ground = terrain_edge;
 
-                        Coordinate intersection = movement_line.intersection( terrain_edge->line( ) + VectorY( space( ).bound_height( ).half( ) ) );
+                        Coordinate intersection = movement_line.intersection( terrain_edge->line( ) + Vector::Y( half( space( ).bound_height( ) ) ) );
 
                         movement = Vector( center, intersection );
 
@@ -277,9 +277,9 @@ void Object::update_movement( )
         // check if object is moving to connecting edge
         if( m_ground && next_ground == m_ground )
         {
-            if( ( movement.dx( ) > 0.0 ) && ( center + movement ).x( ) > m_ground->line( ).right( ).x( ) )
+            if( ( movement.dx( ) > 0.0 ) && ( center + movement ).x( ) > m_ground->line( ).x_upper( ) )
             {
-                movement = Vector( center, m_ground->vertex2( )->position( ) + VectorY( space( ).bound_height( ).half( ) ) );
+                movement = Vector( center, m_ground->vertex2( )->position( ) + Vector::Y( half( space( ).bound_height( ) ) ) );
 
                 if( m_ground->vertex2( ) )
                 {
@@ -290,9 +290,9 @@ void Object::update_movement( )
                     next_ground = nullptr;
                 }
             }
-            else if( ( movement.dx( ) < 0.0 ) && ( center + movement ).x( ) < m_ground->line( ).left( ).x( ) )
+            else if( ( movement.dx( ) < 0.0 ) && ( center + movement ).x( ) < m_ground->line( ).x_lower( ) )
             {
-                movement = Vector( center, m_ground->vertex1( )->position( ) + VectorY( space( ).bound_height( ).half( ) ) );
+                movement = Vector( center, m_ground->vertex1( )->position( ) + Vector::Y( half( space( ).bound_height( ) ) ) );
 
                 if( m_ground->vertex1( ) )
                 {
@@ -338,8 +338,8 @@ void Object::update_movement( )
                 {
                     if( hit_box.width( ) )
                     {
-                        Line hit_box_line( hit_box.center( ) - VectorX( hit_box.width( ).half( ) ),
-                                           hit_box.center( ) + VectorX( hit_box.width( ).half( ) ) );
+                        Line hit_box_line( hit_box.center( ) - Vector::X( half( hit_box.width( ) ) ),
+                                           hit_box.center( ) + Vector::X( half( hit_box.width( ) ) ) );
 
                         if( movement_line.intersects( hit_box_line ) )
                         {
@@ -348,8 +348,8 @@ void Object::update_movement( )
                     }
                     else if( hit_box.height( ) )
                     {
-                        Line hit_box_line( hit_box.center( ) - VectorY( hit_box.height( ).half( ) ),
-                                           hit_box.center( ) + VectorY( hit_box.height( ).half( ) ) );
+                        Line hit_box_line( hit_box.center( ) - Vector::Y( half( hit_box.height( ) ) ),
+                                           hit_box.center( ) + Vector::Y( half( hit_box.height( ) ) ) );
 
                         if( movement_line.intersects( hit_box_line ) )
                         {
@@ -398,7 +398,7 @@ void Object::update_movement( )
         move( movement );
         ground( next_ground );
 
-        if( velocity.magnitude( ) )
+        if( velocity.has_magnitude( ) )
         {
             remaining_percentage *= ( ONE - ( movement.magnitude( ) / velocity.magnitude( ) ) );
         }
@@ -445,7 +445,7 @@ void Object::position( const Coordinate & _position )
 {
     if( interactive( ) )
     {
-        world( )->object_grid( ).erase( this );
+        world( )->object_grid( ).remove( this );
     }
 
     Visible::center( _position );
@@ -498,7 +498,7 @@ void Object::interactive( const bool _interactive )
 
     if( !m_interactive )
     {
-        world( )->object_grid( ).erase( this );
+        world( )->object_grid( ).remove( this );
     }
 }
 
@@ -513,7 +513,7 @@ void Object::stationary( const bool _stationary )
 
     if( m_stationary )
     {
-        velocity( ZERO_VECTOR );
+        velocity( V0 );
     }
 }
 
@@ -638,7 +638,7 @@ Drawing Object::debug_overlay( ) const
         debug_overlay.draw( PHYSICS_COLOR, hit_box( ) - position( ), HIT_BOX_THICKNESS, true );
 
         // center
-        debug_overlay.draw( PHYSICS_COLOR, Circle( DOT_RADIUS ), FILLED );
+        debug_overlay.draw( PHYSICS_COLOR, Polygon::circle( DOT_RADIUS ), FILLED );
 
         // velocity
         Vector velocity_graphic = velocity( ) * VELOCITY_SCALE;

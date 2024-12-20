@@ -41,14 +41,14 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
         for_range( i, 10 )
         {
             // todo
-            Coordinate top = VectorA( RIGHT_ANGLE, _length * leaves_top + Random::rPlanc( -5.0, 5.0 ) );
-            Coordinate bottom = VectorA( RIGHT_ANGLE, _length * leaves_bottom + Random::rPlanc( -5.0, 5.0 ) );
+            Coordinate top = Vector::A( RIGHT_ANGLE, _length * leaves_top + Random::rPlanc( -5.0, 5.0 ) );
+            Coordinate bottom = Vector::A( RIGHT_ANGLE, _length * leaves_bottom + Random::rPlanc( -5.0, 5.0 ) );
 
             tree_drawing.draw( LEAF_COLOR,
                                Polygon( { top,
-                                          bottom + VectorA( BRANCH_OFFSET, ( _length * 0.5 * ( 1.0 - leaves_bottom ) ) + Random::rPlanc( 2.0 ) ),
+                                          bottom + Vector::A( BRANCH_OFFSET, ( _length * 0.5 * ( 1.0 - leaves_bottom ) ) + Random::rPlanc( 2.0 ) ),
                                           bottom,
-                                          bottom + VectorA( ( PI - BRANCH_OFFSET ), ( _length * 0.5 * ( 1.0 - leaves_bottom ) ) + Random::rPlanc( 2.0 ) ) } ) );
+                                          bottom + Vector::A( ( PI - BRANCH_OFFSET ), ( _length * 0.5 * ( 1.0 - leaves_bottom ) ) + Random::rPlanc( 2.0 ) ) } ) );
 
             leaves_top -= 0.025;
             leaves_bottom -= 0.06;
@@ -56,27 +56,27 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
 
         for_range( i, 5 )
         {
-            Coordinate top = VectorA( RIGHT_ANGLE, _length * leaves_top + Random::rPlanc( -5.0, 5.0 ) );
-            Coordinate bottom = VectorA( RIGHT_ANGLE, _length * leaves_bottom + Random::rPlanc( -5.0, 5.0 ) );
+            Coordinate top = Vector::A( RIGHT_ANGLE, _length * leaves_top + Random::rPlanc( -5.0, 5.0 ) );
+            Coordinate bottom = Vector::A( RIGHT_ANGLE, _length * leaves_bottom + Random::rPlanc( -5.0, 5.0 ) );
 
             tree_drawing.draw( LEAF_COLOR,
                                Polygon( { top,
-                                          bottom + VectorA( BRANCH_OFFSET, ( _length * 0.5 * ( 1.0 - leaves_bottom ) * ( (dec)( 5 - i ) / 5.0 ) ) + Random::rPlanc( 2.0 ) ),
+                                          bottom + Vector::A( BRANCH_OFFSET, ( _length * 0.5 * ( 1.0 - leaves_bottom ) * ( (dec)( 5 - i ) / 5.0 ) ) + Random::rPlanc( 2.0 ) ),
                                           bottom,
-                                          bottom + VectorA( ( PI - BRANCH_OFFSET ), ( _length * 0.5 * ( 1.0 - leaves_bottom ) * ( (dec)( 5 - i ) / 5.0 ) ) + Random::rPlanc( 2.0 ) ) } ) );
+                                          bottom + Vector::A( ( PI - BRANCH_OFFSET ), ( _length * 0.5 * ( 1.0 - leaves_bottom ) * ( (dec)( 5 - i ) / 5.0 ) ) + Random::rPlanc( 2.0 ) ) } ) );
 
             leaves_top += 0.01;
             leaves_bottom -= 0.01;
         }
     }
 
-    Circle trunk_base( half( _base_width ) );
+    Polygon trunk_base = Polygon::circle( half( _base_width ) );
     Polygon trunk_polygon( { base_right, top, base_left } );
 
     tree_drawing.draw( TRUNK_COLOR, trunk_base );
     tree_drawing.draw( TRUNK_COLOR, trunk_polygon );
 
-    for_range( i, _branch_count )
+    do_count( _branch_count )
     {
         dec branch_remaining = 1.0 - branch_height;
 
@@ -126,7 +126,7 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
         dec branch_remaining = ( 1.0 - branch_height );
         branch_height += Random::rdec( 0.02, 0.1 );
 
-        tree_drawing.draw( TRUNK_MARK_COLOR.a( Random::rdec( 0.25, 0.75 ) ), Polygon::equilateral( 4, Random::rPlanc( 0.1, 0.3 ) * _base_width, Vector( trunk ).magnitude( trunk.magnitude( ) * branch_height ) + VectorA( trunk.angle( ) + Random::rAngle( -RIGHT_ANGLE, RIGHT_ANGLE ), Random::rPlanc( _base_width ) ), Random::rAngle( -TAU / 16.0, TAU / 16.0 ) ) );
+        tree_drawing.draw( TRUNK_MARK_COLOR.a( Random::rdec( 0.25, 0.75 ) ), Polygon::equilateral( 4, Random::rPlanc( 0.1, 0.3 ) * _base_width, Vector( trunk ).magnitude( trunk.magnitude( ) * branch_height ) + Vector::A( trunk.angle( ) + Random::rAngle( -RIGHT_ANGLE, RIGHT_ANGLE ), Random::rPlanc( _base_width ) ), Random::rAngle( -TAU / 16.0, TAU / 16.0 ) ) );
     }
 
     tree_drawing.clear_bounds( );

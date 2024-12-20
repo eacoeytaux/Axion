@@ -12,83 +12,113 @@ namespace geometry
 
 class Vector
 {
+private:
+    Planc m_dx = P0;
+    Planc m_dy = P0;
+
+    Coordinate m_origin = ORIGIN;
+
 public:
-    virtual ~Vector( ) { }
-    Vector( const Planc & dx, const Planc & dy, const Coordinate & c = ORIGIN );
-    Vector( const Coordinate & c = ORIGIN );
-    Vector( const Coordinate & start, const Coordinate & end );
+    Vector( ) { }
 
-    Planc dx( ) const;
-    Vector & dx( const Planc & dx );
-    Planc dy( ) const;
-    Vector & dy( const Planc & dy );
-    Vector & dxdy( const Planc & dx, const Planc & dy );
+    Vector( const Planc & dx, const Planc & dy ) : m_dx( dx ), m_dy( dy ) { }
+    Vector( const Planc & dx, const Planc & dy, const Coordinate & origin ) : m_dx( dx ), m_dy( dy ), m_origin( origin ) { }
 
-    Coordinate origin( ) const;
-    Vector & origin( const Coordinate & origin );
-    Coordinate destination( ) const;
-    Vector & destination( const Coordinate destination );
+    Vector( const Coordinate & c ) : m_dx( c.x( ) ), m_dy( c.y( ) ), m_origin( ORIGIN ) { }
 
-    bool has_magnitude( ) const;
-    Planc magnitude( ) const;
-    Vector & magnitude( const Planc & magnitude );
-    Vector & extend( const Planc & length );
-    Vector & normalize( );
+    Vector( const Coordinate & start, const Coordinate & end ) : m_dx( end.x( ) - start.x( ) ), m_dy( end.y( ) - start.y( ) ), m_origin( start ) { }
 
-    Vector half( ) const;
+    static Vector X( const Planc & dx ) { return Vector( dx, P0 ); }
+    static Vector X( const Planc & dx, const Coordinate & origin ) { return Vector( dx, P0, origin ); }
 
-    Angle angle( ) const;
-    Vector & rotate_to_angle( const Angle & angle );
-    Vector & rotate( const Angle & rotation );
+    static Vector Y( const Planc & dy ) { return Vector( P0, dy ); }
+    static Vector Y( const Planc & dy, const Coordinate & origin ) { return Vector( P0, dy, origin ); }
 
-    Vector & flatten( const Angle & );
+    static Vector A( const Angle & a ) { return Vector( a.cos( ), a.sin( ) ); }
+    static Vector A( const Angle & a, const Coordinate & origin ) { return Vector( a.cos( ), a.sin( ), origin ); }
 
-    Vector operator-( ) const;
+    static Vector A( const Angle & a, const Planc & magnitude ) { return Vector( a.cos( ) * magnitude, a.sin( ) * magnitude ); }
+    static Vector A( const Angle & a, const Planc & magnitude, const Coordinate & origin ) { return Vector( a.cos( ) * magnitude, a.sin( ) * magnitude, origin ); }
 
-    Vector operator+( const Vector & ) const;
-    Vector operator-( const Vector & ) const;
-    Vector & operator+=( const Vector & );
-    Vector & operator-=( const Vector & );
+    Planc dx( ) const { return m_dx; }
+    Vector & dx( const Planc & dx ) { m_dx = dx; rethis; }
 
-    Vector operator*( dec scale ) const;
-    Vector operator/( dec scale ) const;
-    Vector & operator*=( dec scale );
-    Vector & operator/=( dec scale );
+    Planc dy( ) const { return m_dy; }
+    Vector & dy( const Planc & dy ) { m_dy = dy; rethis; }
 
-    Vector & operator=( const Coordinate & );
+    Coordinate origin( ) const { return m_origin; }
+    Vector & origin( const Coordinate & origin ) { m_origin = origin; rethis; }
+
+    Coordinate destination( ) const { return Coordinate( origin( ).x( ) + dx( ), origin( ).y( ) + dy( ) ); }
+    Vector & destination( Coordinate c ) { dx( c.x( ) - origin( ).x( ) ); dy( c.y( ) - origin( ).y( ) ); rethis; }
+
+    bool has_magnitude( ) const { return ( dx( ) || dy( ) ); }
+    Planc magnitude( ) const { return origin( ).distance_to( destination( ) ); }
+
+    Vector & magnitude( const Planc & m ) { Angle a = angle( ); dx( a.cos( ) * m ); dy( a.sin( ) * m ); rethis; }
+
+    Vector & extend( const Planc & p ) { return magnitude( magnitude( ) + p ); }
+
+    Vector & normalize( ) { return magnitude( ONE ); }
+
+    Angle angle( ) const { return Angle( m_dx, m_dy ); }
+    Vector & rotate( const Angle & a ) { return rotate_to_angle( angle( ) + a ); }
+    Vector & rotate_to_angle( const Angle & a ) { if( angle( ) != a ) { Planc _magnitude = magnitude( ); dx( _magnitude * a.cos( ) ); dy( _magnitude * a.sin( ) ); } rethis; }
+
+    Vector & flatten( const Angle & a ) { rotate( -a ); dy( ZERO ); rotate( a ); rethis; }
+
+    Vector & operator=( const Coordinate & c ) { origin( ORIGIN ); dx( c.x( ) ); dy( c.y( ) ); rethis; }
+
+    Vector operator-( ) const { return Vector( -dx( ), -dy( ), origin( ) ); }
+
+    Vector operator+( const Vector & v ) const { return Vector( dx( ) + v.dx( ), dy( ) + v.dy( ), origin( ) ); }
+    Vector operator-( const Vector & v ) const { return Vector( dx( ) - v.dx( ), dy( ) - v.dy( ), origin( ) ); }
+
+    Vector operator*( const dec scale ) const { return Vector( origin( ), Coordinate( origin( ).x( ) + ( dx( ) * scale ), origin( ).y( ) + ( dy( ) * scale ) ) ); }
+    Vector operator/( const dec scale ) const { return Vector( origin( ), Coordinate( origin( ).x( ) + ( dx( ) / scale ), origin( ).y( ) + ( dy( ) / scale ) ) ); }
+
+    Vector & operator+=( const Vector & v ) { dx( dx( ) + v.dx( ) ); dy( dy( ) + v.dy( ) ); rethis; }
+    Vector & operator-=( const Vector & v ) { dx( dx( ) - v.dx( ) ); dy( dy( ) - v.dy( ) ); rethis; }
+
+    Vector & operator*=( const dec scale ) { dx( dx( ) * scale ); dy( dy( ) * scale ); rethis; }
+    Vector & operator/=( const dec scale ) { dx( dx( ) / scale ); dy( dy( ) / scale ); rethis; }
 
     default_equal( Vector );
-
-private:
-    Coordinate m_origin = ORIGIN;
-    Planc m_dx = ZERO, m_dy = ZERO;
 };
 
-class VectorX : public Vector
-{
-public:
-    virtual ~VectorX( ) { }
-    VectorX( const Planc & dx, const Coordinate & origin = ORIGIN );
-};
-
-class VectorY : public Vector
-{
-public:
-    virtual ~VectorY( ) { }
-    VectorY( const Planc & dy, const Coordinate & origin = ORIGIN );
-};
-
-class VectorA : public Vector
-{
-public:
-    virtual ~VectorA( ) { }
-    VectorA( const Angle & angle, const Planc & magnitude = 1.0, const Coordinate & origin = ORIGIN );
-    VectorA( const Angle & angle, const Coordinate & origin );
-};
-
-const Vector ZERO_VECTOR( ZERO, ZERO );
+const Vector V0( ZERO, ZERO );
 const Vector X_HAT( ONE, ZERO );
 const Vector Y_HAT( ZERO, ONE );
+
+inline Coordinate::Coordinate( const Vector & v ) { *this = v.destination( ); }
+
+inline Coordinate & Coordinate::move( const Planc & x, const Planc & y ) { Coordinate::x( Coordinate::x( ) + x ); Coordinate::y( Coordinate::y( ) + y ); rethis; }
+inline Coordinate & Coordinate::rotate( const Angle & a ) { rethis = Vector( *this ).rotate( a ).destination( ); }
+inline Coordinate & Coordinate::rotate( const Angle & a, const Coordinate & c ) { rethis = Vector( c, *this ).rotate( a ).destination( ); }
+inline Coordinate & Coordinate::mirror_x( ) { return mirror( X_HAT ); }
+inline Coordinate & Coordinate::mirror_y( ) { return mirror( Y_HAT ); }
+inline Coordinate & Coordinate::mirror( const Vector & v )
+{
+    x( x( ) - v.origin( ).x( ) );
+    y( y( ) - v.origin( ).y( ) );
+
+    rotate( -v.angle( ) );
+
+    y( -y( ) );
+
+    rotate( v.angle( ) );
+
+    x( x( ) + v.origin( ).x( ) );
+    y( y( ) + v.origin( ).y( ) );
+
+    rethis;
+}
+
+inline Coordinate Coordinate::operator+( const Vector & v ) const { return Coordinate( x( ) + v.dx( ), y( ) + v.dy( ) ); }
+inline Coordinate Coordinate::operator-( const Vector & v ) const { return Coordinate( x( ) - v.dx( ), y( ) - v.dy( ) ); }
+
+inline Coordinate & Coordinate::operator+=( const Vector & v ) { x( x( ) + v.dx( ) ); y( y( ) + v.dy( ) ); rethis; }
+inline Coordinate & Coordinate::operator-=( const Vector & v ) { x( x( ) - v.dx( ) ); y( y( ) - v.dy( ) ); rethis; }
 
 } // namespace geometry
 } // namespace axn

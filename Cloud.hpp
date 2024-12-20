@@ -18,7 +18,6 @@ private:
     };
 
 public:
-    virtual ~Cloud( ) { }
     Cloud( World * );
 
     void render( ) override;

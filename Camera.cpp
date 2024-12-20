@@ -101,11 +101,11 @@ void Camera::render( )
                 return;
             }
 
-            if( !_transform.identity( ) )
+            if( !_transform.is_identity( ) )
             {
                 ogl::push_matrix( );
 
-                ogl::translate( _transform.get( 0, 2 ), _transform.get( 1, 2 ) );
+                ogl::translate( _transform.translation_x( ), _transform.translation_y( ) );
                 ogl::transform( _transform );
             }
 
@@ -130,7 +130,7 @@ void Camera::render( )
             }
             ogl::end( );
 
-            if( !_transform.identity( ) )
+            if( !_transform.is_identity( ) )
             {
                 ogl::pop_matrix( );
             }
@@ -196,14 +196,16 @@ void Camera::render( )
                         {
                             if( _colored_polygon.polygon.convex( ) )
                             {
-                                render_convex_polygon( _colored_polygon.colors, _colored_polygon.polygon.coordinates( ) );
+                                render_convex_polygon( _colored_polygon.colors, _colored_polygon.polygon.coordinates( true ), _colored_polygon.polygon.cumulative_transform( ) );
                             }
                             else
                             {
-                                const varray<Polygon> & _convex_polygons = _colored_polygon.polygon.convex_partitions( );
-                                for_each( _convex_polygon, _convex_polygons )
+                                const varray<Coordinate> & cc = _colored_polygon.polygon.coordinates( true );
+                                const varray<varray<uint>> & t = _colored_polygon.polygon.triangle_indices( );
+
+                                for_range( i, t.size( ) )
                                 {
-                                    render_convex_polygon( _colored_polygon.colors, _convex_polygon.coordinates( ) ); // TODO need convex indices for color
+                                    render_convex_polygon( { _colored_polygon.colors[ t[ i ][ 0 ], t[ i ][ 1 ], t[ i ][ 2 ] ] }, { cc[ t[ i ][ 0 ] ], cc[ t[ i ][ 1 ] ], cc[ t[ i ][ 2 ] ] }, _colored_polygon.polygon.cumulative_transform( ) );
                                 }
                             }
                         }
@@ -211,34 +213,35 @@ void Camera::render( )
                         {
                             const dec _thickness = _colored_polygon.thickness / ( _colored_polygon.preserve_thickness ? _zoom : ONE );
 
-                            const varray<Line> & _lines = _colored_polygon.polygon.perimeter( );
-                            for_range( i, _lines.size( ) )
+                            // TODO not raw!
+                            const varray<Coordinate> & cc = _colored_polygon.polygon.coordinates( false );
+                            for_range( i, cc.size( ) )
                             {
-                                const Line & _line = _lines[ i ];
+                                const Line _line = Line( cc[ i ? ( i - 1 ) : ( cc.size( ) - 1 ) ], cc[ i ] );
                                 const Angle _line_angle = _line.angle( );
                                 const Vector _line_vector( _line.c1( ), _line.c2( ) );
 
-                                const Line & _next_line = _lines[ ( i + 1 ) % _lines.size( ) ];
+                                const Line _next_line = Line( cc[ i ], cc[ ( i == cc.size( ) - 1 ) ? 0 : ( i + 1 ) ] );
                                 const Angle _next_line_angle = _next_line.angle( );
                                 const Vector _next_line_vector( _next_line.c1( ), _next_line.c2( ) );
 
                                 Polygon line_polygon;
                                 if( _colored_polygon.extend_lines )
                                 {
-                                    line_polygon = Rectangle( _line_vector.magnitude( ) + _thickness, _thickness, _line_vector.half( ), _line_angle );
+                                    line_polygon = Polygon::rectangle( _line_vector.magnitude( ) + _thickness, _thickness, half( _line_vector ), _line_angle );
                                 }
                                 else
                                 {
-                                    line_polygon = Rectangle( _line_vector.magnitude( ), _thickness, _line_vector.half( ), _line_angle );
+                                    line_polygon = Polygon::rectangle( _line_vector.magnitude( ), _thickness, half( _line_vector ), _line_angle );
                                 }
 
                                 Polygon corner_polygon;
                                 if( ( _line.c1( ) != _line.c2( ) ) && ( _next_line.c1( ) != _next_line.c2( ) ) )
                                 {
                                     Coordinate c0 = _line.c2( );
-                                    Coordinate c1 = c0 + VectorA( _line_angle - RIGHT_ANGLE, half( _thickness ) );
-                                    Coordinate c2 = c0 + VectorA( _next_line_angle - RIGHT_ANGLE, half( _thickness ) );
-                                    Coordinate c3 = Line( c1, c1 + VectorA( _line_angle ) ).intersection( Line( c2, c2 - VectorA( _next_line_angle ) ) );
+                                    Coordinate c1 = c0 + Vector::A( _line_angle - RIGHT_ANGLE, half( _thickness ) );
+                                    Coordinate c2 = c0 + Vector::A( _next_line_angle - RIGHT_ANGLE, half( _thickness ) );
+                                    Coordinate c3 = Line( c1, c1 + Vector::A( _line_angle ) ).intersection( Line( c2, c2 - Vector::A( _next_line_angle ) ) );
                                     corner_polygon = Polygon( { c0, c1, c3, c2 } );
                                 }
 
@@ -275,7 +278,7 @@ void Camera::render( )
                     if( lighting->ambient_color( ).a( ) )
                     {
                         ogl::depth_always( );
-                        render_convex_polygon( { lighting->ambient_color( ) }, Rectangle( screen_width, screen_height ).coordinates( ) );
+                        render_convex_polygon( { lighting->ambient_color( ) }, Polygon::rectangle( screen_width, screen_height ).coordinates( ) );
                     }
 
                     const varray<LightSource> & _light_sources = lighting->light_sources( );
@@ -295,14 +298,14 @@ void Camera::render( )
                             for_each( light, _light_sources )
                             {
                                 render_convex_polygon( { TRANSPARENT },
-                                                       Circle( light.radius( ) * ( ( i * LIGHTING_RADIUS_GROW * pow( LIGHTING_RADIUS_GROW_EXPONENT, i ) ) + 1 ), light.position( ) ).coordinates( ) );
+                                                       Polygon::circle( light.radius( ) * ( ( i * LIGHTING_RADIUS_GROW * pow( LIGHTING_RADIUS_GROW_EXPONENT, i ) ) + 1 ), light.position( ) ).coordinates( ) );
                             }
                         }
                         ogl::pop_matrix( );
 
                         ogl::depth_not_equal( );
                         render_convex_polygon( { BLACK.a( min( ONE, ( (dec)( i + 1 ) / (dec)LIGHTING_LAYERS ) ) * lighting->darkness_intensity( ) ) },
-                                               Rectangle( screen_width, screen_height ).coordinates( ) );
+                                               Polygon::rectangle( screen_width, screen_height ).coordinates( ) );
                     }
                 }
             }
@@ -323,7 +326,7 @@ void Camera::render( )
             world_bounds_polygon.scale( _zoom );
 
             render_convex_polygon( { TRANSPARENT }, world_bounds_polygon.coordinates( ) );
-            render_convex_polygon( { COLOR }, Rectangle( screen_width, screen_height ).coordinates( ) );
+            render_convex_polygon( { COLOR }, Polygon::rectangle( screen_width, screen_height ).coordinates( ) );
         };
 
         auto render_camera_bounds = [ & ] ( )
@@ -340,7 +343,7 @@ void Camera::render( )
             Polygon camera_bounds_polygon = FixedRectangle( width( ), height( ) );
 
             render_convex_polygon( { TRANSPARENT }, camera_bounds_polygon.coordinates( ) );
-            render_convex_polygon( { COLOR }, Rectangle( screen_width, screen_height ).coordinates( ) );
+            render_convex_polygon( { COLOR }, Polygon::rectangle( screen_width, screen_height ).coordinates( ) );
         };
 
         auto render_screen_effects = [ & ] ( )
@@ -366,7 +369,7 @@ void Camera::render( )
 
         auto render_cursor = [ & ] ( )
         {
-            if( !is_infinity( cursor_world_position( ).x( ) ) && !is_infinity( cursor_world_position( ).y( ) ) )
+            if( is_num( cursor_world_position( ).x( ) ) && is_num( cursor_world_position( ).y( ) ) )
             {
                 Drawing cursor = cursor_drawing( );
                 cursor.scale( inverse( _zoom ) );
@@ -414,10 +417,10 @@ Drawing Camera::cursor_drawing( ) const
         const dec RETICLE_LENGTH = 8.0;
         const dec RETICLE_BORDER_WIDTH = 1.0;
 
-        cursor_drawing.draw( BLACK, Rectangle( RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * TWO ), RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * TWO ) ) );
-        cursor_drawing.draw( BLACK, Rectangle( RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * TWO ), RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * TWO ) ) );
-        cursor_drawing.draw( WHITE, Rectangle( RETICLE_WIDTH, RETICLE_LENGTH ) );
-        cursor_drawing.draw( WHITE, Rectangle( RETICLE_LENGTH, RETICLE_WIDTH ) );
+        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * TWO ), RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * TWO ) ) );
+        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * TWO ), RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * TWO ) ) );
+        cursor_drawing.draw( WHITE, Polygon::rectangle( RETICLE_WIDTH, RETICLE_LENGTH ) );
+        cursor_drawing.draw( WHITE, Polygon::rectangle( RETICLE_LENGTH, RETICLE_WIDTH ) );
     }
 
     return cursor_drawing;
@@ -450,13 +453,13 @@ Drawing Camera::debug_overlay_drawing( ) const
 
     const Vector _target_offset = target( ) - center( );
 
-    const Polygon _target_outer = Circle( TARGET_RADIUS + FPS_LINE_THICKNESS, _target_offset );
-    const Polygon _target_inner = Circle( TARGET_RADIUS, _target_offset );
-    const Polygon _target_cover = Circle( TARGET_RADIUS );
+    const Polygon _target_outer = Polygon::circle( TARGET_RADIUS + FPS_LINE_THICKNESS, _target_offset );
+    const Polygon _target_inner = Polygon::circle( TARGET_RADIUS, _target_offset );
+    const Polygon _target_cover = Polygon::circle( TARGET_RADIUS );
 
     const Line _fps_line = Line( ORIGIN, Coordinate( ZERO, FPS_RADIUS ).rotate( delta ) );
-    const Polygon _fps_circle = Circle( FPS_RADIUS );
-    const Polygon _fps_dot = Circle( TARGET_RADIUS );
+    const Polygon _fps_circle = Polygon::circle( FPS_RADIUS );
+    const Polygon _fps_dot = Polygon::circle( TARGET_RADIUS );
 
     Drawing overlay_drawing;
 
@@ -540,11 +543,11 @@ void Camera::remove_hud_element( HeadUpDisplay * _hud_element )
 {
     Assert( (bool)_hud_element );
 
-    m_hud_elements.erase( _hud_element, ALL );
+    m_hud_elements.remove( _hud_element );
 
     if( m_owned_hud_elements.contains( _hud_element ) )
     {
-        m_owned_hud_elements.erase( _hud_element, ALL );
+        m_owned_hud_elements.remove( _hud_element );
     }
 }
 
@@ -564,11 +567,11 @@ void Camera::remove_screen_effect( ScreenEffect * _effect )
 {
     Assert( (bool)_effect );
 
-    m_screen_effects.erase( _effect, ALL );
+    m_screen_effects.remove( _effect );
 
     if( m_owned_screen_effects.contains( _effect ) )
     {
-        m_owned_screen_effects.erase( _effect, ALL );
+        m_owned_screen_effects.remove( _effect );
     }
 }
 
@@ -671,25 +674,29 @@ bool Camera::in_view( const FixedRectangle & _world_bounding_box, const dec _z )
 Coordinate Camera::screen_to_world( const Coordinate & _screen_position ) const
 {
     Coordinate world_position = _screen_position;
-    world_position += center( ) - Vector( Engine::screen_width( ), Engine::screen_height( ) ).half( );
+
+    world_position += center( ) - half( Vector( Engine::screen_width( ), Engine::screen_height( ) ) );
     world_position.y( -world_position.y( ) + ( center( ).y( ) * TWO ) );
     world_position = Vector( center( ), world_position ) / zoom( );
+
     return world_position;
 }
 
 Coordinate Camera::world_to_screen( const Coordinate & _world_position ) const
 {
     Coordinate screen_position = _world_position;
+
     screen_position = Vector( center( ), screen_position ) * zoom( );
     screen_position.y( -screen_position.y( ) + ( center( ).y( ) * TWO ) );
-    screen_position -= center( ) - Vector( Engine::screen_width( ), Engine::screen_height( ) ).half( );
+    screen_position -= center( ) - half( Vector( Engine::screen_width( ), Engine::screen_height( ) ) );
+
     return screen_position;
 }
 
 Coordinate Camera::cursor_world_position( ) { return m_cursor_world_position; }
 void Camera::cursor_world_position( const Coordinate & _cursor_world_position ) { m_cursor_world_position = _cursor_world_position; }
 
-void Camera::cursor_world_position_reset( ) { m_cursor_world_position = COORDINATE_INFINITY_NEGATIVE; }
+void Camera::cursor_world_position_reset( ) { m_cursor_world_position = INVALID_COORDINATE; }
 
 Camera::HeadUpDisplay::HeadUpDisplay( const dec _center_x_percent, const dec _center_y_percent, const dec _width_percent, const dec _height_percent )
     : m_center_x_percent( _center_x_percent ), m_center_y_percent( _center_y_percent ), m_width_percent( _width_percent ), m_height_percent( _height_percent )

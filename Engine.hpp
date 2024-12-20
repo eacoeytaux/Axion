@@ -37,9 +37,9 @@ public:
     static bool paused( ) { return paused_eng( ); }
     static void pause( bool p ) { pause_eng( p ); }
 
-#ifdef AXN_DEBUG
+    #ifdef AXN_DEBUG
     static void step( );
-#endif
+    #endif
 
     static void sync_controllers( ) { sync_controllers_eng( ); }
 
@@ -187,14 +187,14 @@ struct ControllerJoystickInput : public ControllerInput
 {
     static dec DEAD_ZONE;
 
-    inline static bool in_dead_zone(const dec d)
+    static bool in_dead_zone( const dec d )
     {
         return ( d < DEAD_ZONE );
     }
 
-    inline static bool in_dead_zone(const Vector& v)
+    static bool in_dead_zone( const Vector & v )
     {
-        return !v.has_magnitude() || in_dead_zone(abs(v.magnitude()));
+        return !v.has_magnitude( ) || in_dead_zone( abs( v.magnitude( ) ) );
     }
 
     enum Joystick
@@ -204,9 +204,9 @@ struct ControllerJoystickInput : public ControllerInput
         LEFT_JOYSTICK,
     };
 
-    ControllerJoystickInput(Joystick j) : joystick(j), dead_zone(true) { }
-    ControllerJoystickInput(Joystick j, const Vector& v) : vector(v), joystick(j), dead_zone(false) { }
-    
+    ControllerJoystickInput( Joystick j ) : joystick( j ), dead_zone( true ) { }
+    ControllerJoystickInput( Joystick j, const Vector & v ) : vector( v ), joystick( j ), dead_zone( false ) { }
+
     const Joystick joystick;
     const Vector vector;
     const bool dead_zone;

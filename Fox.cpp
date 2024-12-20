@@ -16,7 +16,7 @@ const Color FUR_COLOR2 = WHITE;
 
 Fox::Fox( World * world, const Coordinate & _position ) : Mob( world, _position )
 {
-    space( Rectangle( 32.0, 32.0 ) );
+    space( Polygon::rectangle( 32.0, 32.0 ) );
 
     eye_info( EYE_RADIUS, BLINK_DURATION, BLINK_WAIT, EYE_COLOR );
 }

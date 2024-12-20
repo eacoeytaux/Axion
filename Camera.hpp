@@ -27,8 +27,8 @@ public:
     class HeadUpDisplay;
     class ScreenEffect;
 
-    virtual ~Camera( ) { clear_all( ); }
-    Camera( World * world, const Planc & width = 0.0, const Planc & height = 0.0, dec zoom = 1.0 );
+    ~Camera( ) { clear_all( ); }
+    Camera( World * world, const Planc & width = P0, const Planc & height = P0, dec zoom = ONE );
 
     uint age( ) const { return m_age; }
 
@@ -173,7 +173,6 @@ public:
     class HeadUpDisplay : public Visible
     {
     public:
-        virtual ~HeadUpDisplay( ) { }
         HeadUpDisplay( dec center_x_percent, dec center_y_percent, dec width_percent, dec height_percent );
 
         virtual void render( Camera * ) { Visible::render( ); }
@@ -190,7 +189,6 @@ public:
     class ScreenEffect : public Visible
     {
     public:
-        virtual ~ScreenEffect( ) { }
         ScreenEffect( );
 
         virtual void render( Camera * ) { Visible::render( ); }

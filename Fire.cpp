@@ -30,7 +30,7 @@ Fire::Fire( World * world, const Coordinate & _position ) : Object( world, _posi
     needs_render_always( true );
 
     no_gravity( );
-    space( Rectangle( FLAME_ORANGE_RADIUS.half( ), FLAME_ORANGE_RADIUS.half( ) ) );
+    space( Polygon::rectangle( half( FLAME_ORANGE_RADIUS ), half( FLAME_ORANGE_RADIUS ) ) );
 
     flame_timer.reset( FLAME_WAIT.min( ) );
 
@@ -45,17 +45,17 @@ void Fire::render( )
 
     for_each( flame, m_flames_orange )
     {
-        draw( FLAME_COLOR_ORANGE, Polygon::equilateral( FOUR, flame.radius.half( ), flame.offset ) );
+        draw( FLAME_COLOR_ORANGE, Polygon::equilateral( FOUR, half( flame.radius ), flame.offset ) );
     }
 
     for_each( flame, m_flames_yellow )
     {
-        draw( FLAME_COLOR_ORANGE, Polygon::equilateral( FOUR, flame.radius.half( ) * FLAME_YELLOW_OUTLINE_RATIO, flame.offset ) );
+        draw( FLAME_COLOR_ORANGE, Polygon::equilateral( FOUR, half( flame.radius ) * FLAME_YELLOW_OUTLINE_RATIO, flame.offset ) );
     }
 
     for_each( flame, m_flames_yellow )
     {
-        draw( FLAME_COLOR_YELLOW, Polygon::equilateral( FOUR, flame.radius.half( ), flame.offset ) );
+        draw( FLAME_COLOR_YELLOW, Polygon::equilateral( FOUR, half( flame.radius ), flame.offset ) );
     }
 }
 
@@ -73,9 +73,9 @@ void Fire::update( )
     for_each( flame, m_flames_orange )
     {
         flame.radius -= min( FLAME_ORANGE_SHRINK_RATE, flame.radius );
-        flame.offset += VectorA( Angle( RIGHT_ANGLE_1 + Random::rAngle( -FLAME_DEVIATION, FLAME_DEVIATION ) ), FLAME_YELLOW_SPEED ) + ( world( )->wind( ) / FLAME_WIND_RESISTANCE );
+        flame.offset += Vector::A( Angle( RIGHT_ANGLE_1 + Random::rAngle( -FLAME_DEVIATION, FLAME_DEVIATION ) ), FLAME_YELLOW_SPEED ) + ( world( )->wind( ) / FLAME_WIND_RESISTANCE );
     }
-    m_flames_orange.erase_if( [ ] ( const Flame & flame )
+    m_flames_orange.remove_if( [ ] ( const Flame & flame )
     {
         return flame.radius < FLAME_RADIUS_MIN;
     } );
@@ -83,9 +83,9 @@ void Fire::update( )
     for_each( flame, m_flames_yellow )
     {
         flame.radius -= min( FLAME_YELLOW_SHRINK_RATE, flame.radius );
-        flame.offset += VectorA( Angle( RIGHT_ANGLE_1 + Random::rAngle( -FLAME_DEVIATION, FLAME_DEVIATION ) ), FLAME_ORANGE_SPEED ) + ( world( )->wind( ) / FLAME_WIND_RESISTANCE );
+        flame.offset += Vector::A( Angle( RIGHT_ANGLE_1 + Random::rAngle( -FLAME_DEVIATION, FLAME_DEVIATION ) ), FLAME_ORANGE_SPEED ) + ( world( )->wind( ) / FLAME_WIND_RESISTANCE );
     }
-    m_flames_yellow.erase_if( [ ] ( const Flame & flame )
+    m_flames_yellow.remove_if( [ ] ( const Flame & flame )
     {
         return flame.radius < FLAME_RADIUS_MIN;
     } );

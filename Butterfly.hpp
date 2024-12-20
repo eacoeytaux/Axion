@@ -9,7 +9,6 @@ namespace mtmercy
 class Butterfly : public Mob
 {
 public:
-    virtual ~Butterfly( ) { }
     Butterfly( World *, const Coordinate & position );
 
     virtual void render( ) override;

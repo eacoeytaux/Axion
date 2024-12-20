@@ -46,13 +46,13 @@
     <Filter Include="Source Files\mt\environment">
       <UniqueIdentifier>{52a05681-1065-4b27-96f7-85e8faa79190}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\axn\system\std">
+      <UniqueIdentifier>{c3c0c855-09f1-477f-9ea3-5efcee1dde33}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Angle.cpp">
-      <Filter>Source Files\axn\geometry</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\axn\graphics</Filter>
@@ -63,9 +63,6 @@
     <ClCompile Include="Clock.cpp">
       <Filter>Source Files\axn\system</Filter>
     </ClCompile>
-    <ClCompile Include="Coordinate.cpp">
-      <Filter>Source Files\axn\geometry</Filter>
-    </ClCompile>
     <ClCompile Include="Drawing.cpp">
       <Filter>Source Files\axn\graphics</Filter>
     </ClCompile>
@@ -75,29 +72,8 @@
     <ClCompile Include="EngineSDL.cpp">
       <Filter>Source Files\axn\system</Filter>
     </ClCompile>
-    <ClCompile Include="FixedRectangle.cpp">
-      <Filter>Source Files\axn\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="Line.cpp">
-      <Filter>Source Files\axn\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="Polygon.cpp">
-      <Filter>Source Files\axn\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="Vector.cpp">
-      <Filter>Source Files\axn\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="Transform.cpp">
-      <Filter>Source Files\axn\geometry</Filter>
-    </ClCompile>
     <ClCompile Include="MountMerciless.cpp">
       <Filter>Source Files\mt</Filter>
-    </ClCompile>
-    <ClCompile Include="Joint.cpp">
-      <Filter>Source Files\axn\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Matter.cpp">
-      <Filter>Source Files\axn\physics</Filter>
     </ClCompile>
     <ClCompile Include="Logger.cpp">
       <Filter>Source Files\axn\system</Filter>
@@ -185,9 +161,6 @@
     </ClCompile>
     <ClCompile Include="Waterfall.cpp">
       <Filter>Source Files\mt\environment</Filter>
-    </ClCompile>
-    <ClCompile Include="Path.cpp">
-      <Filter>Source Files\axn\geometry</Filter>
     </ClCompile>
     <ClCompile Include="Gopher.cpp">
       <Filter>Source Files\mt\mobs</Filter>
@@ -335,15 +308,6 @@
     <ClInclude Include="Player.hpp">
       <Filter>Source Files\axn\world</Filter>
     </ClInclude>
-    <ClInclude Include="STD.hpp">
-      <Filter>Source Files\axn\system</Filter>
-    </ClInclude>
-    <ClInclude Include="STDc.hpp">
-      <Filter>Source Files\axn\system</Filter>
-    </ClInclude>
-    <ClInclude Include="STDptr.hpp">
-      <Filter>Source Files\axn\system</Filter>
-    </ClInclude>
     <ClInclude Include="Terrain.hpp">
       <Filter>Source Files\axn\world</Filter>
     </ClInclude>
@@ -424,6 +388,15 @@
     </ClInclude>
     <ClInclude Include="Unalope.hpp">
       <Filter>Source Files\mt\mobs</Filter>
+    </ClInclude>
+    <ClInclude Include="STD.hpp">
+      <Filter>Source Files\axn\system\std</Filter>
+    </ClInclude>
+    <ClInclude Include="STDc.hpp">
+      <Filter>Source Files\axn\system\std</Filter>
+    </ClInclude>
+    <ClInclude Include="STDptr.hpp">
+      <Filter>Source Files\axn\system\std</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

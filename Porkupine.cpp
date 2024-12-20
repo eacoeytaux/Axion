@@ -21,7 +21,7 @@ Porkupine::Porkupine( World * world, const Coordinate & _position ) : Enemy( wor
 
     for_range( i, quill_count + ONE )
     {
-        m_quills.insert_back( Line( ORIGIN, VectorA( QUILL_CLOSE + ( d_angle * i ), METER ) ) );
+        m_quills.insert_back( Line( ORIGIN, Vector::A( QUILL_CLOSE + ( d_angle * i ), METER ) ) );
     }
 }
 
@@ -36,7 +36,7 @@ void Porkupine::render( )
 
     for_each( quill, m_quills )
     {
-        VectorA offset( quill.angle( ) + RIGHT_ANGLE, 2.5 );
+        Vector offset = Vector::A( quill.angle( ) + RIGHT_ANGLE, 2.5 );
         draw( RED, Polygon( { quill.c2( ), offset, -offset } ) );
     }
 }

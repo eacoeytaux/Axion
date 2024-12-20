@@ -27,7 +27,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Angle.cpp" />
     <ClCompile Include="Arrow.cpp" />
     <ClCompile Include="AspineTree.cpp" />
     <ClCompile Include="Bird.cpp" />
@@ -37,7 +36,6 @@
     <ClCompile Include="Climber.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="Cloud.cpp" />
-    <ClCompile Include="Coordinate.cpp" />
     <ClCompile Include="DistantBird.cpp" />
     <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="Dust.cpp" />
@@ -45,28 +43,22 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineSDL.cpp" />
     <ClCompile Include="Fire.cpp" />
-    <ClCompile Include="FixedRectangle.cpp" />
     <ClCompile Include="Fox.cpp" />
     <ClCompile Include="Gopher.cpp" />
     <ClCompile Include="GrassTerrain.cpp" />
     <ClCompile Include="Hills.cpp" />
     <ClCompile Include="Hook.cpp" />
-    <ClCompile Include="Joint.cpp" />
     <ClCompile Include="Lighting.cpp" />
     <ClCompile Include="LightSource.cpp" />
-    <ClCompile Include="Line.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Matter.cpp" />
     <ClCompile Include="Mob.cpp" />
     <ClCompile Include="MountainRange.cpp" />
     <ClCompile Include="MountMerciless.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="OGL.cpp" />
-    <ClCompile Include="Path.cpp" />
     <ClCompile Include="PineTree.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="Porkupine.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Skull.cpp" />
@@ -75,9 +67,7 @@
     <ClCompile Include="SoundClip.cpp" />
     <ClCompile Include="Speaker.cpp" />
     <ClCompile Include="Terrain.cpp" />
-    <ClCompile Include="Transform.cpp" />
     <ClCompile Include="Unalope.cpp" />
-    <ClCompile Include="Vector.cpp" />
     <ClCompile Include="Waterfall.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
@@ -251,6 +241,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -267,6 +258,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -286,6 +278,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>Default</LanguageStandard_C>
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -303,6 +296,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -322,6 +316,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -344,6 +339,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>Default</LanguageStandard_C>
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -32,9 +32,9 @@ void Feather::render( )
     Object::render( );
 
     // Coordinate center = position( );
-    // Polygon feather = Polygon( { center + VectorX( FEATHER_LENGTH ), center + VectorY( -FEATHER_BASE_LENGTH ),
-    //                          center + VectorX( -FEATHER_BASE_LENGTH ),
-    //                          center + VectorY( FEATHER_BASE_LENGTH ) } );
+    // Polygon feather = Polygon( { center + Vector::X( FEATHER_LENGTH ), center + Vector::Y( -FEATHER_BASE_LENGTH ),
+    //                          center + Vector::X( -FEATHER_BASE_LENGTH ),
+    //                          center + Vector::Y( FEATHER_BASE_LENGTH ) } );
     // Line stem = Line( position( ), position( ) - Vector( FEATHER_BASE_LENGTH + FEATHER_STEM_LENGTH, 0.0 ) );
     // draw( m_color, feather );
     // draw( m_color, stem, FEATHER_STEM_THICKNESS );
@@ -43,7 +43,7 @@ void Feather::render( )
 Bird::Bird( World * world, const Coordinate & _position ) : Mob( world, _position )
 {
     no_gravity( );
-    space( Rectangle( 32.0, 32.0 ) );
+    space( Polygon::rectangle( 32.0, 32.0 ) );
     health( BIRD_HEALTH );
 }
 
@@ -66,9 +66,9 @@ void Bird::update( )
     if( alive( ) && world( )->player( ) )
     {
         Coordinate target = world( )->player( )->position( );
-        target += VectorY( 270.0 );
+        target += Vector::Y( 270.0 );
         target += Vector( sin( (dec)( ( (Planc)( world( )->age( ) ) * ROTATIONAL_SPEED / ROTATIONAL_RADIUS ) * ROTATIONAL_RADIUS ) ), 0.0 );
-        target += VectorY( -sin( (dec)( ( ( (Planc)( world( )->age( ) ) - ( LIFT_DISTANCE / 2.0 ) ) * LIFT_SPEED / LIFT_DISTANCE ) * LIFT_DISTANCE ) ) );
+        target += Vector::Y( -sin( (dec)( ( ( (Planc)( world( )->age( ) ) - ( LIFT_DISTANCE / 2.0 ) ) * LIFT_SPEED / LIFT_DISTANCE ) * LIFT_DISTANCE ) ) );
         Vector movement = Vector( position( ), target );
         if( movement.dx( ) > 0.0 )
             movement.dx( min( SPEED, movement.dx( ) ) );

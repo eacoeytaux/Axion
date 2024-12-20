@@ -49,21 +49,13 @@ string Clock::datestamp( const char _delim ) const
 }
 
 uint Clock::total_ms( ) const { return m_ms; }
+
 uint Clock::seconds( ) const { return m_ms / 1000.0; }
 uint Clock::minutes( ) const { return m_ms / ( 1000.0 * 60.0 ); }
 uint Clock::hours( ) const { return m_ms / ( 1000.0 * 60.0 * 60.0 ); }
 
 Clock Clock::operator+( const Clock & _c ) const { return Clock( m_ms + _c.m_ms ); }
-
-Clock & Clock::operator+=( const Clock & _c )
-{
-    m_ms += _c.m_ms;
-    return *this;
-}
-
 Clock Clock::operator-( const Clock & _c ) const { return Clock( m_ms - _c.m_ms ); }
-Clock & Clock::operator-=( const Clock & _c )
-{
-    m_ms -= _c.m_ms;
-    return *this;
-}
+
+Clock & Clock::operator+=( const Clock & _c ) { m_ms += _c.m_ms; rethis; }
+Clock & Clock::operator-=( const Clock & _c ) { m_ms -= _c.m_ms; rethis; }

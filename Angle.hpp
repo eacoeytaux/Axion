@@ -3,134 +3,91 @@
 
 #include "Planc.hpp"
 #include "Coordinate.hpp"
-#include "Utility.hpp"
 
 namespace axn
 {
 namespace geometry
 {
 
-const bool TRUNCATE_ANGLE_DEFAULT = false;
-
 class Angle
 {
-public:
-    virtual ~Angle( ) { }
-    Angle( dec radians = 0, bool truncate = TRUNCATE_ANGLE_DEFAULT );
-    Angle( const Planc & dx, const Planc & dy, bool truncate = TRUNCATE_ANGLE_DEFAULT );
-    Angle( const Coordinate & c, bool truncate = TRUNCATE_ANGLE_DEFAULT );
-    Angle( const Coordinate & from, const Coordinate & to, bool truncate = TRUNCATE_ANGLE_DEFAULT );
-
-    bool truncating( ) const;
-    Angle & truncate( bool truncate );
-    Angle truncated( );
-
-    dec radians( ) const;
-    dec degrees( ) const;
-
-    Angle & radians( dec radians );
-    Angle & radians( const Planc & dx, const Planc & dy );
-
-    dec sin( dec multiplier = 1.0 ) const;
-    dec cos( dec multiplier = 1.0 ) const;
-
-    Angle & flip( );
-    Angle flipped( ) const;
-
-    Angle half( ) const;
-
-    Quadrant quadrant( ) const;
-    Axis axis( ) const;
-    bool in_quadrant( Quadrant quadrant ) const;
-    bool on_axis( Axis axis ) const;
-
-    bool right( ) const;
-    bool straight( ) const;
-    bool acute( ) const;
-    bool obtuse( ) const;
-    bool reflex( ) const;
-
-    operator dec( ) const { return m_radians; }
-
-    Angle & operator=( dec radians );
-
-    Angle operator-( ) const;
-
-    Angle operator+( const Angle & angle ) const;
-    Angle operator-( const Angle & angle ) const;
-
-    Angle & operator+=( const Angle & angle );
-    Angle & operator-=( const Angle & angle );
-
-    bool operator==( const Angle & angle ) const;
-    bool operator!=( const Angle & angle ) const;
-    bool operator<=( const Angle & angle ) const;
-    bool operator>=( const Angle & angle ) const;
-    bool operator<( const Angle & angle ) const;
-    bool operator>( const Angle & angle ) const;
-
-    Angle operator+( dec radians ) const;
-    Angle operator-( dec radians ) const;
-    Angle operator*( dec scale ) const;
-    Angle operator/( dec scale ) const;
-
-    Angle & operator+=( dec radians );
-    Angle & operator-=( dec radians );
-    Angle & operator*=( dec scale );
-    Angle & operator/=( dec scale );
-
-    bool operator==( dec radians ) const;
-    bool operator!=( dec radians ) const;
-    bool operator<=( dec radians ) const;
-    bool operator>=( dec radians ) const;
-    bool operator<( dec radians ) const;
-    bool operator>( dec radians ) const;
-
-    Angle operator+( int radians ) const;
-    Angle operator-( int radians ) const;
-    Angle operator*( int scale ) const;
-    Angle operator/( int scale ) const;
-
-    Angle & operator+=( int radians );
-    Angle & operator-=( int radians );
-    Angle & operator*=( int scale );
-    Angle & operator/=( int scale );
-
-    bool operator==( int radians ) const;
-    bool operator!=( int radians ) const;
-    bool operator<=( int radians ) const;
-    bool operator>=( int radians ) const;
-    bool operator<( int radians ) const;
-    bool operator>( int radians ) const;
-
-    Angle operator+( uint radians ) const;
-    Angle operator-( uint radians ) const;
-    Angle operator*( uint scale ) const;
-    Angle operator/( uint scale ) const;
-
-    Angle & operator+=( uint radians );
-    Angle & operator-=( uint radians );
-    Angle & operator*=( uint scale );
-    Angle & operator/=( uint scale );
-
-    bool operator==( uint radians ) const;
-    bool operator!=( uint radians ) const;
-    bool operator<=( uint radians ) const;
-    bool operator>=( uint radians ) const;
-    bool operator<( uint radians ) const;
-    bool operator>( uint radians ) const;
-
-    static dec radians_to_degrees( dec radians );
-    static dec degrees_to_radians( dec degrees );
-
 private:
-    bool m_truncate = TRUNCATE_ANGLE_DEFAULT; // keeps radians within [ 0, 2 * pi )
+    dec m_radians = ZERO;
+    bool m_truncate = false; // keeps radians within [ 0, 2 * pi )
 
-    dec m_radians = 0.0;
-    #ifdef AXN_DEBUG
-    dec m_degrees = 0.0;
-    #endif
+public:
+    Angle( ) { }
+
+    Angle( bool truncate ) : m_truncate( truncate ) { }
+
+    Angle( dec radians ) { Angle::radians( radians ); }
+    Angle( dec radians, bool truncate ) : m_truncate( truncate ) { Angle::radians( radians ); }
+
+    Angle( const Planc & dx, const Planc & dy ) { Angle::radians( atan2( dy, dx ) ); }
+    Angle( const Planc & dx, const Planc & dy, bool truncate ) : m_truncate( truncate ) { Angle::radians( atan2( dy, dx ) ); }
+
+    Angle( const Coordinate & c ) { Angle::radians( atan2( c.y( ), c.x( ) ) ); }
+    Angle( const Coordinate & c, bool truncate ) : m_truncate( truncate ) { Angle::radians( atan2( c.y( ), c.x( ) ) ); }
+
+    Angle( const Coordinate & from, const Coordinate & to ) { Angle::radians( atan2( ( to.y( ) - from.y( ) ), ( to.x( ) - from.x( ) ) ) ); }
+    Angle( const Coordinate & from, const Coordinate & to, bool truncate ) : m_truncate( truncate ) { Angle::radians( atan2( ( to.y( ) - from.y( ) ), ( to.x( ) - from.x( ) ) ) ); }
+
+    operator dec( ) const { return radians( ); }
+
+    bool truncating( ) const { return m_truncate; }
+    Angle & truncate( bool truncate ) { if( m_truncate != truncate ) { m_truncate = truncate; radians( radians( ) ); } rethis; }
+    Angle truncated( ) { return Angle( radians( ), true ); }
+
+    dec radians( ) const { return m_radians; }
+
+    Angle & radians( dec radians ) { if( m_radians != radians ) { m_radians = ( !is_num( radians ) ? ZERO : ( truncating( ) ? ( radians - ( floor( radians / TAU ) * TAU ) ) : radians ) ); } rethis; }
+    Angle & radians( const Planc & dx, const Planc & dy ) { radians( atan2( dy, dx ) ); rethis; }
+
+    dec sin( ) const { return ::sin( radians( ) ); }
+    dec cos( ) const { return ::cos( radians( ) ); }
+    dec tan( ) const { return ::tan( radians( ) ); }
+
+    Angle & flip( ) { return radians( radians( ) + PI ); }
+    Angle flipped( ) const { return ( *this + PI ); }
+
+    Quadrant quadrant( ) const { return Coordinate( cos( ), sin( ) ).quadrant( ); }
+    bool in_quadrant( const Quadrant q ) const { return ( quadrant( ) == q ); }
+
+    Axis axis( ) const { return Coordinate( cos( ), sin( ) ).axis( ); }
+    bool on_axis( const Axis a ) const { return ( axis( ) == a ); }
+
+    bool right( ) const { return equal( radians( ), RIGHT_ANGLE ); }
+    bool straight( ) const { return equal( radians( ), PI ); }
+    bool acute( ) const { return ( is_pos( radians( ) ) && less( radians( ), RIGHT_ANGLE ) ); }
+    bool obtuse( ) const { return ( is_pos( radians( ) ) && greater( radians( ), RIGHT_ANGLE ) && less( radians( ), PI ) ); }
+    bool reflex( ) const { return ( is_pos( radians( ) ) && greater( radians( ), PI ) && less( radians( ), TAU ) ); }
+
+    Angle operator-( ) const { return Angle( -radians( ), truncating( ) ); }
+
+    #define AngleOps( type ) \
+        Angle & operator=( type t ) { return radians( (dec)t ); } \
+        Angle operator+( type t ) const { return Angle( radians( ) + t, truncating( ) ); } \
+        Angle operator-( type t ) const { return Angle( radians( ) - t, truncating( ) ); } \
+        Angle operator*( type t ) const { return Angle( radians( ) * t, truncating( ) ); } \
+        Angle operator/( type t ) const { return Angle( radians( ) / t, truncating( ) ); } \
+        Angle & operator+=( type t ) { return radians( radians( ) + t ); } \
+        Angle & operator-=( type t ) { return radians( radians( ) - t ); } \
+        Angle & operator*=( type t ) { return radians( radians( ) * t ); } \
+        Angle & operator/=( type t ) { return radians( radians( ) / t ); } \
+        bool operator==( type t ) const { return equal( radians( ), t ); } \
+        bool operator!=( type t ) const { return !equal( radians( ), t ); } \
+        bool operator<=( type t ) const { return less_or_equal( radians( ), t ); } \
+        bool operator>=( type t ) const { return greater_or_equal( radians( ), t ); } \
+        bool operator<( type t ) const { return less( radians( ), t ); } \
+        bool operator>( type t ) const { return greater( radians( ), t ); }
+
+    AngleOps( int );
+    AngleOps( uint );
+    AngleOps( dec );
+    AngleOps( Angle );
 };
+
+const Angle A0 = Angle( );
 
 } // namespace geometry
 } // namespace axn

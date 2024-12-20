@@ -17,8 +17,6 @@ const dec FILLED = ZERO;
 class Color
 {
 public:
-    virtual ~Color( ) { }
-
     Color( ) :
         m_r( ZERO ),
         m_g( ZERO ),
@@ -64,9 +62,9 @@ public:
     static Color rgb( uint rgb ) { return Color::rgba( rgb, ONE ); }
     static Color rgba( uint rgb, dec a )
     {
-        return Color::rgba( (dec)( ( rgb & 0xFF0000 ) >> 16 ) / (dec)255,
-                            (dec)( ( rgb & 0x00FF00 ) >> 8 ) / (dec)255,
-                            (dec)( ( rgb & 0x0000FF ) >> 0 ) / (dec)255, a );
+        return Color::rgba( (dec)( ( rgb & 0xFF0000 ) >> 16 ) / 255.0,
+                            (dec)( ( rgb & 0x00FF00 ) >> 8 ) / 255.0,
+                            (dec)( ( rgb & 0x0000FF ) >> 0 ) / 255.0, a );
     }
 
     static Color cmyk( dec c, dec m, dec y, dec k ) { return Color::cmyka( c, m, y, k, ONE ); }
@@ -195,31 +193,31 @@ public:
 
     dec r( ) const { return m_r; }
     Color r( dec r ) const { return Color::rgba( r, g( ), b( ), a( ) ); }
-    Color & r( dec r ) { return *this = Color::rgba( r, g( ), b( ), a( ) ); }
+    Color & r( dec r ) { rethis = Color::rgba( r, g( ), b( ), a( ) ); }
 
     dec g( ) const { return m_g; }
     Color g( dec g ) const { return Color::rgba( r( ), g, b( ), a( ) ); }
-    Color & g( dec g ) { return *this = Color::rgba( r( ), g, b( ), a( ) ); }
+    Color & g( dec g ) { rethis = Color::rgba( r( ), g, b( ), a( ) ); }
 
     dec b( ) const { return m_b; }
     Color b( dec b ) const { return Color::rgba( r( ), g( ), b, a( ) ); }
-    Color & b( dec b ) { return *this = Color::rgba( r( ), g( ), b, a( ) ); }
+    Color & b( dec b ) { rethis = Color::rgba( r( ), g( ), b, a( ) ); }
 
     dec c( ) const { return ONE - max_rgb( ); }
     Color c( dec c ) const { return Color::cmyka( c, m( ), y( ), k( ), a( ) ); }
-    Color & c( dec c ) { return *this = Color::cmyka( c, y( ), m( ), k( ), a( ) ); }
+    Color & c( dec c ) { rethis = Color::cmyka( c, y( ), m( ), k( ), a( ) ); }
 
     dec m( ) const { return ( max_rgb( ) - r( ) ) / max_rgb( ); }
     Color m( dec m ) const { return Color::cmyka( c( ), m, y( ), k( ), a( ) ); }
-    Color & m( dec m ) { return *this = Color::cmyka( c( ), m, y( ), k( ), a( ) ); }
+    Color & m( dec m ) { rethis = Color::cmyka( c( ), m, y( ), k( ), a( ) ); }
 
     dec y( ) const { return ( max_rgb( ) - g( ) ) / max_rgb( ); }
     Color y( dec y ) const { return Color::cmyka( c( ), m( ), y, k( ), a( ) ); }
-    Color & y( dec y ) { return *this = Color::cmyka( c( ), m( ), y, k( ), a( ) ); }
+    Color & y( dec y ) { rethis = Color::cmyka( c( ), m( ), y, k( ), a( ) ); }
 
     dec k( ) const { return ( max_rgb( ) - b( ) ) / max_rgb( ); }
     Color k( dec k ) const { return Color::cmyka( c( ), m( ), y( ), k, a( ) ); }
-    Color & k( dec k ) { return *this = Color::cmyka( c( ), m( ), y( ), k, a( ) ); }
+    Color & k( dec k ) { rethis = Color::cmyka( c( ), m( ), y( ), k, a( ) ); }
 
     dec h( ) const
     {
@@ -242,33 +240,33 @@ public:
         return ZERO;
     };
     Color h( dec h ) const { return Color::hsva( h, sv( ), v( ), a( ) ); }
-    Color & h( dec h ) { return *this = Color::hsva( h, sv( ), v( ), a( ) ); }
+    Color & h( dec h ) { rethis = Color::hsva( h, sv( ), v( ), a( ) ); }
 
     dec sv( ) const { return max_rgb( ) ? ( ( max_rgb( ) - min_rgb( ) ) / max_rgb( ) ) : ZERO; }
     Color sv( dec s ) const { return Color::hsva( h( ), s, v( ), a( ) ); }
-    Color & sv( dec s ) { return *this = Color::hsva( h( ), s, v( ), a( ) ); }
+    Color & sv( dec s ) { rethis = Color::hsva( h( ), s, v( ), a( ) ); }
 
     dec v( ) const { return max_rgb( ); }
     Color v( dec v ) const { return Color::hsva( h( ), sv( ), v, a( ) ); }
-    Color & v( dec v ) { return *this = Color::hsva( h( ), sv( ), v, a( ) ); }
+    Color & v( dec v ) { rethis = Color::hsva( h( ), sv( ), v, a( ) ); }
 
     dec sl( ) const
     {
         return ( max_rgb( ) == min_rgb( ) ) ? ZERO :
-            ( ( dec_le( l( ), HALF ) ) ?
+            ( ( less_or_equal( l( ), HALF ) ) ?
               ( ( max_rgb( ) - min_rgb( ) ) / ( max_rgb( ) + min_rgb( ) ) ) :
               ( ( max_rgb( ) - min_rgb( ) / ( TWO - ( max_rgb( ) + min_rgb( ) ) ) ) ) );
     }
     Color sl( dec s ) const { return Color::hsla( h( ), s, l( ), a( ) ); }
-    Color & sl( dec s ) { return *this = Color::hsla( h( ), s, l( ), a( ) ); }
+    Color & sl( dec s ) { rethis = Color::hsla( h( ), s, l( ), a( ) ); }
 
     dec l( ) const { return half( max_rgb( ) + min_rgb( ) ); }
     Color l( dec l ) const { return Color::hsla( h( ), sl( ), l, a( ) ); }
-    Color & l( dec l ) { return *this = Color::hsla( h( ), sl( ), l, a( ) ); }
+    Color & l( dec l ) { rethis = Color::hsla( h( ), sl( ), l, a( ) ); }
 
     dec a( ) const { return m_a; }
     Color a( dec a ) const { return Color::rgba( r( ), g( ), b( ), a ); }
-    Color & a( dec a ) { return *this = Color::rgba( r( ), g( ), b( ), a ); }
+    Color & a( dec a ) { rethis = Color::rgba( r( ), g( ), b( ), a ); }
 
     bool opaque( ) const { return ( m_a == ONE ); }
     bool transparent( ) const { return ( m_a != ONE ); }
@@ -305,7 +303,6 @@ const Color YELLOW = Color::rgb( 1.0, 1.0, 0.0 );
 class ColorSlider
 {
 public:
-    virtual ~ColorSlider( ) { }
     ColorSlider( const Color & start, const Color & end ) : m_color_start( start ), m_color_end( end ), m_slide( 0.0 ) { }
 
     void color_start( const Color & c )

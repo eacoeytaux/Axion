@@ -41,7 +41,7 @@ Cloud::Cloud( World * world ) : Object( world )
     {
         x += world->player( )->position( ).x( );
     }
-    // Coordinate location( x, ( (Planc)Random::rdec( (dec)Engine::screen_height( ), 0.0 /*-(dec)Engine::screen_height()*/ ) ).half( ) - max_dy( ).half( ) );
+    // Coordinate location( x, ( half( Random::rdec( (dec)Engine::screen_height( ), 0.0 /*-(dec)Engine::screen_height()*/ ) ) ) - half( max_dy( ) ) );
     Coordinate location( 0.0, 5000.0 ); // todo
     position( location );
 
@@ -51,32 +51,32 @@ Cloud::Cloud( World * world ) : Object( world )
     varray<Puff> small_puffs;
 
     int large_puff_count = Random::rint( LARGE_PUFF_COUNT );
-    for_range( i, large_puff_count )
+    do_count( large_puff_count )
     {
         Puff & puff = large_puffs.insert_back( );
 
         puff.radius = Random::rint( LARGE_PUFF_RADIUS ) * scale;
 
-        puff.center_offset = VectorA( Random::rAngle( ), Random::rdec( LARGE_PUFF_DISTANCE ) );
+        puff.center_offset = Vector::A( Random::rAngle( ), Random::rdec( LARGE_PUFF_DISTANCE ) );
         puff.center_offset.dx( puff.center_offset.dx( ) * X_STRETCH_LARGE );
         puff.center_offset *= scale;
 
         int small_puff_count = Random::rint( SMALL_PUFF_COUNT );
-        for_range( i, small_puff_count )
+        do_count( small_puff_count )
         {
             Puff & puff = small_puffs.insert_back( );
 
             puff.radius = Random::rint( SMALL_PUFF_RADIUS ) * scale;
 
-            puff.center_offset = VectorA( Random::rAngle( ), Random::rdec( SMALL_PUFF_DISTANCE ) );
+            puff.center_offset = Vector::A( Random::rAngle( ), Random::rdec( SMALL_PUFF_DISTANCE ) );
             puff.center_offset.dx( puff.center_offset.dx( ) * X_STRETCH_SMALL );
             puff.center_offset *= scale;
         }
     }
 
-    for_each( puff, small_puffs ) m_cloud_drawing.draw( OUTSIDE_COLOR, Circle( puff.radius, puff.center_offset ), FILLED );
-    for_each( puff, large_puffs ) m_cloud_drawing.draw( OUTSIDE_COLOR, Circle( puff.radius, puff.center_offset ), FILLED );
-    for_each( puff, large_puffs ) m_cloud_drawing.draw( INSIDE_COLOR, Circle( puff.radius * PUFF_OUTLINE_RATIO, puff.center_offset ), FILLED );
+    for_each( puff, small_puffs ) m_cloud_drawing.draw( OUTSIDE_COLOR, Polygon::circle( puff.radius, puff.center_offset ), FILLED );
+    for_each( puff, large_puffs ) m_cloud_drawing.draw( OUTSIDE_COLOR, Polygon::circle( puff.radius, puff.center_offset ), FILLED );
+    for_each( puff, large_puffs ) m_cloud_drawing.draw( INSIDE_COLOR, Polygon::circle( puff.radius * PUFF_OUTLINE_RATIO, puff.center_offset ), FILLED );
 }
 
 Planc Cloud::max_dx( ) { return ( ( LARGE_PUFF_RADIUS.max( ) + LARGE_PUFF_DISTANCE.max( ) ) * X_STRETCH_LARGE ) + ( ( SMALL_PUFF_RADIUS.max( ) + SMALL_PUFF_DISTANCE.max( ) ) * X_STRETCH_SMALL ); }

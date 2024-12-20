@@ -106,7 +106,7 @@ void Sky::render( )
             top_color,
             bottom_color,
             bottom_color },
-          Rectangle( world( )->camera( )->width( ) + 2.0, world( )->camera( )->height( ) + 2.0, ORIGIN ) ); // added + 2 just in case
+          Polygon::rectangle( world( )->camera( )->width( ) + 2.0, world( )->camera( )->height( ) + 2.0, ORIGIN ) ); // added + 2 just in case
 }
 
 void Sky::update( )

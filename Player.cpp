@@ -27,9 +27,9 @@ void Player::render( )
         const Color GLOW_COLOR = Color( WHITE, 0.125 );
 
         Drawing god_drawing;
-        god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * GLOW_RADIUS_RATIO1 ) );
-        god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * GLOW_RADIUS_RATIO2 ) );
-        god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * GLOW_RADIUS_RATIO3 ) );
+        god_drawing.draw( GLOW_COLOR, Polygon::circle( GLOW_RADIUS * GLOW_RADIUS_RATIO1 ) );
+        god_drawing.draw( GLOW_COLOR, Polygon::circle( GLOW_RADIUS * GLOW_RADIUS_RATIO2 ) );
+        god_drawing.draw( GLOW_COLOR, Polygon::circle( GLOW_RADIUS * GLOW_RADIUS_RATIO3 ) );
         draw( god_drawing );
     }
 }
@@ -100,7 +100,7 @@ void Player::god( const bool _god )
         heal_full( );                // god is never wounded
         no_gravity( );               // god is not pulled on by gravity
         terrain_boundaries( false ); // god is not affected by boundaries
-        velocity( ZERO_VECTOR );     // god brings all to a halt
+        velocity( V0 );              // god brings all to a halt
     }
     else
     {

@@ -61,7 +61,7 @@ const Color NOSE_COLOR = RED;
 
 Unalope::Unalope( World * world, const Coordinate & _position ) : Enemy( world, _position, 10000.0 )
 {
-    space( Rectangle( 16.0, 16.0 ) );
+    space( Polygon::rectangle( 16.0, 16.0 ) );
 
     eye_info( 4, 1, 240 );
 

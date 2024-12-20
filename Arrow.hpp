@@ -9,7 +9,6 @@ namespace mtmercy
 class Arrow : public Object
 {
 public:
-    virtual ~Arrow( ) { }
     Arrow( World *, const Coordinate & tip, const Vector & launch_speed, const Color & feather_color );
 
     virtual void render( ) override;

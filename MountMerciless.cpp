@@ -37,8 +37,7 @@ struct object_layer_param
     const Object * object = nullptr;
 };
 
-template <typename T>
-inline bool score_layer_position_i( object_layer_param & p )
+typeT inline bool score_layer_position_i( object_layer_param & p )
 {
     if( dynamic_cast<const T *>( p.object ) )
     {

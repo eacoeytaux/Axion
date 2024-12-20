@@ -20,7 +20,7 @@ void Enemy::update( )
             }
         }
     }
-    
+
     Mob::update( );
 }
 
@@ -31,7 +31,8 @@ bool Enemy::overrides_target( const Player * player ) const
 
 void Enemy::sight_range( const Planc & _range )
 {
-    Assert( !is_negative( _range ) );
+    Assert( is_pos( _range ) );
+
     m_sight_range = _range;
 
     if( !alert_range( ) || ( alert_range( ) > sight_range( ) ) )
@@ -47,7 +48,8 @@ bool Enemy::in_sight_range( const Player * player ) const
 
 void Enemy::alert_range( const Planc & _range )
 {
-    Assert( !is_negative( _range ) );
+    Assert( is_pos( _range ) );
+
     m_alert_range = _range;
 
     if( sight_range( ) && ( sight_range( ) < alert_range( ) ) )
@@ -81,14 +83,14 @@ Drawing Enemy::debug_overlay( ) const
 
             if( sight_range( ) )
             {
-                debug_overlay.draw( SIGHT_LINE_COLOR.a( ALPHA_INNER ), Circle( sight_range( ) ) );
-                debug_overlay.draw( SIGHT_LINE_COLOR, Circle( sight_range( ) ), ALERT_LINE_THICKNESS, true );
+                debug_overlay.draw( SIGHT_LINE_COLOR.a( ALPHA_INNER ), Polygon::circle( sight_range( ) ) );
+                debug_overlay.draw( SIGHT_LINE_COLOR, Polygon::circle( sight_range( ) ), ALERT_LINE_THICKNESS, true );
             }
         }
         else if( alert_range( ) )
         {
-            debug_overlay.draw( ALERT_LINE_COLOR.a( ALPHA_INNER ), Circle( alert_range( ) ) );
-            debug_overlay.draw( ALERT_LINE_COLOR, Circle( alert_range( ) ), ALERT_LINE_THICKNESS, true );
+            debug_overlay.draw( ALERT_LINE_COLOR.a( ALPHA_INNER ), Polygon::circle( alert_range( ) ) );
+            debug_overlay.draw( ALERT_LINE_COLOR, Polygon::circle( alert_range( ) ), ALERT_LINE_THICKNESS, true );
         }
     }
 

@@ -45,8 +45,7 @@ void Mob::draw_eyes( const Coordinate & _position, const Angle & _angle )
         Planc eye_width = m_eye_radius * TWO;
         Planc eye_height = eyes_closed( ) ? (Planc)ONE : ( eye_width * ( squinting( ) ? HALF : ONE ) );
 
-        Rectangle eye( eye_width, eye_height );
-        eye.rotate( _angle ).move( _position );
+        Polygon eye = Polygon::rectangle( eye_width, eye_height ).rotate( _angle ).move( _position );
 
         draw( eye_color( ), eye );
     }
@@ -211,9 +210,9 @@ Drawing Mob::debug_overlay( ) const
         {
             Planc health_width = max( HEALTH_BAR_WIDTH_MIN, hit_box( ).width( ) * HEALTH_BAR_TO_OBJECT_RATIO );
             Planc health_height = HEALTH_BAR_HEIGHT;
-            Coordinate offset( ZERO, -( hit_box( ).height( ).half( ) + ( health_height * 1.5 ) + HEALTH_BAR_BORDER_WIDTH ) );
+            Coordinate offset( ZERO, -( half( hit_box( ).height( ) ) + ( health_height * 1.5 ) + HEALTH_BAR_BORDER_WIDTH ) );
 
-            debug_overlay.draw( BLACK, Rectangle( health_width, health_height, offset ) );
+            debug_overlay.draw( BLACK, Polygon::rectangle( health_width, health_height, offset ) );
 
             if( alive( ) )
             {
@@ -238,11 +237,11 @@ Drawing Mob::debug_overlay( ) const
                     health_color = RED;
                 }
 
-                debug_overlay.draw( health_color, Rectangle( health_width * health_percentage, health_height,
-                                                             offset + VectorX( ( health_width.half( ) * health_percentage ) - health_width.half( ) ) ) );
+                debug_overlay.draw( health_color, Polygon::rectangle( health_width * health_percentage, health_height,
+                                                                      offset + Vector::X( ( half( health_width ) * health_percentage ) - half( health_width ) ) ) );
             }
 
-            debug_overlay.draw( WHITE, Rectangle( health_width, health_height, offset ), HEALTH_BAR_BORDER_WIDTH, true );
+            debug_overlay.draw( WHITE, Polygon::rectangle( health_width, health_height, offset ), HEALTH_BAR_BORDER_WIDTH, true );
         }
     }
 

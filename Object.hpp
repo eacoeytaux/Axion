@@ -26,7 +26,7 @@ public:
     virtual ~Object( );
 
     Object( World * world );
-    Object( World * world, const Coordinate & position, const Vector & velocity = ZERO_VECTOR );
+    Object( World * world, const Coordinate & position, const Vector & velocity = V0 );
     Object( World * world, const Vector & position_velocity );
 
 private:

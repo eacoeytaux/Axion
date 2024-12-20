@@ -1,11 +1,10 @@
 #include "Drawing.hpp"
-#include "Color.hpp"
 
 Drawing::Drawing( const Coordinate & _center ) { center( _center ); }
 
 const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( const bool _transformed ) const
 {
-    //if( _transformed && !transform( ).identity( ) )
+    if( _transformed && !transform( ).is_identity( ) )
     {
         const Transform _t = transform( );
 
@@ -15,7 +14,7 @@ const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( const bool _t
         {
             colored_polygon.polygon.transform( _t );
 
-            transformed_bounding_box.union_with( FixedRectangle( colored_polygon.polygon ) );
+            transformed_bounding_box.union_with( FixedRectangle::bounds( colored_polygon.polygon, false ) );
         }
 
         m_bounding_box = transformed_bounding_box;
@@ -40,9 +39,9 @@ void Drawing::clear( const bool _reserve_mem )
 
     m_colored_polygons.clear( !_reserve_mem );
 
-    //m_bounding_box.width( ZERO );
-    //m_bounding_box.height( ZERO );
-    //m_bounding_box.center( ORIGIN );
+    m_bounding_box.width( ZERO );
+    m_bounding_box.height( ZERO );
+    m_bounding_box.center( ORIGIN );
 
     clear_filter_function( );
 }
@@ -57,7 +56,7 @@ Drawing & Drawing::center( const Coordinate & _center )
         m_center = _center;
     }
 
-    return *this;
+    rethis;
 }
 
 Drawing & Drawing::filter_function( const function<void( Color & )> & _filter_function )
@@ -66,14 +65,14 @@ Drawing & Drawing::filter_function( const function<void( Color & )> & _filter_fu
 
     m_filter_function_set = true;
 
-    return *this;
+    rethis;
 }
 
 Drawing & Drawing::clear_filter_function( )
 {
     m_filter_function_set = false;
 
-    return *this;
+    rethis;
 }
 
 Drawing & Drawing::erase( const Polygon & _polygon )
@@ -83,7 +82,7 @@ Drawing & Drawing::erase( const Polygon & _polygon )
     colored_polygon.colors = { TRANSPARENT };
     colored_polygon.hole = true;
 
-    return *this;
+    rethis;
 }
 
 Drawing & Drawing::add_bound( const Polygon & _polygon )
@@ -93,7 +92,7 @@ Drawing & Drawing::add_bound( const Polygon & _polygon )
     colored_polygon.colors = { TRANSPARENT };
     colored_polygon.fill = true;
 
-    return *this;
+    rethis;
 }
 
 Drawing & Drawing::clear_bounds( )
@@ -101,7 +100,7 @@ Drawing & Drawing::clear_bounds( )
     ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
     colored_polygon.reset = true;
 
-    return *this;
+    rethis;
 }
 
 Drawing & Drawing::draw( const Drawing & _drawing )
@@ -120,7 +119,7 @@ Drawing & Drawing::draw( const Drawing & _drawing )
 
             if( !filtered_colored_polygon.reset )
             {
-                m_bounding_box.union_with( FixedRectangle( filtered_colored_polygon.polygon ) );
+                m_bounding_box.union_with( FixedRectangle::bounds( filtered_colored_polygon.polygon, false ) );
             }
         }
     }
@@ -130,7 +129,7 @@ Drawing & Drawing::draw( const Drawing & _drawing )
         m_bounding_box.union_with( _drawing.bounding_box( ) );
     }
 
-    return *this;
+    rethis;
 }
 
 Drawing & Drawing::draw( const Drawing & _drawing, const Color & _color )
@@ -147,7 +146,7 @@ Drawing & Drawing::draw( const Drawing & _drawing, const Color & _color )
 
     m_bounding_box.union_with( _drawing.bounding_box( ) );
 
-    return *this;
+    rethis;
 }
 
 Drawing & Drawing::draw( const varray<Color> & _colors,
@@ -182,9 +181,9 @@ Drawing & Drawing::draw( const varray<Color> & _colors,
         }
     }
 
-    m_bounding_box.union_with( FixedRectangle( colored_polygon.polygon ) );
+    m_bounding_box.union_with( FixedRectangle::bounds( colored_polygon.polygon, false ) );
 
-    return *this;
+    rethis;
 }
 
 Drawing & Drawing::draw( const Color & _color,
@@ -226,7 +225,7 @@ Drawing & Drawing::draw( const Color & _color,
         draw( _color, line, _thickness, _preserve_thickness, _extend_lines );
     }
 
-    return *this;
+    rethis;
 }
 
 #ifdef AXN_DEBUG
@@ -237,9 +236,9 @@ Drawing & Drawing::draw( const Color & _color,
                          const bool _preserve_thickness )
 {
     draw( _color, Line( _vector.origin( ), _vector.destination( ) ), _thickness, _preserve_thickness );
-    draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) + ( half( RIGHT_ANGLE ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
-    draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) - ( half( RIGHT_ANGLE ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
-    return *this;
+    draw( _color, Line( _vector.destination( ), _vector.destination( ) - Vector::A( _vector.angle( ) + ( half( RIGHT_ANGLE ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
+    draw( _color, Line( _vector.destination( ), _vector.destination( ) - Vector::A( _vector.angle( ) - ( half( RIGHT_ANGLE ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
+    rethis;
 }
 #endif
 

@@ -15,32 +15,13 @@ void Engine::step( ) { b_step = true; }
 #endif
 
 #define check_quit( f ) \
-    f;                  \
-                        \
-    if( quit_break )    \
-    {                   \
-        break;          \
-    }
+    f; if( quit_break ) { break; }
 
 #define try_catch_error( f ) \
-    try                      \
-    {                        \
-        f;                   \
-    }                        \
-    catch( ... )             \
-    {                        \
-        errored = true;      \
-    }
+    try { f; } catch( ... ) { errored = true; }
 
 #define try_return_error( f, err ) \
-    try                            \
-    {                              \
-        f;                         \
-    }                              \
-    catch( ... )                   \
-    {                              \
-        return err;                \
-    }
+    try { f; } catch( ... ) { return err; }
 
 bool errored = false;
 bool quit_break = false;
@@ -95,8 +76,6 @@ error Engine::run( World * world, const string _app_name )
             world->input( inputs );
             clear_inputs( );
 
-            //sync_controllers( );
-
             if( !paused( ) )
             {
                 check_quit( world->update( ); );
@@ -116,16 +95,9 @@ error Engine::run( World * world, const string _app_name )
             check_quit( world->render( ); );
             check_quit( render_eng( ); );
 
-            int ms = ( 1000.0 / (dec)FPS ) - ( current_ticks_eng( ) - start_ticks );
-
-            if( ms > 0 )
+            if( int ms = ( 1000.0 / (dec)FPS ) - ( current_ticks_eng( ) - start_ticks ) > 0 )
             {
-                // Log( INFO_LOG, "waiting ms ............. ( %i )", _ms );
                 wait_eng( ms );
-            }
-            else
-            {
-                // Log( INFO_LOG, "missed ms .............. ( %i )", -ms );
             }
         }
     }

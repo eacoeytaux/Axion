@@ -23,8 +23,8 @@ public:
     static const Distribution DEFAULT_DISTRIBUTION;
 
     static error seed( );
-    static error seed( string seed );
     static error seed( uint seed );
+    static error seed( string seed );
 
     static bool rbool( dec true_odds = 0.5 );
 
@@ -62,7 +62,7 @@ public:
     }
 
     template <typename T>
-    static T negative( const T & t, dec flip_odds = 0.5 )
+    static T negate( const T & t, dec flip_odds = 0.5 )
     {
         if( rbool( flip_odds ) )
         {

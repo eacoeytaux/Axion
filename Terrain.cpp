@@ -150,7 +150,7 @@ Drawing Terrain::debug_overlay( ) const
         {
             for_each( vertex, vertices )
             {
-                debug_overlay.draw( COLOR, Circle( GROUND_VERTEX_WIDTH / world( )->camera( )->zoom( ), vertex->position( ) ), FILLED, true );
+                debug_overlay.draw( COLOR, Polygon::circle( GROUND_VERTEX_WIDTH / world( )->camera( )->zoom( ), vertex->position( ) ), FILLED, true );
             }
         }
     }
@@ -184,7 +184,7 @@ Angle TerrainVertex::normal( ) const
 {
     if( m_e1 && m_e2 )
     {
-        return ( m_e1->normal( ) + m_e2->normal( ) ).half( ).flipped( );
+        return half( m_e1->normal( ) + m_e2->normal( ) ).flipped( );
     }
     else if( m_e1 )
     {

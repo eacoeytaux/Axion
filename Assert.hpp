@@ -13,10 +13,15 @@ namespace axn
 class Assert
 {
 private:
-    bool m_passed;
-    string m_message;
+    bool m_passed = true;
+    string m_message = "";
 
-    void fail( const char * message )
+public:
+    operator bool( ) const { return m_passed; }
+    operator string( ) const { return m_message; }
+
+private:
+    void fail( const char * message = "" )
     {
         m_passed = false;
         m_message = string( message );
@@ -32,33 +37,15 @@ private:
 
         breakpoint;
 
-        throw runtime_error( message );
+        // throw runtime_error( message );
     }
 
 public:
-    virtual ~Assert( ) { }
+    Assert( ) { fail( ); }
+    Assert( const char * message, ... ) { va_list va_args; va_start( va_args, message ); fail( message ); va_end( va_args ); }
 
-    Assert( const char * message = "", ... ) : m_passed( false )
-    {
-        va_list va_args;
-        va_start( va_args, message );
-        Assert::fail( message );
-        va_end( va_args );
-    }
-
-    Assert( bool b, const char * message = "", ... ) : m_passed( b )
-    {
-        if( !b )
-        {
-            va_list va_args;
-            va_start( va_args, message );
-            Assert::fail( message );
-            va_end( va_args );
-        }
-    }
-
-    operator bool( ) const { return m_passed; }
-    operator string( ) const { return m_message; }
+    Assert( bool b ) { if( !b ) { fail( ); } }
+    Assert( bool b, const char * message, ... ) { if( !b ) { va_list va_args; va_start( va_args, message ); fail( message ); va_end( va_args ); } }
 };
 
 } // namespace axn
