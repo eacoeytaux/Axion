@@ -22,8 +22,10 @@ public:
     static error clear( );
 
     static error clear_color( dec r, dec g, dec b );
-    static error clear_color( ) { return ogl::clear_color( ZERO, ZERO, ZERO ); }
+    static error clear_color( ) { return ogl::clear_color( 0.0, 0.0, 0.0 ); }
+
     static error clear_depth( );
+
     static error clear_stencil( );
 
     static error load_identity( );
@@ -37,20 +39,21 @@ public:
     static error matrix_modelview_mode( bool load_identity = true );
     static error matrix_projection_mode( bool load_identity = true );
 
-    static error transform( const Transform & );
+    static error transform( Transform cref );
 
     static error translate( dec x, dec y );
-    static error translate( const Coordinate & c ) { return translate( c.x( ), c.y( ) ); }
-    static error translate( const Vector & v ) { return translate( v.dx( ), v.dy( ) ); }
+    static error translate( Coordinate cref c ) { return translate( c.x( ), c.y( ) ); }
+    static error translate( Vector cref v ) { return translate( v.dx( ), v.dy( ) ); }
 
-    static error scale( dec x, dec y );
     static error scale( dec s ) { return scale( s, s ); }
+    static error scale( dec x, dec y );
 
 private:
     static error begin( int gl_enum );
 
 public:
     static error end( );
+
     static error begin_points( );
     static error begin_lines( );
     static error begin_lines_strip( );

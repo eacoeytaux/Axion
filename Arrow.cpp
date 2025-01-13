@@ -6,17 +6,17 @@ using mtmercy::Arrow;
 
 namespace
 {
-const dec DAMAGE = 10.0;
+cdec DAMAGE = 10.0;
 
-const uint LIFESPAN = 300;
-const uint FADESPAN = 50;
+cuint LIFESPAN = 300;
+cuint FADESPAN = 50;
 
-const Planc HEAD_LENGTH_INNER = 4.0;
-const Planc HEAD_LENGTH_OUTER = 6.0;
-const Planc HEAD_WIDTH = 3.0;
-const Planc HEAD_BUFFER = 1.0;
-const Planc SHAFT_LENGTH = 30.0;
-const Planc SHAFT_THICKNESS = 3.0;
+cPlanc HEAD_LENGTH_INNER = 4.0;
+cPlanc HEAD_LENGTH_OUTER = 6.0;
+cPlanc HEAD_WIDTH = 3.0;
+cPlanc HEAD_BUFFER = 1.0;
+cPlanc SHAFT_LENGTH = 30.0;
+cPlanc SHAFT_THICKNESS = 3.0;
 
 const Polygon HEAD( { Coordinate( HEAD_BUFFER, 0.0 ),
                       Coordinate( -HEAD_LENGTH_OUTER, -HEAD_WIDTH ),
@@ -36,7 +36,10 @@ const Color TIP_COLOR = GRAY_LIGHT;
 const Color SHAFT_COLOR = Color::rgb( 0x8B4513 );
 } // namespace
 
-Arrow::Arrow( World * world, const Coordinate & tip, const Vector & launch_speed, const Color & _feather_color ) : Object( world, tip )
+Arrow Arrow::tip( World * world, Coordinate cref tip, Vector cref launch_speed, Color cref feather_color ) { return Arrow( world, tip, launch_speed, feather_color ); }
+Arrow Arrow::base( World * world, Coordinate cref base, Vector cref launch_speed, Color cref feather_color ) { return Arrow( world, base + Vector::A( launch_speed.angle( ), ( SHAFT_LENGTH + HEAD_LENGTH_INNER ) ), launch_speed, feather_color ); }
+
+Arrow::Arrow( World * world, Coordinate cref tip, Vector cref launch_speed, Color cref _feather_color ) : Object( world, tip )
 {
     #ifdef AXN_DEBUG
     m_draw_debug = true;
@@ -132,7 +135,7 @@ void Arrow::update( )
 
 Angle Arrow::angle( ) const { return m_angle; }
 
-void Arrow::angle( const Angle & _angle )
+void Arrow::angle( Angle cref _angle )
 {
     m_angle = _angle;
     needs_render( true );
@@ -173,7 +176,7 @@ bool Arrow::collide( Object * object )
     return false;
 }
 
-void Arrow::react_to_movement( Object * object, const Vector & _v )
+void Arrow::react_to_movement( Object * object, Vector cref _v )
 {
     Object::react_to_movement( object, _v );
 

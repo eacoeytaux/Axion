@@ -21,17 +21,19 @@ private:
     Planc m_m = INFINITY;
     Planc m_b = P0;
 
-    Line & solve_mb( ) { if( c1( ).x( ) == c2( ).x( ) ) { m_m = INFINITY; m_b = c1( ).x( ); } else { m_m = ( ( c2( ).y( ) - c1( ).y( ) ) / ( c2( ).x( ) - c1( ).x( ) ) ); m_b = ( c1( ).y( ) - ( m_m * c1( ).x( ) ) ); } rethis; }
+    Line & solve_mb( ) { if( c1( ).x( ) == c2( ).x( ) ) { m_m = ( ( c1( ).y( ) <= c2( ).y( ) ) ? INFINITY_POS : INFINITY_NEG ); m_b = c1( ).x( ); } else { m_m = ( ( c2( ).y( ) - c1( ).y( ) ) / ( c2( ).x( ) - c1( ).x( ) ) ); m_b = ( c1( ).y( ) - ( m_m * c1( ).x( ) ) ); } rethis; }
 
 public:
     Line( ) { }
 
-    Line( const Coordinate & c1, const Coordinate & c2 ) : m_c1( c1 ), m_c2( c2 ) { solve_mb( ); }
+    Line( Coordinate cref c1, Coordinate cref c2 ) : m_c1( c1 ), m_c2( c2 ) { solve_mb( ); }
 
-    Line( const Vector & v ) : m_c1( v.origin( ) ), m_c2( v.destination( ) ) { solve_mb( ); }
+    Line( Vector cref v ) : m_c1( v.origin( ) ), m_c2( v.destination( ) ) { solve_mb( ); }
 
-    const Coordinate & c1( ) const { if( is_dirty( ) ) { } return m_c1; }
-    const Coordinate & c2( ) const { return m_c2; }
+    Coordinate cref c1( ) const { return m_c1; }
+    Coordinate cref c2( ) const { return m_c2; }
+
+    Line flipped( ) const { return Line( c2( ), c1( ) ); }
 
     Angle angle( ) const { return Angle( c1( ), c2( ) ); }
     Vector vector( ) const { return Vector( c1( ), c2( ) ); }
@@ -39,30 +41,31 @@ public:
     bool vertical( ) const { return is_inf( m( ) ); }
     bool horizontal( ) const { return is_zero( m( ) ); }
 
-    const Planc & m( ) const { return m_m; }
-    const Planc & b( ) const { return m_b; }
+    Planc cref m( ) const { return m_m; }
+    Planc cref b( ) const { return m_b; }
 
     Planc length( ) const { return c1( ).distance_to( c2( ) ); }
 
-    const Planc & x_lower( ) const { return min( c1( ).x( ), c2( ).x( ) ); }
-    const Planc & y_lower( ) const { return min( c1( ).y( ), c2( ).y( ) ); }
-    const Planc & x_upper( ) const { return max( c1( ).x( ), c2( ).x( ) ); }
-    const Planc & y_upper( ) const { return max( c1( ).y( ), c2( ).y( ) ); }
+    Planc cref lower_bound_x( ) const { return min( c1( ).x( ), c2( ).x( ) ); }
+    Planc cref lower_bound_y( ) const { return min( c1( ).y( ), c2( ).y( ) ); }
+    Planc cref upper_bound_x( ) const { return max( c1( ).x( ), c2( ).x( ) ); }
+    Planc cref upper_bound_y( ) const { return max( c1( ).y( ), c2( ).y( ) ); }
 
-    Planc x( const Planc & y ) const { return ( vertical( ) || horizontal( ) ) ? c1( ).x( ) : ( ( y - b( ) ) / m( ) ); }
-    Planc y( const Planc & x ) const { return ( vertical( ) || horizontal( ) ) ? c1( ).y( ) : ( ( m( ) * x ) + b( ) ); }
+    Planc x( Planc cref y ) const { return ( vertical( ) || horizontal( ) ) ? c1( ).x( ) : ( ( y - b( ) ) / m( ) ); }
+    Planc y( Planc cref x ) const { return ( vertical( ) || horizontal( ) ) ? c1( ).y( ) : ( ( m( ) * x ) + b( ) ); }
 
-    Planc cross( const Coordinate & c ) const { return ::cross( c1( ), c2( ), c ); }
+    Planc cross( Coordinate cref c ) const { return ::cross( c1( ), c2( ), c ); }
 
-    bool on( const Coordinate & c ) const { return equal( cross( c ), ZERO ); }
-    bool above( const Coordinate & c, const bool inclusive = false ) const { return greater( inclusive, cross( c ), ZERO ); }
-    bool below( const Coordinate & c, const bool inclusive = false ) const { return less( inclusive, cross( c ), ZERO ); }
+    bool on( Coordinate cref c ) const { return equal( cross( c ), 0.0 ); }
+    bool above( Coordinate cref c, cbool inclusive = false ) const { return greater( inclusive, cross( c ), 0.0 ); }
+    bool below( Coordinate cref c, cbool inclusive = false ) const { return less( inclusive, cross( c ), 0.0 ); }
 
-    bool in_bounds( const Coordinate & c, const bool inclusive = true ) const { return ( in_range( c.x( ), x_lower( ), x_upper( ), inclusive ) && in_range( c.y( ), y_lower( ), y_upper( ), inclusive ) ); }
+    bool in_bounds( Coordinate cref c, cbool inclusive = true ) const { return ( in_range( c.x( ), lower_bound_x( ), upper_bound_x( ), inclusive ) && in_range( c.y( ), lower_bound_y( ), upper_bound_y( ), inclusive ) ); }
 
-    bool parallel( const Line & l ) const { return ( ( m( ) == l.m( ) ) && ( c1( ) != c2( ) ) && ( l.c1( ) != l.c2( ) ) ); }
+    bool parallel( Line cref l ) const { return ( ( ( m( ) == l.m( ) ) || ( is_inf( m( ) ) && is_inf( l.m( ) ) ) ) && ( ( c1( ) != c2( ) ) && ( l.c1( ) != l.c2( ) ) ) ); }
+    bool colinear( Line cref l ) const { return ( ( *this == l ) || ( parallel( l ) && ( b( ) == l.b( ) ) ) ); }
 
-    bool intersects( const Line & l, bool inclusive = true ) const
+    bool intersects( Line cref l, bool inclusive = true ) const
     {
         if( parallel( l ) )
         {
@@ -74,17 +77,17 @@ public:
             {
                 if( vertical( ) )
                 {
-                    return ( in_range( l.c1( ).y( ), y_lower( ), y_upper( ), inclusive ) ||
-                             in_range( l.c2( ).y( ), y_lower( ), y_upper( ), inclusive ) ||
-                             in_range( c1( ).y( ), l.y_lower( ), l.y_upper( ), inclusive ) ||
-                             in_range( c2( ).y( ), l.y_lower( ), l.y_upper( ), inclusive ) );
+                    return ( in_range( l.c1( ).y( ), lower_bound_y( ), upper_bound_y( ), inclusive ) ||
+                             in_range( l.c2( ).y( ), lower_bound_y( ), upper_bound_y( ), inclusive ) ||
+                             in_range( c1( ).y( ), l.lower_bound_y( ), l.upper_bound_y( ), inclusive ) ||
+                             in_range( c2( ).y( ), l.lower_bound_y( ), l.upper_bound_y( ), inclusive ) );
                 }
                 else
                 {
-                    return ( in_range( l.c1( ).x( ), x_lower( ), x_upper( ), inclusive ) ||
-                             in_range( l.c2( ).x( ), x_lower( ), x_upper( ), l.c2( ).x( ), inclusive ) ||
-                             in_range( c1( ).x( ), l.x_lower( ), l.x_upper( ), inclusive ) ||
-                             in_range( c2( ).x( ), l.x_lower( ), l.x_upper( ), inclusive ) );
+                    return ( in_range( l.c1( ).x( ), lower_bound_x( ), upper_bound_x( ), inclusive ) ||
+                             in_range( l.c2( ).x( ), lower_bound_x( ), upper_bound_x( ), l.c2( ).x( ), inclusive ) ||
+                             in_range( c1( ).x( ), l.lower_bound_x( ), l.upper_bound_x( ), inclusive ) ||
+                             in_range( c2( ).x( ), l.lower_bound_x( ), l.upper_bound_x( ), inclusive ) );
                 }
             }
         }
@@ -94,19 +97,19 @@ public:
 
             if( vertical( ) )
             {
-                intersect = Coordinate( x_lower( ), ( l.horizontal( ) ? l.y_lower( ) : ( x_lower( ) * l.m( ) ) + l.b( ) ) );
+                intersect = Coordinate( lower_bound_x( ), ( l.horizontal( ) ? l.lower_bound_y( ) : ( lower_bound_x( ) * l.m( ) ) + l.b( ) ) );
             }
             else if( l.vertical( ) )
             {
-                intersect = Coordinate( l.x_lower( ), ( horizontal( ) ? y_lower( ) : ( l.x_lower( ) * m( ) ) + b( ) ) );
+                intersect = Coordinate( l.lower_bound_x( ), ( horizontal( ) ? lower_bound_y( ) : ( l.lower_bound_x( ) * m( ) ) + b( ) ) );
             }
             else if( horizontal( ) )
             {
-                intersect = Coordinate( ( ( y_lower( ) - l.b( ) ) / l.m( ) ), y_lower( ) );
+                intersect = Coordinate( ( ( lower_bound_y( ) - l.b( ) ) / l.m( ) ), lower_bound_y( ) );
             }
             else if( l.horizontal( ) )
             {
-                intersect = Coordinate( ( ( l.y_lower( ) - b( ) ) / m( ) ), l.y_lower( ) );
+                intersect = Coordinate( ( ( l.lower_bound_y( ) - b( ) ) / m( ) ), l.lower_bound_y( ) );
             }
             else
             {
@@ -118,7 +121,7 @@ public:
         }
     }
 
-    Coordinate intersection( const Line & l ) const
+    Coordinate intersection( Line cref l ) const
     {
         if( parallel( l ) )
         {
@@ -174,13 +177,13 @@ public:
         }
     }
 
-    virtual Line & transform( const Transform & t ) override { m_c1 = t.apply( m_c1 ); m_c2 = t.apply( m_c2 ); return solve_mb( ); }
+    virtual Line & transform( Transform cref t ) override { m_c1 = t.apply( m_c1 ); m_c2 = t.apply( m_c2 ); return solve_mb( ); }
 
-    Line operator+( const Vector & v ) const { return Line( c1( ) + v, c2( ) + v ); }
-    Line operator-( const Vector & v ) const { return Line( c1( ) - v, c2( ) - v ); }
+    Line operator+( Vector cref v ) const { return Line( c1( ) + v, c2( ) + v ); }
+    Line operator-( Vector cref v ) const { return Line( c1( ) - v, c2( ) - v ); }
 
-    Line & operator+=( const Vector & v ) { rethis = *this + v; }
-    Line & operator-=( const Vector & v ) { rethis = *this - v; }
+    Line & operator+=( Vector cref v ) { rethis = *this + v; }
+    Line & operator-=( Vector cref v ) { rethis = *this - v; }
 
     default_equal( Line );
 };

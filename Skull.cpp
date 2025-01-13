@@ -5,25 +5,25 @@ using mtmercy::Skull;
 
 namespace
 {
-const Planc SKULL_RADIUS = METER / 3.0;
-const Planc SKULL_DIAMETER = SKULL_RADIUS * 2.0;
-const Planc SKULL_CIRCUMFERENCE = SKULL_RADIUS * SKULL_RADIUS * PI;
+cPlanc SKULL_RADIUS = METER / 3.0;
+cPlanc SKULL_DIAMETER = SKULL_RADIUS * 2.0;
+cPlanc SKULL_CIRCUMFERENCE = SKULL_RADIUS * SKULL_RADIUS * PI;
 
-const Planc JAW_TO_SKULL_WIDTH_RADIO = 0.64;
-const Planc JAW_TO_SKULL_HEIGHT_RADIO = 0.64;
-const Planc JAW_WIDTH = SKULL_DIAMETER * JAW_TO_SKULL_WIDTH_RADIO;
-const Planc JAW_HEIGHT = SKULL_DIAMETER * JAW_TO_SKULL_HEIGHT_RADIO;
+cPlanc JAW_TO_SKULL_WIDTH_RADIO = 0.64;
+cPlanc JAW_TO_SKULL_HEIGHT_RADIO = 0.64;
+cPlanc JAW_WIDTH = SKULL_DIAMETER * JAW_TO_SKULL_WIDTH_RADIO;
+cPlanc JAW_HEIGHT = SKULL_DIAMETER * JAW_TO_SKULL_HEIGHT_RADIO;
 
-const Planc EYE_RADIUS = 2.0;
-const dec EYE_OFFSET_X = 0.4;
-const dec EYE_OFFSET_Y = 0.1;
-const dec EYE_SPACING = 0.5;
+cPlanc EYE_RADIUS = 2.0;
+cdec EYE_OFFSET_X = 0.4;
+cdec EYE_OFFSET_Y = 0.1;
+cdec EYE_SPACING = 0.5;
 
 const Color BONE_COLOR = WHITE;
 const Color HOLE_COLOR = BLACK;
 } // namespace
 
-Skull::Skull( World * world, const Coordinate & _position ) : Object( world, _position )
+Skull::Skull( World * world, Coordinate cref _position ) : Object( world, _position )
 {
     needs_render_always( true );
 

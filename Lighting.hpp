@@ -27,17 +27,17 @@ public:
     void darkness_intensity( dec );
 
     const varray<LightSource> & light_sources( ) const;
-    void add_light_source( const LightSource & );
+    void add_light_source( LightSource cref );
     void clear_light_sources( );
 
-    const Color & ambient_color( ) const;
-    void ambient_color( const Color & );
+    Color cref ambient_color( ) const;
+    void ambient_color( Color cref );
 
 private:
     varray<LightSource> m_light_sources;
 
     bool m_darkness_active = false;
-    Slider<dec> m_darkness_slider = Slider<dec>( 1.0 );
+    Slider<dec> m_darkness_slider;
 
     Color m_ambient_color = TRANSPARENT;
 };

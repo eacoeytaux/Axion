@@ -37,7 +37,7 @@ Terrain::Terrain( World * world, const varray<varray<Coordinate>> & _vertices ) 
     }
 }
 
-void Terrain::make( const varray<Coordinate> & _positions, const bool _loop )
+void Terrain::make( varray<Coordinate> cref _positions, cbool _loop )
 {
     if( _positions.size( ) <= 1 )
     {
@@ -52,7 +52,7 @@ void Terrain::make( const varray<Coordinate> & _positions, const bool _loop )
     TerrainVertex * previous = nullptr;
     for_range( i, _positions.size( ) )
     {
-        const Coordinate & coordinate = _positions[ i ];
+        Coordinate cref coordinate = _positions[ i ];
         TerrainVertex * vertex = new TerrainVertex( coordinate );
         m_vertices.back( ).insert_back( vertex );
         world( )->object_grid( ).add( vertex );
@@ -95,7 +95,7 @@ const varray<varray<TerrainVertex *>> & Terrain::vertices( ) const { return m_ve
 
 const varray<varray<TerrainEdge *>> & Terrain::edges( ) const { return m_edges; }
 
-void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( const Coordinate &, const TerrainEdge * )> & f ) const
+void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( Coordinate cref, const TerrainEdge * )> & f ) const
 {
     if( !( edges( ).size( ) ) )
         return;
@@ -129,8 +129,8 @@ void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( 
 #ifdef AXN_DEBUG
 Drawing Terrain::debug_overlay( ) const
 {
-    const Planc GROUND_WIDTH = 1.5;
-    const Planc GROUND_VERTEX_WIDTH = 2.5;
+    cPlanc GROUND_WIDTH = 1.5;
+    cPlanc GROUND_VERTEX_WIDTH = 2.5;
     const Color COLOR = CYAN;
 
     Drawing debug_overlay;
@@ -159,9 +159,9 @@ Drawing Terrain::debug_overlay( ) const
 }
 #endif
 
-TerrainVertex::TerrainVertex( const Coordinate & _position ) { m_position = _position; }
+TerrainVertex::TerrainVertex( Coordinate cref _position ) { m_position = _position; }
 
-const Coordinate & TerrainVertex::position( ) const { return m_position; }
+Coordinate cref TerrainVertex::position( ) const { return m_position; }
 
 TerrainEdge * TerrainVertex::edge1( ) const { return m_e1; }
 TerrainEdge * TerrainVertex::edge2( ) const { return m_e2; }
@@ -202,10 +202,10 @@ dec TerrainVertex::resistance( ) const { return m_resistance; }
 
 FixedRectangle TerrainVertex::bounding_box( ) const
 {
-    return FixedRectangle( ZERO, ZERO, position( ) );
+    return FixedRectangle( 0.0, 0.0, position( ) );
 }
 
-TerrainEdge::TerrainEdge( TerrainVertex * _v1, TerrainVertex * _v2, const dec _resistance ) : m_v1( _v1 ), m_v2( _v2 ), m_resistance( _resistance )
+TerrainEdge::TerrainEdge( TerrainVertex * _v1, TerrainVertex * _v2, cdec _resistance ) : m_v1( _v1 ), m_v2( _v2 ), m_resistance( _resistance )
 {
     Assert( (bool)m_v1 );
     Assert( (bool)m_v2 );
@@ -214,7 +214,7 @@ TerrainEdge::TerrainEdge( TerrainVertex * _v1, TerrainVertex * _v2, const dec _r
     m_v2->edge1( this );
 }
 
-TerrainEdge::TerrainEdge( const TerrainEdge & _edge )
+TerrainEdge::TerrainEdge( TerrainEdge cref _edge )
 {
     m_v1 = _edge.vertex1( );
     m_v2 = _edge.vertex2( );

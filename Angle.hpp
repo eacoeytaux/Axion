@@ -12,7 +12,7 @@ namespace geometry
 class Angle
 {
 private:
-    dec m_radians = ZERO;
+    dec m_radians = 0.0;
     bool m_truncate = false; // keeps radians within [ 0, 2 * pi )
 
 public:
@@ -23,14 +23,14 @@ public:
     Angle( dec radians ) { Angle::radians( radians ); }
     Angle( dec radians, bool truncate ) : m_truncate( truncate ) { Angle::radians( radians ); }
 
-    Angle( const Planc & dx, const Planc & dy ) { Angle::radians( atan2( dy, dx ) ); }
-    Angle( const Planc & dx, const Planc & dy, bool truncate ) : m_truncate( truncate ) { Angle::radians( atan2( dy, dx ) ); }
+    Angle( Planc cref dx, Planc cref dy ) { Angle::radians( atan2( dy, dx ) ); }
+    Angle( Planc cref dx, Planc cref dy, bool truncate ) : m_truncate( truncate ) { Angle::radians( atan2( dy, dx ) ); }
 
-    Angle( const Coordinate & c ) { Angle::radians( atan2( c.y( ), c.x( ) ) ); }
-    Angle( const Coordinate & c, bool truncate ) : m_truncate( truncate ) { Angle::radians( atan2( c.y( ), c.x( ) ) ); }
+    Angle( Coordinate cref c ) { Angle::radians( atan2( c.y( ), c.x( ) ) ); }
+    Angle( Coordinate cref c, bool truncate ) : m_truncate( truncate ) { Angle::radians( atan2( c.y( ), c.x( ) ) ); }
 
-    Angle( const Coordinate & from, const Coordinate & to ) { Angle::radians( atan2( ( to.y( ) - from.y( ) ), ( to.x( ) - from.x( ) ) ) ); }
-    Angle( const Coordinate & from, const Coordinate & to, bool truncate ) : m_truncate( truncate ) { Angle::radians( atan2( ( to.y( ) - from.y( ) ), ( to.x( ) - from.x( ) ) ) ); }
+    Angle( Coordinate cref from, Coordinate cref to ) { Angle::radians( atan2( ( to.y( ) - from.y( ) ), ( to.x( ) - from.x( ) ) ) ); }
+    Angle( Coordinate cref from, Coordinate cref to, bool truncate ) : m_truncate( truncate ) { Angle::radians( atan2( ( to.y( ) - from.y( ) ), ( to.x( ) - from.x( ) ) ) ); }
 
     operator dec( ) const { return radians( ); }
 
@@ -40,8 +40,8 @@ public:
 
     dec radians( ) const { return m_radians; }
 
-    Angle & radians( dec radians ) { if( m_radians != radians ) { m_radians = ( !is_num( radians ) ? ZERO : ( truncating( ) ? ( radians - ( floor( radians / TAU ) * TAU ) ) : radians ) ); } rethis; }
-    Angle & radians( const Planc & dx, const Planc & dy ) { radians( atan2( dy, dx ) ); rethis; }
+    Angle & radians( dec radians ) { if( m_radians != radians ) { m_radians = ( !is_num( radians ) ? 0.0 : ( truncating( ) ? ( radians - ( floor( radians / TAU ) * TAU ) ) : radians ) ); } rethis; }
+    Angle & radians( Planc cref dx, Planc cref dy ) { radians( atan2( dy, dx ) ); rethis; }
 
     dec sin( ) const { return ::sin( radians( ) ); }
     dec cos( ) const { return ::cos( radians( ) ); }
@@ -51,10 +51,10 @@ public:
     Angle flipped( ) const { return ( *this + PI ); }
 
     Quadrant quadrant( ) const { return Coordinate( cos( ), sin( ) ).quadrant( ); }
-    bool in_quadrant( const Quadrant q ) const { return ( quadrant( ) == q ); }
+    bool in_quadrant( Quadrant q ) const { return ( quadrant( ) == q ); }
 
     Axis axis( ) const { return Coordinate( cos( ), sin( ) ).axis( ); }
-    bool on_axis( const Axis a ) const { return ( axis( ) == a ); }
+    bool on_axis( Axis a ) const { return ( axis( ) == a ); }
 
     bool right( ) const { return equal( radians( ), RIGHT_ANGLE ); }
     bool straight( ) const { return equal( radians( ), PI ); }

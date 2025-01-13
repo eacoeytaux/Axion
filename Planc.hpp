@@ -8,15 +8,17 @@ namespace axn
 namespace geometry
 {
 
-class Planc
+axnclass( Planc )
 {
 private:
-    dec m_value = ZERO;
+
+    dec m_value = 0.0;
 
     dec get( ) const { return m_value; }
     Planc & set( dec value ) { m_value = value; rethis; }
 
 public:
+
     Planc( ) { }
 
     Planc( dec d ) { set( d ); }
@@ -53,26 +55,26 @@ public:
 };
 
 #define PlancOpsRight( type ) \
-    inline Planc operator+( type t, const Planc & p ) { return ( (Planc)t + p ); } \
-    inline Planc operator-( type t, const Planc & p ) { return ( (Planc)t - p ); } \
-    inline Planc operator*( type t, const Planc & p ) { return ( (Planc)t * p ); } \
-    inline Planc operator/( type t, const Planc & p ) { return ( (Planc)t / p ); } \
-    inline type & operator+=( type & t, const Planc & p ) { return ( t = (Planc)t + p ); } \
-    inline type & operator-=( type & t, const Planc & p ) { return ( t = (Planc)t - p ); } \
-    inline type & operator*=( type & t, const Planc & p ) { return ( t = (Planc)t * p ); } \
-    inline type & operator/=( type & t, const Planc & p ) { return ( t = (Planc)t / p ); } \
-    inline bool operator==( type t, const Planc & p ) { return ( (Planc)t == p ); } \
-    inline bool operator!=( type t, const Planc & p ) { return ( (Planc)t != p ); } \
-    inline bool operator<=( type t, const Planc & p ) { return ( (Planc)t <= p ); } \
-    inline bool operator>=( type t, const Planc & p ) { return ( (Planc)t >= p ); } \
-    inline bool operator<( type t, const Planc & p ) { return ( (Planc)t < p ); } \
-    inline bool operator>( type t, const Planc & p ) { return ( (Planc)t > p ); }
+    inline Planc operator+( type t, Planc cref p ) { return ( (Planc)t + p ); } \
+    inline Planc operator-( type t, Planc cref p ) { return ( (Planc)t - p ); } \
+    inline Planc operator*( type t, Planc cref p ) { return ( (Planc)t * p ); } \
+    inline Planc operator/( type t, Planc cref p ) { return ( (Planc)t / p ); } \
+    inline type & operator+=( type & t, Planc cref p ) { return ( t = (Planc)t + p ); } \
+    inline type & operator-=( type & t, Planc cref p ) { return ( t = (Planc)t - p ); } \
+    inline type & operator*=( type & t, Planc cref p ) { return ( t = (Planc)t * p ); } \
+    inline type & operator/=( type & t, Planc cref p ) { return ( t = (Planc)t / p ); } \
+    inline bool operator==( type t, Planc cref p ) { return ( (Planc)t == p ); } \
+    inline bool operator!=( type t, Planc cref p ) { return ( (Planc)t != p ); } \
+    inline bool operator<=( type t, Planc cref p ) { return ( (Planc)t <= p ); } \
+    inline bool operator>=( type t, Planc cref p ) { return ( (Planc)t >= p ); } \
+    inline bool operator<( type t, Planc cref p ) { return ( (Planc)t < p ); } \
+    inline bool operator>( type t, Planc cref p ) { return ( (Planc)t > p ); }
 
 PlancOpsRight( int );
 PlancOpsRight( uint );
 PlancOpsRight( dec );
 
-const Planc P0 = Planc( ZERO );
+cPlanc P0 = Planc( 0.0 );
 
 } // namespace geometry
 } // namespace axn

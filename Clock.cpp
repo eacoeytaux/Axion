@@ -8,7 +8,7 @@
 
 Clock::Clock( ) : m_ms( (uint)system_clock::now( ).time_since_epoch( ).count( ) / 1000.0 ) { }
 
-Clock::Clock( uint _ms ) : m_ms( _ms ) { }
+Clock::Clock( cuint _ms ) : m_ms( _ms ) { }
 
 string Clock::timestamp( const char _delim ) const
 {
@@ -47,15 +47,3 @@ string Clock::datestamp( const char _delim ) const
     // return string( time_str );
     return "";
 }
-
-uint Clock::total_ms( ) const { return m_ms; }
-
-uint Clock::seconds( ) const { return m_ms / 1000.0; }
-uint Clock::minutes( ) const { return m_ms / ( 1000.0 * 60.0 ); }
-uint Clock::hours( ) const { return m_ms / ( 1000.0 * 60.0 * 60.0 ); }
-
-Clock Clock::operator+( const Clock & _c ) const { return Clock( m_ms + _c.m_ms ); }
-Clock Clock::operator-( const Clock & _c ) const { return Clock( m_ms - _c.m_ms ); }
-
-Clock & Clock::operator+=( const Clock & _c ) { m_ms += _c.m_ms; rethis; }
-Clock & Clock::operator-=( const Clock & _c ) { m_ms -= _c.m_ms; rethis; }

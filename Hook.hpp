@@ -26,7 +26,7 @@ public:
     Planc rope_length( ) const { return m_rope_length; }
     Planc max_rope_length( ) const { return m_max_rope_length; }
 
-    void fire( const Vector & launch_speed );
+    void fire( Vector cref launch_speed );
     void retract( );
     void load( );
 

@@ -4,12 +4,12 @@ using mtmercy::GrassTerrain;
 
 namespace
 {
-const Planc OUTLINE_THICKNESS = 3.0;
-const Planc DEPTH_LENGTH = 1000.0; // todo this should be more variable
-const Planc DEPTH_COLOR_LENGTH = 400.0;
+cPlanc OUTLINE_THICKNESS = 3.0;
+cPlanc DEPTH_LENGTH = 1000.0; // todo this should be more variable
+cPlanc DEPTH_COLOR_LENGTH = 400.0;
 
 const Angle GLASS_MAX_ANGLE = PI / 6.0;
-const Planc GRASS_BASE = 2.0;
+cPlanc GRASS_BASE = 2.0;
 const Span<Planc> GRASS_RADIUS = { 13.0, 17. };
 const Span<Planc> GRASS_TIP_SWAY = { 0.25, 0.4 };
 
@@ -171,7 +171,7 @@ GrassTerrain::GrassTerrain( World * world, const varray<varray<Coordinate>> & _v
     for_each( polygon, grass_top ) draw( GRASS_COLOR_LIGHT, polygon );
 }
 
-const Color & GrassTerrain::dust_color( ) const
+Color cref GrassTerrain::dust_color( ) const
 {
     return DUST_COLOR;
 }

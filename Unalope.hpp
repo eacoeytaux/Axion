@@ -10,7 +10,7 @@ class Unalope : public Enemy
 {
 public:
     virtual ~Unalope( ) { }
-    Unalope( World *, const Coordinate & position );
+    Unalope( World *, Coordinate cref position );
 
     virtual void render( ) override;
 

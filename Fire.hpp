@@ -17,7 +17,7 @@ private:
 
 public:
     virtual ~Fire( ) { }
-    Fire( World *, const Coordinate & position );
+    Fire( World *, Coordinate cref position );
 
     virtual void render( ) override;
 

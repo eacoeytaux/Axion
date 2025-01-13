@@ -17,6 +17,11 @@ class list : private std::list<T>
     using std::list<T>::list;
 
 public:
+    bool empty( ) const
+    {
+        return size( );
+    }
+
     uint size( ) const
     {
         return (uint)std::list<T>::size( );
@@ -44,22 +49,10 @@ public:
         return *it;
     }
 
-    T & front( )
-    {
-        assert_index( 0 );
-        return at( 0 );
-    }
-
     const T & front( ) const
     {
         assert_index( 0 );
         return at( 0 );
-    }
-
-    T & back( )
-    {
-        assert_index( size( ) - 1 );
-        return at( size( ) - 1 );
     }
 
     const T & back( ) const
@@ -170,24 +163,19 @@ private:
 };
 
 template <typename T>
-class queue : public std::queue<T>
+class queue : private std::queue<T>
 {
     using std::queue<T>::queue;
 
 public:
+    bool empty( ) const
+    {
+        return size( );
+    }
+
     uint size( ) const
     {
-        return (uint)std::queue<T>::size( );
-    }
-
-    T & front( )
-    {
-        return std::queue<T>::front( );
-    }
-
-    const T & front( ) const
-    {
-        return std::queue<T>::front( );
+        return std::queue<T>::size( );
     }
 
     void push( const T & t )
@@ -195,63 +183,107 @@ public:
         std::queue<T>::push( t );
     }
 
-    void pop( )
+    T pop( )
     {
+        T t = front( );
         std::queue<T>::pop( );
+        return t;
+    }
+
+    const T & front( ) const
+    {
+        return std::queue<T>::front( );
+    }
+
+    const T & back( ) const
+    {
+        return std::queue<T>::back( );
+    }
+
+    bool operator==( const queue<T> & q ) const
+    {
+        if( size( ) != q.size( ) )
+        {
+            return false;
+        }
+
+        queue<T> q1 = *this;
+        queue<T> q2 = q;
+
+        while( q1.size( ) )
+        {
+            if( q1.pop( ) != q2.pop( ) )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool operator!=( const queue<T> & q ) const
+    {
+        return !( *this == q );
     }
 };
 
 template <typename T>
-class stack : public std::stack<T>
+class stack : private std::stack<T>
 {
     using std::stack<T>::stack;
-};
-
-template <typename Key, typename Compare = std::less<Key>>
-class oset : public std::set<Key, Compare>
-{
-    using std::set<Key, Compare>::set;
 
 public:
-    bool contains( const Key & k ) const
+    bool empty( ) const
     {
-        return ( std::set<Key, Compare>::find( k ) != std::set<Key, Compare>::end( ) );
+        return size( );
     }
-};
 
-template <typename Key, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
-class uset : public std::unordered_set<Key, Hash, Equal>
-{
-    using std::unordered_set<Key, Hash, Equal>::unordered_set;
-
-public:
-    bool contains( const Key & k ) const
+    uint size( ) const
     {
-        return ( std::unordered_set<Key, Hash, Equal>::find( k ) != std::unordered_set<Key, Hash, Equal>::end( ) );
+        return std::stack<T>::size( );
     }
-};
 
-template <typename Key, typename Value, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
-class omap : public std::map<Key, Value, Hash, Equal>
-{
-    using std::map<Key, Value, Hash, Equal>::map;
-
-public:
-    bool contains( const Key & k ) const
+    void push( const T & t )
     {
-        return ( std::map<Key, Value, Hash, Equal>::map::find( k ) != std::map<Key, Value, Hash, Equal>::unordered_map::end( ) );
+        return std::stack<T>::push( t );
     }
-};
 
-template <typename Key, typename Value, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
-class umap : public std::unordered_map<Key, Value, Hash, Equal>
-{
-    using std::unordered_map<Key, Value, Hash, Equal>::unordered_map;
-
-public:
-    bool contains( const Key & k ) const
+    T pop( )
     {
-        return ( std::unordered_map<Key, Value, Hash, Equal>::unordered_map::find( k ) != std::unordered_map<Key, Value, Hash, Equal>::unordered_map::end( ) );
+        T t = top( );
+        std::stack<T>::pop( );
+        return t;
+    }
+
+    const T & top( ) const
+    {
+        return std::stack<T>::top( );
+    }
+
+    bool operator==( const stack<T> & s ) const
+    {
+        if( size( ) != s.size( ) )
+        {
+            return false;
+        }
+
+        stack<T> s1 = *this;
+        stack<T> s2 = s;
+
+        while( s1.size( ) )
+        {
+            if( s1.pop( ) != s2.pop( ) )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool operator!=( const stack<T> & s ) const
+    {
+        return !( *this == s );
     }
 };
 
@@ -283,6 +315,11 @@ public:
         }
 
         return ret;
+    }
+
+    bool empty( ) const
+    {
+        return size( );
     }
 
     uint size( ) const
@@ -613,6 +650,69 @@ private:
     bool assert_index( uint index, bool exclude_end = true ) const
     {
         return Assert( valid_index( index ) || ( !exclude_end && ( index == size( ) ) ), "varray index (%ui) out of range, varray size: %ui", index, size( ) );
+    }
+};
+
+template <typename Key, typename Compare = std::less<Key>>
+class oset : private std::set<Key, Compare>
+{
+    using std::set<Key, Compare>::set;
+
+public:
+    bool empty( ) const
+    {
+        return size( );
+    }
+
+    uint size( ) const
+    {
+        return std::set<Key, Compare>::size( );
+    }
+
+    bool contains( const Key & k ) const
+    {
+        return ( std::set<Key, Compare>::find( k ) != std::set<Key, Compare>::end( ) );
+    }
+
+    virtual void clear( )
+    {
+        std::set<Key, Compare>::clear( );
+    }
+};
+
+template <typename Key, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
+class uset : public std::unordered_set<Key, Hash, Equal>
+{
+    using std::unordered_set<Key, Hash, Equal>::unordered_set;
+
+public:
+    bool contains( const Key & k ) const
+    {
+        return ( std::unordered_set<Key, Hash, Equal>::find( k ) != std::unordered_set<Key, Hash, Equal>::end( ) );
+    }
+};
+
+template <typename Key, typename Value, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
+class omap : public std::map<Key, Value, Hash, Equal>
+{
+    using std::map<Key, Value, Hash, Equal>::map;
+
+public:
+    bool contains( const Key & k ) const
+    {
+        return ( std::map<Key, Value, Hash, Equal>::map::find( k ) != std::map<Key, Value, Hash, Equal>::unordered_map::end( ) );
+    }
+};
+
+template <typename Key, typename Value, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
+class umap : public std::unordered_map<Key, Value, Hash, Equal>
+{
+    using std::unordered_map<Key, Value, Hash, Equal>::unordered_map;
+
+public:
+    bool contains( const Key & k ) const
+    {
+        return ( std::unordered_map<Key, Value, Hash, Equal>::unordered_map::find( k ) != std::unordered_map<Key, Value, Hash, Equal>::unordered_map::end( ) );
     }
 };
 

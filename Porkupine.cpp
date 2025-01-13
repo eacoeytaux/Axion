@@ -11,7 +11,7 @@ Angle QUILL_FAR = PI;
 Angle QUILL_CLOSE = PI / 5.0;
 }
 
-Porkupine::Porkupine( World * world, const Coordinate & _position ) : Enemy( world, _position, 10000.0 )
+Porkupine::Porkupine( World * world, Coordinate cref _position ) : Enemy( world, _position, 10000.0 )
 {
     space( FixedRectangle( 25.0, 25.0 ) );
 
@@ -19,7 +19,7 @@ Porkupine::Porkupine( World * world, const Coordinate & _position ) : Enemy( wor
 
     Angle d_angle = ( QUILL_FAR - QUILL_CLOSE ) / quill_count;
 
-    for_range( i, quill_count + ONE )
+    for_range( i, quill_count + 1 )
     {
         m_quills.insert_back( Line( ORIGIN, Vector::A( QUILL_CLOSE + ( d_angle * i ), METER ) ) );
     }

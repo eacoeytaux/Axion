@@ -5,20 +5,20 @@ using mtmercy::DistantBird;
 
 namespace
 {
-const Planc SCALE = 3.0;
+cPlanc SCALE = 3.0;
 
-const Planc X_SPEED = 2.0;
+cPlanc X_SPEED = 2.0;
 
-const Planc WING_HEIGHT_SPAN = 6.0;
-const uint WING_CYCLE = 4;
+cPlanc WING_HEIGHT_SPAN = 6.0;
+cuint WING_CYCLE = 4;
 
-const Planc FLIGHT_HEIGHT_SPAN = 16.0;
-const uint FLIGHT_HEIGHT_CYCLE = 17;
+cPlanc FLIGHT_HEIGHT_SPAN = 16.0;
+cuint FLIGHT_HEIGHT_CYCLE = 17;
 
 const Color BIRD_COLOR = BLACK;
 } // namespace
 
-DistantBird::DistantBird( World * world, const Coordinate & _position ) : Object( world, _position )
+DistantBird::DistantBird( World * world, Coordinate cref _position ) : Object( world, _position )
 {
     background( true );
 

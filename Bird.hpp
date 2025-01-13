@@ -9,7 +9,7 @@ namespace mtmercy
 class Feather : public Object
 {
 public:
-    Feather( World *, const Coordinate & position );
+    Feather( World *, Coordinate cref position );
 
     virtual void render( ) override;
 
@@ -20,7 +20,7 @@ private:
 class Bird : public Mob
 {
 public:
-    Bird( World *, const Coordinate & position );
+    Bird( World *, Coordinate cref position );
 
     virtual void render( ) override;
 

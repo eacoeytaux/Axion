@@ -7,100 +7,111 @@ using mtmercy::Climber;
 
 namespace
 {
-const Planc HEIGHT = METER * 1.85;
-const Planc WIDTH = HEIGHT / 2.5;
+cPlanc HEIGHT = METER * 1.85;
+cPlanc WIDTH = HEIGHT / 2.5;
 
-const Planc DEFAULT_SPEED_GROUND = 1.0;
-const Planc DEFAULT_SPEED_AIR = 0.25;
-const Planc JUMP_STRENGTH = METER / 7.0;
-const dec JUMP_DEGRATION_RATIO = 0.9;
-const uint JUMP_MAX_DURATION = 8;
-const uint JUMP_RESET_WAIT_TIME = 0;
+cPlanc DEFAULT_SPEED_GROUND = 1.0;
+cPlanc DEFAULT_SPEED_AIR = 0.25;
+cPlanc JUMP_STRENGTH = METER / 7.0;
+cdec JUMP_DEGRATION_RATIO = 0.9;
+cuint JUMP_MAX_DURATION = 8;
+cuint JUMP_RESET_WAIT_TIME = 0;
 
-const Planc LIGHT_SIGHT = HEIGHT * 3.0;
+cPlanc LIGHT_SIGHT = HEIGHT * 3.0;
 
 // crossbox / hook
-const Planc DEFAULT_ARROW_LAUNCH_SPEED = 16.0;
-const dec ARROW_VELOCITY_DAMPEN = 0.25;
-const Planc DEFAULT_HOOK_LAUNCH_SPEED = 16.0;
-const Planc DEFAULT_ROPE_GROWTH_SPEED = 16.0;
-const Planc DEFAULT_ROPE_RETRACT_SPEED = 32.0;
-const uint RELOAD_TIME = 20;
+cPlanc DEFAULT_ARROW_LAUNCH_SPEED = 16.0;
+cdec ARROW_VELOCITY_DAMPEN = 0.25;
+cPlanc DEFAULT_HOOK_LAUNCH_SPEED = 16.0;
+cPlanc DEFAULT_ROPE_GROWTH_SPEED = 16.0;
+cPlanc DEFAULT_ROPE_RETRACT_SPEED = 32.0;
+cuint RELOAD_TIME = 20;
 
-const Planc DUST_MINIMUM_SPEED = METER / 6.0;
-const dec DUST_VELOCITY_DAMPEN_RATIO = 0.1;
+cPlanc DUST_MINIMUM_SPEED = METER / 6.0;
+cdec DUST_VELOCITY_DAMPEN_RATIO = 0.1;
 const Span<Planc> DUST_RISE = { 0.25, 0.75 };
 const Span<uint> DUST_LANDING_COUNT = { 9, 15 };
 const Span<dec> DUST_LANDING_ANGLE = { 0.0, RIGHT_ANGLE / 3.0 };
 const Span<uint> DUST_WALKING_COUNT = { 1, 3 };
 const Span<uint> DUST_WALKING_TIME = { 0, 5 };
 
-const Planc HEAD_RADIUS = HEIGHT / 3.9;
-const Planc HEAD_Y_OFFSET = HEAD_RADIUS * 0.05;
-const Planc FACE_RADIUS = HEAD_RADIUS * 0.75;
-const Planc EYE_SPACING = FACE_RADIUS * 0.55;
-const Planc EYE_RADIUS = 1.5;
-const Planc NOSE_WIDTH = 3.5;
-const Planc NOSE_HEIGHT = 8.0;
-const Planc NOSE_RADIUS = 1.5;
-const Planc NOSE_OFFSET_Y = -3.0;
-const Planc EAR_RADIUS = 3.0;
+cPlanc HEAD_RADIUS = HEIGHT / 3.9;
+cPlanc HEAD_Y_OFFSET = HEAD_RADIUS * 0.05;
+cPlanc FACE_RADIUS = HEAD_RADIUS * 0.75;
+cPlanc EYE_SPACING = FACE_RADIUS * 0.55;
+cPlanc EYE_RADIUS = 1.5;
+cPlanc NOSE_WIDTH = 3.5;
+cPlanc NOSE_HEIGHT = 8.0;
+cPlanc NOSE_RADIUS = 1.5;
+cPlanc NOSE_OFFSET_Y = -3.0;
+cPlanc EAR_RADIUS = 3.0;
 
-const Planc BODY_HEIGHT = HEIGHT / 3.0;
-const Planc LEG_HEIGHT = HEIGHT / 4.0;
+cPlanc BODY_HEIGHT = HEIGHT / 3.0;
+cPlanc LEG_HEIGHT = HEIGHT / 4.0;
 
-const Planc BODY_WIDTH = HEIGHT / 2.0;
+cPlanc BODY_WIDTH = HEIGHT / 2.0;
 
-const Planc PANTS_WIDTH_UPPER = BODY_WIDTH - 6.0;
-const Planc PANTS_WIDTH_LOWER = PANTS_WIDTH_UPPER * 0.5;
-const Planc PANTS_HEIGHT = BODY_HEIGHT / 2.0;
-const Planc FRONT_ARM_WIDTH = HEIGHT / 6.0;
-const Planc BACK_ARM_WIDTH = FRONT_ARM_WIDTH * 0.9;
-const Planc SHOULDER_RADIUS = half( FRONT_ARM_WIDTH );
-const Planc FINGER_WIDTH = FRONT_ARM_WIDTH / 3.0;
-const Planc FINGER_LENGTH_OUT = FRONT_ARM_WIDTH * 0.72;
-const Planc FINGER_LENGTH_DOWN = FRONT_ARM_WIDTH * 0.64;
-const Planc UPPER_ARM_LENGTH = BODY_HEIGHT * 0.8;
-const Planc LOWER_ARM_LENGTH = UPPER_ARM_LENGTH * 0.8;
-const Planc LEG_WIDTH = HEIGHT / 5.25;
-const Planc BOOT_TOP_WIDTH = LEG_WIDTH * 1.3;
-const Planc BOOT_TOP_HEIGHT = BOOT_TOP_WIDTH * 0.66;
-const Planc BOOT_BASE_WIDTH = LEG_WIDTH * 1.6;
-const Planc BOOT_BASE_HEIGHT = BOOT_BASE_WIDTH * 0.3;
-const Planc BOOT_SOLE_HEIGHT = 1.0;
-const Planc BOOT_SOLE_SUB_WIDTH = 3.0;
-const Planc BOOT_SOLE_SUB_GAP_WIDTH = 1.0;
-const Planc BOOT_SOLE_SUB_HEIGHT = 0.75;
+cPlanc PANTS_WIDTH_UPPER = BODY_WIDTH - 6.0;
+cPlanc PANTS_WIDTH_LOWER = PANTS_WIDTH_UPPER * 0.5;
+cPlanc PANTS_HEIGHT = BODY_HEIGHT / 2.0;
 
-const Planc BELT_THICKNESS = 3.0;
-const Planc BELT_BUCKLE_WIDTH = 5.0;
+cPlanc FRONT_ARM_WIDTH = HEIGHT / 6.0;
+cPlanc FRONT_HAND_WIDTH = FRONT_ARM_WIDTH;
+cPlanc FRONT_HAND_OFFSET = METER * ( 3.0 / 8.0 );
 
-const uint BOB_PERIOD = 20;
-const Planc HEAD_BOB_DISTANCE = 1.0;
-const Planc SHOULDER_BOB_DISTANCE = 0.8;
-const dec SHOULDER_BOB_OFFSET = 0.75;
+cPlanc BACK_ARM_WIDTH = FRONT_ARM_WIDTH * 0.9;
+cPlanc BACK_HAND_WIDTH = BACK_ARM_WIDTH;
+cPlanc BACK_HAND_OFFSET = METER * ( 3.0 / 4.0 );
+
+cPlanc FINGER_WIDTH = FRONT_ARM_WIDTH / 3.0;
+cPlanc FINGER_LENGTH_OUT = FRONT_ARM_WIDTH * 0.72;
+cPlanc FINGER_LENGTH_DOWN = FRONT_ARM_WIDTH * 0.64;
+
+cPlanc UPPER_ARM_LENGTH = BODY_HEIGHT * 0.8;
+cPlanc LOWER_ARM_LENGTH = UPPER_ARM_LENGTH * 0.8;
+
+cPlanc SHOULDER_RADIUS = half( FRONT_ARM_WIDTH );
+
+cPlanc LEG_WIDTH = HEIGHT / 5.25;
+
+cPlanc BOOT_TOP_WIDTH = LEG_WIDTH * 1.3;
+cPlanc BOOT_TOP_HEIGHT = BOOT_TOP_WIDTH * 0.66;
+cPlanc BOOT_BASE_WIDTH = LEG_WIDTH * 1.6;
+cPlanc BOOT_BASE_HEIGHT = BOOT_BASE_WIDTH * 0.3;
+cPlanc BOOT_SOLE_HEIGHT = 1.0;
+cPlanc BOOT_SOLE_SUB_WIDTH = 3.0;
+cPlanc BOOT_SOLE_SUB_GAP_WIDTH = 1.0;
+cPlanc BOOT_SOLE_SUB_HEIGHT = 0.75;
+
+cPlanc BELT_THICKNESS = 3.0;
+cPlanc BELT_BUCKLE_WIDTH = 5.0;
+
+cuint BOB_PERIOD = 20;
+cPlanc HEAD_BOB_DISTANCE = 1.0;
+cPlanc SHOULDER_BOB_DISTANCE = 0.8;
+cdec SHOULDER_BOB_OFFSET = 0.75;
 
 static uint BLINK_DURATION = 6;
 static Span<uint> BLINK_WAIT = { 240, 480 };
 
 const Color CROSSBOW_COLOR = Color::rgb( 0xA54B23 );
 
-const Planc HOOK_LENGTH = 38.0;
-const Planc HOOK_THICKNESS = 5.0;
-const Planc HOOK_TIP_LENGTH = 2.5;
+cPlanc HOOK_LENGTH = 38.0;
+cPlanc HOOK_THICKNESS = 5.0;
+cPlanc HOOK_TIP_LENGTH = 2.5;
 const Angle HOOK_ANGLE = RIGHT_ANGLE;
 const Color HOOK_COLOR = Color::rgb( 0x9C9C9C );
 
-const Planc ROPE_WIDTH = 4.0;
+cPlanc ROPE_WIDTH = 4.0;
 const Color ROPE_BASE_COLOR = Color::rgb( 0xDAA420 );
 const Color ROPE_ALT_COLOR = Color::rgb( 0xB9870F );
 
-const Planc HOOK_PATH_LENGTH = METER * 25;
-const dec HOOK_PATH_ALPHA_START = 0.8;
+cPlanc HOOK_PATH_LENGTH = METER * 25;
+cdec HOOK_PATH_ALPHA_START = 0.8;
 const Color HOOK_PATH_COLOR = WHITE;
 
-const Planc ARROW_PATH_LENGTH = HOOK_PATH_LENGTH;
-const dec ARROW_PATH_ALPHA_START = HOOK_PATH_ALPHA_START;
+cPlanc ARROW_PATH_LENGTH = HOOK_PATH_LENGTH;
+cdec ARROW_PATH_ALPHA_START = HOOK_PATH_ALPHA_START;
 const Color ARROW_PATH_COLOR = RED;
 } // namespace
 
@@ -110,7 +121,7 @@ Climber::~Climber( )
     world( )->camera( )->remove_screen_effect( &m_low_health_effect );
 }
 
-Climber::Climber( World * world, const Coordinate & _position )
+Climber::Climber( World * world, Coordinate cref _position )
     : Player( world, _position ),
     m_hook( world, this ),
     m_healthbar( this ),
@@ -142,7 +153,10 @@ void Climber::update( )
 {
     Player::update( );
 
-    heal( 0.01 );
+    if( alive( ) )
+    {
+        heal( 0.01 );
+    }
 
     m_reload_timer.tick( );
     m_dust_timer.tick( );
@@ -152,7 +166,7 @@ void Climber::update( )
         passing_terrain( false );
     }
 
-    const Vector & v = velocity( );
+    Vector cref v = velocity( );
     if( v.has_magnitude( ) )
     {
         if( v.magnitude( ) >= DUST_MINIMUM_SPEED )
@@ -164,7 +178,7 @@ void Climber::update( )
                     uint dust_count = Random::rint( DUST_WALKING_COUNT );
                     do_count( dust_count )
                     {
-                        world( )->add_object( new Dust( world( ), position( ) + front_foot( ), ( velocity( ) * DUST_VELOCITY_DAMPEN_RATIO ) + Vector::Y( Random::rPlanc( DUST_RISE ) ), world( )->terrain( )->dust_color( ) ) );
+                        world( )->add_object( new Dust( world( ), position( ) + foot( true ), ( velocity( ) * DUST_VELOCITY_DAMPEN_RATIO ) + Vector::Y( Random::rPlanc( DUST_RISE ) ), world( )->terrain( )->dust_color( ) ) );
                     }
                     m_dust_timer.reset( Random::rint( DUST_WALKING_TIME ) );
                 }
@@ -182,7 +196,7 @@ void Climber::update( )
                 // twang.play( 0.5 );
 
                 Angle aim = aim_angle( ) + aim_shake( );
-                Arrow * arrow = new Arrow( world( ), position( ), Vector::A( aim, DEFAULT_ARROW_LAUNCH_SPEED ) + ( velocity( ) * ARROW_VELOCITY_DAMPEN ), m_arrow_feather_color );
+                Arrow * arrow = new Arrow( Arrow::base( world( ), position( ), Vector::A( aim, DEFAULT_ARROW_LAUNCH_SPEED ) + ( velocity( ) * ARROW_VELOCITY_DAMPEN ), m_arrow_feather_color ) );
                 arrow->position( arrow->position( ) + Vector::A( aim_angle( ), arrow->length( ) ) );
 
                 world( )->add_object( arrow );
@@ -215,7 +229,7 @@ void Climber::update( )
 
 void Climber::update_velocity( )
 {
-    const Planc _movement_speed = Object::ground( ) ? m_movement_speed_ground : m_movement_speed_air;
+    cPlanc _movement_speed = Object::ground( ) ? m_movement_speed_ground : m_movement_speed_air;
 
     if( !gravity_ratio( ) )
     { // can fly?
@@ -319,7 +333,7 @@ bool Climber::moving_right( ) const
     return m_moving_right && !m_moving_left;
 }
 
-void Climber::moving_right( const bool _moving )
+void Climber::moving_right( cbool _moving )
 {
     m_moving_right = _moving;
 }
@@ -329,7 +343,7 @@ bool Climber::moving_left( ) const
     return m_moving_left && !m_moving_right;
 }
 
-void Climber::moving_left( const bool _moving )
+void Climber::moving_left( cbool _moving )
 {
     m_moving_left = _moving;
 }
@@ -339,7 +353,7 @@ bool Climber::looking_up( ) const
     return m_looking_up && !m_looking_down;
 }
 
-void Climber::looking_up( const bool _looking )
+void Climber::looking_up( cbool _looking )
 {
     m_looking_up = _looking;
 }
@@ -349,12 +363,12 @@ bool Climber::looking_down( ) const
     return m_looking_down && !m_looking_up;
 }
 
-void Climber::looking_down( const bool _looking )
+void Climber::looking_down( cbool _looking )
 {
     m_looking_down = _looking;
 }
 
-void Climber::jump( const bool _jumping )
+void Climber::jump( cbool _jumping )
 {
     if( _jumping && looking_down( ) )
     {
@@ -374,15 +388,13 @@ void Climber::ground( TerrainEdge * ground )
         uint dust_count = Random::rint( DUST_LANDING_COUNT );
         for_range( i, dust_count )
         {
-            bool left = ( i < half( dust_count ) );
+            bool b = ( i < half( dust_count ) );
 
-            Coordinate back_foot = left ? left_foot( ) : right_foot( );
-            Coordinate front_foot = left ? right_foot( ) : left_foot( );
-            Coordinate foot = position( ) + back_foot + ( Vector( back_foot, front_foot ) * ( (dec)i / (dec)dust_count ) );
+            Coordinate c = position( ) + foot( b ) + ( Vector( foot( b ), foot( !b ) ) * ( (dec)i / (dec)dust_count ) );
 
-            Angle angle = ground->vector( ).angle( ) + Random::rAngle( DUST_LANDING_ANGLE.min( ), DUST_LANDING_ANGLE.max( ) ) + ( left ? ZERO : PI );
+            Angle angle = ground->vector( ).angle( ) + Random::rAngle( DUST_LANDING_ANGLE.min( ), DUST_LANDING_ANGLE.max( ) ) + ( b ? 0.0 : PI );
 
-            world( )->add_object( new Dust( world( ), foot, dust_velocity + Vector::A( angle, Random::rPlanc( DUST_RISE ) ), world( )->terrain( )->dust_color( ) ) );
+            world( )->add_object( new Dust( world( ), c, dust_velocity + Vector::A( angle, Random::rPlanc( DUST_RISE ) ), world( )->terrain( )->dust_color( ) ) );
         }
     }
 
@@ -414,12 +426,12 @@ bool Climber::aiming_down( ) const
     return !aiming_up( );
 }
 
-void Climber::aim( const Angle & _aim_angle )
+void Climber::aim( Angle cref _aim_angle )
 {
     m_aim_angle = _aim_angle;
 }
 
-void Climber::aim_shake( const Angle & _aim_shake_angle )
+void Climber::aim_shake( Angle cref _aim_shake_angle )
 {
     m_aim_shake_angle = _aim_shake_angle;
 }
@@ -460,96 +472,25 @@ Coordinate Climber::face_center( ) const
     return head_center( ) + Vector::A( aim_angle( ), ( HEAD_RADIUS - FACE_RADIUS ) / 2.0 );
 }
 
-Coordinate Climber::front_shoulder( ) const
+Coordinate Climber::shoulder( cbool _front ) const
 {
-    Coordinate shoulder = Coordinate( -half( BODY_WIDTH - ( SHOULDER_RADIUS * 2.0 ) ),
-                                      half( BODY_HEIGHT - ( SHOULDER_RADIUS * 2.0 ) ) + ( SHOULDER_BOB_DISTANCE * sin( (dec)( age( ) + ( BOB_PERIOD * SHOULDER_BOB_OFFSET ) ) / BOB_PERIOD ) ) );
-
-    if( aiming_left( ) )
-    {
-        shoulder.mirror_y( );
-    }
-
-    return shoulder;
+    return Coordinate( negate( half( BODY_WIDTH - ( SHOULDER_RADIUS * 2.0 ) ), ( aiming_left( ) ^ _front ) ),
+                       half( BODY_HEIGHT - ( SHOULDER_RADIUS * 2.0 ) ) + ( SHOULDER_BOB_DISTANCE * sin( (dec)( age( ) + ( BOB_PERIOD * SHOULDER_BOB_OFFSET ) ) / BOB_PERIOD ) ) );
 }
 
-Coordinate Climber::back_shoulder( ) const
+Coordinate Climber::hand( cbool _front ) const
 {
-    Coordinate shoulder = front_shoulder( );
-    shoulder.mirror_y( );
-    return shoulder;
+    return Vector::A( aim_angle( ) - negate( _front ? RIGHT_ANGLE : ( TAU / 32.0 ), aiming_left( ) ), _front ? FRONT_HAND_OFFSET : BACK_HAND_OFFSET );
 }
 
-Coordinate Climber::front_hand( ) const
+Coordinate Climber::hip( cbool _front ) const
 {
-    Coordinate hand = Vector::A( aim_angle( ) - negate( RIGHT_ANGLE, aiming_left( ) ), 12.0 );
-    return hand;
+    return Coordinate( negate( half( PANTS_WIDTH_UPPER ) - half( LEG_WIDTH ), ( facing_left( ) ^ _front ) ), -half( BODY_HEIGHT ) );
 }
 
-Coordinate Climber::back_hand( ) const
+Coordinate Climber::foot( cbool _front ) const
 {
-    Coordinate hand = Vector::A( aim_angle( ) - negate( Angle( TAU / 32.0 ), aiming_left( ) ), 24.0 );
-    return hand;
-}
-
-Coordinate Climber::front_hip( ) const
-{
-    return Coordinate( negate( half( LEG_WIDTH ) - half( PANTS_WIDTH_UPPER ), facing_left( ) ), -half( BODY_HEIGHT ) );
-}
-
-Coordinate Climber::back_hip( ) const
-{
-    return Coordinate( negate( half( PANTS_WIDTH_UPPER ) - half( LEG_WIDTH ), facing_left( ) ), -half( BODY_HEIGHT ) );
-}
-
-Coordinate Climber::front_foot( ) const
-{
-    return Coordinate( front_hip( ).x( ), -half( HEIGHT ) );
-}
-
-Coordinate Climber::back_foot( ) const
-{
-    return Coordinate( back_hip( ).x( ), -half( HEIGHT ) );
-}
-
-Coordinate Climber::left_shoulder( ) const
-{
-    return ( facing_left( ) ? back_shoulder( ) : front_shoulder( ) );
-}
-
-Coordinate Climber::right_shoulder( ) const
-{
-    return ( facing_right( ) ? back_shoulder( ) : front_shoulder( ) );
-}
-
-Coordinate Climber::left_hand( ) const
-{
-    return ( facing_left( ) ? back_hand( ) : front_hand( ) );
-}
-
-Coordinate Climber::right_hand( ) const
-{
-    return ( facing_right( ) ? back_hand( ) : front_hand( ) );
-}
-
-Coordinate Climber::left_hip( ) const
-{
-    return ( facing_left( ) ? front_hip( ) : back_hip( ) );
-}
-
-Coordinate Climber::right_hip( ) const
-{
-    return ( facing_right( ) ? front_hip( ) : back_hip( ) );
-}
-
-Coordinate Climber::left_foot( ) const
-{
-    return ( facing_left( ) ? front_foot( ) : back_foot( ) );
-}
-
-Coordinate Climber::right_foot( ) const
-{
-    return ( facing_right( ) ? front_foot( ) : back_foot( ) );
+    return Coordinate( hip( _front ).x( ), -half( HEIGHT ) );
 }
 
 // -- GRAPHICS --
@@ -648,12 +589,12 @@ void Climber::render( )
 
     draw_legs( );
     draw_torso( );
-    draw_back_arm( );
-    draw_back_hand( );
+    draw_arm( false );
+    draw_hand( false );
     draw_head( );
     draw_crossbow( );
-    draw_front_arm( );
-    draw_front_hand( );
+    draw_arm( true );
+    draw_hand( true );
     draw_arrow( );
 }
 
@@ -725,7 +666,7 @@ void Climber::draw_torso( )
     draw( color( BELT_BUCKLE ), Polygon::rectangle( BELT_BUCKLE_WIDTH, BELT_BUCKLE_WIDTH, waist ) );
 
     // jacket
-    draw( color( JACKET ), Polygon::circle( half( BACK_ARM_WIDTH ), back_shoulder( ) ) );
+    draw( color( JACKET ), Polygon::circle( half( BACK_ARM_WIDTH ), shoulder( false ) ) );
     draw( color( JACKET ), Polygon::rectangle( BODY_WIDTH / 3.0, BODY_HEIGHT - SHOULDER_RADIUS, Coordinate( BODY_WIDTH / 3.5, -half( SHOULDER_RADIUS ) ) ) );
     draw( color( JACKET ), Polygon::rectangle( BODY_WIDTH / 3.0, BODY_HEIGHT - SHOULDER_RADIUS, Coordinate( -BODY_WIDTH / 3.5, -half( SHOULDER_RADIUS ) ) ) );
 }
@@ -752,10 +693,10 @@ void Climber::draw_legs( )
     boot_drawing.draw( color( BOOT ), boot_shin );
     boot_drawing.draw( color( BOOT ), boot_base );
 
-    Line lace_1 = Line( Coordinate( 5.0, 7.5 ), Coordinate( -3.0, 7.5 ) );
-    Line lace_2 = Line( Coordinate( 5.0, 6.0 ), Coordinate( -3.0, 6.0 ) );
-    boot_drawing.draw( color( BOOT_LACE ), lace_1, 1.0 );
-    boot_drawing.draw( color( BOOT_LACE ), lace_2, 1.0 );
+    Line lace1 = Line( Coordinate( 5.0, 7.5 ), Coordinate( -3.0, 7.5 ) );
+    Line lace2 = Line( Coordinate( 5.0, 6.0 ), Coordinate( -3.0, 6.0 ) );
+    boot_drawing.draw( color( BOOT_LACE ), lace1, 1.0 );
+    boot_drawing.draw( color( BOOT_LACE ), lace2, 1.0 );
 
     Planc foot_offset_x = ( sin( world( )->age( ) / 4.0 ) * 4.0 );
     Planc foot_offset_y = ( cos( world( )->age( ) / 4.0 ) * 2.0 );
@@ -763,8 +704,8 @@ void Climber::draw_legs( )
     Planc foot_offset_y_front = max( foot_offset_y, P0 );
 
     { // back leg
-        Coordinate hip = back_hip( );
-        Coordinate foot = back_foot( );
+        Coordinate hip = Climber::hip( false );
+        Coordinate foot = Climber::foot( false );
 
         if( Object::ground( ) )
         {
@@ -803,8 +744,8 @@ void Climber::draw_legs( )
     }
 
     { // front leg
-        Coordinate hip = front_hip( );
-        Coordinate foot = front_foot( );
+        Coordinate hip = Climber::hip( true );
+        Coordinate foot = Climber::foot( true );
 
         if( Object::ground( ) )
         {
@@ -839,54 +780,39 @@ void Climber::draw_legs( )
     }
 }
 
-void Climber::draw_front_arm( )
+void Climber::draw_arm( cbool _front )
 {
-    const Coordinate shoulder = front_shoulder( );
-    const Coordinate hand = front_hand( );
+    const Coordinate shoulder = Climber::shoulder( _front );
+    const Coordinate hand = Climber::hand( _front );
 
-    Joint lower_arm = Joint( shoulder, UPPER_ARM_LENGTH, LOWER_ARM_LENGTH, hand, !( aiming_left( ) ) );
-    Joint upper_arm = Joint( shoulder, UPPER_ARM_LENGTH, LOWER_ARM_LENGTH, hand, !( aiming_left( ) ) );
+    Joint arm = Joint( shoulder, hand, UPPER_ARM_LENGTH, LOWER_ARM_LENGTH, !( aiming_left( ) ) );
 
     draw( color( JACKET ), Polygon::circle( SHOULDER_RADIUS, shoulder ) );
 
-    draw( color( JACKET ), Line( lower_arm.c1( ), lower_arm.joint( ) ), (dec)FRONT_ARM_WIDTH );
-    draw( color( JACKET ), Polygon::circle( (dec)half( FRONT_ARM_WIDTH ), upper_arm.joint( ) ) );
-    draw( color( JACKET ), Line( upper_arm.joint( ), upper_arm.c2( ) ), (dec)FRONT_ARM_WIDTH );
+    draw( color( JACKET ), Polygon::circle( half( _front ? FRONT_ARM_WIDTH : BACK_ARM_WIDTH ), arm.joint( ) ) );
+
+    draw( color( JACKET ), arm.arm1( ), _front ? FRONT_ARM_WIDTH : BACK_ARM_WIDTH );
+    draw( color( JACKET ), arm.arm2( ), _front ? FRONT_ARM_WIDTH : BACK_ARM_WIDTH );
 }
 
-void Climber::draw_back_arm( )
+void Climber::draw_hand( cbool _front )
 {
-    // draw( color( JACKET ), Line( back_shoulder( ), back_hand( ) ), (dec)BACK_ARM_WIDTH );
+    if( _front )
+    {
+        bool finger_down = ( m_reload_timer.remaining( ) <= ( RELOAD_TIME / 2 ) );
 
-    const Coordinate shoulder = back_shoulder( );
-    const Coordinate hand = back_hand( );
+        Coordinate hand = Climber::hand( true );
 
-    Joint lower_arm = Joint( shoulder, UPPER_ARM_LENGTH, LOWER_ARM_LENGTH, hand, !( aiming_left( ) ) );
-    Joint upper_arm = Joint( shoulder, UPPER_ARM_LENGTH, LOWER_ARM_LENGTH, hand, !( aiming_left( ) ) );
+        Coordinate finger_base = hand + Vector::A( aim_angle( ) + negate( RIGHT_ANGLE, aiming_left( ) ), half( FRONT_ARM_WIDTH - FINGER_WIDTH ) );
+        Coordinate finger_tip = finger_base + Vector::A( aim_angle( ), finger_down ? FINGER_LENGTH_OUT : FINGER_LENGTH_DOWN );
 
-    draw( color( JACKET ), Polygon::circle( SHOULDER_RADIUS, shoulder ) );
-
-    draw( color( JACKET ), Line( lower_arm.c1( ), lower_arm.joint( ) ), (dec)BACK_ARM_WIDTH );
-    draw( color( JACKET ), Polygon::circle( (dec)half( BACK_ARM_WIDTH ), upper_arm.joint( ) ) );
-    draw( color( JACKET ), Line( upper_arm.joint( ), upper_arm.c2( ) ), (dec)BACK_ARM_WIDTH );
-}
-
-void Climber::draw_front_hand( )
-{
-    bool finger_down = ( m_reload_timer.remaining( ) <= ( RELOAD_TIME / 2 ) );
-
-    Coordinate hand = front_hand( );
-
-    Coordinate finger_base = hand + Vector::A( aim_angle( ) + negate( RIGHT_ANGLE, aiming_left( ) ), half( FRONT_ARM_WIDTH - FINGER_WIDTH ) );
-    Coordinate finger_tip = finger_base + Vector::A( aim_angle( ), finger_down ? FINGER_LENGTH_OUT : FINGER_LENGTH_DOWN );
-
-    draw( color( SKIN ), Polygon::circle( half( FRONT_ARM_WIDTH ), hand ) );
-    draw( color( SKIN ), Line( finger_base, finger_tip ), FINGER_WIDTH );
-}
-
-void Climber::draw_back_hand( )
-{
-    draw( color( SKIN ), Polygon::circle( half( BACK_ARM_WIDTH ), back_hand( ) ) );
+        draw( color( SKIN ), Polygon::circle( half( FRONT_ARM_WIDTH ), hand ) );
+        draw( color( SKIN ), Line( finger_base, finger_tip ), FINGER_WIDTH );
+    }
+    else
+    {
+        draw( color( SKIN ), Polygon::circle( half( BACK_ARM_WIDTH ), hand( false ) ) );
+    }
 }
 
 void Climber::draw_crossbow( )
@@ -905,7 +831,7 @@ void Climber::draw_crossbow( )
 
 void Climber::draw_arrow( )
 {
-    Arrow arrow( world( ), position( ), Vector::A( aim_angle( ), DEFAULT_ARROW_LAUNCH_SPEED ), m_arrow_feather_color );
+    Arrow arrow = Arrow::tip( world( ), position( ), Vector::A( aim_angle( ), DEFAULT_ARROW_LAUNCH_SPEED ), m_arrow_feather_color );
     arrow.render( );
 
     Vector v = Vector::A( aim_angle( ), arrow.length( ) );
@@ -927,15 +853,15 @@ void Climber::HealthBar::render( Camera * camera )
 {
     HeadUpDisplay::render( camera );
 
-    const Planc HEALTH_BAR_BORDER_WIDTH = 4.0;
+    cPlanc HEALTH_BAR_BORDER_WIDTH = 4.0;
 
-    const dec RED_START = 0.1;
-    const dec YELLOW_START = 0.5;
+    cdec RED_START = 0.1;
+    cdec YELLOW_START = 0.5;
     static_once( ) { Assert( RED_START < YELLOW_START ); }
 
     if( Climber * climber = m_climber )
     {
-        const FixedRectangle & rect = bounds( camera );
+        FixedRectangle cref rect = bounds( camera );
         Planc width = rect.width( ) - ( HEALTH_BAR_BORDER_WIDTH * 3.0 );
         Planc height = rect.height( ) - ( HEALTH_BAR_BORDER_WIDTH * 3.0 );
         Coordinate center = rect.center( );
@@ -949,24 +875,24 @@ void Climber::HealthBar::render( Camera * camera )
         if( climber->alive( ) )
         {
             dec health_percentage = climber->health( ) / climber->max_health( );
-            Assert( in_range( health_percentage, ZERO, ONE, true ) );
+            Assert( in_range( health_percentage, 0.0, 1.0, true ) );
 
             Color health_color;
             if( climber->god( ) )
             {
                 health_color = CYAN;
             }
-            else if( health_percentage == ONE )
+            else if( health_percentage == 1.0 )
             {
                 health_color = GREEN;
             }
             else if( health_percentage >= YELLOW_START )
             {
-                health_color = ColorSlider( YELLOW, GREEN ).color_at( ( health_percentage - YELLOW_START ) * inverse( ONE - YELLOW_START ) );
+                health_color = ColorSlider( YELLOW, GREEN ).color_at( ( health_percentage - YELLOW_START ) * inverse( 1.0 - YELLOW_START ) );
             }
             else if( health_percentage >= RED_START )
             {
-                health_color = ColorSlider( RED, YELLOW ).color_at( ( health_percentage - RED_START ) * inverse( ONE - RED_START ) );
+                health_color = ColorSlider( RED, YELLOW ).color_at( ( health_percentage - RED_START ) * inverse( 1.0 - RED_START ) );
             }
             else
             {
@@ -974,7 +900,7 @@ void Climber::HealthBar::render( Camera * camera )
             }
 
             draw( health_color, Polygon::rectangle( width * health_percentage, height,
-                                                    center - Vector::X( half( width * ( ONE - health_percentage ) ) ) ) );
+                                                    center - Vector::X( half( width * ( 1.0 - health_percentage ) ) ) ) );
         }
     }
 }
@@ -985,27 +911,28 @@ void Climber::LowHealthAlertEffect::render( Camera * camera )
 {
     ScreenEffect::render( camera );
 
-    const dec PULSE_DURATION = 15.0;
-    const dec SCREEN_FADE_DISTANCE = 0.5;
+    const Span<dec> PULSE_DURATION = { 16.0, 32.0 };
+
+    cdec SCREEN_FADE_DISTANCE = 0.5;
 
     const Color BASE_COLOR = RED;
-    const Color TRANSPARENT_COLOR = BASE_COLOR.a( ZERO );
-    const dec BASE_ALPHA = 0.5;
+    const Color TRANSPARENT_COLOR = BASE_COLOR.a( 0.0 );
+    cdec BASE_ALPHA = 0.5;
 
-    const dec HEALTH_THRESHOLD_UPPER = 0.333;
-    const dec HEALTH_THRESHOLD_LOWER = 0.1;
+    cdec HEALTH_THRESHOLD_UPPER = 0.333;
+    cdec HEALTH_THRESHOLD_LOWER = 0.1;
 
     Assert( HEALTH_THRESHOLD_UPPER > HEALTH_THRESHOLD_LOWER );
 
     if( m_climber->health_percentage( ) <= HEALTH_THRESHOLD_UPPER )
     {
-        dec alpha_health = ONE;
+        dec alpha_health = 1.0;
         if( m_climber->health_percentage( ) > HEALTH_THRESHOLD_LOWER )
         {
-            alpha_health = ONE - ( ( m_climber->health_percentage( ) - HEALTH_THRESHOLD_LOWER ) / ( HEALTH_THRESHOLD_UPPER - HEALTH_THRESHOLD_LOWER ) );
+            alpha_health = 1.0 - ( ( m_climber->health_percentage( ) - HEALTH_THRESHOLD_LOWER ) / ( HEALTH_THRESHOLD_UPPER - HEALTH_THRESHOLD_LOWER ) );
         }
 
-        dec alpha_time = BASE_ALPHA * abs( sin( (dec)( (dec)m_climber->age( ) / PULSE_DURATION ) ) );
+        dec alpha_time = BASE_ALPHA * abs( sin( (dec)( (dec)m_climber->age( ) / ( PULSE_DURATION.min( ) + ( PULSE_DURATION.range( ) * m_climber->health_percentage( ) ) ) ) ) );
         Color color = BASE_COLOR.a( alpha_health * alpha_time );
 
         FixedRectangle screen_bounds = camera->bounds( ) - camera->center( );
@@ -1201,12 +1128,12 @@ void Climber::input( Input * _input )
                 {
                     Vector v = joystick_input->vector;
 
-                    if( v.dx( ) > ZERO )
+                    if( v.dx( ) > 0.0 )
                     {
                         moving_left( false );
                         moving_right( true );
                     }
-                    else if( v.dx( ) < ZERO )
+                    else if( v.dx( ) < 0.0 )
                     {
                         moving_left( true );
                         moving_right( false );

@@ -7,7 +7,7 @@
 
 namespace
 {
-const uint RANDOM_BUFFER_SIZE = 65536;
+cuint RANDOM_BUFFER_SIZE = 65536;
 uint RANDOM_BUFFER[ RANDOM_BUFFER_SIZE ];
 uint RANDOM_BUFFER_INDEX = 0;
 } // namespace
@@ -34,10 +34,10 @@ error Random::seed( const string _seed )
 
 error Random::seed( )
 {
-    return seed( (uint)( Clock( ).total_ms( ) ) );
+    return seed( milliseconds( ) );
 }
 
-error Random::seed( const uint _seed )
+error Random::seed( cuint _seed )
 {
     ::srand( _seed );
     Log( INFO_LOG, "random seed ............ ( %u )", _seed );
@@ -45,15 +45,15 @@ error Random::seed( const uint _seed )
     return no_error;
 }
 
-bool Random::rbool( const dec _true_odds )
+bool Random::rbool( cdec _true_odds )
 {
-    Assert( _true_odds >= ZERO );
+    Assert( _true_odds >= 0.0 );
 
     if( _true_odds >= 1.0 )
     {
         return true;
     }
-    else if( _true_odds == ZERO )
+    else if( _true_odds == 0.0 )
     {
         return false;
     }
@@ -61,7 +61,7 @@ bool Random::rbool( const dec _true_odds )
     return ( rdec( 1.0 ) <= _true_odds );
 }
 
-int Random::rint( const int _l, const int _h, const Distribution _distribution )
+int Random::rint( cint _l, cint _h, const Distribution _distribution )
 {
     if( _l == _h )
     {
@@ -79,7 +79,7 @@ int Random::rint( const int _l, const int _h, const Distribution _distribution )
     return ( random_int( ) % ( h - l + 1 ) ) + l;
 }
 
-dec Random::rdec( const dec _l, const dec _h, const Distribution _distribution )
+dec Random::rdec( cdec _l, cdec _h, const Distribution _distribution )
 {
     if( _l == _h )
     {
@@ -100,17 +100,17 @@ dec Random::rdec( const dec _l, const dec _h, const Distribution _distribution )
     return ( rand_ratio * ( h - l ) ) + l;
 }
 
-Planc Random::rPlanc( const Planc & _l, const Planc & _h, const Distribution _distribution )
+Planc Random::rPlanc( Planc cref _l, Planc cref _h, const Distribution _distribution )
 {
     return Planc( rdec( _l, _h, _distribution ) );
 }
 
-Angle Random::rAngle( const Angle & _low_bound, const Angle & _high_bound, const Distribution _distribution )
+Angle Random::rAngle( Angle cref _low_bound, Angle cref _high_bound, const Distribution _distribution )
 {
     return Angle( rdec( _low_bound.radians( ), _high_bound.radians( ), _distribution ) );
 }
 
-Color Random::rColor( const bool include_alpha )
+Color Random::rColor( cbool include_alpha )
 {
     return Color::rgba( rdec( 1.0 ), rdec( 1.0 ), rdec( 1.0 ), include_alpha ? rdec( 1.0 ) : 1.0 );
 }

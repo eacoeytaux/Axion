@@ -15,7 +15,7 @@ public:
     virtual ~Visible( ) { }
 
     Visible( dec z = 1.0 ) : m_z( z ) { }
-    Visible( const Drawing & drawing, dec z = 1.0 ) : Drawing( drawing ), m_z( z ) { }
+    Visible( Drawing cref drawing, dec z = 1.0 ) : Drawing( drawing ), m_z( z ) { }
 
     dec z( ) const { return m_z; }
     void z( dec z ) { m_z = z; }
@@ -97,7 +97,7 @@ protected:
         }
     }
 
-    void add_light_source( const Coordinate & position, Planc radius, const Color & tint = TRANSPARENT, dec flicker = 0.0 ) { m_lights.insert_back( LightSource( position, radius ) ); }
+    void add_light_source( Coordinate cref position, Planc radius, Color cref tint = TRANSPARENT, dec flicker = 0.0 ) { m_lights.insert_back( LightSource( position, radius ) ); }
 
 private:
     dec m_z = 1.0;                // 1 = player plane, <1 = background, >1 = foreground

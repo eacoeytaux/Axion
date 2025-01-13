@@ -5,15 +5,15 @@ using mtmercy::Bush;
 
 namespace
 {
-const Planc BASE_WIDTH = 33.0;
-const Planc LEAF_LENGTH = 45.0;
+cPlanc BASE_WIDTH = 33.0;
+cPlanc LEAF_LENGTH = 45.0;
 const Span<uint> LEAF_COUNT = { 5, 7 };
 const Angle LEAF_BASE = RIGHT_ANGLE / 4.0;
 
 const Color BUSH_COLOR = GREEN;
 } // namespace
 
-Bush::Bush( World * world, const Coordinate & _root, const dec _z ) : Object( world, _root )
+Bush::Bush( World * world, Coordinate cref _root, cdec _z ) : Object( world, _root )
 {
     background( true );
 

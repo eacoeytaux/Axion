@@ -5,17 +5,17 @@
 namespace
 {
 // crossbox / hook
-const Planc DEFAULT_ROPE_MAX_LENGTH = METER * 10.0;
-const Planc DEFAULT_ROPE_GROWTH_SPEED = 33.0;
-const Planc DEFAULT_ROPE_RETRACT_SPEED = 44.0;
+cPlanc DEFAULT_ROPE_MAX_LENGTH = METER * 10.0;
+cPlanc DEFAULT_ROPE_GROWTH_SPEED = 33.0;
+cPlanc DEFAULT_ROPE_RETRACT_SPEED = 44.0;
 
-const Planc HOOK_LENGTH = 38.0;
-const Planc HOOK_THICKNESS = 5.0;
-const Planc HOOK_TIP_LENGTH = 2.5;
+cPlanc HOOK_LENGTH = 38.0;
+cPlanc HOOK_THICKNESS = 5.0;
+cPlanc HOOK_TIP_LENGTH = 2.5;
 const Angle HOOK_ANGLE = RIGHT_ANGLE;
 const Color HOOK_COLOR = Color::rgb( 0x9C9C9C );
 
-const Planc ROPE_WIDTH = 4.0;
+cPlanc ROPE_WIDTH = 4.0;
 const Color ROPE_BASE_COLOR = Color::rgb( 0xDAA420 );
 const Color ROPE_ALT_COLOR = Color::rgb( 0xB9870F );
 } // namespace
@@ -196,7 +196,7 @@ Coordinate Hook::hook_base( ) const
     }
 }
 
-void Hook::fire( const Vector & _launch_speed )
+void Hook::fire( Vector cref _launch_speed )
 {
     switch( state( ) )
     {

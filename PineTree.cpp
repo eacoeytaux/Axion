@@ -6,22 +6,22 @@ using mtmercy::PineTree;
 namespace
 {
 const Angle MAX_SWAY = TAU / 64.0;
-const uint SWAY_PERIOD = 40;
-const Planc TRUNK_HEIGHT = 72.0;
-const Planc TRUNK_THICKNESS = 16.0;
-const Planc SUB_TRUNK_HEIGHT_INITIAL = 101.0;
-const Planc SUB_TRUNK_HEIGHT_RATIO = 0.75;
+cuint SWAY_PERIOD = 40;
+cPlanc TRUNK_HEIGHT = 72.0;
+cPlanc TRUNK_THICKNESS = 16.0;
+cPlanc SUB_TRUNK_HEIGHT_INITIAL = 101.0;
+cPlanc SUB_TRUNK_HEIGHT_RATIO = 0.75;
 const Span<uint> LEAVES_COUNT = { 3, 3 };
 const Angle LEAVES_SPAN = TAU / 8.0;
-const Planc LEAVES_HEIGHT_BASE_LENGTH = 172.0;
-const Planc LEAVES_SHRINK_RATIO = 0.64;
-const Planc LEAVES_BORDER_WIDTH = 4.0;
+cPlanc LEAVES_HEIGHT_BASE_LENGTH = 172.0;
+cPlanc LEAVES_SHRINK_RATIO = 0.64;
+cPlanc LEAVES_BORDER_WIDTH = 4.0;
 
 const Span<uint> SPIKE_COUNT = { 4, 5 };
-const uint SPIKE_SHRINK_RATE = 1;
-const dec SPIKE_INNER_RATIO = 0.9;
-const Planc SPIKE_OFFSET_INNER = 3.0;
-const Planc SPIKE_OFFSET_OUTER = 6.0;
+cuint SPIKE_SHRINK_RATE = 1;
+cdec SPIKE_INNER_RATIO = 0.9;
+cPlanc SPIKE_OFFSET_INNER = 3.0;
+cPlanc SPIKE_OFFSET_OUTER = 6.0;
 
 const Color TRUNK_COLOR = Color::rgb( 0xA56405 );
 const Color TRUNK_BORDER_COLOR = Color::rgb( 0x804800 );
@@ -29,7 +29,7 @@ const Color LEAVES_COLOR = Color::rgb( 0x00C000 );
 const Color LEAVES_BORDER_COLOR = Color::rgb( 0x008000 );
 } // namespace
 
-PineTree::PineTree( World * world, const Coordinate & _root, const dec _z ) : Object( world, _root )
+PineTree::PineTree( World * world, Coordinate cref _root, cdec _z ) : Object( world, _root )
 {
     background( true );
 

@@ -21,8 +21,8 @@ const Color LEAF_COLOR = RED;
 
 namespace
 {
-Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc & _base_width, const uint _branch_count );
-Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc & _base_width, const uint _branch_count )
+Drawing draw_trunk( cbool _draw_leaves, Planc cref _length, Planc cref _base_width, cuint _branch_count );
+Drawing draw_trunk( cbool _draw_leaves, Planc cref _length, Planc cref _base_width, cuint _branch_count )
 {
     Drawing tree_drawing;
 
@@ -82,18 +82,18 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
 
         Coordinate branch_base = Vector( trunk ).magnitude( trunk.magnitude( ) * branch_height );
 
-        bool left;
-        bool right;
-        bool both = Random::rbool( 0 ); // todo
-        if( both )
+        bool add_left;
+        bool add_right;
+        bool add_both = Random::rbool( 0 ); // todo
+        if( add_both )
         {
-            left = true;
-            right = true;
+            add_left = true;
+            add_right = true;
         }
         else
         {
-            left = Random::rbool( );
-            right = !left;
+            add_left = Random::rbool( );
+            add_right = !add_left;
         }
 
         auto draw_branch = [ & ] ( bool left )
@@ -105,12 +105,12 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
             tree_drawing.draw( branch_drawing );
         };
 
-        if( left )
+        if( add_left )
         {
             draw_branch( true );
         }
 
-        if( right )
+        if( add_right )
         {
             draw_branch( false );
         }
@@ -135,7 +135,7 @@ Drawing draw_trunk( const bool _draw_leaves, const Planc & _length, const Planc 
 };
 } // namespace
 
-AspineTree::AspineTree( World * world, const Coordinate & _root, const dec _z ) : Object( world, _root )
+AspineTree::AspineTree( World * world, Coordinate cref _root, cdec _z ) : Object( world, _root )
 {
     background( true );
 

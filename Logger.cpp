@@ -18,20 +18,12 @@ FILE * log_file = nullptr;
 
 bool Logger::printing_to_console( ) { return b_using_console; }
 
-error Logger::print_to_console( const bool b )
-{
-    b_using_console = b;
-    return no_error;
-}
+error Logger::print_to_console( cbool b ) { b_using_console = b; return no_error; }
 
 bool Logger::paused( ) { return b_paused; }
-error Logger::pause( bool p )
-{
-    b_paused = p;
-    return no_error;
-}
+error Logger::pause( bool p ) { b_paused = p; return no_error; }
 
-error Logger::init( const bool _file )
+error Logger::init( cbool _file )
 {
     b_initialized = b_paused = false;
 

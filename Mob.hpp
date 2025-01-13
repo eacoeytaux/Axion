@@ -12,7 +12,7 @@ class Mob : public Object
 {
 public:
     virtual ~Mob( ) { }
-    Mob( World * world, const Coordinate & position, dec health = 1 );
+    Mob( World * world, Coordinate cref position, dec health = 1 );
 
     #ifdef AXN_DEBUG
     static bool draw_health;
@@ -62,9 +62,9 @@ protected:
     // eyes
 protected:
     // todo annoying to always cast span to (dec)
-    virtual void eye_info( Planc eye_radius, uint blink_duration, const Span<uint> & blink_wait_span, const Color & eye_color = BLACK );
-    virtual void eye_info( Planc eye_radius, const Color & eye_color ) { return eye_info( eye_radius, ZERO, { (uint)ZERO, (uint)ZERO }, eye_color ); }
-    virtual void eye_info( Planc eye_radius ) { return eye_info( eye_radius, ZERO, { (uint)ZERO, (uint)ZERO } ); }
+    virtual void eye_info( Planc eye_radius, uint blink_duration, const Span<uint> & blink_wait_span, Color cref eye_color = BLACK );
+    virtual void eye_info( Planc eye_radius, Color cref eye_color ) { return eye_info( eye_radius, 0.0, { (uint)0, (uint)0 }, eye_color ); }
+    virtual void eye_info( Planc eye_radius ) { return eye_info( eye_radius, 0.0, { (uint)0, (uint)0 } ); }
 
     bool eyes_open( ) const { return !eyes_closed( ); }
     void eyes_open( bool open ) { eyes_closed( !open ); }
@@ -76,13 +76,13 @@ protected:
     virtual bool squinting( ) const { return m_eyes_squinting; }
     virtual void squinting( bool squinting ) { m_eyes_squinting = squinting; }
 
-    virtual void draw_eyes( const Coordinate & eye_position, const Angle & angle = ZERO );
-    virtual void draw_eyes( const Coordinate & eye_position1, const Coordinate & eye_position2, const Angle & angle = ZERO )
+    virtual void draw_eyes( Coordinate cref eye_position, Angle cref angle = A0 );
+    virtual void draw_eyes( Coordinate cref eye_position1, Coordinate cref eye_position2, Angle cref angle = A0 )
     {
         draw_eyes( eye_position1, angle );
         draw_eyes( eye_position2, angle );
     }
-    virtual void draw_eyes( const varray<Coordinate> & eye_positions, const Angle & angle = ZERO )
+    virtual void draw_eyes( varray<Coordinate> cref eye_positions, Angle cref angle = A0 )
     {
         for_each( position, eye_positions )
         {
@@ -103,9 +103,9 @@ protected:
     Color m_eye_color;
 
 protected:
-    const Counter & invincible_counter( ) const { return m_invincible_counter; }
+    Counter cref invincible_counter( ) const { return m_invincible_counter; }
 
-    const Counter & hurt_display( ) const { return m_hurt_display; }
+    Counter cref hurt_display( ) const { return m_hurt_display; }
     void hurt_display_length( uint ticks ) { m_hurt_display.set( ticks ); }
 
 private:

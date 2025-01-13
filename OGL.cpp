@@ -137,57 +137,54 @@ error ogl::reset( )
     return error_check( );
 }
 
-bool ogl::state_bool( const int _gl_enum )
+bool ogl::state_bool( cint _gl_enum )
 {
-    error_check( );
     GLboolean b;
     glGetBooleanv( _gl_enum, &b );
     error_check( );
     return b;
 }
 
-int ogl::state_int( const int _gl_enum )
+int ogl::state_int( cint _gl_enum )
 {
-    error_check( );
     GLint i;
     glGetIntegerv( _gl_enum, &i );
     error_check( );
     return i;
 }
 
-double ogl::state_double( const int _gl_enum )
+double ogl::state_double( cint _gl_enum )
 {
-    error_check( );
     GLdouble d;
     glGetDoublev( _gl_enum, &d );
     error_check( );
     return d;
 }
 
-error ogl::hint( const int _gl_enum_target, const int _gl_enum )
+error ogl::hint( cint _gl_enum_target, cint _gl_enum )
 {
     glHint( _gl_enum_target, _gl_enum );
     return error_check( );
 }
 
-error ogl::enable( const int _gl_enum )
+error ogl::enable( cint _gl_enum )
 {
     glEnable( _gl_enum );
     return error_check( );
 }
 
-bool ogl::enabled( const int _gl_enum )
+bool ogl::enabled( cint _gl_enum )
 {
     return glIsEnabled( _gl_enum );
 }
 
-error ogl::disable( const int _gl_enum )
+error ogl::disable( cint _gl_enum )
 {
     glDisable( _gl_enum );
     return error_check( );
 }
 
-bool ogl::disabled( const int _gl_enum )
+bool ogl::disabled( cint _gl_enum )
 {
     return !enabled( _gl_enum );
 }
@@ -205,7 +202,7 @@ error ogl::close( )
     return reset( );
 }
 
-error ogl::clear( const int _gl_bit )
+error ogl::clear( cint _gl_bit )
 {
     glClear( _gl_bit );
     return error_check( );
@@ -220,7 +217,7 @@ error ogl::clear( )
     return error_check( );
 }
 
-error ogl::clear_color( const dec _r, const dec _g, const dec _b )
+error ogl::clear_color( cdec _r, cdec _g, cdec _b )
 {
     glClearColor( _r, _g, _b, 1.0 );
     error_check( );
@@ -302,7 +299,7 @@ error ogl::pop_matrix( )
     return error_check( );
 }
 
-error ogl::matrix_modelview_mode( const bool _load_identity )
+error ogl::matrix_modelview_mode( cbool _load_identity )
 {
     glMatrixMode( GL_MODELVIEW );
 
@@ -314,7 +311,7 @@ error ogl::matrix_modelview_mode( const bool _load_identity )
     return error_check( );
 }
 
-error ogl::matrix_projection_mode( const bool _load_identity )
+error ogl::matrix_projection_mode( cbool _load_identity )
 {
     glMatrixMode( GL_PROJECTION );
 
@@ -326,7 +323,7 @@ error ogl::matrix_projection_mode( const bool _load_identity )
     return error_check( );
 }
 
-error ogl::transform( const Transform & _transform )
+error ogl::transform( Transform cref _transform )
 {
     dec matrix[ 16 ] = {
         _transform.get( 0, 0 ),
@@ -344,13 +341,13 @@ error ogl::transform( const Transform & _transform )
     return error_check( );
 }
 
-error ogl::translate( const dec _x, const dec _y )
+error ogl::translate( cdec _x, cdec _y )
 {
-    glTranslated( _x, _y, ZERO );
+    glTranslated( _x, _y, 0.0 );
     return error_check( );
 }
 
-error ogl::scale( const dec _x, const dec _y )
+error ogl::scale( cdec _x, cdec _y )
 {
     glScaled( _x, _y, 1.0 );
     return error_check( );
@@ -365,7 +362,7 @@ error ogl::begin_triangles_strip( ) { return begin( GL_TRIANGLE_STRIP ); }
 error ogl::begin_triangles_fan( ) { return begin( GL_TRIANGLE_FAN ); }
 error ogl::begin_polygons( ) { return begin( GL_POLYGON ); }
 
-error ogl::begin( const int _gl_enum )
+error ogl::begin( cint _gl_enum )
 {
     glBegin( _gl_enum );
     m_disable_error_check = true;
@@ -384,7 +381,7 @@ error ogl::end( )
     return error_check( );
 }
 
-error ogl::vertex( const dec _x, const dec _y, const dec _z, const dec _w )
+error ogl::vertex( cdec _x, cdec _y, cdec _z, cdec _w )
 {
     if( !m_started_sequence )
     {
@@ -395,7 +392,7 @@ error ogl::vertex( const dec _x, const dec _y, const dec _z, const dec _w )
     return error_check( );
 }
 
-error ogl::faces_counterclockwise( const bool _ccw )
+error ogl::faces_counterclockwise( cbool _ccw )
 {
     glFrontFace( _ccw ? GL_CCW : GL_CW );
     return error_check( );
@@ -428,7 +425,7 @@ bool ogl::shaded_smooth( )
     return ( state_int( GL_SHADE_MODEL ) == GL_SMOOTH );
 }
 
-error ogl::point_radius( const dec _d )
+error ogl::point_radius( cdec _d )
 {
     return point_diameter( _d * 2.0 );
 }
@@ -438,7 +435,7 @@ dec ogl::point_radius( )
     return ( point_diameter( ) / 2.0 );
 }
 
-error ogl::point_diameter( const dec _d )
+error ogl::point_diameter( cdec _d )
 {
     glPointSize( _d );
     return error_check( );
@@ -449,7 +446,7 @@ dec ogl::point_diameter( )
     return state_double( GL_POINT_SIZE );
 }
 
-error ogl::line_width( const dec _d )
+error ogl::line_width( cdec _d )
 {
     glLineWidth( _d );
     return error_check( );
@@ -460,7 +457,7 @@ dec ogl::line_width( )
     return state_double( GL_LINE_WIDTH );
 }
 
-error ogl::color( const dec _r, const dec _g, const dec _b, const dec _a )
+error ogl::color( cdec _r, cdec _g, cdec _b, cdec _a )
 {
     glColor4d( _r, _g, _b, _a );
     return error_check( );
@@ -512,7 +509,7 @@ error ogl::disable_anti_alias( )
     return error_check( );
 }
 
-error ogl::depth_func( const int _gl_enum )
+error ogl::depth_func( cint _gl_enum )
 {
     glDepthFunc( _gl_enum );
     return ogl::error_check( );
@@ -558,7 +555,7 @@ error ogl::depth_less( )
     return depth_func( GL_LESS );
 }
 
-error ogl::depth_mask( const bool b )
+error ogl::depth_mask( cbool b )
 {
     m_depth_mask = b;
     glDepthMask( m_depth_mask ? 0xFF : 0x0 );
@@ -570,9 +567,10 @@ bool ogl::depth_mask( )
     return m_depth_mask;
 }
 
-error ogl::stencil_func( const int _gl_enum )
+error ogl::stencil_func( cint _gl_enum )
 {
-    glStencilFunc( _gl_enum, 1, 0xFF );
+    GLint gli = 0;
+    glStencilFunc( _gl_enum, gli, 0xFF );
     return ogl::error_check( );
 }
 
@@ -616,7 +614,7 @@ error ogl::stencil_less( )
     return stencil_func( GL_LESS );
 }
 
-error ogl::stencil_mask( const bool b )
+error ogl::stencil_mask( cbool b )
 {
     m_stencil_mask = b;
     glStencilMask( m_stencil_mask ? 0xFF : 0x0 );

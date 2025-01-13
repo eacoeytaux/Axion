@@ -5,13 +5,13 @@ using mtmercy::Sky;
 
 namespace
 {
-const uint DAY_LENGTH = 2048;
+cuint DAY_LENGTH = 2048;
 
-const dec SUNRISE_START = 0.2;
-const dec SUNRISE_END = 0.25;
-const dec NOON = 0.5;
-const dec SUNSET_START = 0.75;
-const dec SUNSET_END = 0.8;
+cdec SUNRISE_START = 0.2;
+cdec SUNRISE_END = 0.25;
+cdec NOON = 0.5;
+cdec SUNSET_START = 0.75;
+cdec SUNSET_END = 0.8;
 
 const Span<uint> CLOUD_REGEN_RATE = { 0, 0 }; // 0 for no clouds
 
@@ -35,7 +35,7 @@ Sky::Sky( World * world ) : Object( world )
 
     needs_render_always( true );
 
-    gravity_ratio( ZERO );
+    gravity_ratio( 0.0 );
     terrain_boundaries( false );
 
     z( 0.0 );

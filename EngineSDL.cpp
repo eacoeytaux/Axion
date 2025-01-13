@@ -41,17 +41,17 @@ uint WINDOW_WIDTH;
 uint WINDOW_HEIGHT;
 bool ANTI_ALIAS = true;
 
-const dec VOLUME_INCREMENT = 0.0625;
-Slider<dec> VOLUME = { ZERO, ONE };
+cdec VOLUME_INCREMENT = 0.0625;
+Slider<dec> VOLUME;
 bool MUTED = true;
 
-const uint MAX_CONTROLLERS = 4;
+cuint MAX_CONTROLLERS = 4;
 SDL_Joystick * CONTROLLERS[ MAX_CONTROLLERS ];
 SDL_Haptic * CONTROLLER_HAPTICS[ MAX_CONTROLLERS ];
 
 char * SDL_GetErrorStr( )
 {
-    const uint SDL_ErrorMsgBufferSize = 256;
+    cuint SDL_ErrorMsgBufferSize = 256;
     char SDL_ErrorMsgStr[ SDL_ErrorMsgBufferSize ];
     return SDL_GetErrorMsg( SDL_ErrorMsgStr, SDL_ErrorMsgBufferSize );
 }
@@ -176,7 +176,7 @@ void Engine::sync_controllers_eng( )
 }
 
 uint Engine::current_ticks_eng( ) { return SDL_GetTicks( ); }
-void Engine::wait_eng( const uint _ms )
+void Engine::wait_eng( cuint _ms )
 {
     if( _ms )
     {
@@ -401,8 +401,8 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
             }
             case SDL_JOYAXISMOTION:
             {
-                const int MAX_AXIS_VALUE = 32767;
-                const int MIN_AXIS_VALUE = -32767;
+                cint MAX_AXIS_VALUE = 32767;
+                cint MIN_AXIS_VALUE = -32767;
 
                 // L2 and R2
                 if( ( event.jaxis.axis == 4 ) || ( event.jaxis.axis == 5 ) )

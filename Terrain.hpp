@@ -25,9 +25,9 @@ class TerrainVertex : public TerrainNode
 {
 public:
     virtual ~TerrainVertex( ) { }
-    TerrainVertex( const Coordinate & pos );
+    TerrainVertex( Coordinate cref pos );
 
-    const Coordinate & position( ) const;
+    Coordinate cref position( ) const;
 
     TerrainEdge * edge1( ) const;
     TerrainEdge * edge2( ) const;
@@ -53,7 +53,7 @@ class TerrainEdge : public TerrainNode
 public:
     virtual ~TerrainEdge( ) { }
     TerrainEdge( TerrainVertex * v1, TerrainVertex * v2, dec resistance = 0.1 );
-    TerrainEdge( const TerrainEdge & );
+    TerrainEdge( TerrainEdge cref );
 
     Line line( ) const;
     Vector vector( ) const;
@@ -86,13 +86,13 @@ public:
     const varray<varray<TerrainVertex *>> & vertices( ) const;
     const varray<varray<TerrainEdge *>> & edges( ) const;
 
-    void traverse_x( const Span<Planc> & _distance_x, const function<void( const Coordinate &, const TerrainEdge * )> & f ) const;
-    void traverse_x( const Planc & _distance_x, const function<void( const Coordinate &, const TerrainEdge * )> & f ) const { traverse_x( Span<Planc>( _distance_x, _distance_x ), f ); }
+    void traverse_x( const Span<Planc> & _distance_x, const function<void( Coordinate cref, const TerrainEdge * )> & f ) const;
+    void traverse_x( Planc cref _distance_x, const function<void( Coordinate cref, const TerrainEdge * )> & f ) const { traverse_x( Span<Planc>( _distance_x, _distance_x ), f ); }
 
-    virtual const Color & dust_color( ) const { return TRANSPARENT; }
+    virtual Color cref dust_color( ) const { return TRANSPARENT; }
 
 private:
-    void make( const varray<Coordinate> & positions, bool loop );
+    void make( varray<Coordinate> cref positions, bool loop );
 
     varray<varray<TerrainVertex *>> m_vertices;
     varray<varray<TerrainEdge *>> m_edges;

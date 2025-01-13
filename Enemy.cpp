@@ -26,10 +26,10 @@ void Enemy::update( )
 
 bool Enemy::overrides_target( const Player * player ) const
 {
-    return !target_locked( ) && position( ).distance_to( m_target->position( ) ) > position( ).distance_to( player->position( ) );
+    return ( !target_locked( ) && position( ).closer_than( m_target->position( ), player->position( ) ) );
 }
 
-void Enemy::sight_range( const Planc & _range )
+void Enemy::sight_range( Planc cref _range )
 {
     Assert( is_pos( _range ) );
 
@@ -46,7 +46,7 @@ bool Enemy::in_sight_range( const Player * player ) const
     return ( !sight_range( ) || position( ).in_distance_range( player->position( ), sight_range( ) ) );
 }
 
-void Enemy::alert_range( const Planc & _range )
+void Enemy::alert_range( Planc cref _range )
 {
     Assert( is_pos( _range ) );
 
@@ -66,10 +66,10 @@ bool Enemy::in_alert_range( const Player * player ) const
 #ifdef AXN_DEBUG
 Drawing Enemy::debug_overlay( ) const
 {
-    const Planc SIGHT_LINE_THICKNESS = 0.8;
-    const Planc ALERT_LINE_THICKNESS = SIGHT_LINE_THICKNESS;
-    const dec ALPHA = 0.75;
-    const dec ALPHA_INNER = ALPHA * 0.1;
+    cPlanc SIGHT_LINE_THICKNESS = 0.8;
+    cPlanc ALERT_LINE_THICKNESS = SIGHT_LINE_THICKNESS;
+    cdec ALPHA = 0.75;
+    cdec ALPHA_INNER = ALPHA * 0.1;
     const Color SIGHT_LINE_COLOR = GREEN.a( ALPHA );
     const Color ALERT_LINE_COLOR = RED.a( ALPHA );
 

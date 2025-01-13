@@ -10,7 +10,7 @@ class Porkupine : public Enemy
 {
 public:
     virtual ~Porkupine( ) { }
-    Porkupine( World *, const Coordinate & position );
+    Porkupine( World *, Coordinate cref position );
 
     virtual void render( ) override;
 

@@ -48,7 +48,7 @@ public:
     virtual void input( const varray<Input *> & inputs = { } );
 
     uint age( ) const;
-    const FixedRectangle & bounds( ) const;
+    FixedRectangle cref bounds( ) const;
 
     virtual void pause( bool );
 
@@ -111,24 +111,24 @@ public:
 
     const varray<Object *> & objects( ) const;
 
-    varray<Object *> objects_in_range( const FixedRectangle & );
+    varray<Object *> objects_in_range( FixedRectangle cref );
 
-    varray<TerrainNode *> terrain_in_range( const FixedRectangle & );
+    varray<TerrainNode *> terrain_in_range( FixedRectangle cref );
 
 protected:
     virtual void create( ) { return create( FixedRectangle( ) ); }
-    virtual void create( const FixedRectangle & bounds );
+    virtual void create( FixedRectangle cref bounds );
     virtual void destroy( );
     virtual void reset( );
 
-    virtual void bounds( const FixedRectangle & );
+    virtual void bounds( FixedRectangle cref );
 
-    virtual Player * add_player( const Coordinate & position );
-    virtual Player * create_player( const Coordinate & position ) = 0;
+    virtual Player * add_player( Coordinate cref position );
+    virtual Player * create_player( Coordinate cref position ) = 0;
 
     virtual Terrain * generate_terrain( ) = 0;
 
-    virtual void wind( const Vector & );
+    virtual void wind( Vector cref );
 
 private:
     void add_objects_from_queue( );
@@ -179,28 +179,28 @@ public:
     public:
         virtual ~Grid( ) { }
 
-        void init( const FixedRectangle & bounds );
+        void init( FixedRectangle cref bounds );
 
         Block & block( uint x, uint y );
-        const Block & block_const( uint x, uint y ) const;
+        Block cref block_const( uint x, uint y ) const;
 
         bool valid_x( uint x ) const { return ( x < m_grid_x_size ); }
         bool valid_y( uint y ) const { return ( y < m_grid_y_size ); }
 
-        uint x( const Planc & ) const;
-        uint y( const Planc & ) const;
+        uint x( Planc cref ) const;
+        uint y( Planc cref ) const;
 
-        Span<uint> x_range( const FixedRectangle & ) const;
-        Span<uint> y_range( const FixedRectangle & ) const;
+        Span<uint> x_range( FixedRectangle cref ) const;
+        Span<uint> y_range( FixedRectangle cref ) const;
 
         Span<uint> x_range( ) const { return Span<uint>{ 0, m_grid_x_size }; }
         Span<uint> y_range( ) const { return Span<uint>{ 0, m_grid_y_size }; }
 
-        void traverse( const FixedRectangle & range, function<void( Block & )> f );
+        void traverse( FixedRectangle cref range, function<void( Block & )> f );
         void traverse( function<void( Block & )> f ) { return traverse( m_bounds, f ); }
 
-        void traverse_const( const FixedRectangle & range, function<void( const Block & )> f ) const;
-        void traverse_const( function<void( const Block & )> f ) const { return traverse_const( m_bounds, f ); }
+        void traverse_const( FixedRectangle cref range, function<void( Block cref )> f ) const;
+        void traverse_const( function<void( Block cref )> f ) const { return traverse_const( m_bounds, f ); }
 
         void add( Object * object );
         void remove( Object * object );

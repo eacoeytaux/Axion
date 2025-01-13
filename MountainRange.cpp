@@ -10,7 +10,7 @@ const Span<Planc> MOUNTAIN_BASE_LENGTH = { 4000, 7500 };
 const Span<Planc> MOUNTAIN_OFFSET = { 500, 1500 };
 } // namespace
 
-MountainRange::MountainRange( World * world, const Planc _base_bottom, const dec _z, const Color & _color ) : Object( world )
+MountainRange::MountainRange( World * world, cPlanc _base_bottom, cdec _z, Color cref _color ) : Object( world )
 {
     background( true );
 

@@ -14,76 +14,95 @@ class Drawing : public Transformable
     friend class Camera; // be friendly to the camera and smile
 
 public:
-    Drawing( const Coordinate & center = ORIGIN );
+    Drawing( ) { }
+
+    Drawing( Coordinate cref center ) { Drawing::center( center ); }
 
     transform_functions( Drawing );
 
-    uint polygon_count( ) const;
+    Drawing & draw( Drawing cref );
 
-    void reserve( uint reserve_size );
-    void reserve_more( uint reserve_size );
-    void clear( bool reserve_mem = true );
-
-    Coordinate center( ) const;
-    Drawing & center( const Coordinate & );
-
-    Drawing & draw( const Drawing & );
-
-    Drawing & draw( const Drawing &,
-                    const Color & color );
+    Drawing & draw( Drawing cref,
+                    Color cref color );
 
     Drawing & draw( const varray<Color> & colors,
-                    const Polygon & polygon,
+                    Polygon cref polygon,
                     dec thickness = FILLED,
                     bool preserve_thickness = false,
                     bool extend_lines = false );
 
-    Drawing & draw( const Color & color,
-                    const Polygon & polygon,
+    Drawing & draw( Color cref color,
+                    Polygon cref polygon,
                     dec thickness = FILLED,
                     bool preserve_thickness = false,
                     bool extend_lines = false );
 
-    Drawing & draw( const Color & color1,
-                    const Color & color2,
-                    const Line & line,
-                    dec thickness = ONE,
+    Drawing & draw( Color cref color1,
+                    Color cref color2,
+                    Line cref line,
+                    dec thickness = 1.0,
                     bool preserve_thickness = false,
                     bool extend_lines = false );
 
-    Drawing & draw( const Color & color,
-                    const Line & line,
-                    dec thickness = ONE,
+    Drawing & draw( Color cref color,
+                    Line cref line,
+                    dec thickness = 1.0,
                     bool preserve_thickness = false,
                     bool extend_lines = false );
 
-    Drawing & draw( const Color & color,
-                    const Path & path,
-                    dec thickness = ONE,
+    Drawing & draw( Color cref color,
+                    Path cref path,
+                    dec thickness = 1.0,
                     bool preserve_thickness = false,
                     bool extend_lines = false );
 
     #ifdef AXN_DEBUG
-    Drawing & draw( const Color & color,
-                    const Vector & vector,
+    Drawing & draw( Color cref color,
+                    Vector cref vector,
                     dec arrow_head_length,
-                    dec thickness = ONE,
+                    dec thickness = 1.0,
                     bool preserve_thickness = false );
     #endif
 
-    const FixedRectangle & bounding_box( ) const { return m_bounding_box; }
+    Drawing & erase( Polygon cref );
 
-    Drawing & filter_function( const function<void( Color & )> & );
-    Drawing & clear_filter_function( );
-
-    Drawing & erase( const Polygon & );
-    Drawing & add_bound( const Polygon & );
+    Drawing & add_bound( Polygon cref );
     Drawing & clear_bounds( );
 
-    bool translucent( ) const;
+    Drawing & filter_function( const function<void( Color & )> & filter_function ) { m_filter_function = filter_function; m_filter_function_set = true; rethis; }
+    Drawing & clear_filter_function( ) { m_filter_function_set = false; rethis; }
 
-    bool operator==( const Drawing & ) const { return false; }
-    bool operator!=( const Drawing & ) const { return true; }
+    bool opaque( ) const { return m_opaque; }
+
+    uint polygon_count( ) const { return m_colored_polygons.size( ); }
+
+    Coordinate center( ) const { return m_center; }
+    Drawing & center( Coordinate cref center ) { m_center = center; rethis; }
+
+    FixedRectangle cref bounding_box( ) const { return m_bounding_box; }
+
+    void reserve( cuint reserve_size ) { m_colored_polygons.reserve( reserve_size ); }
+    void reserve_more( cuint reserve_size ) { m_colored_polygons.reserve_more( reserve_size ); }
+
+    void clear( bool reserve_mem = true )
+    {
+        Transformable::clear_transform( );
+
+        uint mem_size = ( reserve_mem ? m_colored_polygons.size( ) : 0 );
+
+        m_colored_polygons.clear( !reserve_mem );
+
+        m_bounding_box.width( 0.0 );
+        m_bounding_box.height( 0.0 );
+        m_bounding_box.center( ORIGIN );
+
+        m_opaque = true;
+
+        clear_filter_function( );
+    }
+
+    bool operator==( Drawing cref ) const { return false; }
+    bool operator!=( Drawing cref ) const { return true; }
 
 private:
     struct ColoredPolygon
@@ -102,15 +121,14 @@ private:
         default_equal( ColoredPolygon );
     };
 
+    mutable varray<ColoredPolygon> m_colored_polygons;
     const varray<ColoredPolygon> & colored_polygons( bool transformed = true ) const;
 
-    mutable varray<ColoredPolygon> m_colored_polygons;
-
-    mutable Coordinate m_center;
+    mutable Coordinate m_center = ORIGIN;
 
     mutable FixedRectangle m_bounding_box;
 
-    mutable bool m_translucent = false;
+    mutable bool m_opaque = true;
 
     bool m_filter_function_set = false;
     std::function<void( Color & )> m_filter_function = [ ] ( Color & ) { };

@@ -32,12 +32,12 @@ Object::Object( World * world ) : Matter( ORIGIN ), m_world( world )
     init( );
 }
 
-Object::Object( World * world, const Coordinate & _position, const Vector & _velocity ) : Matter( Vector( _velocity ).origin( _position ) ), m_world( world )
+Object::Object( World * world, Coordinate cref _position, Vector cref _velocity ) : Matter( Vector( _velocity ).origin( _position ) ), m_world( world )
 {
     init( );
 }
 
-Object::Object( World * world, const Vector & _position_velocity ) : Matter( _position_velocity ), m_world( world )
+Object::Object( World * world, Vector cref _position_velocity ) : Matter( _position_velocity ), m_world( world )
 {
     init( );
 }
@@ -53,11 +53,11 @@ void Object::init( )
 
     m_age = 0;
 
-    foreground( z( ) > ONE );
-    background( z( ) < ONE );
+    foreground( z( ) > 1.0 );
+    background( z( ) < 1.0 );
 }
 
-Drawing Object::trajection_drawing( const Planc & _distance, const Color & _color, const dec _alpha_start, const dec _alpha_end ) const
+Drawing Object::trajection_drawing( Planc cref _distance, Color cref _color, cdec _alpha_start, cdec _alpha_end ) const
 {
     Drawing trajection;
 
@@ -68,10 +68,10 @@ Drawing Object::trajection_drawing( const Planc & _distance, const Color & _colo
         Planc d = _distance;
         dec a = _alpha_start;
 
-        while( d > ZERO && v.has_magnitude( ) )
+        while( ( d > 0.0 ) && v.has_magnitude( ) )
         {
             v += ( GRAVITY * gravity_ratio( ) );
-            v *= ( ONE - friction_resistance( ) );
+            v *= ( 1.0 - friction_resistance( ) );
 
             if( d > v.magnitude( ) )
             {
@@ -80,7 +80,7 @@ Drawing Object::trajection_drawing( const Planc & _distance, const Color & _colo
             else
             {
                 v.magnitude( d );
-                d = ZERO;
+                d = 0.0;
             }
 
             dec d_a = min<dec>( a, ( _alpha_start - _alpha_end ) * ( v.magnitude( ) / _distance ) );
@@ -170,7 +170,7 @@ void Object::update_velocity( )
         velocity += ( GRAVITY * m_gravity_ratio );
     }
 
-    velocity *= ( ONE - friction_resistance( ) );
+    velocity *= ( 1.0 - friction_resistance( ) );
 
     Matter::velocity( velocity );
 }
@@ -193,8 +193,8 @@ void Object::update_movement( )
         }
     }
 
-    dec remaining_percentage = ONE;
-    while( ( greater( remaining_percentage, ZERO ) && !isnan( remaining_percentage ) ) )
+    dec remaining_percentage = 1.0;
+    while( ( greater( remaining_percentage, 0.0 ) && !isnan( remaining_percentage ) ) )
     {
         update_velocity( );
         Vector velocity = Object::velocity( ) * remaining_percentage;
@@ -267,7 +267,7 @@ void Object::update_movement( )
                         }
                         else
                         {
-                            movement_percentage = ONE;
+                            movement_percentage = 1.0;
                         }
                     }
                 }
@@ -277,7 +277,7 @@ void Object::update_movement( )
         // check if object is moving to connecting edge
         if( m_ground && next_ground == m_ground )
         {
-            if( ( movement.dx( ) > 0.0 ) && ( center + movement ).x( ) > m_ground->line( ).x_upper( ) )
+            if( ( movement.dx( ) > 0.0 ) && ( center + movement ).x( ) > m_ground->line( ).upper_bound_x( ) )
             {
                 movement = Vector( center, m_ground->vertex2( )->position( ) + Vector::Y( half( space( ).bound_height( ) ) ) );
 
@@ -290,7 +290,7 @@ void Object::update_movement( )
                     next_ground = nullptr;
                 }
             }
-            else if( ( movement.dx( ) < 0.0 ) && ( center + movement ).x( ) < m_ground->line( ).x_lower( ) )
+            else if( ( movement.dx( ) < 0.0 ) && ( center + movement ).x( ) < m_ground->line( ).lower_bound_x( ) )
             {
                 movement = Vector( center, m_ground->vertex1( )->position( ) + Vector::Y( half( space( ).bound_height( ) ) ) );
 
@@ -376,18 +376,11 @@ void Object::update_movement( )
 
             if( collied_objects.size( ) )
             {
-                struct
-                {
-                    Coordinate origin;
-                    bool operator( )( const ObjectCollision & c1, const ObjectCollision & c2 )
-                    {
-                        return ( c1.line.c1( ).distance_to( origin ) < c2.line.c1( ).distance_to( origin ) );
-                    }
-                } collision_sort;
-                collision_sort.origin = position( );
-                collied_objects.sort( collision_sort );
+                struct CollisionDistance { CollisionDistance( Coordinate cref c ) : origin( c ) { } Coordinate origin; bool operator( )( ObjectCollision cref c1, ObjectCollision cref c2 ) { return origin.closer_than( c1.line.c1( ), c2.line.c1( ) ); } };
 
-                ObjectCollision & collision = collied_objects.front( );
+                collied_objects.sort( CollisionDistance( position( ) ) );
+
+                const ObjectCollision & collision = collied_objects.front( );
 
                 collide( collision.object );
 
@@ -400,16 +393,16 @@ void Object::update_movement( )
 
         if( velocity.has_magnitude( ) )
         {
-            remaining_percentage *= ( ONE - ( movement.magnitude( ) / velocity.magnitude( ) ) );
+            remaining_percentage *= ( 1.0 - ( movement.magnitude( ) / velocity.magnitude( ) ) );
         }
         else
         {
-            remaining_percentage = ZERO;
+            remaining_percentage = 0.0;
         }
     }
 }
 
-void Object::move( const Vector & _movement )
+void Object::move( Vector cref _movement )
 {
     if( _movement.has_magnitude( ) )
     {
@@ -441,7 +434,7 @@ Coordinate Object::position( ) const
     return Matter::position( );
 }
 
-void Object::position( const Coordinate & _position )
+void Object::position( Coordinate cref _position )
 {
     if( interactive( ) )
     {
@@ -472,9 +465,9 @@ bool Object::foreground( ) const
     return m_foreground;
 }
 
-void Object::foreground( const bool _foreground )
+void Object::foreground( cbool _foreground )
 {
-    m_foreground = _foreground || ( z( ) > ONE );
+    m_foreground = _foreground || ( z( ) > 1.0 );
 }
 
 bool Object::background( ) const
@@ -482,9 +475,9 @@ bool Object::background( ) const
     return m_background;
 }
 
-void Object::background( const bool _background )
+void Object::background( cbool _background )
 {
-    m_background = _background || ( z( ) < ONE );
+    m_background = _background || ( z( ) < 1.0 );
 }
 
 bool Object::interactive( ) const
@@ -492,7 +485,7 @@ bool Object::interactive( ) const
     return m_interactive;
 }
 
-void Object::interactive( const bool _interactive )
+void Object::interactive( cbool _interactive )
 {
     m_interactive = _interactive;
 
@@ -507,7 +500,7 @@ bool Object::stationary( ) const
     return m_stationary;
 }
 
-void Object::stationary( const bool _stationary )
+void Object::stationary( cbool _stationary )
 {
     m_stationary = _stationary;
 
@@ -547,14 +540,14 @@ bool Object::collide( Object * object )
     return false;
 }
 
-void Object::react_to_movement( Object * object, const Vector & _v )
+void Object::react_to_movement( Object * object, Vector cref _v )
 {
     Assert( m_movement_subscriptions.contains( object ), "not subscribed to object's movement" );
 }
 
 bool Object::terrain_boundaries( ) const { return m_terrain_boundaries; }
 
-void Object::terrain_boundaries( const bool _terrain_boundaries )
+void Object::terrain_boundaries( cbool _terrain_boundaries )
 {
     m_terrain_boundaries = _terrain_boundaries;
     if( !m_terrain_boundaries )
@@ -565,7 +558,7 @@ void Object::terrain_boundaries( const bool _terrain_boundaries )
 
 dec Object::gravity_ratio( ) const { return m_gravity_ratio; }
 
-void Object::gravity_ratio( const dec _gravity_ratio )
+void Object::gravity_ratio( cdec _gravity_ratio )
 {
     m_gravity_ratio = _gravity_ratio;
 }
@@ -573,7 +566,7 @@ void Object::gravity_ratio( const dec _gravity_ratio )
 
 dec Object::air_resistance_ratio( ) const { return m_air_resistance_ratio; }
 
-void Object::air_resistance_ratio( const dec _air_resistance_ratio )
+void Object::air_resistance_ratio( cdec _air_resistance_ratio )
 {
     m_air_resistance_ratio = _air_resistance_ratio;
 }
@@ -620,19 +613,19 @@ void Object::remove_movement_subscriber( Object * object )
 #ifdef AXN_DEBUG
 Drawing Object::debug_overlay( ) const
 {
-    const Planc HIT_BOX_THICKNESS = 1.5;
-    const Planc DOT_RADIUS = HIT_BOX_THICKNESS;
-    const Planc VELOCITY_THICKNESS = HIT_BOX_THICKNESS;
-    const Planc VELOCITY_ARROW_LENGTH = 10.0;
-    const Planc VELOCITY_MAGNITUDE_MINIMUM = 1.0;
-    const Planc VELOCITY_SCALE = 3.0;
+    cPlanc HIT_BOX_THICKNESS = 1.5;
+    cPlanc DOT_RADIUS = HIT_BOX_THICKNESS;
+    cPlanc VELOCITY_THICKNESS = HIT_BOX_THICKNESS;
+    cPlanc VELOCITY_ARROW_LENGTH = 10.0;
+    cPlanc VELOCITY_MAGNITUDE_MINIMUM = 1.0;
+    cPlanc VELOCITY_SCALE = 3.0;
     const Color PHYSICS_COLOR = YELLOW;
 
     Drawing debug_overlay;
 
     // physics
     // (only for objects on plane)
-    if( draw_physics && ( z( ) == ONE ) )
+    if( draw_physics && ( z( ) == 1.0 ) )
     {
         // hit box
         debug_overlay.draw( PHYSICS_COLOR, hit_box( ) - position( ), HIT_BOX_THICKNESS, true );

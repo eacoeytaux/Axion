@@ -10,7 +10,7 @@ class Fox : public Mob
 {
 public:
     virtual ~Fox( ) { }
-    Fox( World *, const Coordinate & position );
+    Fox( World *, Coordinate cref position );
 
     virtual void render( ) override;
 };

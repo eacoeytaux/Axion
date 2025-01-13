@@ -10,7 +10,7 @@ class Dust : public Object
 {
 public:
     virtual ~Dust( ) { }
-    Dust( World *, const Coordinate & position, const Vector & velocity, const Color & color );
+    Dust( World *, Coordinate cref position, Vector cref velocity, Color cref color );
 
     virtual void render( ) override;
 

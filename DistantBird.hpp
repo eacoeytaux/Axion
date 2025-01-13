@@ -10,7 +10,7 @@ class DistantBird : public Object
 {
 public:
     virtual ~DistantBird( ) { }
-    DistantBird( World *, const Coordinate & position );
+    DistantBird( World *, Coordinate cref position );
 
     virtual void render( ) override;
 

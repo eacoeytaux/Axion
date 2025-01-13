@@ -12,7 +12,7 @@ class Enemy : public Mob
 {
 public:
     virtual ~Enemy( ) { }
-    Enemy( World * world, const Coordinate & position, dec health = 1.0 ) : Mob( world, position, health ) { }
+    Enemy( World * world, Coordinate cref position, dec health = 1.0 ) : Mob( world, position, health ) { }
 
 protected:
     #ifdef AXN_DEBUG
@@ -34,12 +34,12 @@ protected:
     bool target_locked( ) const { return m_target_locked; }
     void target_locked( bool locked ) { m_target_locked = locked; }
 
-    const Planc & sight_range( ) const { return m_sight_range; }
-    void sight_range( const Planc & range );
+    Planc cref sight_range( ) const { return m_sight_range; }
+    void sight_range( Planc cref range );
     virtual bool in_sight_range( const Player * player ) const;
 
-    const Planc & alert_range( ) const { return m_alert_range; }
-    void alert_range( const Planc & range );
+    Planc cref alert_range( ) const { return m_alert_range; }
+    void alert_range( Planc cref range );
     virtual bool in_alert_range( const Player * player ) const;
 
 private:

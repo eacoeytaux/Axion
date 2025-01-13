@@ -7,21 +7,21 @@ using mtmercy::Feather;
 
 namespace
 {
-const uint BIRD_HEALTH = 1;
+cuint BIRD_HEALTH = 1;
 
-const Planc FEATHER_LENGTH = 15.0;
-const Planc FEATHER_BASE_LENGTH = 5.0;
-const Planc FEATHER_STEM_LENGTH = 3.0;
-const Planc FEATHER_STEM_THICKNESS = 2.0;
+cPlanc FEATHER_LENGTH = 15.0;
+cPlanc FEATHER_BASE_LENGTH = 5.0;
+cPlanc FEATHER_STEM_LENGTH = 3.0;
+cPlanc FEATHER_STEM_THICKNESS = 2.0;
 
-const Planc SPEED = 1.5;
-const Planc ROTATIONAL_SPEED = 1.0;
-const Planc ROTATIONAL_RADIUS = 160.0;
-const Planc LIFT_SPEED = 0.5;
-const Planc LIFT_DISTANCE = 16.0;
+cPlanc SPEED = 1.5;
+cPlanc ROTATIONAL_SPEED = 1.0;
+cPlanc ROTATIONAL_RADIUS = 160.0;
+cPlanc LIFT_SPEED = 0.5;
+cPlanc LIFT_DISTANCE = 16.0;
 } // namespace
 
-Feather::Feather( World * world, const Coordinate & _position ) : Object( world, _position )
+Feather::Feather( World * world, Coordinate cref _position ) : Object( world, _position )
 {
     m_color = Random::rColor( );
     gravity_ratio( 0.025 );
@@ -40,7 +40,7 @@ void Feather::render( )
     // draw( m_color, stem, FEATHER_STEM_THICKNESS );
 }
 
-Bird::Bird( World * world, const Coordinate & _position ) : Mob( world, _position )
+Bird::Bird( World * world, Coordinate cref _position ) : Mob( world, _position )
 {
     no_gravity( );
     space( Polygon::rectangle( 32.0, 32.0 ) );

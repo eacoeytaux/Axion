@@ -194,12 +194,6 @@
     <ClInclude Include="AXN.hpp">
       <Filter>Source Files\axn</Filter>
     </ClInclude>
-    <ClInclude Include="Background.hpp">
-      <Filter>Source Files\axn\world</Filter>
-    </ClInclude>
-    <ClInclude Include="Bedrock.hpp">
-      <Filter>Source Files\axn\world</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.hpp">
       <Filter>Source Files\axn\graphics</Filter>
     </ClInclude>
@@ -247,9 +241,6 @@
     </ClInclude>
     <ClInclude Include="Transform.hpp">
       <Filter>Source Files\axn\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="Foreground.hpp">
-      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
     <ClInclude Include="Graphics.hpp">
       <Filter>Source Files\axn\graphics</Filter>
@@ -397,6 +388,15 @@
     </ClInclude>
     <ClInclude Include="STDptr.hpp">
       <Filter>Source Files\axn\system\std</Filter>
+    </ClInclude>
+    <ClInclude Include="Arc.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Bezier.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Triangle.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

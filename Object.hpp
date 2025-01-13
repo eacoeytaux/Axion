@@ -26,8 +26,8 @@ public:
     virtual ~Object( );
 
     Object( World * world );
-    Object( World * world, const Coordinate & position, const Vector & velocity = V0 );
-    Object( World * world, const Vector & position_velocity );
+    Object( World * world, Coordinate cref position, Vector cref velocity = V0 );
+    Object( World * world, Vector cref position_velocity );
 
 private:
     bool m_initialized = false;
@@ -44,7 +44,7 @@ protected:
 public:
     void render_object( );
 
-    Drawing trajection_drawing( const Planc & distance, const Color & path_color, const dec alpha_start = ONE, const dec alpha_end = ZERO ) const;
+    Drawing trajection_drawing( Planc cref distance, Color cref path_color, cdec alpha_start = 1.0, cdec alpha_end = 0.0 ) const;
 
     #ifdef AXN_DEBUG
     bool m_draw_debug = false;
@@ -59,7 +59,7 @@ public:
     void update_object( );
 
     Coordinate position( ) const;
-    void position( const Coordinate & );
+    void position( Coordinate cref );
 
     virtual Planc width( ) const;
     virtual Planc height( ) const;
@@ -86,8 +86,8 @@ public:
 
     dec gravity_ratio( ) const;
     void gravity_ratio( dec );
-    void normal_gravity( ) { return gravity_ratio( ONE ); }
-    void no_gravity( ) { return gravity_ratio( ZERO ); }
+    void normal_gravity( ) { return gravity_ratio( 1.0 ); }
+    void no_gravity( ) { return gravity_ratio( 0.0 ); }
     bool has_gravity( ) const { return gravity_ratio( ); }
 
     dec air_resistance_ratio( ) const;
@@ -109,18 +109,18 @@ public:
     void subscribe_to_movement( Object * );
     void unsubscribe_to_movement( Object * );
 
-    virtual bool operator==( const Object & other ) const { return id( ) == other.id( ); }
+    virtual bool operator==( Object cref other ) const { return id( ) == other.id( ); }
     default_non_equal( Object );
 
 protected:
     virtual void update_movement( );
     virtual void update_velocity( );
 
-    virtual void move( const Vector & );
+    virtual void move( Vector cref );
     virtual void ground( TerrainEdge * ground );
     virtual void out_of_bounds( );
 
-    virtual void react_to_movement( Object * object, const Vector & );
+    virtual void react_to_movement( Object * object, Vector cref );
 
     virtual void add_movement_subscriber( Object * );
     virtual void remove_movement_subscriber( Object * );
@@ -132,8 +132,8 @@ protected:
 private:
     World * m_world = nullptr;
 
-    uint m_age = ZERO;
-    uint m_last_world_age_update = ZERO;
+    uint m_age = 0;
+    uint m_last_world_age_update = 0;
 
     bool m_deleted = false;
     bool m_marked_to_delete = false;
@@ -141,21 +141,21 @@ private:
     bool m_foreground = false;
     bool m_background = false;
 
-    Planc m_visible_width = ZERO;
-    Planc m_visible_height = ZERO;
+    Planc m_visible_width = P0;
+    Planc m_visible_height = P0;
 
     TerrainEdge * m_ground = nullptr;
     bool m_passing_terrain = false;
 
-    dec m_gravity_ratio = ONE;
+    dec m_gravity_ratio = 1.0;
     dec m_air_resistance_ratio = AIR_RESISTANCE;
 
     bool m_interactive = false;
     bool m_stationary = false;
     bool m_terrain_boundaries = true;
 
-    uint m_last_position_count = ZERO;
-    uint m_last_position_index = ZERO;
+    uint m_last_position_count = 0;
+    uint m_last_position_index = 0;
     varray<Coordinate> m_last_positions;
 
     uset<Object *> m_movement_subscribers;

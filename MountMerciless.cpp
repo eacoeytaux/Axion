@@ -86,12 +86,12 @@ void MountMerciless::assign_layer_position( Object * object )
     object->layer_position( score_layer_position( object ) );
 }
 
-Player * MountMerciless::create_player( const Coordinate & _position )
+Player * MountMerciless::create_player( Coordinate cref _position )
 {
     return new Climber( this, _position );
 }
 
-Player * MountMerciless::add_player( const Coordinate & _position )
+Player * MountMerciless::add_player( Coordinate cref _position )
 {
     Player * player = World::add_player( _position );
     return player;
@@ -117,17 +117,17 @@ void MountMerciless::create( )
     // add_object( new Waterfall( this, Coordinate( 0.0, 10.0 ), METER * 4.0, METER * 8.0, 0.95 ) );
 
     terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
-                            [ & ] ( const Coordinate & c, const TerrainEdge * e )
+                            [ & ] ( Coordinate cref c, const TerrainEdge * e )
     {
         add_object( new AspineTree( this, c ) );
     } );
 
     // terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
-    //                        [ & ]( const Coordinate & c, const TerrainEdge * e )
+    //                        [ & ]( Coordinate cref c, const TerrainEdge * e )
     //                        { add_object( new AspineTree( this, c, 0.5 ) ); } );
 
     // terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
-    //                         [ & ]( const Coordinate & c, const TerrainEdge * e )
+    //                         [ & ]( Coordinate cref c, const TerrainEdge * e )
     //                         { add_object( new Stalagmite( this, c, 100.0, 1.0, GRAY_DARK ) ); } );
 
     add_object( new Fire( this, Coordinate( 50, 20 ) ) );

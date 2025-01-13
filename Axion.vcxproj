@@ -73,13 +73,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Angle.hpp" />
+    <ClInclude Include="Arc.hpp" />
     <ClInclude Include="Arrow.hpp" />
     <ClInclude Include="AspineTree.hpp" />
     <ClInclude Include="Assert.hpp" />
     <ClInclude Include="Audio.hpp" />
     <ClInclude Include="AXN.hpp" />
-    <ClInclude Include="Background.hpp" />
-    <ClInclude Include="Bedrock.hpp" />
+    <ClInclude Include="Bezier.hpp" />
     <ClInclude Include="Bird.hpp" />
     <ClInclude Include="Bush.hpp" />
     <ClInclude Include="Butterfly.hpp" />
@@ -99,7 +99,6 @@
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="Fire.hpp" />
     <ClInclude Include="FixedRectangle.hpp" />
-    <ClInclude Include="Foreground.hpp" />
     <ClInclude Include="Fox.hpp" />
     <ClInclude Include="Geometry.hpp" />
     <ClInclude Include="Gopher.hpp" />
@@ -138,6 +137,7 @@
     <ClInclude Include="STDptr.hpp" />
     <ClInclude Include="Terrain.hpp" />
     <ClInclude Include="Transform.hpp" />
+    <ClInclude Include="Triangle.hpp" />
     <ClInclude Include="Unalope.hpp" />
     <ClInclude Include="Utility.hpp" />
     <ClInclude Include="Vector.hpp" />

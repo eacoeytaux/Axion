@@ -4,8 +4,8 @@ using mtmercy::Fox;
 
 namespace
 {
-const Planc EYE_RADIUS = 1.0;
-const uint BLINK_DURATION = 2;
+cPlanc EYE_RADIUS = 1.0;
+cuint BLINK_DURATION = 2;
 const Span<uint> BLINK_WAIT = { 180, 240 };
 
 const Color EYE_COLOR = BLACK;
@@ -14,7 +14,7 @@ const Color FUR_COLOR1 = Color::rgb( 0xFFA500 );
 const Color FUR_COLOR2 = WHITE;
 }
 
-Fox::Fox( World * world, const Coordinate & _position ) : Mob( world, _position )
+Fox::Fox( World * world, Coordinate cref _position ) : Mob( world, _position )
 {
     space( Polygon::rectangle( 32.0, 32.0 ) );
 

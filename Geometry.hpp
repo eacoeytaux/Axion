@@ -8,6 +8,9 @@
 #include "Transform.hpp"
 #include "Line.hpp"
 #include "Path.hpp"
+#include "Arc.hpp"
+#include "Bezier.hpp"
+#include "Triangle.hpp"
 #include "Polygon.hpp"
 #include "FixedRectangle.hpp"
 

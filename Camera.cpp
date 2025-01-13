@@ -5,16 +5,16 @@
 
 namespace
 {
-const dec MIN_ZOOM = 0.64;
-const dec MAX_ZOOM = 2.5;
-const dec TARGET_OFFSET_Y = 0.125;
-const uint LIGHTING_LAYERS = 6;
-const dec LIGHTING_RADIUS_GROW = 0.333;
-const dec LIGHTING_RADIUS_GROW_EXPONENT = 0.88;
-const dec DEFAULT_HUD_OFFSET = 0.025;
+cdec MIN_ZOOM = 0.64;
+cdec MAX_ZOOM = 2.5;
+cdec TARGET_OFFSET_Y = 0.125;
+cuint LIGHTING_LAYERS = 6;
+cdec LIGHTING_RADIUS_GROW = 0.333;
+cdec LIGHTING_RADIUS_GROW_EXPONENT = 0.88;
+cdec DEFAULT_HUD_OFFSET = 0.025;
 } // namespace
 
-Camera::Camera( World * world, const Planc & _width, const Planc & _height, const dec _zoom ) : m_world( world )
+Camera::Camera( World * world, Planc cref _width, Planc cref _height, cdec _zoom ) : m_world( world )
 {
     Assert( (bool)world );
 
@@ -80,21 +80,21 @@ void Camera::clear_hud_elements( )
 
 void Camera::render( )
 {
-    const dec screen_width = Engine::screen_width( );
-    const dec screen_height = Engine::screen_height( );
+    cdec screen_width = Engine::screen_width( );
+    cdec screen_height = Engine::screen_height( );
 
     const Coordinate _camera_center = center( );
 
-    const dec _zoom = Camera::zoom( );
+    cdec _zoom = Camera::zoom( );
 
     ogl::clear( );
     ogl::push_matrix( );
     {
-        ogl::scale( TWO / screen_width, TWO / screen_height );
+        ogl::scale( 2.0 / screen_width, 2.0 / screen_height );
 
         Engine::anti_alias( ) ? ogl::enable_anti_alias( ) : ogl::disable_anti_alias( );
 
-        auto render_convex_polygon = [ & ] ( const varray<Color> & _colors, const varray<Coordinate> & _coordinates, const Transform & _transform = IDENTITY_TRANSFORM, const dec _z = 0.0 )
+        auto render_convex_polygon = [ & ] ( const varray<Color> & _colors, varray<Coordinate> cref _coordinates, Transform cref _transform = IDENTITY_TRANSFORM, cdec _z = 0.0 )
         {
             if( !_colors.size( ) || !_coordinates.size( ) )
             {
@@ -153,7 +153,7 @@ void Camera::render( )
             {
                 if( !fixed )
                 {
-                    if( const dec _z = visible->z( ) )
+                    if( cdec _z = visible->z( ) )
                     {
                         ogl::scale( _zoom * _z );
                         ogl::translate( -_camera_center.x( ),
@@ -161,7 +161,7 @@ void Camera::render( )
                     }
                 }
 
-                const Drawing & _drawing = *visible;
+                Drawing cref _drawing = *visible;
 
                 ogl::translate( _drawing.center( ).x( ), _drawing.center( ).y( ) );
 
@@ -200,28 +200,28 @@ void Camera::render( )
                             }
                             else
                             {
-                                const varray<Coordinate> & cc = _colored_polygon.polygon.coordinates( true );
+                                varray<Coordinate> cref cs = _colored_polygon.polygon.coordinates( true );
                                 const varray<varray<uint>> & t = _colored_polygon.polygon.triangle_indices( );
 
                                 for_range( i, t.size( ) )
                                 {
-                                    render_convex_polygon( { _colored_polygon.colors[ t[ i ][ 0 ], t[ i ][ 1 ], t[ i ][ 2 ] ] }, { cc[ t[ i ][ 0 ] ], cc[ t[ i ][ 1 ] ], cc[ t[ i ][ 2 ] ] }, _colored_polygon.polygon.cumulative_transform( ) );
+                                    render_convex_polygon( { _colored_polygon.colors[ t[ i ][ 0 ], t[ i ][ 1 ], t[ i ][ 2 ] ] }, { cs[ t[ i ][ 0 ] ], cs[ t[ i ][ 1 ] ], cs[ t[ i ][ 2 ] ] }, _colored_polygon.polygon.cumulative_transform( ) );
                                 }
                             }
                         }
                         else
                         {
-                            const dec _thickness = _colored_polygon.thickness / ( _colored_polygon.preserve_thickness ? _zoom : ONE );
+                            cdec _thickness = _colored_polygon.preserve_thickness ? ( _colored_polygon.thickness / _zoom ) : ( _colored_polygon.thickness );
 
                             // TODO not raw!
-                            const varray<Coordinate> & cc = _colored_polygon.polygon.coordinates( false );
-                            for_range( i, cc.size( ) )
+                            varray<Coordinate> cref cs = _colored_polygon.polygon.coordinates( false );
+                            for_range( i, cs.size( ) )
                             {
-                                const Line _line = Line( cc[ i ? ( i - 1 ) : ( cc.size( ) - 1 ) ], cc[ i ] );
+                                const Line _line = Line( cs[ i ? ( i - 1 ) : ( cs.size( ) - 1 ) ], cs[ i ] );
                                 const Angle _line_angle = _line.angle( );
                                 const Vector _line_vector( _line.c1( ), _line.c2( ) );
 
-                                const Line _next_line = Line( cc[ i ], cc[ ( i == cc.size( ) - 1 ) ? 0 : ( i + 1 ) ] );
+                                const Line _next_line = Line( cs[ i ], cs[ ( i == cs.size( ) - 1 ) ? 0 : ( i + 1 ) ] );
                                 const Angle _next_line_angle = _next_line.angle( );
                                 const Vector _next_line_vector( _next_line.c1( ), _next_line.c2( ) );
 
@@ -304,7 +304,7 @@ void Camera::render( )
                         ogl::pop_matrix( );
 
                         ogl::depth_not_equal( );
-                        render_convex_polygon( { BLACK.a( min( ONE, ( (dec)( i + 1 ) / (dec)LIGHTING_LAYERS ) ) * lighting->darkness_intensity( ) ) },
+                        render_convex_polygon( { BLACK.a( min( 1.0, ( (dec)( i + 1 ) / (dec)LIGHTING_LAYERS ) ) * lighting->darkness_intensity( ) ) },
                                                Polygon::rectangle( screen_width, screen_height ).coordinates( ) );
                     }
                 }
@@ -413,12 +413,12 @@ Drawing Camera::cursor_drawing( ) const
 {
     static_setup( Drawing, cursor_drawing )
     {
-        const dec RETICLE_WIDTH = 1.5;
-        const dec RETICLE_LENGTH = 8.0;
-        const dec RETICLE_BORDER_WIDTH = 1.0;
+        cdec RETICLE_WIDTH = 1.5;
+        cdec RETICLE_LENGTH = 8.0;
+        cdec RETICLE_BORDER_WIDTH = 1.0;
 
-        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * TWO ), RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * TWO ) ) );
-        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * TWO ), RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * TWO ) ) );
+        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * 2.0 ), RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) );
+        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * 2.0 ), RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) );
         cursor_drawing.draw( WHITE, Polygon::rectangle( RETICLE_WIDTH, RETICLE_LENGTH ) );
         cursor_drawing.draw( WHITE, Polygon::rectangle( RETICLE_LENGTH, RETICLE_WIDTH ) );
     }
@@ -429,27 +429,27 @@ Drawing Camera::cursor_drawing( ) const
 #ifdef AXN_DEBUG
 Drawing Camera::debug_overlay_drawing( ) const
 {
-    const Planc BORDER_LINE_THICKNESS = 1.5;
-    const Planc CROSSHAIR_LINE_THICKNESS = 1.0;
-    const Planc FPS_LINE_THICKNESS = 1.5;
+    cPlanc BORDER_LINE_THICKNESS = 1.5;
+    cPlanc CROSSHAIR_LINE_THICKNESS = 1.0;
+    cPlanc FPS_LINE_THICKNESS = 1.5;
     const Angle DELTA = TAU / (dec)Engine::FPS;
-    const Planc TARGET_RADIUS = 2.0;
-    const Planc FPS_RADIUS = 32.0;
+    cPlanc TARGET_RADIUS = 2.0;
+    cPlanc FPS_RADIUS = 32.0;
     const Color MAIN_COLOR = WHITE;
     const Color TARGET_COLOR = RED;
-    const dec COLOR_OPACITY = 1.0;
+    cdec COLOR_OPACITY = 1.0;
 
-    const Planc FPS_LINE_THICKNESS_ZOOM = FPS_LINE_THICKNESS * zoom( );
-    const Planc CROSSHAIR_LINE_THICKNESS_ZOOM = CROSSHAIR_LINE_THICKNESS * zoom( );
+    cPlanc FPS_LINE_THICKNESS_ZOOM = FPS_LINE_THICKNESS * zoom( );
+    cPlanc CROSSHAIR_LINE_THICKNESS_ZOOM = CROSSHAIR_LINE_THICKNESS * zoom( );
 
     static Angle delta;
     delta -= DELTA;
 
-    const Planc _width = width( );
-    const Planc _height = height( );
+    cPlanc _width = width( );
+    cPlanc _height = height( );
 
-    const Planc _half_width = half( _width );
-    const Planc _half_height = half( _height );
+    cPlanc _half_width = half( _width );
+    cPlanc _half_height = half( _height );
 
     const Vector _target_offset = target( ) - center( );
 
@@ -457,7 +457,7 @@ Drawing Camera::debug_overlay_drawing( ) const
     const Polygon _target_inner = Polygon::circle( TARGET_RADIUS, _target_offset );
     const Polygon _target_cover = Polygon::circle( TARGET_RADIUS );
 
-    const Line _fps_line = Line( ORIGIN, Coordinate( ZERO, FPS_RADIUS ).rotate( delta ) );
+    const Line _fps_line = Line( ORIGIN, Coordinate( 0.0, FPS_RADIUS ).rotate( delta ) );
     const Polygon _fps_circle = Polygon::circle( FPS_RADIUS );
     const Polygon _fps_dot = Polygon::circle( TARGET_RADIUS );
 
@@ -481,12 +481,12 @@ Drawing Camera::debug_overlay_drawing( ) const
                           BORDER_LINE_THICKNESS, true, true );
 
     overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
-                          Line( Coordinate( -_half_width, ZERO ),
-                                Coordinate( _half_width, ZERO ) ),
+                          Line( Coordinate( -_half_width, 0.0 ),
+                                Coordinate( _half_width, 0.0 ) ),
                           CROSSHAIR_LINE_THICKNESS_ZOOM, true );
     overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
-                          Line( Coordinate( ZERO, -_half_height ),
-                                Coordinate( ZERO, _half_height ) ),
+                          Line( Coordinate( 0.0, -_half_height ),
+                                Coordinate( 0.0, _half_height ) ),
                           CROSSHAIR_LINE_THICKNESS_ZOOM, true );
 
     overlay_drawing.draw( MAIN_COLOR, _target_outer, FILLED );
@@ -515,7 +515,7 @@ void Camera::update( )
     }
 }
 
-void Camera::capture( Visible * _subject, const bool _should_delete )
+void Camera::capture( Visible * _subject, cbool _should_delete )
 {
     Assert( (bool)_subject );
 
@@ -527,7 +527,7 @@ void Camera::capture( Visible * _subject, const bool _should_delete )
     }
 }
 
-void Camera::add_hud_element( HeadUpDisplay * _hud_element, const bool _should_delete )
+void Camera::add_hud_element( HeadUpDisplay * _hud_element, cbool _should_delete )
 {
     Assert( (bool)_hud_element );
 
@@ -551,7 +551,7 @@ void Camera::remove_hud_element( HeadUpDisplay * _hud_element )
     }
 }
 
-void Camera::add_screen_effect( ScreenEffect * _effect, const bool _should_delete )
+void Camera::add_screen_effect( ScreenEffect * _effect, cbool _should_delete )
 {
     Assert( (bool)_effect );
 
@@ -576,7 +576,7 @@ void Camera::remove_screen_effect( ScreenEffect * _effect )
 }
 
 #ifdef AXN_DEBUG
-void Camera::capture_debug( Visible * _subject, const bool _should_delete )
+void Camera::capture_debug( Visible * _subject, cbool _should_delete )
 {
     Assert( (bool)_subject );
 
@@ -590,13 +590,13 @@ void Camera::capture_debug( Visible * _subject, const bool _should_delete )
 #endif
 
 Planc Camera::width( ) const { return m_width; }
-void Camera::width( const Planc & _width ) { m_width = _width; }
+void Camera::width( Planc cref _width ) { m_width = _width; }
 
 Planc Camera::height( ) const { return m_height; }
-void Camera::height( const Planc & _height ) { m_height = _height; }
+void Camera::height( Planc cref _height ) { m_height = _height; }
 
 dec Camera::zoom( ) const { return m_zoom; }
-void Camera::zoom( const dec _zoom )
+void Camera::zoom( cdec _zoom )
 {
     Assert( _zoom, "zoom cannot be zero" );
 
@@ -620,18 +620,18 @@ dec Camera::min_zoom( ) const { return MIN_ZOOM; }
 dec Camera::max_zoom( ) const { return MAX_ZOOM; }
 
 bool Camera::show_hud( ) const { return m_show_hud; }
-void Camera::show_hud( const bool _show_hud ) { m_show_hud = _show_hud; }
+void Camera::show_hud( cbool _show_hud ) { m_show_hud = _show_hud; }
 
 dec Camera::hud_offset_percentage( ) const { return m_hud_offset_percentage; }
-void Camera::hud_offset_percentage( const dec _hud_offset_percentage ) { m_hud_offset_percentage = _hud_offset_percentage; }
+void Camera::hud_offset_percentage( cdec _hud_offset_percentage ) { m_hud_offset_percentage = _hud_offset_percentage; }
 
 Coordinate Camera::center( ) const { return m_center; }
-void Camera::center( const Coordinate & _center ) { m_center = _center; }
+void Camera::center( Coordinate cref _center ) { m_center = _center; }
 
 FixedRectangle Camera::bounds( ) const { return FixedRectangle( width( ), height( ), center( ) ); }
 
 Coordinate Camera::target( ) const { return m_target; }
-void Camera::target( const Coordinate & _target, const bool _hard_set )
+void Camera::target( Coordinate cref _target, cbool _hard_set )
 {
     m_target = _target;
     m_target += target_offset( );
@@ -642,9 +642,9 @@ void Camera::target( const Coordinate & _target, const bool _hard_set )
     }
 }
 
-Vector Camera::target_offset( ) const { return Vector( ZERO, ( height( ) * TARGET_OFFSET_Y ) / zoom( ) ); }
+Vector Camera::target_offset( ) const { return Vector( 0.0, ( height( ) * TARGET_OFFSET_Y ) / zoom( ) ); }
 
-bool Camera::in_view( const Coordinate & _world_position, const dec _z ) const
+bool Camera::in_view( Coordinate cref _world_position, cdec _z ) const
 {
     if( !_z )
     {
@@ -655,7 +655,7 @@ bool Camera::in_view( const Coordinate & _world_position, const dec _z ) const
     return in_range( screen_position.x( ), width( ) / _z ) && in_range( screen_position.y( ), height( ) / _z );
 }
 
-bool Camera::in_view( const FixedRectangle & _world_bounding_box, const dec _z ) const
+bool Camera::in_view( FixedRectangle cref _world_bounding_box, cdec _z ) const
 {
     if( !_z )
     {
@@ -671,34 +671,34 @@ bool Camera::in_view( const FixedRectangle & _world_bounding_box, const dec _z )
     return screen.has_intersection_with( bounds );
 }
 
-Coordinate Camera::screen_to_world( const Coordinate & _screen_position ) const
+Coordinate Camera::screen_to_world( Coordinate cref _screen_position ) const
 {
     Coordinate world_position = _screen_position;
 
     world_position += center( ) - half( Vector( Engine::screen_width( ), Engine::screen_height( ) ) );
-    world_position.y( -world_position.y( ) + ( center( ).y( ) * TWO ) );
+    world_position.y( -world_position.y( ) + ( center( ).y( ) * 2.0 ) );
     world_position = Vector( center( ), world_position ) / zoom( );
 
     return world_position;
 }
 
-Coordinate Camera::world_to_screen( const Coordinate & _world_position ) const
+Coordinate Camera::world_to_screen( Coordinate cref _world_position ) const
 {
     Coordinate screen_position = _world_position;
 
     screen_position = Vector( center( ), screen_position ) * zoom( );
-    screen_position.y( -screen_position.y( ) + ( center( ).y( ) * TWO ) );
+    screen_position.y( -screen_position.y( ) + ( center( ).y( ) * 2.0 ) );
     screen_position -= center( ) - half( Vector( Engine::screen_width( ), Engine::screen_height( ) ) );
 
     return screen_position;
 }
 
 Coordinate Camera::cursor_world_position( ) { return m_cursor_world_position; }
-void Camera::cursor_world_position( const Coordinate & _cursor_world_position ) { m_cursor_world_position = _cursor_world_position; }
+void Camera::cursor_world_position( Coordinate cref _cursor_world_position ) { m_cursor_world_position = _cursor_world_position; }
 
 void Camera::cursor_world_position_reset( ) { m_cursor_world_position = INVALID_COORDINATE; }
 
-Camera::HeadUpDisplay::HeadUpDisplay( const dec _center_x_percent, const dec _center_y_percent, const dec _width_percent, const dec _height_percent )
+Camera::HeadUpDisplay::HeadUpDisplay( cdec _center_x_percent, cdec _center_y_percent, cdec _width_percent, cdec _height_percent )
     : m_center_x_percent( _center_x_percent ), m_center_y_percent( _center_y_percent ), m_width_percent( _width_percent ), m_height_percent( _height_percent )
 {
     persist_render( false );
@@ -712,12 +712,12 @@ FixedRectangle Camera::HeadUpDisplay::bounds( Camera * camera ) const
 
     Planc offset = min( width, height ) * camera->hud_offset_percentage( );
 
-    width -= ( offset * TWO );
-    height -= ( offset * TWO );
+    width -= ( offset * 2.0 );
+    height -= ( offset * 2.0 );
 
     Planc display_width = width * m_width_percent;
     Planc display_height = height * m_height_percent;
-    Coordinate center( width * ( m_center_x_percent - HALF ), height * ( m_center_y_percent - HALF ) );
+    Coordinate center( width * ( m_center_x_percent - 0.5 ), height * ( m_center_y_percent - 0.5 ) );
 
     return FixedRectangle( display_width, display_height, center );
 }

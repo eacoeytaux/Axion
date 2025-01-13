@@ -6,12 +6,12 @@ using mtmercy::Unalope;
 
 namespace
 {
-const dec TEMP_SCALE_TODO = 1.0;
+cdec TEMP_SCALE_TODO = 1.0;
 
-const Planc SIGHT_RANGE = METER * 10.0;
-const Planc ALERT_RANGE = SIGHT_RANGE * 0.75;
+cPlanc SIGHT_RANGE = METER * 10.0;
+cPlanc ALERT_RANGE = SIGHT_RANGE * 0.75;
 
-const Planc FACE_WIDTH;
+cPlanc FACE_WIDTH;
 
 const Polygon HEAD = Polygon( {
     Coordinate( -3.0, -8.0 ),
@@ -38,9 +38,9 @@ const Polygon EAR = Polygon( {
                              } ).scale( TEMP_SCALE_TODO );
 
 const Polygon INNER_EAR = Polygon( {
-    Coordinate( -7.0, 12.0 ),
+    Coordinate( -8.0, 14.0 ),
     Coordinate( -13.0, 24.0 ),
-    Coordinate( -10.0, 36.0 )
+    Coordinate( -10.5, 32.0 )
                                    } ).scale( TEMP_SCALE_TODO );
 
 const Polygon EAR_MIRRORED = Polygon( EAR ).mirror_y( );
@@ -59,7 +59,7 @@ const Color INNER_EAR_COLOR = RED;
 const Color NOSE_COLOR = RED;
 }
 
-Unalope::Unalope( World * world, const Coordinate & _position ) : Enemy( world, _position, 10000.0 )
+Unalope::Unalope( World * world, Coordinate cref _position ) : Enemy( world, _position, 10000.0 )
 {
     space( Polygon::rectangle( 16.0, 16.0 ) );
 

@@ -6,13 +6,13 @@
 
 namespace
 {
-const uint GRID_BLOCK_SIZE = 256;
-const uint START_AGE = 0; // 1024;
-const dec CAMERA_ZOOM_RATIO = 0.96875;
+cuint GRID_BLOCK_SIZE = 256;
+cuint START_AGE = 0; // 1024;
+cdec CAMERA_ZOOM_RATIO = 0.96875;
 #ifdef AXN_DEBUG
-const dec CAMERA_SIDE_BUFFER_RATIO = 0.1;
+cdec CAMERA_SIDE_BUFFER_RATIO = 0.1;
 #else
-const dec CAMERA_SIDE_BUFFER_RATIO = ZERO;
+cdec CAMERA_SIDE_BUFFER_RATIO = 0.0;
 #endif
 } // namespace
 
@@ -30,7 +30,7 @@ World::~World( )
     destroy( );
 }
 
-void World::create( const FixedRectangle & _bounds )
+void World::create( FixedRectangle cref _bounds )
 {
     bounds( _bounds );
 
@@ -153,7 +153,7 @@ void World::input( const varray<Input *> & _inputs )
                     }
                     case '/':
                     {
-                        m_camera->zoom( ONE );
+                        m_camera->zoom( 1.0 );
                         break;
                     };
 
@@ -307,15 +307,15 @@ void World::pause( bool paused )
 void World::render_bounds( Camera * camera )
 {
     const Color BOUNDS_COLOR = RED;
-    const Planc BOUNDS_THICKNESS = 5.0;
+    cPlanc BOUNDS_THICKNESS = 5.0;
 
     static uint PULSE = 0;
-    const uint PULSE_SPAN = 30;
-    const uint PULSE_THICKNESS = BOUNDS_THICKNESS;
-    const dec PULSE_ALPHA_START = 0.8;
+    cuint PULSE_SPAN = 30;
+    cuint PULSE_THICKNESS = BOUNDS_THICKNESS;
+    cdec PULSE_ALPHA_START = 0.8;
 
     static uint PULSE_COLOR = 0;
-    const uint PULSE_COLOR_SPAN = 71;
+    cuint PULSE_COLOR_SPAN = 71;
 
     dec percent_pulse = (dec)( PULSE = ( PULSE + 1 ) % PULSE_SPAN ) / (dec)( PULSE_SPAN );
     dec percent_color = (dec)( PULSE_COLOR = ( PULSE_COLOR + 1 ) % PULSE_COLOR_SPAN ) / (dec)( PULSE_COLOR_SPAN );
@@ -348,12 +348,12 @@ void World::render_bounds( Camera * camera )
 #ifdef AXN_DEBUG
 void World::render_object_grid( Camera * camera ) const
 {
-    const dec GRID_LINE_THICKNESS = 1.0;
+    cdec GRID_LINE_THICKNESS = 1.0;
     const Color GRID_LINE_COLOR = WHITE.a( 0.25 );
     const Color HAS_OBJECTS_COLOR = GREEN.a( 0.15 );
     const Color HAS_TERRAIN_COLOR = YELLOW.a( 0.15 );
 
-    const Grid & grid = m_object_grid;
+    Grid cref grid = m_object_grid;
     Coordinate top = bounds( ).top( );
     Coordinate bottom = bounds( ).bottom( );
 
@@ -529,7 +529,18 @@ void World::update( )
 
         if( obj1->layer_position( ) != obj2->layer_position( ) )
         {
-            return ( obj1->layer_position( ) < obj2->layer_position( ) );
+            if( obj1->layer_position( ).size( ) && obj2->layer_position( ).size( ) )
+            {
+                return ( obj1->layer_position( ).front( ) < obj2->layer_position( ).front( ) );
+            }
+            else if( obj1->layer_position( ).size( ) )
+            {
+                return true;
+            }
+            else if( obj2->layer_position( ).size( ) )
+            {
+                return false;
+            }
         }
 
         if( obj1->age( ) != obj2->age( ) )
@@ -610,7 +621,7 @@ const varray<Object *> & World::objects( ) const
     return m_objects;
 }
 
-varray<Object *> World::objects_in_range( const FixedRectangle & _range )
+varray<Object *> World::objects_in_range( FixedRectangle cref _range )
 {
     uset<Object *> objects_set;
     varray<Object *> objects;
@@ -630,7 +641,7 @@ varray<Object *> World::objects_in_range( const FixedRectangle & _range )
     return objects;
 }
 
-varray<TerrainNode *> World::terrain_in_range( const FixedRectangle & _range )
+varray<TerrainNode *> World::terrain_in_range( FixedRectangle cref _range )
 {
     uset<TerrainNode *> terrain_set;
     varray<TerrainNode *> terrain;
@@ -662,7 +673,7 @@ void World::remove_object( Object * object )
 {
     if( object )
     {
-        if( object->z( ) == ONE )
+        if( object->z( ) == 1.0 )
         {
             m_object_grid.remove( object );
         }
@@ -707,7 +718,7 @@ void World::clear_objects( )
 
     while( m_object_queue.size( ) )
     {
-        safe_delete( m_object_queue.front( ) );
+        // todo safe_delete( m_object_queue.front( ) );
         m_object_queue.pop( );
     }
 
@@ -742,17 +753,17 @@ uint World::age( ) const
     return m_age;
 }
 
-const FixedRectangle & World::bounds( ) const
+FixedRectangle cref World::bounds( ) const
 {
     return m_bounds;
 }
 
-void World::bounds( const FixedRectangle & _bounds )
+void World::bounds( FixedRectangle cref _bounds )
 {
     m_object_grid.init( m_bounds = _bounds );
 }
 
-Player * World::add_player( const Coordinate & _position )
+Player * World::add_player( Coordinate cref _position )
 {
     Player * new_player = m_players.insert_back( create_player( _position ) );
 
@@ -768,7 +779,7 @@ Camera * World::camera( )
     return m_camera;
 }
 
-Player * World::player( const uint _player_number )
+Player * World::player( cuint _player_number )
 {
     if( m_players.valid_index( _player_number ) )
     {
@@ -785,7 +796,7 @@ Player * World::player_main( )
     return player( 0 );
 }
 
-void World::wind( const Vector & _wind )
+void World::wind( Vector cref _wind )
 {
     m_wind = _wind;
 }
@@ -815,7 +826,7 @@ Vector World::wind( ) const
     return m_wind;
 }
 
-void World::Grid::init( const FixedRectangle & _bounds )
+void World::Grid::init( FixedRectangle cref _bounds )
 {
     m_bounds = _bounds;
 
@@ -833,7 +844,7 @@ void World::Grid::init( const FixedRectangle & _bounds )
     }
 }
 
-World::Grid::Block & World::Grid::block( const uint _x, const uint _y )
+World::Grid::Block & World::Grid::block( cuint _x, cuint _y )
 {
     if( valid_x( _x ) && valid_y( _y ) )
     {
@@ -845,7 +856,7 @@ World::Grid::Block & World::Grid::block( const uint _x, const uint _y )
     }
 }
 
-const World::Grid::Block & World::Grid::block_const( const uint _x, const uint _y ) const
+const World::Grid::Block & World::Grid::block_const( cuint _x, cuint _y ) const
 {
     if( valid_x( _x ) && valid_y( _y ) )
     {
@@ -857,45 +868,45 @@ const World::Grid::Block & World::Grid::block_const( const uint _x, const uint _
     }
 }
 
-uint World::Grid::x( const Planc & _x ) const
+uint World::Grid::x( Planc cref _x ) const
 {
     Planc x_translated = _x - m_bounds.bottom( ).x( );
 
-    if( x_translated >= ZERO )
+    if( x_translated >= 0.0 )
     {
         return floor( x_translated / GRID_BLOCK_SIZE );
     }
     else
     {
-        return ZERO;
+        return 0;
     }
 }
 
-uint World::Grid::y( const Planc & _y ) const
+uint World::Grid::y( Planc cref _y ) const
 {
     Planc y_translated = _y - m_bounds.bottom( ).y( );
 
-    if( y_translated >= ZERO )
+    if( y_translated >= 0.0 )
     {
         return floor( y_translated / GRID_BLOCK_SIZE );
     }
     else
     {
-        return ZERO;
+        return 0;
     }
 }
 
-Span<uint> World::Grid::x_range( const FixedRectangle & _r ) const
+Span<uint> World::Grid::x_range( FixedRectangle cref _r ) const
 {
     return Span<uint>( x( _r.bottom( ).x( ) ), x( _r.top( ).x( ) ) );
 }
 
-Span<uint> World::Grid::y_range( const FixedRectangle & _r ) const
+Span<uint> World::Grid::y_range( FixedRectangle cref _r ) const
 {
     return Span<uint>( y( _r.bottom( ).y( ) ), y( _r.top( ).y( ) ) );
 }
 
-void World::Grid::traverse( const FixedRectangle & _range, function<void( World::Grid::Block & )> f )
+void World::Grid::traverse( FixedRectangle cref _range, function<void( World::Grid::Block & )> f )
 {
     Span<uint> xx = x_range( _range );
     Span<uint> yy = y_range( _range );
@@ -909,7 +920,7 @@ void World::Grid::traverse( const FixedRectangle & _range, function<void( World:
     }
 }
 
-void World::Grid::traverse_const( const FixedRectangle & _range, function<void( const World::Grid::Block & )> f ) const
+void World::Grid::traverse_const( FixedRectangle cref _range, function<void( const World::Grid::Block & )> f ) const
 {
     Span<uint> xx = x_range( _range );
     Span<uint> yy = y_range( _range );
@@ -925,7 +936,7 @@ void World::Grid::traverse_const( const FixedRectangle & _range, function<void( 
 
 void World::Grid::add( Object * object )
 {
-    if( object->z( ) == ONE )
+    if( object->z( ) == 1.0 )
     {
         traverse( object->hit_box( ), [ & ] ( Grid::Block & block )
         {
@@ -936,7 +947,7 @@ void World::Grid::add( Object * object )
 
 void World::Grid::remove( Object * object )
 {
-    if( object->z( ) == ONE )
+    if( object->z( ) == 1.0 )
     {
         traverse( object->hit_box( ), [ & ] ( Grid::Block & block )
         {

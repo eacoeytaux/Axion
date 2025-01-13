@@ -5,25 +5,25 @@ using mtmercy::Hills;
 
 namespace
 {
-const Planc HILL_RADIUS = 1000.0;
-const Planc HILL_SCALE_X = 2.0;
+cPlanc HILL_RADIUS = 1000.0;
+cPlanc HILL_SCALE_X = 2.0;
 const Span<Planc> HILL_OFFSET_X = { HILL_RADIUS * 0.8, HILL_RADIUS * 1.75 };
-const Span<Planc> HILL_OFFSET_Y = { ZERO, HILL_RADIUS * 0.25 };
-const Planc TREE_HEIGHT = 225.0;
-const Planc TREE_BASE = 150.0;
+const Span<Planc> HILL_OFFSET_Y = { 0.0, HILL_RADIUS * 0.25 };
+cPlanc TREE_HEIGHT = 225.0;
+cPlanc TREE_BASE = 150.0;
 const Span<uint> INNER_TREE_COUNT = { 20, 30 };
 const Span<uint> TOP_TREE_COUNT = { 8, 12 };
 const Angle TOP_TREE_ANGLE = RIGHT_ANGLE / 1.5;
-const Planc TREE_LINE_BASE = HILL_RADIUS;
-const Planc TREE_LINE_PENUMBRA = TREE_LINE_BASE * 2.0;
-const uint TREE_LINE_PENUMBRA_PASSES = 2;
+cPlanc TREE_LINE_BASE = HILL_RADIUS;
+cPlanc TREE_LINE_PENUMBRA = TREE_LINE_BASE * 2.0;
+cuint TREE_LINE_PENUMBRA_PASSES = 2;
 
 const Color GRASS_COLOR = Color::rgb( 0x00EE00 );
 const Color TREE_COLOR = Color::rgb( 0x00CC00 );
 const Color TREE_2_COLOR = Color::rgb( 0x00AA00 );
 }
 
-Hills::Hills( World * world, const Planc _base_bottom, const dec _z ) : Object( world )
+Hills::Hills( World * world, cPlanc _base_bottom, cdec _z ) : Object( world )
 {
     background( true );
 
@@ -51,8 +51,8 @@ Hills::Hills( World * world, const Planc _base_bottom, const dec _z ) : Object( 
                                   Coordinate( end_x, bottom ),
                                   Coordinate( end_x, _base_bottom ) } ) );
 
-    Polygon tree( { Coordinate( ZERO, TREE_HEIGHT ), Coordinate( -half( TREE_BASE ), ZERO ), Coordinate( half( TREE_BASE ), ZERO ) } );
-    Polygon hill = Polygon::circle( HILL_RADIUS, Coordinate( ZERO, _base_bottom ) ).stretch( Vector::X( HILL_SCALE_X ) );
+    Polygon tree( { Coordinate( 0.0, TREE_HEIGHT ), Coordinate( -half( TREE_BASE ), 0.0 ), Coordinate( half( TREE_BASE ), 0.0 ) } );
+    Polygon hill = Polygon::circle( HILL_RADIUS, Coordinate( 0.0, _base_bottom ) ).stretch( Vector::X( HILL_SCALE_X ) );
 
     varray<Vector> centers = { };
 
@@ -92,14 +92,14 @@ Hills::Hills( World * world, const Planc _base_bottom, const dec _z ) : Object( 
         }
     }
 
-    auto draw_tree_line = [ & ] ( const Planc & _base, const Planc & _penumbra, const Color & _color )
+    auto draw_tree_line = [ & ] ( Planc cref _base, Planc cref _penumbra, Color cref _color )
     {
         draw( _color, Polygon( { Coordinate( start_x, _base ),
                                   Coordinate( start_x, bottom ),
                                   Coordinate( end_x, bottom ),
                                   Coordinate( end_x, _base ) } ) );
 
-        auto fill_tree_line = [ & ] ( const Planc & _y_raise, uint loops = 1 )
+        auto fill_tree_line = [ & ] ( Planc cref _y_raise, uint loops = 1 )
         {
             for_range( i, loops )
             {
@@ -108,10 +108,10 @@ Hills::Hills( World * world, const Planc _base_bottom, const dec _z ) : Object( 
                 {
                     center_x += Random::rPlanc( TREE_BASE );
 
-                    Planc y = ZERO;
+                    Planc y = 0.0;
                     if( _y_raise )
                     {
-                        y = _y_raise - ( log( _y_raise, Random::rPlanc( _y_raise ) + ONE ) * _y_raise );
+                        y = _y_raise - ( log( _y_raise, Random::rPlanc( _y_raise ) + 1.0 ) * _y_raise );
                     }
 
                     draw( _color, Polygon( tree ).move( Vector( center_x, _base + y ) ) );
@@ -119,7 +119,7 @@ Hills::Hills( World * world, const Planc _base_bottom, const dec _z ) : Object( 
             }
         };
 
-        fill_tree_line( ZERO );
+        fill_tree_line( 0.0 );
         fill_tree_line( TREE_LINE_PENUMBRA, TREE_LINE_PENUMBRA_PASSES );
     };
 

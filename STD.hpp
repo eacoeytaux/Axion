@@ -19,6 +19,11 @@
 typedef double dec;
 typedef unsigned int uint;
 
+typedef const bool cbool;
+typedef const int cint;
+typedef const uint cuint;
+typedef const dec cdec;
+
 #define use_std( s ) using std::s;
 
 #define use_std_dec( s )  \
@@ -66,29 +71,16 @@ use_std_dec2( atan2 );
 
 // -- constants --
 
-const dec ZERO = 0.0;
-const dec HALF = 0.5;
-const dec ONE = 1.0;
-const dec TWO = 2.0;
-const dec THREE = 3.0;
-const dec FOUR = 4.0;
-const dec FIVE = 5.0;
-const dec SIX = 6.0;
-const dec SEVEN = 7.0;
-const dec EIGTH = 8.0;
-const dec NINE = 9.0;
-const dec TEN = 10.0;
+cdec TAU = 6.283185307179586476925;
+cdec PI = 3.141592653589793236926;
+cdec RIGHT_ANGLE = 1.570796326794896618463;
+cdec RIGHT_ANGLE_0 = RIGHT_ANGLE * 0.0;
+cdec RIGHT_ANGLE_1 = RIGHT_ANGLE * 1.0;
+cdec RIGHT_ANGLE_2 = RIGHT_ANGLE * 2.0;
+cdec RIGHT_ANGLE_3 = RIGHT_ANGLE * 3.0;
 
-const dec TAU = 6.283185307179586476925;
-const dec PI = 3.141592653589793236926;
-const dec RIGHT_ANGLE = 1.570796326794896618463;
-const dec RIGHT_ANGLE_0 = RIGHT_ANGLE * ZERO;
-const dec RIGHT_ANGLE_1 = RIGHT_ANGLE * ONE;
-const dec RIGHT_ANGLE_2 = RIGHT_ANGLE * TWO;
-const dec RIGHT_ANGLE_3 = RIGHT_ANGLE * THREE;
-
-const dec INFINITY_POS = INFINITY;
-const dec INFINITY_NEG = -INFINITY;
+cdec INFINITY_POS = INFINITY;
+cdec INFINITY_NEG = -INFINITY;
 
 } // namespace axn
 

@@ -28,7 +28,7 @@ public:
     class ScreenEffect;
 
     ~Camera( ) { clear_all( ); }
-    Camera( World * world, const Planc & width = P0, const Planc & height = P0, dec zoom = ONE );
+    Camera( World * world, Planc cref width = P0, Planc cref height = P0, dec zoom = 1.0 );
 
     uint age( ) const { return m_age; }
 
@@ -97,17 +97,17 @@ public:
     #endif
 
     Planc width( ) const;
-    void width( const Planc & );
+    void width( Planc cref );
     Planc height( ) const;
-    void height( const Planc & );
+    void height( Planc cref );
 
     Coordinate center( ) const;
-    void center( const Coordinate & );
+    void center( Coordinate cref );
 
     FixedRectangle bounds( ) const;
 
     Coordinate target( ) const;
-    void target( const Coordinate &, bool hard_set = false );
+    void target( Coordinate cref, bool hard_set = false );
 
     Vector target_offset( ) const;
 
@@ -123,14 +123,14 @@ public:
     dec hud_offset_percentage( ) const;
     void hud_offset_percentage( dec );
 
-    bool in_view( const Coordinate & world_position, dec z = ONE ) const;
-    bool in_view( const FixedRectangle & world_bounding_box, dec z = ONE ) const;
+    bool in_view( Coordinate cref world_position, dec z = 1.0 ) const;
+    bool in_view( FixedRectangle cref world_bounding_box, dec z = 1.0 ) const;
 
-    Coordinate screen_to_world( const Coordinate & screen_position ) const;
-    Coordinate world_to_screen( const Coordinate & world_position ) const;
+    Coordinate screen_to_world( Coordinate cref screen_position ) const;
+    Coordinate world_to_screen( Coordinate cref world_position ) const;
 
     Coordinate cursor_world_position( );
-    void cursor_world_position( const Coordinate & );
+    void cursor_world_position( Coordinate cref );
     void cursor_world_position_reset( );
 
 private:

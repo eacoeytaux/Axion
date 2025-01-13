@@ -5,16 +5,16 @@ using mtmercy::Snail;
 
 namespace
 {
-const Planc SPEED = 0.025;
-const Planc SHELL_RADIUS = 10.0;
-const Planc SLUG_THICKNESS = 5.0;
-const uint STRETCH_PERIOD = 10;
+cPlanc SPEED = 0.025;
+cPlanc SHELL_RADIUS = 10.0;
+cPlanc SLUG_THICKNESS = 5.0;
+cuint STRETCH_PERIOD = 10;
 
 const Color SLUG_COLOR = BLACK;
 const Color SHELL_COLOR = RED;
 } // namespace
 
-Snail::Snail( World * world, const Coordinate & _position ) : Mob( world, _position )
+Snail::Snail( World * world, Coordinate cref _position ) : Mob( world, _position )
 {
     needs_render_always( true );
 

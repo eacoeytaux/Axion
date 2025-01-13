@@ -19,7 +19,7 @@ private:
 
 public:
     virtual ~Waterfall( ) { }
-    Waterfall( World *, const Coordinate & bottom, Planc width, Planc height, dec z = 1.0 );
+    Waterfall( World *, Coordinate cref bottom, Planc width, Planc height, dec z = 1.0 );
 
     void render( ) override;
     void update( ) override;

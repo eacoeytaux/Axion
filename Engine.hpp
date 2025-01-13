@@ -29,7 +29,7 @@ private:
 public:
     virtual ~Engine( ) { }
 
-    static const uint FPS = 60; // frames per second
+    static cuint FPS = 60; // frames per second
 
     static error run( World * world, const string app_name = "" );
     static error quit( );
@@ -132,7 +132,7 @@ struct MouseInput : public Input
         MOVE,
     };
 
-    MouseInput( Button b, Dynamic d, const Coordinate & p ) : button( b ), dynamic( d ), position( p ) { }
+    MouseInput( Button b, Dynamic d, Coordinate cref p ) : button( b ), dynamic( d ), position( p ) { }
 
     const Button button;
     const Dynamic dynamic;
@@ -187,15 +187,8 @@ struct ControllerJoystickInput : public ControllerInput
 {
     static dec DEAD_ZONE;
 
-    static bool in_dead_zone( const dec d )
-    {
-        return ( d < DEAD_ZONE );
-    }
-
-    static bool in_dead_zone( const Vector & v )
-    {
-        return !v.has_magnitude( ) || in_dead_zone( abs( v.magnitude( ) ) );
-    }
+    static bool in_dead_zone( cdec d ) { return ( d < DEAD_ZONE ); }
+    static bool in_dead_zone( Vector cref v ) { return !v.has_magnitude( ) || in_dead_zone( abs( v.magnitude( ) ) ); }
 
     enum Joystick
     {
@@ -205,11 +198,11 @@ struct ControllerJoystickInput : public ControllerInput
     };
 
     ControllerJoystickInput( Joystick j ) : joystick( j ), dead_zone( true ) { }
-    ControllerJoystickInput( Joystick j, const Vector & v ) : vector( v ), joystick( j ), dead_zone( false ) { }
+    ControllerJoystickInput( Joystick j, Vector cref v ) : vector( v ), joystick( j ), dead_zone( false ) { }
 
     const Joystick joystick;
     const Vector vector;
-    const bool dead_zone;
+    cbool dead_zone;
 };
 
 } // namespace axn

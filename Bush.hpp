@@ -9,7 +9,7 @@ namespace mtmercy
 class Bush : public Object
 {
 public:
-    Bush( World *, const Coordinate & root, dec z = 1.0 );
+    Bush( World *, Coordinate cref root, dec z = 1.0 );
 };
 
 } // namespace mtmercy

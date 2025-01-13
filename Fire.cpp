@@ -7,25 +7,25 @@ namespace
 {
 const Span<uint> FLAME_WAIT = { 8 };
 const Angle FLAME_DEVIATION = RIGHT_ANGLE / 2.0;
-const Planc FLAME_ORANGE_SPEED = 1.25;
-const Planc FLAME_ORANGE_RADIUS = METER * 1.8;
-const Planc FLAME_ORANGE_SHRINK_RATE = 0.75;
-const Planc FLAME_YELLOW_SPEED = 1.0;
-const Planc FLAME_YELLOW_RADIUS = FLAME_ORANGE_RADIUS / 3.33 * 2.0;
-const Planc FLAME_YELLOW_SHRINK_RATE = FLAME_ORANGE_SHRINK_RATE;
-const Planc FLAME_YELLOW_OUTLINE_RATIO = 1.5;
-const Planc FLAME_WIND_RESISTANCE = 2.1;
-const Planc FLAME_RADIUS_MIN = 0.1;
+cPlanc FLAME_ORANGE_SPEED = 1.25;
+cPlanc FLAME_ORANGE_RADIUS = METER * 1.8;
+cPlanc FLAME_ORANGE_SHRINK_RATE = 0.75;
+cPlanc FLAME_YELLOW_SPEED = 1.0;
+cPlanc FLAME_YELLOW_RADIUS = FLAME_ORANGE_RADIUS / 3.33 * 2.0;
+cPlanc FLAME_YELLOW_SHRINK_RATE = FLAME_ORANGE_SHRINK_RATE;
+cPlanc FLAME_YELLOW_OUTLINE_RATIO = 1.5;
+cPlanc FLAME_WIND_RESISTANCE = 2.1;
+cPlanc FLAME_RADIUS_MIN = 0.1;
 
-const Planc LIGHT_DISTANCE = FLAME_ORANGE_RADIUS * 2.0;
+cPlanc LIGHT_DISTANCE = FLAME_ORANGE_RADIUS * 2.0;
 const Color FLAME_COLOR_ORANGE = Color::rgb( 0xFF8000 );
 const Color FLAME_COLOR_YELLOW = Color::rgb( 0xFFC000 );
-const Planc TINT_DISTANCE = LIGHT_DISTANCE * 0.8;
-const dec TINT_FLICKER = 2.0;
-const dec TINT_INTENSITY = 0.125;
+cPlanc TINT_DISTANCE = LIGHT_DISTANCE * 0.8;
+cdec TINT_FLICKER = 2.0;
+cdec TINT_INTENSITY = 0.125;
 } // namespace
 
-Fire::Fire( World * world, const Coordinate & _position ) : Object( world, _position )
+Fire::Fire( World * world, Coordinate cref _position ) : Object( world, _position )
 {
     needs_render_always( true );
 
@@ -45,17 +45,17 @@ void Fire::render( )
 
     for_each( flame, m_flames_orange )
     {
-        draw( FLAME_COLOR_ORANGE, Polygon::equilateral( FOUR, half( flame.radius ), flame.offset ) );
+        draw( FLAME_COLOR_ORANGE, Polygon::equilateral( 4, half( flame.radius ), flame.offset ) );
     }
 
     for_each( flame, m_flames_yellow )
     {
-        draw( FLAME_COLOR_ORANGE, Polygon::equilateral( FOUR, half( flame.radius ) * FLAME_YELLOW_OUTLINE_RATIO, flame.offset ) );
+        draw( FLAME_COLOR_ORANGE, Polygon::equilateral( 4, half( flame.radius ) * FLAME_YELLOW_OUTLINE_RATIO, flame.offset ) );
     }
 
     for_each( flame, m_flames_yellow )
     {
-        draw( FLAME_COLOR_YELLOW, Polygon::equilateral( FOUR, half( flame.radius ), flame.offset ) );
+        draw( FLAME_COLOR_YELLOW, Polygon::equilateral( 4, half( flame.radius ), flame.offset ) );
     }
 }
 
@@ -75,7 +75,7 @@ void Fire::update( )
         flame.radius -= min( FLAME_ORANGE_SHRINK_RATE, flame.radius );
         flame.offset += Vector::A( Angle( RIGHT_ANGLE_1 + Random::rAngle( -FLAME_DEVIATION, FLAME_DEVIATION ) ), FLAME_YELLOW_SPEED ) + ( world( )->wind( ) / FLAME_WIND_RESISTANCE );
     }
-    m_flames_orange.remove_if( [ ] ( const Flame & flame )
+    m_flames_orange.remove_if( [ ] ( Flame cref flame )
     {
         return flame.radius < FLAME_RADIUS_MIN;
     } );
@@ -85,7 +85,7 @@ void Fire::update( )
         flame.radius -= min( FLAME_YELLOW_SHRINK_RATE, flame.radius );
         flame.offset += Vector::A( Angle( RIGHT_ANGLE_1 + Random::rAngle( -FLAME_DEVIATION, FLAME_DEVIATION ) ), FLAME_ORANGE_SPEED ) + ( world( )->wind( ) / FLAME_WIND_RESISTANCE );
     }
-    m_flames_yellow.remove_if( [ ] ( const Flame & flame )
+    m_flames_yellow.remove_if( [ ] ( Flame cref flame )
     {
         return flame.radius < FLAME_RADIUS_MIN;
     } );

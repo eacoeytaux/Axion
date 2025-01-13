@@ -4,10 +4,10 @@
 
 namespace
 {
-const uint PLAYER_HEALTH_START = 100;
+cuint PLAYER_HEALTH_START = 100;
 }
 
-Player::Player( World * world, const Coordinate & _position ) : Mob( world, _position, PLAYER_HEALTH_START )
+Player::Player( World * world, Coordinate cref _position ) : Mob( world, _position, PLAYER_HEALTH_START )
 {
     god( false );
 
@@ -20,10 +20,10 @@ void Player::render( )
 
     if( god( ) )
     {
-        const Planc GLOW_RADIUS = height( );
-        const Planc GLOW_RADIUS_RATIO1 = 1.35;
-        const Planc GLOW_RADIUS_RATIO2 = 1.75;
-        const Planc GLOW_RADIUS_RATIO3 = 2.0;
+        cPlanc GLOW_RADIUS = height( );
+        cPlanc GLOW_RADIUS_RATIO1 = 1.35;
+        cPlanc GLOW_RADIUS_RATIO2 = 1.75;
+        cPlanc GLOW_RADIUS_RATIO3 = 2.0;
         const Color GLOW_COLOR = Color( WHITE, 0.125 );
 
         Drawing god_drawing;
@@ -85,7 +85,7 @@ void Player::out_of_bounds( )
     #endif
 }
 
-void Player::god( const bool _god )
+void Player::god( cbool _god )
 {
     if( _god == m_god )
     {

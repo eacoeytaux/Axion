@@ -4,13 +4,13 @@ using mtmercy::Butterfly;
 
 namespace
 {
-const Planc WING_RADIUS = 5.0;
-const dec UNDER_WING_RATIO = 0.9;
-const dec UNDER_WING_OFFSET = 0.75;
+cPlanc WING_RADIUS = 5.0;
+cdec UNDER_WING_RATIO = 0.9;
+cdec UNDER_WING_OFFSET = 0.75;
 const Color WING_COLOR = RED;
 } // namespace
 
-Butterfly::Butterfly( World * world, const Coordinate & _position ) : Mob( world, _position )
+Butterfly::Butterfly( World * world, Coordinate cref _position ) : Mob( world, _position )
 {
     needs_render_always( true );
 
@@ -23,15 +23,15 @@ void Butterfly::render( )
 
     Drawing wings;
 
-    //Path path1 = Arc::ccw( WING_RADIUS, ZERO, PI );
-    //Path path2 = Arc::ccw( WING_RADIUS * UNDER_WING_RATIO, ZERO, PI );
+    //Path path1 = Arc::ccw( WING_RADIUS, 0.0, PI );
+    //Path path2 = Arc::ccw( WING_RADIUS * UNDER_WING_RATIO, 0.0, PI );
 
     //Polygon wing1 = Polygon( path1.points( ) );
-    //wing1.stretch( Vector( ZERO, 2.0 ) );
+    //wing1.stretch( Vector( 0.0, 2.0 ) );
 
     //Polygon wing2 = Polygon( path2.points( ) );
-    //wing2.stretch( Vector( ZERO, 2.0 ) );
-    //wing2.move( Vector::X( WING_RADIUS * ( UNDER_WING_RATIO + ONE ) * UNDER_WING_OFFSET ) );
+    //wing2.stretch( Vector( 0.0, 2.0 ) );
+    //wing2.move( Vector::X( WING_RADIUS * ( UNDER_WING_RATIO + 1.0 ) * UNDER_WING_OFFSET ) );
 
     //wings.draw( WING_COLOR, wing1 );
     //wings.draw( WING_COLOR, wing2 );

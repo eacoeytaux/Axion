@@ -23,8 +23,8 @@ public:
 
     Planc get( uint i, uint j ) const { Assert( ( ( i <= 2 ) && ( j <= 2 ) ), "index out of range" ); return m_matrix[ i ][ j ]; }
 
-    Transform & set( uint i, uint j, const Planc p ) { Assert( ( ( i <= 2 ) && ( j <= 2 ) ), "index out of range" ); m_matrix[ i ][ j ] = p; rethis; }
-    Transform & set( const Transform & t )
+    Transform & set( uint i, uint j, cPlanc p ) { Assert( ( ( i <= 2 ) && ( j <= 2 ) ), "index out of range" ); m_matrix[ i ][ j ] = p; rethis; }
+    Transform & set( Transform cref t )
     {
         m_matrix[ 0 ][ 0 ] = t.m_matrix[ 0 ][ 0 ];
         m_matrix[ 0 ][ 1 ] = t.m_matrix[ 0 ][ 1 ];
@@ -40,16 +40,16 @@ public:
 
     Transform & clear( bool identity ) { m_matrix[ 0 ][ 0 ] = m_matrix[ 1 ][ 1 ] = m_matrix[ 2 ][ 2 ] = identity ? 1.0 : 0.0; m_matrix[ 0 ][ 1 ] = m_matrix[ 0 ][ 2 ] = m_matrix[ 1 ][ 0 ] = m_matrix[ 1 ][ 2 ] = m_matrix[ 2 ][ 0 ] = m_matrix[ 2 ][ 1 ] = 0.0; rethis; }
 
-    Coordinate apply( const Coordinate & c ) const { return ( is_identity( ) ? c : Coordinate( ( c.x( ) * m_matrix[ 0 ][ 0 ] ) + ( c.y( ) * m_matrix[ 0 ][ 1 ] ) + m_matrix[ 0 ][ 2 ], ( c.x( ) * m_matrix[ 1 ][ 0 ] ) + ( c.y( ) * m_matrix[ 1 ][ 1 ] ) + m_matrix[ 1 ][ 2 ] ) ); }
+    Coordinate apply( Coordinate cref c ) const { return ( is_identity( ) ? c : Coordinate( ( c.x( ) * m_matrix[ 0 ][ 0 ] ) + ( c.y( ) * m_matrix[ 0 ][ 1 ] ) + m_matrix[ 0 ][ 2 ], ( c.x( ) * m_matrix[ 1 ][ 0 ] ) + ( c.y( ) * m_matrix[ 1 ][ 1 ] ) + m_matrix[ 1 ][ 2 ] ) ); }
 
-    Transform & chain( const Transform & t ) { return set( t * ( *this ) ); }
+    Transform & chain( Transform cref t ) { return set( t * ( *this ) ); }
 
     Transform & invert( ) { rethis = inverse( ); }
     Transform inverse( ) const
     {
         if( dec d = determinant( ) )
         {
-            auto determinant2x2 = [ ] ( const Planc & a, const Planc & b, const Planc & c, const Planc & d ) { return ( a * d ) - ( b * c ); };
+            auto determinant2x2 = [ ] ( Planc cref a, Planc cref b, Planc cref c, Planc cref d ) { return ( a * d ) - ( b * c ); };
 
             return Transform(
                 determinant2x2( m_matrix[ 1 ][ 1 ], m_matrix[ 1 ][ 2 ], m_matrix[ 2 ][ 1 ], m_matrix[ 2 ][ 2 ] ) / d,
@@ -112,8 +112,8 @@ public:
 
     Vector scale( ) const { return Vector( scale_x( ), scale_y( ) ); }
 
-    Planc scale_x( ) const { pythagorean( m_matrix[ 0 ][ 0 ], m_matrix[ 1 ][ 0 ] ); }
-    Planc scale_y( ) const { pythagorean( m_matrix[ 0 ][ 1 ], m_matrix[ 1 ][ 1 ] ); }
+    Planc scale_x( ) const { return pythagorean( m_matrix[ 0 ][ 0 ], m_matrix[ 1 ][ 0 ] ); }
+    Planc scale_y( ) const { return pythagorean( m_matrix[ 0 ][ 1 ], m_matrix[ 1 ][ 1 ] ); }
 
     Transform rotation_only( ) const { Angle a = rotation( ); return Transform( a.cos( ), -a.sin( ), 0.0, a.sin( ), a.cos( ), 0.0, 0.0, 0.0, 1.0 ); }
 
@@ -126,28 +126,28 @@ public:
                           0.0, 0.0, 1.0 );
     }
 
-    static Transform move( const Vector & v )
+    static Transform move( Vector cref v )
     {
         return Transform( 1.0, 0.0, v.dx( ),
                           0.0, 1.0, v.dy( ),
                           0.0, 0.0, 1.0 );
     }
 
-    static Transform scale( const Planc & s )
+    static Transform scale( Planc cref s )
     {
         return Transform( s, 0.0, 0.0,
                           0.0, s, 0.0,
                           0.0, 0.0, 1.0 );
     }
 
-    static Transform scale( const Planc & s, const Coordinate & origin )
+    static Transform scale( Planc cref s, Coordinate cref origin )
     {
         return Transform( s, 0.0, origin.x( ) - ( s * square( origin.x( ) ) ),
                           0.0, s, origin.y( ) - ( s * square( origin.y( ) ) ),
                           0.0, 0.0, 1.0 );
     }
 
-    static Transform rotate( const Angle & a )
+    static Transform rotate( Angle cref a )
     {
         Planc s = a.sin( );
         Planc c = a.cos( );
@@ -157,7 +157,7 @@ public:
                           0.0, 0.0, 1.0 );
     }
 
-    static Transform rotate( const Angle & a, const Coordinate & origin )
+    static Transform rotate( Angle cref a, Coordinate cref origin )
     {
         Planc s = a.sin( );
         Planc c = a.cos( );
@@ -167,7 +167,7 @@ public:
                           0.0, 0.0, 1.0 );
     }
 
-    static Transform reflect( const Angle & a )
+    static Transform reflect( Angle cref a )
     {
         Planc s = a.sin( );
         Planc c = a.cos( );
@@ -180,7 +180,7 @@ public:
                           0.0, 0.0, 1.0 );
     }
 
-    static Transform reflect( const Vector & v )
+    static Transform reflect( Vector cref v )
     {
         if( v.origin( ).x( ) || v.origin( ).y( ) )
         {
@@ -202,7 +202,7 @@ public:
         }
     }
 
-    static Transform stretch( const Vector & v )
+    static Transform stretch( Vector cref v )
     {
         Planc m = v.magnitude( );
 
@@ -223,9 +223,9 @@ public:
                           0.0, 0.0, 1.0 );
     }
 
-    Transform & operator=( const Transform & t ) { return set( t ); }
+    Transform & operator=( Transform cref t ) { return set( t ); }
 
-    Transform operator+( const dec d ) const
+    Transform operator+( cdec d ) const
     {
         return Transform(
             m_matrix[ 0 ][ 0 ] + d,
@@ -239,7 +239,7 @@ public:
             m_matrix[ 2 ][ 2 ] + d );
     }
 
-    Transform operator-( const dec d ) const
+    Transform operator-( cdec d ) const
     {
         return Transform(
             m_matrix[ 0 ][ 0 ] - d,
@@ -253,7 +253,7 @@ public:
             m_matrix[ 2 ][ 2 ] - d );
     }
 
-    Transform operator*( const dec d ) const
+    Transform operator*( cdec d ) const
     {
         return Transform(
             m_matrix[ 0 ][ 0 ] * d,
@@ -267,7 +267,7 @@ public:
             m_matrix[ 2 ][ 2 ] * d );
     }
 
-    Transform operator/( const dec d ) const
+    Transform operator/( cdec d ) const
     {
         Assert( !d, "cannot divide by zero" );
 
@@ -283,7 +283,7 @@ public:
             m_matrix[ 2 ][ 2 ] / d );
     }
 
-    Transform & operator+=( const dec d )
+    Transform & operator+=( cdec d )
     {
         m_matrix[ 0 ][ 0 ] += d;
         m_matrix[ 0 ][ 1 ] += d;
@@ -297,7 +297,7 @@ public:
         rethis;
     }
 
-    Transform & operator-=( const dec d )
+    Transform & operator-=( cdec d )
     {
         m_matrix[ 0 ][ 0 ] -= d;
         m_matrix[ 0 ][ 1 ] -= d;
@@ -311,7 +311,7 @@ public:
         rethis;
     }
 
-    Transform & operator*=( const dec d )
+    Transform & operator*=( cdec d )
     {
         m_matrix[ 0 ][ 0 ] *= d;
         m_matrix[ 0 ][ 1 ] *= d;
@@ -325,7 +325,7 @@ public:
         rethis;
     }
 
-    Transform & operator/=( const dec d )
+    Transform & operator/=( cdec d )
     {
         Assert( !d, "cannot divide by zero" );
 
@@ -341,7 +341,7 @@ public:
         rethis;
     }
 
-    Transform operator+( const Transform & t ) const
+    Transform operator+( Transform cref t ) const
     {
         return Transform(
             m_matrix[ 0 ][ 0 ] + t.m_matrix[ 0 ][ 0 ],
@@ -355,12 +355,12 @@ public:
             m_matrix[ 2 ][ 2 ] + t.m_matrix[ 2 ][ 2 ] );
     }
 
-    Transform & operator+=( const Transform & t )
+    Transform & operator+=( Transform cref t )
     {
         rethis = ( *this ) + t;
     }
 
-    Transform operator*( const Transform & t ) const
+    Transform operator*( Transform cref t ) const
     {
         return Transform(
             ( m_matrix[ 0 ][ 0 ] * t.m_matrix[ 0 ][ 0 ] ) + ( m_matrix[ 0 ][ 1 ] * t.m_matrix[ 1 ][ 0 ] ) + ( m_matrix[ 0 ][ 2 ] * t.m_matrix[ 2 ][ 0 ] ),
@@ -374,7 +374,7 @@ public:
             ( m_matrix[ 2 ][ 0 ] * t.m_matrix[ 0 ][ 2 ] ) + ( m_matrix[ 2 ][ 1 ] * t.m_matrix[ 1 ][ 2 ] ) + ( m_matrix[ 2 ][ 2 ] * t.m_matrix[ 2 ][ 2 ] ) );
     }
 
-    Transform & operator*=( const Transform & t )
+    Transform & operator*=( Transform cref t )
     {
         rethis = ( *this ) * t;
     }
@@ -382,15 +382,15 @@ public:
     default_equal( Transform );
 
 private:
-    Transform( const Planc & p1,
-               const Planc & p2,
-               const Planc & p3,
-               const Planc & p4,
-               const Planc & p5,
-               const Planc & p6,
-               const Planc & p7,
-               const Planc & p8,
-               const Planc & p9 )
+    Transform( Planc cref p1,
+               Planc cref p2,
+               Planc cref p3,
+               Planc cref p4,
+               Planc cref p5,
+               Planc cref p6,
+               Planc cref p7,
+               Planc cref p8,
+               Planc cref p9 )
     {
         m_matrix[ 0 ][ 0 ] = p1;
         m_matrix[ 0 ][ 1 ] = p2;
@@ -421,52 +421,52 @@ public:
     bool is_dirty( ) const { return m_dirty; }
     bool is_clean( ) const { return !is_dirty( ); }
 
-    const Transform & transform( ) const { return m_transform; }
-    const Transform & cumulative_transform( ) const { return m_cumulative_transform; }
+    Transform cref transform( ) const { return m_transform; }
+    Transform cref cumulative_transform( ) const { return m_cumulative_transform; }
 
-    virtual Transformable & transform( const Transform & t ) { dirty( ); m_transform.chain( t ); m_cumulative_transform.chain( t ); rethis; }
+    virtual Transformable & transform( Transform cref t ) { dirty( ); m_transform.chain( t ); m_cumulative_transform.chain( t ); rethis; }
 
-    virtual const Transformable & const_transform( const Transform & t ) const { dirty( ); m_transform.chain( t ); m_cumulative_transform.chain( t ); rethis; }
+    virtual Transformable cref const_transform( Transform cref t ) const { dirty( ); m_transform.chain( t ); m_cumulative_transform.chain( t ); rethis; }
 
     virtual Transformable & clear_transform( ) { dirty( ); m_transform = IDENTITY_TRANSFORM; rethis; }
     virtual Transformable & clear_cumulative_transform( ) { clear_transform( ); m_cumulative_transform = IDENTITY_TRANSFORM; rethis; }
 
-    virtual const Transformable & const_clear_transform( ) const { dirty( ); m_transform = IDENTITY_TRANSFORM; rethis; }
-    virtual const Transformable & const_clear_cumulative_transform( ) const { const_clear_transform( ); m_cumulative_transform = IDENTITY_TRANSFORM; rethis; }
+    virtual Transformable cref const_clear_transform( ) const { dirty( ); m_transform = IDENTITY_TRANSFORM; rethis; }
+    virtual Transformable cref const_clear_cumulative_transform( ) const { const_clear_transform( ); m_cumulative_transform = IDENTITY_TRANSFORM; rethis; }
 
-    Coordinate apply_transform( const Coordinate & coordinate ) const { return transform( ).apply( coordinate ); }
-    Coordinate apply_cumulative_transform( const Coordinate & coordinate ) const { return cumulative_transform( ).apply( coordinate ); }
+    Coordinate apply_transform( Coordinate cref coordinate ) const { return transform( ).apply( coordinate ); }
+    Coordinate apply_cumulative_transform( Coordinate cref coordinate ) const { return cumulative_transform( ).apply( coordinate ); }
 
-    Transformable & move( const Vector & v ) { return transform( Transform::move( v ) ); }
-    Transformable & stretch( const Vector & v ) { return transform( Transform::stretch( v ) ); }
+    Transformable & move( Vector cref v ) { return transform( Transform::move( v ) ); }
+    Transformable & stretch( Vector cref v ) { return transform( Transform::stretch( v ) ); }
     Transformable & scale( dec scale ) { return transform( Transform::scale( scale ) ); }
-    Transformable & scale( dec scale, const Coordinate & origin ) { return transform( Transform::scale( scale, origin ) ); }
-    Transformable & rotate( const Angle & angle ) { return transform( Transform::rotate( angle ) ); }
-    Transformable & rotate( const Angle & angle, const Coordinate & origin ) { return transform( Transform::rotate( angle, origin ) ); }
-    Transformable & mirror( const Vector & axis ) { return transform( Transform::reflect( axis ) ); }
-    Transformable & mirror_x( ) { return mirror( X_HAT ); }
-    Transformable & mirror_y( ) { return mirror( Y_HAT ); }
+    Transformable & scale( dec scale, Coordinate cref origin ) { return transform( Transform::scale( scale, origin ) ); }
+    Transformable & rotate( Angle cref angle ) { return transform( Transform::rotate( angle ) ); }
+    Transformable & rotate( Angle cref angle, Coordinate cref origin ) { return transform( Transform::rotate( angle, origin ) ); }
+    Transformable & mirror( Vector cref axis ) { return transform( Transform::reflect( axis ) ); }
+    Transformable & mirror_x( ) { return mirror( XHAT ); }
+    Transformable & mirror_y( ) { return mirror( YHAT ); }
 
     default_equal( Transformable );
 
 protected:
-    virtual const Transformable & dirty( ) const { m_dirty = true; rethis; }
-    virtual const Transformable & clean( ) const { m_dirty = false; rethis; }
+    virtual Transformable cref dirty( ) const { m_dirty = true; rethis; }
+    virtual Transformable cref clean( ) const { m_dirty = false; rethis; }
 };
 
-inline Coordinate & Coordinate::transform( const Transform & t ) { rethis = t.apply( *this ); }
+inline Coordinate & Coordinate::transform( Transform cref t ) { rethis = t.apply( *this ); }
 
 } // namespace geometry
 } // namespace axn
 
 #define transform_functions( Class ) \
-    Class & move( const Vector & v ) { Transformable::move( v ); rethis; } \
+    Class & move( Vector cref v ) { Transformable::move( v ); rethis; } \
     Class & scale( dec scale ) { Transformable::scale( scale ); rethis; } \
-    Class & scale( dec scale, const Coordinate & origin ) { Transformable::scale( scale, origin ); rethis; } \
-    Class & stretch( const Vector & v ) { Transformable::stretch( v ); rethis; } \
-    Class & rotate( const Angle & angle ) { Transformable::rotate( angle ); rethis; } \
-    Class & rotate( const Angle & angle, const Coordinate & origin ) { Transformable::rotate( angle, origin ); rethis; } \
-    Class & mirror( const Vector & axis ) { Transformable::mirror( axis ); rethis; } \
+    Class & scale( dec scale, Coordinate cref origin ) { Transformable::scale( scale, origin ); rethis; } \
+    Class & stretch( Vector cref v ) { Transformable::stretch( v ); rethis; } \
+    Class & rotate( Angle cref angle ) { Transformable::rotate( angle ); rethis; } \
+    Class & rotate( Angle cref angle, Coordinate cref origin ) { Transformable::rotate( angle, origin ); rethis; } \
+    Class & mirror( Vector cref axis ) { Transformable::mirror( axis ); rethis; } \
     Class & mirror_x( ) { Transformable::mirror_x( ); rethis; } \
     Class & mirror_y( ) { Transformable::mirror_y( ); rethis; }
 

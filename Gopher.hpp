@@ -10,7 +10,7 @@ class Gopher : public Enemy
 {
 public:
     virtual ~Gopher( ) { }
-    Gopher( World *, const Coordinate & position );
+    Gopher( World *, Coordinate cref position );
 
     virtual void render( ) override;
 
@@ -29,7 +29,7 @@ class DirtBall : public Object
 {
 public:
     virtual ~DirtBall( ) { }
-    DirtBall( World *, const Planc & radius, const Coordinate & position, const Vector & velocity );
+    DirtBall( World *, Planc cref radius, Coordinate cref position, Vector cref velocity );
 };
 
 } // namespace mtmercy

@@ -13,7 +13,7 @@ public:
 
     GrassTerrain( World *, const varray<varray<Coordinate>> & vertices = { } );
 
-    virtual const Color & dust_color( ) const;
+    virtual Color cref dust_color( ) const;
 };
 
 } // namespace mtmercy

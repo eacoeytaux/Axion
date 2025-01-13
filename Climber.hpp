@@ -12,7 +12,7 @@ class Climber : public Player
 {
 public:
     virtual ~Climber( );
-    Climber( World * world, const Coordinate & position );
+    Climber( World * world, Coordinate cref position );
 
     virtual void render( ) override;
 
@@ -24,7 +24,7 @@ public:
     void input( Input * ) override;
     void clear_input( ) override;
 
-    const Hook & hook( ) const { return m_hook; }
+    Hook cref hook( ) const { return m_hook; }
 
     void hurt( dec health ) override;
 
@@ -56,41 +56,33 @@ protected:
     void jump( bool );
     void ground( TerrainEdge * ) override;
 
-    void aim( const Angle & );
-    void aim_shake( const Angle & );
+    void aim( Angle cref );
+    void aim_shake( Angle cref );
 
     void launch_hook( );
     void launch_arrow( );
     void release_bow( );
 
     // all of these are offsets from position
+
     Coordinate head_center( ) const;
     Coordinate face_center( ) const;
-    Coordinate front_shoulder( ) const;
-    Coordinate back_shoulder( ) const;
-    Coordinate front_hand( ) const;
-    Coordinate back_hand( ) const;
-    Coordinate front_hip( ) const;
-    Coordinate back_hip( ) const;
-    Coordinate front_foot( ) const;
-    Coordinate back_foot( ) const;
 
-    Coordinate left_shoulder( ) const;
-    Coordinate right_shoulder( ) const;
-    Coordinate left_hand( ) const;
-    Coordinate right_hand( ) const;
-    Coordinate left_hip( ) const;
-    Coordinate right_hip( ) const;
-    Coordinate left_foot( ) const;
-    Coordinate right_foot( ) const;
+    Coordinate shoulder( bool front ) const;
+    Coordinate hand( bool front ) const;
+
+    Coordinate hip( bool front ) const;
+    Coordinate foot( bool front ) const;
 
     void draw_head( );
+
     void draw_torso( );
+
+    void draw_arm( bool front );
+    void draw_hand( bool front );
+
     void draw_legs( );
-    void draw_front_arm( );
-    void draw_back_arm( );
-    void draw_front_hand( );
-    void draw_back_hand( );
+
     void draw_crossbow( );
     void draw_arrow( );
 
@@ -122,20 +114,20 @@ private:
 
     Hook m_hook;
 
-    Planc m_movement_speed_ground = ZERO;
-    Planc m_movement_speed_air = ZERO;
+    Planc m_movement_speed_ground = P0;
+    Planc m_movement_speed_air = P0;
     bool m_moving_right = false;
     bool m_moving_left = false;
     bool m_looking_up = false;
     bool m_looking_down = false;
     bool m_jumping = false;
-    dec m_jump_degradation = ZERO;
+    dec m_jump_degradation = 0.0;
     Counter m_jumping_timer;
     Counter m_jump_reset_timer;
 
     bool m_aiming = true;
-    Angle m_aim_angle = ZERO;
-    Angle m_aim_shake_angle = ZERO;
+    Angle m_aim_angle = A0;
+    Angle m_aim_shake_angle = A0;
     bool m_launching_hook = false;
     bool m_launching_arrow = false;
     bool m_slashing = false;
@@ -156,8 +148,8 @@ public:
         Climber * m_climber = nullptr;
     };
 
-    const HealthBar & healthbar( ) const { return m_healthbar; }
-    void healthbar( const HealthBar & healthbar ) { m_healthbar = healthbar; }
+    HealthBar cref healthbar( ) const { return m_healthbar; }
+    void healthbar( HealthBar cref healthbar ) { m_healthbar = healthbar; }
 
 private:
     HealthBar m_healthbar;
@@ -174,8 +166,8 @@ public:
         Climber * m_climber = nullptr;
     };
 
-    const LowHealthAlertEffect & low_health_effect( ) const { return m_low_health_effect; }
-    void low_health_effect( const LowHealthAlertEffect & low_health_effect ) { m_low_health_effect = low_health_effect; }
+    LowHealthAlertEffect cref low_health_effect( ) const { return m_low_health_effect; }
+    void low_health_effect( LowHealthAlertEffect cref low_health_effect ) { m_low_health_effect = low_health_effect; }
 
 private:
     LowHealthAlertEffect m_low_health_effect;

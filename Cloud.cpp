@@ -6,19 +6,19 @@ using mtmercy::Cloud;
 
 namespace
 {
-const dec PUFF_OUTLINE_RATIO = 0.64;
+cdec PUFF_OUTLINE_RATIO = 0.64;
 const Color INSIDE_COLOR = Color::rgb( 0x87CDEB );
 const Color OUTSIDE_COLOR = WHITE;
 
-const dec SCALE = 10.0;
-const dec WIND_SCALE = 5.0;
+cdec SCALE = 10.0;
+cdec WIND_SCALE = 5.0;
 
-const dec X_STRETCH_LARGE = 2.5;
+cdec X_STRETCH_LARGE = 2.5;
 const Span<uint> LARGE_PUFF_COUNT = { 16, 32 };
 const Span<Planc> LARGE_PUFF_RADIUS = { 21.0 * SCALE, 72.0 * SCALE };
 const Span<Planc> LARGE_PUFF_DISTANCE = { 24.0 * SCALE, 60.0 * SCALE };
 
-const dec X_STRETCH_SMALL = 1.5;
+cdec X_STRETCH_SMALL = 1.5;
 const Span<uint> SMALL_PUFF_COUNT = { 1, 3 };
 const Span<Planc> SMALL_PUFF_RADIUS = { 2.0 * SCALE, 9.0 * SCALE };
 const Span<Planc> SMALL_PUFF_DISTANCE = { ( LARGE_PUFF_RADIUS.max( ) * PUFF_OUTLINE_RATIO ) + SMALL_PUFF_RADIUS.max( ), ( LARGE_PUFF_RADIUS.max( ) * PUFF_OUTLINE_RATIO ) + ( SMALL_PUFF_RADIUS.max( ) * 2.0 ) };
