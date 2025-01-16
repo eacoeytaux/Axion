@@ -21,7 +21,7 @@ cPlanc LIFT_SPEED = 0.5;
 cPlanc LIFT_DISTANCE = 16.0;
 } // namespace
 
-Feather::Feather( World * world, Coordinate cref _position ) : Object( world, _position )
+Feather::Feather( Room * room, Coordinate cref _position ) : Object( room, _position )
 {
     m_color = Random::rColor( );
     gravity_ratio( 0.025 );
@@ -40,7 +40,7 @@ void Feather::render( )
     // draw( m_color, stem, FEATHER_STEM_THICKNESS );
 }
 
-Bird::Bird( World * world, Coordinate cref _position ) : Mob( world, _position )
+Bird::Bird( Room * room, Coordinate cref _position ) : Mob( room, _position )
 {
     no_gravity( );
     space( Polygon::rectangle( 32.0, 32.0 ) );
@@ -53,7 +53,7 @@ void Bird::render( )
 
     const Color COLOR = RED;
 
-    Polygon wing = Polygon( { Coordinate( 0.0, 0.0 ), Coordinate( -24.0, sin( world( )->age( ) / 16.0 ) * 16.0 ), Coordinate( 16.0, 0.0 ) } );
+    Polygon wing = Polygon( { Coordinate( 0.0, 0.0 ), Coordinate( -24.0, sin( room( )->age( ) / 16.0 ) * 16.0 ), Coordinate( 16.0, 0.0 ) } );
     if( velocity( ).dx( ) < 0.0 )
         wing.mirror_y( );
 
@@ -63,12 +63,12 @@ void Bird::render( )
 
 void Bird::update( )
 {
-    if( alive( ) && world( )->player( ) )
+    if( alive( ) && room( )->player( ) )
     {
-        Coordinate target = world( )->player( )->position( );
+        Coordinate target = room( )->player( )->position( );
         target += Vector::Y( 270.0 );
-        target += Vector( sin( (dec)( ( (Planc)( world( )->age( ) ) * ROTATIONAL_SPEED / ROTATIONAL_RADIUS ) * ROTATIONAL_RADIUS ) ), 0.0 );
-        target += Vector::Y( -sin( (dec)( ( ( (Planc)( world( )->age( ) ) - ( LIFT_DISTANCE / 2.0 ) ) * LIFT_SPEED / LIFT_DISTANCE ) * LIFT_DISTANCE ) ) );
+        target += Vector( sin( (dec)( ( (Planc)( room( )->age( ) ) * ROTATIONAL_SPEED / ROTATIONAL_RADIUS ) * ROTATIONAL_RADIUS ) ), 0.0 );
+        target += Vector::Y( -sin( (dec)( ( ( (Planc)( room( )->age( ) ) - ( LIFT_DISTANCE / 2.0 ) ) * LIFT_SPEED / LIFT_DISTANCE ) * LIFT_DISTANCE ) ) );
         Vector movement = Vector( position( ), target );
         if( movement.dx( ) > 0.0 )
             movement.dx( min( SPEED, movement.dx( ) ) );

@@ -10,10 +10,6 @@ class MountMerciless : public World
 {
 protected:
     virtual void create( ) override;
-    virtual Terrain * generate_terrain( ) override;
-
-    virtual Player * add_player( Coordinate cref position ) override;
-    virtual Player * create_player( Coordinate cref position ) override;
 
     virtual void assign_layer_position( Object * ) override;
 };

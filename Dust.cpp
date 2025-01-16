@@ -13,7 +13,7 @@ const Span<uint> SIDE_COUNT = { 6, 9 };
 const Span<dec> ROTATION_SPEED = { TAU / 28.0, TAU / 8.0 };
 } // namespace
 
-Dust::Dust( World * world, Coordinate cref _position, Vector cref _velocity, Color cref _color ) : Object( world )
+Dust::Dust( Room * room, Coordinate cref _position, Vector cref _velocity, Color cref _color ) : Object( room )
 {
     needs_render_always( true );
 
@@ -38,7 +38,7 @@ void Dust::update( )
     m_alpha -= ALPHA_DECREASE_RATE;
     if( m_alpha <= 0.0 )
     {
-        mark_deleted( );
+        mark_to_delete( );
     }
 
     Object::update( );

@@ -2,7 +2,7 @@
 
 using mtmercy::Stalagmite;
 
-Stalagmite::Stalagmite( World * world, const Coordinate & _base, Planc _height, dec _z, const Color & _color ) : Object( world, _base )
+Stalagmite::Stalagmite( Room * room, const Coordinate & _base, Planc _height, dec _z, const Color & _color ) : Object( room, _base )
 {
     background( true );
     

@@ -22,7 +22,7 @@ const Color WATER_COLOR = CYAN;
 const Color FOAM_COLOR = WHITE;
 } // namespace
 
-Waterfall::Waterfall( World * _world, Coordinate cref _bottom, cPlanc _width, cPlanc _height, cdec _z ) : Object( _world, _bottom )
+Waterfall::Waterfall( Room * room, Coordinate cref _bottom, cPlanc _width, cPlanc _height, cdec _z ) : Object( room, _bottom )
 {
     background( true );
 

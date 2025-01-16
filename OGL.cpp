@@ -569,8 +569,7 @@ bool ogl::depth_mask( )
 
 error ogl::stencil_func( cint _gl_enum )
 {
-    GLint gli = 0;
-    glStencilFunc( _gl_enum, gli, 0xFF );
+    glStencilFunc( _gl_enum, 1, 0xFF );
     return ogl::error_check( );
 }
 

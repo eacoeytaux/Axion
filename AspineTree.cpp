@@ -135,7 +135,7 @@ Drawing draw_trunk( cbool _draw_leaves, Planc cref _length, Planc cref _base_wid
 };
 } // namespace
 
-AspineTree::AspineTree( World * world, Coordinate cref _root, cdec _z ) : Object( world, _root )
+AspineTree::AspineTree( Room * room, Coordinate cref _root, cdec _z ) : Object( room, _root )
 {
     background( true );
 

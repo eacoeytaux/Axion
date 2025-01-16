@@ -11,7 +11,7 @@ class GrassTerrain : public Terrain
 public:
     virtual ~GrassTerrain( ) { }
 
-    GrassTerrain( World *, const varray<varray<Coordinate>> & vertices = { } );
+    GrassTerrain( Room *, const varray<varray<Coordinate>> & vertices = { } );
 
     virtual Color cref dust_color( ) const;
 };

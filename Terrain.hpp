@@ -77,7 +77,7 @@ class Terrain : public Object
 {
 public:
     virtual ~Terrain( );
-    Terrain( World *, const varray<varray<Coordinate>> & vertices = { } );
+    Terrain( Room *, const varray<varray<Coordinate>> & vertices = { } );
 
     #ifdef AXN_DEBUG
     virtual Drawing debug_overlay( ) const override;

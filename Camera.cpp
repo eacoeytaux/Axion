@@ -60,7 +60,7 @@ void Camera::clear_screen_effects( )
 {
     for_each( effect, m_owned_screen_effects )
     {
-        safe_delete( effect );
+        // todo safe_delete( effect );
     }
 
     m_owned_screen_effects.clear( );
@@ -71,7 +71,7 @@ void Camera::clear_hud_elements( )
 {
     for_each( hud_element, m_owned_hud_elements )
     {
-        safe_delete( hud_element );
+        // todo safe_delete( hud_element );
     }
 
     m_owned_hud_elements.clear( );
@@ -271,9 +271,9 @@ void Camera::render( )
 
         auto render_lighting = [ & ] ( )
         {
-            if( m_world->lighting_active( ) )
+            if( m_world->current_room( )->lighting_active( ) )
             {
-                if( const Lighting * lighting = m_world->lighting( ) )
+                if( const Lighting * lighting = m_world->current_room( )->lighting( ) )
                 {
                     if( lighting->ambient_color( ).a( ) )
                     {
@@ -322,7 +322,7 @@ void Camera::render( )
             ogl::clear_depth( );
             ogl::depth_not_equal( );
 
-            Polygon world_bounds_polygon = m_world->bounds( ) - Vector( _camera_center );
+            Polygon world_bounds_polygon = m_world->current_room( )->bounds( ) - Vector( _camera_center );
             world_bounds_polygon.scale( _zoom );
 
             render_convex_polygon( { TRANSPARENT }, world_bounds_polygon.coordinates( ) );

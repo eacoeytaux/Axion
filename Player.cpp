@@ -7,7 +7,7 @@ namespace
 cuint PLAYER_HEALTH_START = 100;
 }
 
-Player::Player( World * world, Coordinate cref _position ) : Mob( world, _position, PLAYER_HEALTH_START )
+Player::Player( Room * room, Coordinate cref _position ) : Mob( room, _position, PLAYER_HEALTH_START )
 {
     god( false );
 

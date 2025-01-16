@@ -27,17 +27,17 @@ Object::~Object( )
     m_movement_subscriptions.clear( );
 }
 
-Object::Object( World * world ) : Matter( ORIGIN ), m_world( world )
+Object::Object( Room * room ) : Matter( ORIGIN ), m_room( room )
 {
     init( );
 }
 
-Object::Object( World * world, Coordinate cref _position, Vector cref _velocity ) : Matter( Vector( _velocity ).origin( _position ) ), m_world( world )
+Object::Object( Room * room, Coordinate cref _position, Vector cref _velocity ) : Matter( Vector( _velocity ).origin( _position ) ), m_room( room )
 {
     init( );
 }
 
-Object::Object( World * world, Vector cref _position_velocity ) : Matter( _position_velocity ), m_world( world )
+Object::Object( Room * room, Vector cref _position_velocity ) : Matter( _position_velocity ), m_room( room )
 {
     init( );
 }
@@ -129,7 +129,7 @@ void Object::update( )
 
 void Object::update_object( )
 {
-    if( m_last_world_age_update == world( )->age( ) )
+    if( m_last_world_age_update == room( )->age( ) )
     {
         return;
     }
@@ -141,7 +141,7 @@ void Object::update_object( )
         mark_deleted( );
     }
 
-    m_last_world_age_update = world( )->age( );
+    m_last_world_age_update = room( )->age( );
     ++m_age;
 }
 
@@ -212,7 +212,7 @@ void Object::update_movement( )
         TerrainEdge * next_ground = m_ground;
 
         // if objects decs through walls don't bother
-        if( terrain_boundaries( ) || !m_world->terrain( ) )
+        if( terrain_boundaries( ) || !room( )->terrain( ) )
         {
             TerrainEdge * ground_left = nullptr;
             TerrainEdge * ground_right = nullptr;
@@ -237,7 +237,7 @@ void Object::update_movement( )
             }
 
             // check if object is colliding with any edges
-            for_each( terrain_node, m_world->terrain_in_range( hit_box( ).union_with( hit_box( ) + movement ) ) )
+            for_each( terrain_node, room( )->terrain_in_range( hit_box( ).union_with( hit_box( ) + movement ) ) )
             {
                 if( TerrainEdge * terrain_edge = dynamic_cast<TerrainEdge *>( terrain_node ) )
                 {
@@ -313,9 +313,9 @@ void Object::update_movement( )
                 Line line;
             };
 
-            list<ObjectCollision> collied_objects;
+            list<ObjectCollision> collided_objects;
 
-            varray<Object *> objects = world( )->objects_in_range( hit_box( ).union_with( hit_box( ) + movement ) );
+            varray<Object *> objects = room( )->objects_in_range( hit_box( ).union_with( hit_box( ) + movement ) );
 
             Line movement_line( movement );
             for_each( object, objects )
@@ -358,7 +358,7 @@ void Object::update_movement( )
                     }
                     else
                     {
-                        if( movement_line.on( hit_box.center( ) ) )
+                        if( movement_line.on( hit_box.center( ) ) && movement_line.in_bounds( hit_box.center( ) ) )
                         {
                             intersections = { Line( movement.origin( ), hit_box.center( ) ) };
                         }
@@ -370,21 +370,24 @@ void Object::update_movement( )
                     ObjectCollision collision;
                     collision.object = object;
                     collision.line = intersections.front( );
-                    collied_objects.insert_back( collision );
+                    collided_objects.insert_back( collision );
                 }
             }
 
-            if( collied_objects.size( ) )
+            if( collided_objects.size( ) )
             {
                 struct CollisionDistance { CollisionDistance( Coordinate cref c ) : origin( c ) { } Coordinate origin; bool operator( )( ObjectCollision cref c1, ObjectCollision cref c2 ) { return origin.closer_than( c1.line.c1( ), c2.line.c1( ) ); } };
 
-                collied_objects.sort( CollisionDistance( position( ) ) );
-
-                const ObjectCollision & collision = collied_objects.front( );
-
-                collide( collision.object );
-
-                // movement = Vector( position( ), collision.line.c1( ) );
+                collided_objects.sort( CollisionDistance( position( ) ) );
+                
+                for_each( collision, collided_objects )
+                {
+                    if( collide( collision.object ) )
+                    {
+                        movement = Vector( position( ), collision.line.c1( ) );
+                        break;
+                    }
+                }
             }
         }
 
@@ -410,7 +413,7 @@ void Object::move( Vector cref _movement )
 
         if( z( ) )
         {
-            FixedRectangle world_bounds = world( )->bounds( );
+            FixedRectangle world_bounds = room( )->bounds( );
 
             // todo overshoots
             world_bounds.width( world_bounds.width( ) / ( z( ) * z( ) ) );
@@ -438,7 +441,7 @@ void Object::position( Coordinate cref _position )
 {
     if( interactive( ) )
     {
-        world( )->object_grid( ).remove( this );
+        room( )->object_grid( ).remove( this );
     }
 
     Visible::center( _position );
@@ -446,7 +449,7 @@ void Object::position( Coordinate cref _position )
 
     if( interactive( ) )
     {
-        world( )->object_grid( ).add( this );
+        room( )->object_grid( ).add( this );
     }
 }
 
@@ -491,7 +494,7 @@ void Object::interactive( cbool _interactive )
 
     if( !m_interactive )
     {
-        world( )->object_grid( ).remove( this );
+        room( )->object_grid( ).remove( this );
     }
 }
 

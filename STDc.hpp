@@ -99,6 +99,20 @@ public:
     {
         return insert( t, 0 );
     }
+    
+    T pop_back( )
+    {
+        T t = back( );
+        std::list<T>::pop_back( );
+        return t;
+    }
+    
+    T pop_front( )
+    {
+        T t = front( );
+        std::list<T>::pop_front( );
+        return t;
+    }
 
     virtual void clear( )
     {
@@ -602,16 +616,29 @@ public:
         return at( index );
     }
 
-    varray operator+( const varray & _v ) const
+    varray operator+( const T & t ) const
     {
         varray v = *this;
-        v.insert_back( _v );
+        v.insert_back( t );
         return v;
     }
 
-    varray & operator+=( const varray & _v )
+    varray operator+( const varray & v ) const
     {
-        insert_back( _v );
+        varray ret = *this;
+        ret.insert_back( v );
+        return ret;
+    }
+
+    varray & operator+=( const T & t )
+    {
+        insert_back( t );
+        return *this;
+    }
+
+    varray & operator+=( const varray & v )
+    {
+        insert_back( v );
         return *this;
     }
 

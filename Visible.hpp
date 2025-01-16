@@ -34,14 +34,14 @@ public:
     bool ever_rendered( ) const { return m_ever_rendered; }
     bool needs_render( ) { return ( m_needs_render || !m_ever_rendered ); }
 
-    bool visible( ) const { return polygon_count( ) || lights( ).size( ); }
+    bool visible( ) const { return polygon_count( ) || light_sources( ).size( ); }
 
-    const varray<LightSource> & lights( ) const { return m_lights; }
-    void clear_light_sources( ) { m_lights.clear( ); }
+    const varray<LightSource> & light_sources( ) const { return m_light_sources; }
+    void clear_light_sources( ) { m_light_sources.clear( ); }
 
     queue<uint> layer_position( ) const { return m_layer_position; }
 
-    static bool sort( const Visible * const & v1, const Visible * const & v2 )
+    static bool sort( const Visible * cref v1, const Visible * cref v2 )
     {
         if( v1->z( ) != v2->z( ) )
         {
@@ -97,13 +97,16 @@ protected:
         }
     }
 
-    void add_light_source( Coordinate cref position, Planc radius, Color cref tint = TRANSPARENT, dec flicker = 0.0 ) { m_lights.insert_back( LightSource( position, radius ) ); }
+    void add_light_source( Coordinate cref position, Planc radius, Color cref tint = TRANSPARENT, dec flicker = 0.0 ) { m_light_sources.insert_back( LightSource( position, radius ) ); }
+    
+    void add_light_source( LightSource cref light_source ) { m_light_sources.insert_back( light_source ); }
+    void add_light_sources( varray<LightSource> cref light_sources ) { m_light_sources.insert_back( light_sources ); }
 
 private:
     dec m_z = 1.0;                // 1 = player plane, <1 = background, >1 = foreground
     queue<uint> m_layer_position; // determines show order within layer, lower value shows on top of higher values
 
-    varray<LightSource> m_lights;
+    varray<LightSource> m_light_sources;
 
     bool m_needs_render = true;
     bool m_needs_render_always = false;

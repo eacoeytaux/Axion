@@ -12,7 +12,7 @@ class Hook : public Object
 {
 public:
     virtual ~Hook( ) { }
-    Hook( World *, const Climber * );
+    Hook( Room *, const Climber * );
 
     void render( ) override;
 

@@ -12,7 +12,7 @@ class Climber : public Player
 {
 public:
     virtual ~Climber( );
-    Climber( World * world, Coordinate cref position );
+    Climber( Room * room, Coordinate cref position );
 
     virtual void render( ) override;
 
@@ -122,8 +122,8 @@ private:
     bool m_looking_down = false;
     bool m_jumping = false;
     dec m_jump_degradation = 0.0;
-    Counter m_jumping_timer;
-    Counter m_jump_reset_timer;
+    Countdown m_jumping_timer;
+    Countdown m_jump_reset_timer;
 
     bool m_aiming = true;
     Angle m_aim_angle = A0;
@@ -131,10 +131,10 @@ private:
     bool m_launching_hook = false;
     bool m_launching_arrow = false;
     bool m_slashing = false;
-    Counter m_reload_timer;
+    Countdown m_reload_timer;
     Color m_arrow_feather_color;
 
-    Counter m_dust_timer;
+    Countdown m_dust_timer;
 
 public:
     class HealthBar : public Camera::HeadUpDisplay

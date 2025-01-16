@@ -10,7 +10,7 @@ class Snail : public Mob
 {
 public:
     virtual ~Snail( ) { }
-    Snail( World *, Coordinate cref position );
+    Snail( Room *, Coordinate cref position );
 
     virtual void render( ) override;
     virtual void update( ) override;

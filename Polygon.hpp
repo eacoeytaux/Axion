@@ -139,6 +139,11 @@ public:
                           Coordinate( -half_width, -half_height ),
                           Coordinate( half_width, -half_height ) } );
     }
+    
+    static Polygon square( Planc cref width ) { return rectangle( width, width ); }
+    static Polygon square( Planc cref width, Angle cref rotation ) { return rectangle( width, width, rotation ); }
+    static Polygon square( Planc cref width, Coordinate cref center ) { return rectangle( width, width, center ); }
+    static Polygon square( Planc cref width, Coordinate cref center, Angle cref rotation ) { return rectangle( width, width, center, rotation ); }
 
     static Polygon equilateral( uint side_count, Planc cref radius, Angle cref rotation ) { return equilateral( side_count, radius ).rotate( rotation ); }
     static Polygon equilateral( uint side_count, Planc cref radius, Coordinate cref center ) { return equilateral( side_count, radius ).move( center ); }
@@ -217,7 +222,7 @@ public:
             }
         }
 
-        return Polygon( { } );
+        return Polygon( );
     }
 
     static Polygon expand( Polygon cref polygon, Planc cref expansion )
@@ -393,7 +398,7 @@ public:
 
     bool contains( Coordinate cref coordinate, cbool inclusive = true ) const
     {
-        Coordinate c = cumulative_transform( ).inverse( ).apply( coordinate );
+        Coordinate c = apply_cumulative_transform_inverse( coordinate );
 
         uint intersection_count = 0;
 
@@ -421,9 +426,10 @@ public:
         }
 
         Line line_transformed = line;
-        line_transformed.transform( cumulative_transform( ).inverse( ) );
+        line_transformed.transform( cumulative_transform_inverse( ) );
 
-        for_each( line, Path( m_coordinates_raw, true ).lines( ) )
+        Path perimeter = Path( m_coordinates_raw, true );
+        for_each( line, perimeter.lines( ) )
         {
             if( line.intersects( line_transformed ) )
             {
@@ -449,9 +455,10 @@ public:
         }
 
         Line line_transformed = line;
-        line_transformed.transform( cumulative_transform( ).inverse( ) );
+        line_transformed.transform( cumulative_transform_inverse( ) );
 
-        for_each( line, Path( m_coordinates_raw, true ).lines( ) )
+        Path perimeter = Path( m_coordinates_raw, true );
+        for_each( line, perimeter.lines( ) )
         {
             if( line.intersects( line_transformed ) )
             {
@@ -459,21 +466,27 @@ public:
             }
         }
 
-        Assert( is_even( intersection_coordinates.size( ) ) );
-
-        // sort intersections by distance from start of line
-        struct LineIntersectionDistance { LineIntersectionDistance( Coordinate cref c ) : origin( c ) { } Coordinate origin; bool operator( )( Coordinate cref c1, Coordinate cref c2 ) { return origin.closer_than( c1, c2 ); } };
-
-        intersection_coordinates.sort( LineIntersectionDistance( line.c1( ) ) );
-
-        varray<Line> intersections( intersection_coordinates.size( ) / 2 );
-
-        for_range( i, intersections.size( ) )
+        if( is_even( intersection_coordinates.size( ) ) )
         {
-            intersections[ i ] = Line( intersection_coordinates[ ( i * 2 ) ], intersection_coordinates[ ( i * 2 ) + 1 ] );
+            // sort intersections by distance from start of line
+            struct LineIntersectionDistance { LineIntersectionDistance( Coordinate cref c ) : origin( c ) { } Coordinate origin; bool operator( )( Coordinate cref c1, Coordinate cref c2 ) { return origin.closer_than( c1, c2 ); } };
+            
+            intersection_coordinates.sort( LineIntersectionDistance( line.c1( ) ) );
+            
+            varray<Line> intersections( intersection_coordinates.size( ) / 2 );
+            
+            for_range( i, intersections.size( ) )
+            {
+                intersections[ i ] = Line( intersection_coordinates[ ( i * 2 ) ], intersection_coordinates[ ( i * 2 ) + 1 ] );
+            }
+            
+            return intersections;
         }
-
-        return intersections;
+        else
+        {
+            return { Line( intersection_coordinates.front( ), intersection_coordinates.front( ) ) };
+        }
+        
     }
 
     Polygon operator+( Vector cref v ) const { return Polygon( *this ).move( v ); }

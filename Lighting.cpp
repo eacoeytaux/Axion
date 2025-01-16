@@ -52,6 +52,14 @@ void Lighting::add_light_source( LightSource cref _light_source )
     m_light_sources.insert_back( _light_source );
 }
 
+void Lighting::add_light_sources( varray<LightSource> cref _light_sources )
+{
+    for_each( light_source, _light_sources )
+    {
+        add_light_source( light_source );
+    }
+}
+
 void Lighting::clear_light_sources( )
 {
     m_light_sources.clear( );

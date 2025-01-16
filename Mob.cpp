@@ -4,7 +4,7 @@
 bool Mob::draw_health = true;
 #endif
 
-Mob::Mob( World * world, Coordinate cref _position, cdec _health ) : Object( world, _position )
+Mob::Mob( Room * room, Coordinate cref _position, cdec _health ) : Object( room, _position )
 {
     #ifdef AXN_DEBUG
     m_draw_debug = true;
@@ -15,14 +15,14 @@ Mob::Mob( World * world, Coordinate cref _position, cdec _health ) : Object( wor
 
     health( _health );
 
-    m_hurt_display.set( 1 );
+    m_hurt_display_timer.duration( 0 );
 }
 
 void Mob::render( )
 {
     Object::render( );
 
-    if( m_hurt_display.remaining( ) )
+    if( m_hurt_display_timer.remaining( ) )
     {
         hurt_display_settings( );
     }
@@ -51,17 +51,17 @@ void Mob::draw_eyes( Coordinate cref _position, Angle cref _angle )
     }
 }
 
-void Mob::eye_info( cPlanc _eye_radius, cuint _blink_duration, const Span<uint> & _blink_wait_span, Color cref _eye_color )
+void Mob::eye_info( cPlanc _eye_radius, cuint _blink_duration, const Span<uint> & _blink_pause_duration, Color cref _eye_color )
 {
     m_eye_radius = _eye_radius;
     m_eyes_closed = false;
     m_eyes_squinting = false;
     m_blink_duration = _blink_duration;
-    m_blink_wait_span = _blink_wait_span;
+    m_blink_pause_duration = _blink_pause_duration;
     m_eye_color = _eye_color;
 
-    m_blink_wait_counter.reset( Random::rint( m_blink_wait_span ) );
-    m_blink_duration_counter.reset( m_blink_duration );
+    m_blink_pause_timer.reset( Random::rint( m_blink_pause_duration ) );
+    m_blink_timer.reset( m_blink_duration );
 
     m_eye_info_set = true;
 }
@@ -70,21 +70,21 @@ void Mob::update( )
 {
     Object::update( );
 
-    m_hurt_display.tick( );
-    m_invincible_counter.tick( );
+    m_hurt_display_timer.tick( );
+    m_invincible_timer.tick( );
 
     // eyes
-    if( m_blink_wait_counter.tick( ) )
+    if( m_blink_pause_timer.tick( ) )
     {
-        if( m_blink_duration_counter.remaining( ) == m_blink_duration )
+        if( m_blink_timer.remaining( ) == m_blink_duration )
         {
             needs_render( true );
         }
 
-        if( m_blink_duration_counter.tick( ) )
+        if( m_blink_timer.tick( ) )
         {
-            m_blink_duration_counter.reset( m_blink_duration );
-            m_blink_wait_counter.reset( Random::rint( m_blink_wait_span ) );
+            m_blink_timer.reset( m_blink_duration );
+            m_blink_pause_timer.reset( Random::rint( m_blink_pause_duration ) );
             needs_render( true );
         }
     }
@@ -161,7 +161,7 @@ void Mob::hurt( dec _damage )
         else
         {
             m_health.value( health );
-            m_hurt_display.reset( );
+            m_hurt_display_timer.reset( );
             invincible_pause( invincible_duration( ) );
         }
     }

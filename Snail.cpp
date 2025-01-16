@@ -14,7 +14,7 @@ const Color SLUG_COLOR = BLACK;
 const Color SHELL_COLOR = RED;
 } // namespace
 
-Snail::Snail( World * world, Coordinate cref _position ) : Mob( world, _position )
+Snail::Snail( Room * room, Coordinate cref _position ) : Mob( room, _position )
 {
     needs_render_always( true );
 

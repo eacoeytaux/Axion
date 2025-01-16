@@ -9,7 +9,7 @@ namespace mtmercy
 class AspineTree : public Object
 {
 public:
-    AspineTree( World *, Coordinate cref root, dec z = 1.0 );
+    AspineTree( Room *, Coordinate cref root, dec z = 1.0 );
 };
 
 } // namespace mtmercy

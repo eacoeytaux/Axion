@@ -14,10 +14,10 @@ const Color VINE_COLOR = GREEN;
 const Color THORN_COLOR = WHITE;
 } // namespace
 
-Thorns::Thorns( World * world, const Coordinate & _start, const Coordinate & _end ) : Object( world )
+Thorns::Thorns( Room * room, const Coordinate & _start, const Coordinate & _end ) : Object( room )
 {
 #ifdef AXN_DEBUG
-    draw_debug = true;
+    m_draw_debug = true;
 #endif
     
     persist_render( true );
@@ -45,7 +45,7 @@ Thorns::Thorns( World * world, const Coordinate & _start, const Coordinate & _en
     {
         for_range( i, passes )
         {
-            Planc l = ZERO;
+            Planc l = 0.0;
             while( l < length )
             {
                 draw( THORN_COLOR, Polygon::equilateral( 4, THORN_LENGTH, ( v_norm * l ) + ( offset * Random::rPlanc( -1.0, 1.0 ) ) ) );

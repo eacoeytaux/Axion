@@ -10,14 +10,14 @@ class Gopher : public Enemy
 {
 public:
     virtual ~Gopher( ) { }
-    Gopher( World *, Coordinate cref position );
+    Gopher( Room *, Coordinate cref position );
 
     virtual void render( ) override;
 
     virtual void update( ) override;
 
 private:
-    Counter m_reload;
+    Countdown m_reload_timer;
 
     STATE( EXPOSED,
            BURIED,
@@ -29,7 +29,7 @@ class DirtBall : public Object
 {
 public:
     virtual ~DirtBall( ) { }
-    DirtBall( World *, Planc cref radius, Coordinate cref position, Vector cref velocity );
+    DirtBall( Room *, Planc cref radius, Coordinate cref position, Vector cref velocity );
 };
 
 } // namespace mtmercy

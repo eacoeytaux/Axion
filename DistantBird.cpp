@@ -18,7 +18,7 @@ cuint FLIGHT_HEIGHT_CYCLE = 17;
 const Color BIRD_COLOR = BLACK;
 } // namespace
 
-DistantBird::DistantBird( World * world, Coordinate cref _position ) : Object( world, _position )
+DistantBird::DistantBird( Room * room, Coordinate cref _position ) : Object( room, _position )
 {
     background( true );
 
@@ -26,6 +26,7 @@ DistantBird::DistantBird( World * world, Coordinate cref _position ) : Object( w
 
     z( 0.5 );
     no_gravity( );
+    air_resistance_ratio( 0.0 );
     terrain_boundaries( false );
 
     velocity( Vector::X( X_SPEED ) );

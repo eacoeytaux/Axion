@@ -10,7 +10,7 @@ class Stalagmite : public Object
 {
 public:
     virtual ~Stalagmite( ) { }
-    Stalagmite( World *, const Coordinate & base, Planc height, dec z, const Color & color );
+    Stalagmite( Room *, const Coordinate & base, Planc height, dec z, const Color & color );
 };
 
 } // namespace mtmercy

@@ -29,7 +29,7 @@ const ColorSlider SKY_SUNSET = ColorSlider( SUNSET_COLOR, SUNSET_COLOR );
 const ColorSlider SKY_SUNSET_TO_MIDNIGHT = ColorSlider( SUNSET_COLOR, MIDNIGHT_COLOR );
 } // namespace
 
-Sky::Sky( World * world ) : Object( world )
+Sky::Sky( Room * room ) : Object( room )
 {
     background( true );
 
@@ -46,8 +46,8 @@ Sky::Sky( World * world ) : Object( world )
         m_has_clouds = true;
         m_cloud_timer.reset( Random::rint( CLOUD_REGEN_RATE ) );
 
-        m_clouds.insert_back( new Cloud( world ) );
-        world->add_object( m_clouds.back( ) );
+        m_clouds.insert_back( new Cloud( room ) );
+        room->add_object( m_clouds.back( ) );
     }
     else
     {
@@ -106,7 +106,7 @@ void Sky::render( )
             top_color,
             bottom_color,
             bottom_color },
-          Polygon::rectangle( world( )->camera( )->width( ) + 2.0, world( )->camera( )->height( ) + 2.0, ORIGIN ) ); // added + 2 just in case
+          Polygon::rectangle( room( )->camera( )->width( ) + 2.0, room( )->camera( )->height( ) + 2.0, ORIGIN ) ); // added + 2 just in case
 }
 
 void Sky::update( )
@@ -118,8 +118,8 @@ void Sky::update( )
         if( m_cloud_timer.tick( ) )
         {
             m_cloud_timer.reset( Random::rint( CLOUD_REGEN_RATE ) );
-            m_clouds.insert_back( new Cloud( world( ) ) );
-            world( )->add_object( m_clouds.back( ) );
+            m_clouds.insert_back( new Cloud( room( ) ) );
+            room( )->add_object( m_clouds.back( ) );
         }
     }
 }

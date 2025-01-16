@@ -10,7 +10,7 @@ class Skull : public Object
 {
 public:
     virtual ~Skull( ) { }
-    Skull( World *, Coordinate cref position );
+    Skull( Room *, Coordinate cref position );
 
     virtual void render( ) override;
 

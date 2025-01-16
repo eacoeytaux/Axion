@@ -117,13 +117,13 @@ const Color ARROW_PATH_COLOR = RED;
 
 Climber::~Climber( )
 {
-    world( )->camera( )->remove_hud_element( &m_healthbar );
-    world( )->camera( )->remove_screen_effect( &m_low_health_effect );
+    room( )->camera( )->remove_hud_element( &m_healthbar );
+    room( )->camera( )->remove_screen_effect( &m_low_health_effect );
 }
 
-Climber::Climber( World * world, Coordinate cref _position )
-    : Player( world, _position ),
-    m_hook( world, this ),
+Climber::Climber( Room * room, Coordinate cref _position )
+    : Player( room, _position ),
+    m_hook( room, this ),
     m_healthbar( this ),
     m_low_health_effect( this )
 {
@@ -145,8 +145,8 @@ Climber::Climber( World * world, Coordinate cref _position )
 
     m_arrow_feather_color = Random::rColor( );
 
-    world->camera( )->add_hud_element( &m_healthbar );
-    world->camera( )->add_screen_effect( &m_low_health_effect );
+    room->camera( )->add_hud_element( &m_healthbar );
+    room->camera( )->add_screen_effect( &m_low_health_effect );
 }
 
 void Climber::update( )
@@ -178,7 +178,7 @@ void Climber::update( )
                     uint dust_count = Random::rint( DUST_WALKING_COUNT );
                     do_count( dust_count )
                     {
-                        world( )->add_object( new Dust( world( ), position( ) + foot( true ), ( velocity( ) * DUST_VELOCITY_DAMPEN_RATIO ) + Vector::Y( Random::rPlanc( DUST_RISE ) ), world( )->terrain( )->dust_color( ) ) );
+                        room( )->add_object( new Dust( room( ), position( ) + foot( true ), ( velocity( ) * DUST_VELOCITY_DAMPEN_RATIO ) + Vector::Y( Random::rPlanc( DUST_RISE ) ), room( )->terrain( )->dust_color( ) ) );
                     }
                     m_dust_timer.reset( Random::rint( DUST_WALKING_TIME ) );
                 }
@@ -196,10 +196,10 @@ void Climber::update( )
                 // twang.play( 0.5 );
 
                 Angle aim = aim_angle( ) + aim_shake( );
-                Arrow * arrow = new Arrow( Arrow::base( world( ), position( ), Vector::A( aim, DEFAULT_ARROW_LAUNCH_SPEED ) + ( velocity( ) * ARROW_VELOCITY_DAMPEN ), m_arrow_feather_color ) );
+                Arrow * arrow = new Arrow( Arrow::base( room( ), position( ), Vector::A( aim, DEFAULT_ARROW_LAUNCH_SPEED ) + ( velocity( ) * ARROW_VELOCITY_DAMPEN ), m_arrow_feather_color ) );
                 arrow->position( arrow->position( ) + Vector::A( aim_angle( ), arrow->length( ) ) );
 
-                world( )->add_object( arrow );
+                room( )->add_object( arrow );
 
                 m_arrow_feather_color = Random::rColor( );
 
@@ -394,7 +394,7 @@ void Climber::ground( TerrainEdge * ground )
 
             Angle angle = ground->vector( ).angle( ) + Random::rAngle( DUST_LANDING_ANGLE.min( ), DUST_LANDING_ANGLE.max( ) ) + ( b ? 0.0 : PI );
 
-            world( )->add_object( new Dust( world( ), c, dust_velocity + Vector::A( angle, Random::rPlanc( DUST_RISE ) ), world( )->terrain( )->dust_color( ) ) );
+            room( )->add_object( new Dust( room( ), c, dust_velocity + Vector::A( angle, Random::rPlanc( DUST_RISE ) ), room( )->terrain( )->dust_color( ) ) );
         }
     }
 
@@ -698,8 +698,8 @@ void Climber::draw_legs( )
     boot_drawing.draw( color( BOOT_LACE ), lace1, 1.0 );
     boot_drawing.draw( color( BOOT_LACE ), lace2, 1.0 );
 
-    Planc foot_offset_x = ( sin( world( )->age( ) / 4.0 ) * 4.0 );
-    Planc foot_offset_y = ( cos( world( )->age( ) / 4.0 ) * 2.0 );
+    Planc foot_offset_x = ( sin( room( )->age( ) / 4.0 ) * 4.0 );
+    Planc foot_offset_y = ( cos( room( )->age( ) / 4.0 ) * 2.0 );
     Planc foot_offset_y_back = max( -foot_offset_y, P0 );
     Planc foot_offset_y_front = max( foot_offset_y, P0 );
 
@@ -831,7 +831,7 @@ void Climber::draw_crossbow( )
 
 void Climber::draw_arrow( )
 {
-    Arrow arrow = Arrow::tip( world( ), position( ), Vector::A( aim_angle( ), DEFAULT_ARROW_LAUNCH_SPEED ), m_arrow_feather_color );
+    Arrow arrow = Arrow::tip( room( ), position( ), Vector::A( aim_angle( ), DEFAULT_ARROW_LAUNCH_SPEED ), m_arrow_feather_color );
     arrow.render( );
 
     Vector v = Vector::A( aim_angle( ), arrow.length( ) );

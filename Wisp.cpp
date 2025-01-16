@@ -1,0 +1,195 @@
+#include "Wisp.hpp"
+
+#include "World.hpp"
+#include "Terrain.hpp"
+
+using mtmercy::Wisp;
+
+namespace
+{
+const Planc HEAD_RADIUS = 10.0;
+const dec FACE_RADIUS_RATIO = 0.8;
+const Planc FACE_RADIUS = HEAD_RADIUS * FACE_RADIUS_RATIO;
+const dec FACE_RADIUS_OFFSET_RATIO = 0.5;
+const Planc FACE_OFFSET_DISTANCE = ( HEAD_RADIUS - FACE_RADIUS ) * FACE_RADIUS_OFFSET_RATIO;
+const dec EYE_OFFSET = 0.5;
+const Angle EYE_OFFSET_ANGLE = TAU / 12.0;
+const Planc EYE_RADIUS = FACE_RADIUS * ( ( 1.0 - EYE_OFFSET ) * 0.4 );
+const Color COLOR = BLACK;
+
+const Span<uint> FLAME_PAUSE = { 5, 8 };
+const Planc FLAME_RADIUS = 16.0;
+const Planc FLAME_RADIUS_MIN = 0.1;
+const Planc FLAME_SPEED = 1.0;
+const Planc FLAME_SHRINK_RATE = 0.4;
+const Planc FLAME_ALPHA_SHRINK_RATE = 0.025;
+const Angle FLAME_DEVIATION = RIGHT_ANGLE / 2.0;
+const dec FLAME_WIND_RESISTANCE_RATIO = 0.5;
+const dec FLAME_MOVEMENT_RESISTANCE_RATIO = 0.9;
+const Span<dec> FLAME_BASE_RADIUS_RATIO = { 1.0, 1.1 };
+const dec FLAME_BASE_OFFSET = 0.01;
+const Planc FLAME_LIGHT_DISTANCE = FLAME_RADIUS * 2.0;
+const Color FLAME_COLOR = CYAN;
+
+const Planc BULLET_RADIUS = 4.0;
+const Planc BULLET_FLAME_RATIO = 1.1;
+} // namespace
+
+Wisp::Wisp( Room * room, const Coordinate & _position ) : Enemy( room, _position ), m_fire( room, _position )
+{
+    needs_render_always( true );
+
+    no_gravity( );
+    
+    sight_range( 300.0 );
+    alert_range( 200.0 );
+    
+    m_reload_timer.reset( 0 );
+    
+    m_fire.flame_color( FLAME_COLOR );
+    m_fire.flame_pause( FLAME_PAUSE );
+    m_fire.flame_radius( FLAME_RADIUS );
+    m_fire.flame_radius_min( FLAME_RADIUS_MIN );
+    m_fire.flame_speed( FLAME_SPEED );
+    m_fire.flame_shrink( FLAME_SHRINK_RATE );
+    m_fire.flame_alpha_shrink( FLAME_ALPHA_SHRINK_RATE );
+    m_fire.flame_deviation( FLAME_DEVIATION );
+    m_fire.wind_resistance_ratio( FLAME_WIND_RESISTANCE_RATIO );
+    m_fire.movement_resistance_ratio( FLAME_MOVEMENT_RESISTANCE_RATIO );
+    m_fire.light_distance( FLAME_LIGHT_DISTANCE );
+    m_fire.flame_base_radius_ratio( FLAME_BASE_RADIUS_RATIO );
+    m_fire.flame_base_max_offset_ratio( FLAME_BASE_OFFSET );
+    m_fire.enable_base_flame( true );
+}
+
+void Wisp::render( )
+{
+    Enemy::render( );
+    
+    m_fire.render( );
+    draw( m_fire );
+    
+    Vector face_offset;
+    
+    if( has_target( ) )
+    {
+        Angle viewing_angle = Angle( position( ), target( )->position( ) );
+        face_offset = Vector::A( viewing_angle, FACE_OFFSET_DISTANCE );
+    }
+    
+    draw( COLOR, Polygon::circle( HEAD_RADIUS ) );
+    draw( COLOR, Polygon::circle( FACE_RADIUS, face_offset ) );
+    
+    draw( FLAME_COLOR, Polygon::circle( EYE_RADIUS, Vector::A( EYE_OFFSET_ANGLE, EYE_OFFSET * FACE_RADIUS ) + face_offset ) );
+    draw( FLAME_COLOR, Polygon::circle( EYE_RADIUS, Vector::A( PI - EYE_OFFSET_ANGLE, EYE_OFFSET * FACE_RADIUS ) + face_offset ) );
+    
+    draw( FLAME_COLOR, Polygon( Arc::ccw( Coordinate( 0.0, -6.0 ), 5.0, Angle( 0.0 ), Angle( PI ) ).path( ).loop( ).points( ) ) + face_offset );
+}
+
+void Wisp::update( )
+{
+    Enemy::update( );
+    
+    m_fire.update( );
+    
+    clear_light_sources( );
+    add_light_sources( m_fire.light_sources( ) );
+    
+    if( m_reload_timer.tick( ) )
+    {
+        if( has_target( ) )
+        {
+            m_reload_timer.reset( 60 );
+            room( )->add_object( new Bullet( room( ), position( ), Vector::A( Angle( position( ), target( )->position( ) ), 10.0 ) ) );
+        }
+    }
+}
+
+void Wisp::move( Vector cref _velocity )
+{
+    Enemy::move( _velocity );
+    
+    m_fire.move( _velocity );
+}
+
+Wisp::Bullet::Bullet( Room * room, const Coordinate & _position, const Vector & _velocity ) : Object( room, _position, _velocity ), m_fire( room, _position )
+{
+    needs_render_always( true );
+
+    no_gravity( );
+    
+    interactive( true );
+
+    solid( true );
+    
+    air_resistance_ratio( 0.0 );
+    
+    m_fire.flame_color( FLAME_COLOR );
+    m_fire.flame_pause( FLAME_PAUSE );
+    m_fire.flame_radius( FLAME_RADIUS * ( BULLET_FLAME_RATIO * ( BULLET_RADIUS / HEAD_RADIUS ) ) );
+    m_fire.flame_radius_min( FLAME_RADIUS_MIN );
+    m_fire.flame_speed( FLAME_SPEED );
+    m_fire.flame_shrink( FLAME_SHRINK_RATE );
+    m_fire.flame_alpha_shrink( FLAME_ALPHA_SHRINK_RATE );
+    m_fire.flame_deviation( FLAME_DEVIATION );
+    m_fire.wind_resistance_ratio( FLAME_WIND_RESISTANCE_RATIO );
+    m_fire.movement_resistance_ratio( FLAME_MOVEMENT_RESISTANCE_RATIO );
+    m_fire.light_distance( FLAME_LIGHT_DISTANCE );
+    m_fire.flame_base_radius_ratio( FLAME_BASE_RADIUS_RATIO );
+    m_fire.flame_base_max_offset_ratio( FLAME_BASE_OFFSET );
+    m_fire.enable_base_flame( true );
+}
+
+void Wisp::Bullet::render( )
+{
+    Object::render( );
+    
+    m_fire.render( );
+    draw( m_fire );
+    
+    draw( COLOR, Polygon::circle( BULLET_RADIUS ) );
+}
+
+void Wisp::Bullet::update( )
+{
+    Object::update( );
+    
+    if( ground( ) )
+    {
+        m_fire.extinguish( );
+    }
+    
+    m_fire.update( );
+    
+    clear_light_sources( );
+    add_light_sources( m_fire.light_sources( ) );
+}
+
+void Wisp::Bullet::move( Vector cref _velocity )
+{
+    Object::move( _velocity );
+    
+    m_fire.move( _velocity );
+}
+
+bool Wisp::Bullet::collide( Object * object )
+{
+    Object::collide( object );
+
+    if( object->interactive( ) && !dynamic_cast<Bullet *>( object ) && !dynamic_cast<Wisp *>( object ) )
+    {
+        if( Mob * mob = dynamic_cast<Mob *>( object ) )
+        {
+            mob->hurt( 10.0 );
+        }
+
+        subscribe_to_movement( object );
+        stationary( true );
+        //interactive( false );
+        solid( false );
+
+        return true;
+    }
+
+    return false;
+}

@@ -11,7 +11,7 @@ class Thorns : public Object
 public:
     virtual ~Thorns( ) { }
     
-    Thorns( World *, const Coordinate &, const Coordinate & );
+    Thorns( Room *, const Coordinate &, const Coordinate & );
     
     bool collide( Object * ) override;
 

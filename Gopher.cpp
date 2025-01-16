@@ -1,7 +1,5 @@
 #include "Gopher.hpp"
 
-#include "Player.hpp"
-
 using mtmercy::Gopher;
 using mtmercy::DirtBall;
 
@@ -48,9 +46,9 @@ const Color FUR_COLOR1 = Color::rgb( 0xA0522D );
 const Color FUR_COLOR2 = Color::rgb( 0xF4A460 );
 }
 
-Gopher::Gopher( World * world, Coordinate cref _position ) : Enemy( world, _position, 10000.0 )
+Gopher::Gopher( Room * room, Coordinate cref _position ) : Enemy( room, _position, 10000.0 )
 {
-    space( Polygon::rectangle( 16.0, 16.0 ) );
+    space( Polygon::square( 16.0 ) );
 
     eye_info( EYE_RADIUS, BLINK_DURATION, BLINK_WAIT, EYE_COLOR );
 
@@ -64,7 +62,7 @@ void Gopher::update( )
 {
     Enemy::update( );
 
-    m_reload.tick( );
+    m_reload_timer.tick( );
 
     if( state( ) == EXPOSED )
     {
@@ -72,10 +70,10 @@ void Gopher::update( )
         {
             facing_left( target( )->position( ).x( ) < position( ).x( ) );
 
-            if( !m_reload.remaining( ) )
+            if( !m_reload_timer.remaining( ) )
             {
-                world( )->add_object( new DirtBall( world( ), 5.0, position( ), Vector::A( Angle( position( ), target( )->position( ) ), 5.0 ) ) );
-                m_reload.reset( RELOAD_TIME );
+                room( )->add_object( new DirtBall( room( ), 5.0, position( ), Vector::A( Angle( position( ), target( )->position( ) ), 5.0 ) ) );
+                m_reload_timer.reset( RELOAD_TIME );
             }
         }
     }
@@ -121,7 +119,7 @@ void Gopher::render( )
     }
 }
 
-DirtBall::DirtBall( World * world, Planc cref _radius, Coordinate cref _position, Vector cref _velocity ) : Object( world, _position, _velocity )
+DirtBall::DirtBall( Room * room, Planc cref _radius, Coordinate cref _position, Vector cref _velocity ) : Object( room, _position, _velocity )
 {
     #ifdef AXN_DEBUG
     m_draw_debug = true;

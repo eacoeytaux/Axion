@@ -9,11 +9,11 @@ namespace mtmercy
 class Arrow : public Object
 {
 private:
-    Arrow( World *, Coordinate cref tip, Vector cref launch_speed, Color cref feather_color );
+    Arrow( Room *, Coordinate cref tip, Vector cref launch_speed, Color cref feather_color );
 
 public:
-    static Arrow tip( World *, Coordinate cref tip, Vector cref launch_speed, Color cref feather_color );
-    static Arrow base( World *, Coordinate cref base, Vector cref launch_speed, Color cref feather_color );
+    static Arrow tip( Room *, Coordinate cref tip, Vector cref launch_speed, Color cref feather_color );
+    static Arrow base( Room *, Coordinate cref base, Vector cref launch_speed, Color cref feather_color );
 
     virtual void render( ) override;
 

@@ -10,7 +10,7 @@ class PineTree : public Object
 {
 public:
     virtual ~PineTree( ) { }
-    PineTree( World *, Coordinate cref root, dec z = 1.0 );
+    PineTree( Room *, Coordinate cref root, dec z = 1.0 );
 
     virtual void render( ) override;
 

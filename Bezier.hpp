@@ -14,78 +14,68 @@ namespace axn
 namespace geometry
 {
 
-class Arc
+class Bezier
 {
 private:
-    Arc( ) { }
-
-    Arc( Planc cref radius, Angle cref start, Angle cref end, bool clockwise ) { }
-    Arc( Coordinate cref center, Planc cref radius, Angle cref start, Angle cref end, bool clockwise ) { }
+    varray<Coordinate> m_control_points;
 
 public:
-    static Arc cw( Coordinate cref center, Planc cref radius, Angle cref start, Angle cref end ) { return Arc( center, radius, start, end, true ); }
-    static Arc ccw( Coordinate cref center, Planc cref radius, Angle cref start, Angle cref end ) { return Arc( center, radius, start, end, false ); }
+    Bezier( ) { }
 
-    static Arc cw( Planc cref radius, Angle cref start, Angle cref end ) { return Arc( ORIGIN, radius, start, end, true ); }
-    static Arc ccw( Planc cref radius, Angle cref start, Angle cref end ) { return Arc( ORIGIN, radius, start, end, false ); }
+    Bezier( varray<Coordinate> cref control_points ) : m_control_points( control_points ) { }
 
-private:
-    static varray<Line> generate( Coordinate cref center, Planc cref radius, Angle cref start, Angle cref end, bool clockwise )
+    Coordinate position( dec t )
     {
-        return_if( ( start == end ), { } );
+        Assert( in_range( t, 0.0, 1.0, true ) );
 
-        varray<Line> lines;
+        uint control_point_count = m_control_points.size( );
 
-        Angle d_angle;
+        Vector v;
+        varray<uint> p = pascal( control_point_count - 1 );
 
-        Angle start_angle = start;
-        Angle end_angle = end;
-
-        start_angle.truncate( true );
-        end_angle.truncate( true );
-
-        if( clockwise )
+        for_range( i, control_point_count )
         {
-            if( start_angle < end_angle )
+            v += (Vector)( m_control_points[ i ] ) * (dec)p[ i ] * pow( t, i ) * pow( ( 1.0 - t ), control_point_count - i - 1 );
+        }
+
+        return v;
+    }
+
+    Path path( ) { return path( m_control_points.size( ) + 1 ); }
+    Path path( uint point_count )
+    {
+        uint control_point_count = m_control_points.size( );
+
+        if( control_point_count )
+        {
+            if( control_point_count <= 2 )
             {
-                d_angle = start_angle + ( TAU - end_angle );
+                return { Line( m_control_points.front( ), m_control_points.back( ) ) };
             }
             else
             {
-                d_angle = start_angle - end_angle;
+                varray<Line> lines;
+                Coordinate last = m_control_points.front( );
+
+                dec dt = 1.0 / point_count;
+
+                for_range( x, point_count - 1 )
+                {
+                    Coordinate c = position( dt * ( x + 1.0 ) );
+                    lines.insert_back( Line( last, c ) );
+                    last = c;
+                }
+
+                lines.insert_back( Line( last, m_control_points.back( ) ) );
+
+                return lines;
             }
         }
-        else
-        {
-            if( start_angle > end_angle )
-            {
-                d_angle = end_angle + ( TAU - start_angle );
-            }
-            else
-            {
-                d_angle = end_angle - start_angle;
-            }
-        }
 
-        // TODO 60?
-        uint line_count = max<uint>( 1, ceil( ( d_angle.radians( ) / TAU ) * 60 ) );
-        Angle dd_angle = d_angle / (dec)line_count;
-
-        Coordinate start_coordinate = center + Vector::A( start_angle, radius );
-
-        for_range( i, line_count - 1 )
-        {
-            Coordinate c = center + Vector::A( negate( start_angle + ( dd_angle * (dec)i ), clockwise ), radius );
-            lines.insert_back( Line( start_coordinate, c ) );
-            start_coordinate = c;
-        }
-
-        Coordinate end_coordinate = center + Vector::A( end_angle, radius );
-        lines.insert_back( Line( start_coordinate, end_coordinate ) );
-
-        return lines;
+        return { };
     }
 };
+
 
 } // namespace geometry
 } // namespace axn

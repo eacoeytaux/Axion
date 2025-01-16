@@ -18,7 +18,7 @@ private:
     };
 
 public:
-    Cloud( World * );
+    Cloud( Room * );
 
     void render( ) override;
     void update( ) override;

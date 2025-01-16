@@ -21,7 +21,7 @@ const Color ROPE_ALT_COLOR = Color::rgb( 0xB9870F );
 } // namespace
 
 using mtmercy::Hook;
-Hook::Hook( World * world, const Climber * owner ) : Object( world ), m_owner( owner )
+Hook::Hook( Room * room, const Climber * owner ) : Object( room ), m_owner( owner )
 {
     #ifdef AXN_DEBUG
     m_draw_debug = true;

@@ -10,7 +10,7 @@ const Span<Planc> MOUNTAIN_BASE_LENGTH = { 4000, 7500 };
 const Span<Planc> MOUNTAIN_OFFSET = { 500, 1500 };
 } // namespace
 
-MountainRange::MountainRange( World * world, cPlanc _base_bottom, cdec _z, Color cref _color ) : Object( world )
+MountainRange::MountainRange( Room * room, cPlanc _base_bottom, cdec _z, Color cref _color ) : Object( room )
 {
     background( true );
 
@@ -20,8 +20,8 @@ MountainRange::MountainRange( World * world, cPlanc _base_bottom, cdec _z, Color
 
     z( _z );
 
-    Camera * camera = world->camera( );
-    FixedRectangle bounds = world->bounds( );
+    Camera * camera = room->camera( );
+    FixedRectangle bounds = room->bounds( );
 
     // todo what if camera specs change?
     Planc offset_z = ( z( ) * camera->min_zoom( ) );

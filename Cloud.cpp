@@ -24,7 +24,7 @@ const Span<Planc> SMALL_PUFF_RADIUS = { 2.0 * SCALE, 9.0 * SCALE };
 const Span<Planc> SMALL_PUFF_DISTANCE = { ( LARGE_PUFF_RADIUS.max( ) * PUFF_OUTLINE_RATIO ) + SMALL_PUFF_RADIUS.max( ), ( LARGE_PUFF_RADIUS.max( ) * PUFF_OUTLINE_RATIO ) + ( SMALL_PUFF_RADIUS.max( ) * 2.0 ) };
 } // namespace
 
-Cloud::Cloud( World * world ) : Object( world )
+Cloud::Cloud( Room * room ) : Object( room )
 {
     background( true );
 
@@ -37,9 +37,9 @@ Cloud::Cloud( World * world ) : Object( world )
     // set location
 
     Planc x = (Planc)half( Engine::screen_width( ) ) + max_dx( );
-    if( world->player( ) )
+    if( room->player( ) )
     {
-        x += world->player( )->position( ).x( );
+        x += room->player( )->position( ).x( );
     }
     // Coordinate location( x, ( half( Random::rdec( (dec)Engine::screen_height( ), 0.0 /*-(dec)Engine::screen_height()*/ ) ) ) - half( max_dy( ) ) );
     Coordinate location( 0.0, 5000.0 ); // todo
@@ -92,7 +92,7 @@ void Cloud::render( )
 
 void Cloud::update( )
 {
-    velocity( world( )->wind( ) * WIND_SCALE );
+    velocity( room( )->wind( ) * WIND_SCALE );
 
     Object::update( );
 }

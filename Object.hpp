@@ -25,9 +25,9 @@ private:
 public:
     virtual ~Object( );
 
-    Object( World * world );
-    Object( World * world, Coordinate cref position, Vector cref velocity = V0 );
-    Object( World * world, Vector cref position_velocity );
+    Object( Room * room );
+    Object( Room * room, Coordinate cref position, Vector cref velocity = V0 );
+    Object( Room * room, Vector cref position_velocity );
 
 private:
     bool m_initialized = false;
@@ -36,7 +36,8 @@ private:
 public:
     uint age( ) const { return m_age; }
 
-    World * world( ) const { return m_world; }
+    Room * room( ) const { return m_room; }
+    World * world( ) const { return m_room->world( ); }
 
 protected:
     virtual void render( ) override;
@@ -57,20 +58,22 @@ protected:
 
 public:
     void update_object( );
-
-    Coordinate position( ) const;
-    void position( Coordinate cref );
-
-    virtual Planc width( ) const;
-    virtual Planc height( ) const;
-
+    
+    // todo make setters protected?
+    
+    virtual bool keep( ) const { return false; }
+    
     bool deleted( ) const { return m_deleted; }
     virtual void mark_deleted( ) { m_deleted = true; }
 
     bool marked_to_delete( ) const { return m_marked_to_delete; }
     virtual void mark_to_delete( ) { m_marked_to_delete = true; }
+    
+    Coordinate position( ) const;
+    void position( Coordinate cref );
 
-    // todo make setters protected?
+    virtual Planc width( ) const;
+    virtual Planc height( ) const;
 
     bool foreground( ) const;
     void foreground( bool );
@@ -130,7 +133,7 @@ protected:
     virtual dec friction_resistance( ) const;
 
 private:
-    World * m_world = nullptr;
+    Room * m_room = nullptr;
 
     uint m_age = 0;
     uint m_last_world_age_update = 0;

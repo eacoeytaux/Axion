@@ -12,7 +12,7 @@ class Mob : public Object
 {
 public:
     virtual ~Mob( ) { }
-    Mob( World * world, Coordinate cref position, dec health = 1 );
+    Mob( Room * room, Coordinate cref position, dec health = 1 );
 
     #ifdef AXN_DEBUG
     static bool draw_health;
@@ -23,8 +23,8 @@ public:
     virtual bool alive( ) const;
     bool dead( ) const { return !alive( ); }
 
-    bool invincible( ) const { return ( m_invincible_always || m_invincible_counter.remaining( ) ); }
-    virtual void invincible_pause( uint invincible_duration ) { if( invincible_duration ) { m_invincible_counter.reset( max( invincible_duration, m_invincible_counter.remaining( ) ) ); } }
+    bool invincible( ) const { return ( m_invincible_always || m_invincible_timer.remaining( ) ); }
+    virtual void invincible_pause( uint invincible_duration ) { if( invincible_duration ) { m_invincible_timer.reset( max( invincible_duration, m_invincible_timer.remaining( ) ) ); } }
 
     virtual bool invincible_always( ) const { return m_invincible_always; }
     virtual void invincible_always( bool invincible ) { m_invincible_always = invincible; }
@@ -68,7 +68,7 @@ protected:
 
     bool eyes_open( ) const { return !eyes_closed( ); }
     void eyes_open( bool open ) { eyes_closed( !open ); }
-    virtual bool eyes_closed( ) const { return m_eyes_closed || ( m_blink_duration && !m_blink_wait_counter.remaining( ) ); }
+    virtual bool eyes_closed( ) const { return m_eyes_closed || ( m_blink_duration && !m_blink_timer.remaining( ) ); }
     virtual void eyes_closed( bool closed ) { m_eyes_closed = closed; }
     void open_eyes( ) { eyes_open( true ); }
     void close_eyes( ) { eyes_closed( true ); }
@@ -97,25 +97,25 @@ protected:
     bool m_eyes_closed;
     bool m_eyes_squinting;
     uint m_blink_duration;
-    Counter m_blink_duration_counter;
-    Span<uint> m_blink_wait_span;
-    Counter m_blink_wait_counter;
+    Countdown m_blink_timer;
+    Span<uint> m_blink_pause_duration;
+    Countdown m_blink_pause_timer;
     Color m_eye_color;
 
 protected:
-    Counter cref invincible_counter( ) const { return m_invincible_counter; }
+    Countdown cref invincible_timer( ) const { return m_invincible_timer; }
 
-    Counter cref hurt_display( ) const { return m_hurt_display; }
-    void hurt_display_length( uint ticks ) { m_hurt_display.set( ticks ); }
+    Countdown cref hurt_display_timer( ) const { return m_hurt_display_timer; }
+    void hurt_display_duration( uint ticks ) { m_hurt_display_timer.duration( ticks ); }
 
 private:
     bool m_alive = true;
     Slider<dec> m_health;
 
     bool m_invincible_always = false;
-    uint m_invincible_duration;
-    Counter m_invincible_counter;
-    Counter m_hurt_display;
+    uint m_invincible_duration = 0;
+    Countdown m_invincible_timer;
+    Countdown m_hurt_display_timer;
 
     bool m_facing_right = true;
 };

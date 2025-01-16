@@ -14,7 +14,7 @@ const Color FUR_COLOR1 = Color::rgb( 0xFFA500 );
 const Color FUR_COLOR2 = WHITE;
 }
 
-Fox::Fox( World * world, Coordinate cref _position ) : Mob( world, _position )
+Fox::Fox( Room * room, Coordinate cref _position ) : Mob( room, _position )
 {
     space( Polygon::rectangle( 32.0, 32.0 ) );
 

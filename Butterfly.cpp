@@ -10,7 +10,7 @@ cdec UNDER_WING_OFFSET = 0.75;
 const Color WING_COLOR = RED;
 } // namespace
 
-Butterfly::Butterfly( World * world, Coordinate cref _position ) : Mob( world, _position )
+Butterfly::Butterfly( Room * room, Coordinate cref _position ) : Mob( room, _position )
 {
     needs_render_always( true );
 

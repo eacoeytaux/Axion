@@ -23,7 +23,7 @@ const Color TREE_COLOR = Color::rgb( 0x00CC00 );
 const Color TREE_2_COLOR = Color::rgb( 0x00AA00 );
 }
 
-Hills::Hills( World * world, cPlanc _base_bottom, cdec _z ) : Object( world )
+Hills::Hills( Room * room, cPlanc _base_bottom, cdec _z ) : Object( room )
 {
     background( true );
 
@@ -33,8 +33,8 @@ Hills::Hills( World * world, cPlanc _base_bottom, cdec _z ) : Object( world )
 
     z( _z );
 
-    Camera * camera = world->camera( );
-    FixedRectangle bounds = world->bounds( );
+    Camera * camera = room->camera( );
+    FixedRectangle bounds = room->bounds( );
 
     // todo what if camera specs change?
     Planc offset_z = ( z( ) * camera->min_zoom( ) );

@@ -46,6 +46,8 @@ public:
     Path( Line cref line ) { m_lines = { line }; }
 
     operator const varray<Line> & ( ) { return m_lines; }
+    
+    Path loop( ) { if( m_lines.size( ) && ( m_lines.back( ).c2( ) != m_lines.front( ).c1( ) ) ) { return Path( lines( ) + Line( m_lines.back( ).c2( ), m_lines.front( ).c1( ) ) ); } else { rethis; } }
 
     Path & transform( Transform cref _transform ) { Transformable::transform( _transform ); for_each( line, m_lines ) { line.transform( _transform ); } rethis; }
 
@@ -53,6 +55,7 @@ public:
     uint point_count( ) const { return m_lines.size( ) ? m_lines.size( ) + 1 : 0; }
 
     const varray<Line> & lines( ) const { return m_lines; }
+    varray<Line> lines( ) { return m_lines; }
     varray<Coordinate> points( ) const { return_if( !line_count( ), { } ); varray<Coordinate> points; for_each( line, m_lines ) { points.insert_back( line.c1( ) ); } points.insert_back( m_lines.back( ).c2( ) ); return points; }
 
     bool has_length( ) const { for_each( line, m_lines ) { return_true_if( line.length( ) ); } return false; }

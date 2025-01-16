@@ -13,7 +13,7 @@ const Angle LEAF_BASE = RIGHT_ANGLE / 4.0;
 const Color BUSH_COLOR = GREEN;
 } // namespace
 
-Bush::Bush( World * world, Coordinate cref _root, cdec _z ) : Object( world, _root )
+Bush::Bush( Room * room, Coordinate cref _root, cdec _z ) : Object( room, _root )
 {
     background( true );
 

@@ -12,7 +12,7 @@ class Enemy : public Mob
 {
 public:
     virtual ~Enemy( ) { }
-    Enemy( World * world, Coordinate cref position, dec health = 1.0 ) : Mob( world, position, health ) { }
+    Enemy( Room * room, Coordinate cref position, dec health = 1.0 ) : Mob( room, position, health ) { }
 
 protected:
     #ifdef AXN_DEBUG
@@ -25,11 +25,11 @@ protected:
     void aggressive( bool aggressive ) { m_aggressive = aggressive; }
 
     bool has_target( ) const { return target( ); }
-    Player * target( ) const { return m_target; }
+    Object * target( ) const { return m_target; }
 
-    virtual void set_target( Player * player ) { m_target = player; }
+    virtual void set_target( Object * target ) { m_target = target; }
     virtual void clear_target( ) { set_target( nullptr ); }
-    virtual bool overrides_target( const Player * player ) const;
+    virtual bool overrides_target( const Object * target ) const;
 
     bool target_locked( ) const { return m_target_locked; }
     void target_locked( bool locked ) { m_target_locked = locked; }
@@ -45,7 +45,7 @@ protected:
 private:
     bool m_aggressive = true;
 
-    Player * m_target = nullptr;
+    Object * m_target = nullptr;
     bool m_target_locked = false;
 
     // zero range means no limit

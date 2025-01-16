@@ -11,7 +11,7 @@ Angle QUILL_FAR = PI;
 Angle QUILL_CLOSE = PI / 5.0;
 }
 
-Porkupine::Porkupine( World * world, Coordinate cref _position ) : Enemy( world, _position, 10000.0 )
+Porkupine::Porkupine( Room * room, Coordinate cref _position ) : Enemy( room, _position, 10000.0 )
 {
     space( FixedRectangle( 25.0, 25.0 ) );
 

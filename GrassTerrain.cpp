@@ -19,7 +19,7 @@ const Color DIRT_COLOR = Color::rgb( 0x803000 );
 const Color DUST_COLOR = DIRT_COLOR;
 } // namespace
 
-GrassTerrain::GrassTerrain( World * world, const varray<varray<Coordinate>> & _vertices ) : Terrain( world, _vertices )
+GrassTerrain::GrassTerrain( Room * room, const varray<varray<Coordinate>> & _vertices ) : Terrain( room, _vertices )
 {
     persist_render( true );
 

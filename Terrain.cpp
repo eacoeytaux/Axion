@@ -21,7 +21,7 @@ Terrain::~Terrain( )
     m_vertices.clear( );
 }
 
-Terrain::Terrain( World * world, const varray<varray<Coordinate>> & _vertices ) : Object( world )
+Terrain::Terrain( Room * room, const varray<varray<Coordinate>> & _vertices ) : Object( room )
 {
     #ifdef AXN_DEBUG
     m_draw_debug = true;
@@ -55,14 +55,14 @@ void Terrain::make( varray<Coordinate> cref _positions, cbool _loop )
         Coordinate cref coordinate = _positions[ i ];
         TerrainVertex * vertex = new TerrainVertex( coordinate );
         m_vertices.back( ).insert_back( vertex );
-        world( )->object_grid( ).add( vertex );
+        room( )->object_grid( ).add( vertex );
 
         if( i )
         {
             Assert( (bool)previous );
             TerrainEdge * edge = new TerrainEdge( previous, vertex );
             m_edges.back( ).insert_back( edge );
-            world( )->object_grid( ).add( edge );
+            room( )->object_grid( ).add( edge );
         }
 
         previous = vertex;
@@ -86,7 +86,7 @@ void Terrain::make( varray<Coordinate> cref _positions, cbool _loop )
         {
             TerrainEdge * edge = new TerrainEdge( last, first );
             m_edges.back( ).insert_back( edge );
-            world( )->object_grid( ).add( edge );
+            room( )->object_grid( ).add( edge );
         }
     }
 }
@@ -150,7 +150,7 @@ Drawing Terrain::debug_overlay( ) const
         {
             for_each( vertex, vertices )
             {
-                debug_overlay.draw( COLOR, Polygon::circle( GROUND_VERTEX_WIDTH / world( )->camera( )->zoom( ), vertex->position( ) ), FILLED, true );
+                debug_overlay.draw( COLOR, Polygon::circle( GROUND_VERTEX_WIDTH / room( )->camera( )->zoom( ), vertex->position( ) ), FILLED, true );
             }
         }
     }

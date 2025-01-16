@@ -29,7 +29,7 @@ const Color LEAVES_COLOR = Color::rgb( 0x00C000 );
 const Color LEAVES_BORDER_COLOR = Color::rgb( 0x008000 );
 } // namespace
 
-PineTree::PineTree( World * world, Coordinate cref _root, cdec _z ) : Object( world, _root )
+PineTree::PineTree( Room * room, Coordinate cref _root, cdec _z ) : Object( room, _root )
 {
     background( true );
 
@@ -101,7 +101,7 @@ void PineTree::render( )
 {
     Object::render( );
 
-    Angle d_sway_angle = Angle( sin( ( (dec)world( )->age( ) / (dec)SWAY_PERIOD ) * MAX_SWAY.radians( ) ) );
+    Angle d_sway_angle = Angle( sin( ( (dec)room( )->age( ) / (dec)SWAY_PERIOD ) * MAX_SWAY.radians( ) ) );
     Angle sway_angle = d_sway_angle;
 
     Vector offset;

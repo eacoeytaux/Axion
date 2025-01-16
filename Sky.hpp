@@ -10,7 +10,7 @@ class Sky : public Object
 {
 public:
     virtual ~Sky( ) { }
-    Sky( World * );
+    Sky( Room * );
 
     virtual void render( ) override;
     virtual void update( ) override;
@@ -19,7 +19,7 @@ private:
     bool m_has_clouds;
     varray<Cloud *> m_clouds;
 
-    Counter m_cloud_timer;
+    Countdown m_cloud_timer;
     Color m_top_color;
     Color m_mid_color;
     Color m_bottom_color;

@@ -23,7 +23,7 @@ const Color BONE_COLOR = WHITE;
 const Color HOLE_COLOR = BLACK;
 } // namespace
 
-Skull::Skull( World * world, Coordinate cref _position ) : Object( world, _position )
+Skull::Skull( Room * room, Coordinate cref _position ) : Object( room, _position )
 {
     needs_render_always( true );
 

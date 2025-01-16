@@ -56,9 +56,9 @@ public:
 
     Planc cross( Coordinate cref c ) const { return ::cross( c1( ), c2( ), c ); }
 
-    bool on( Coordinate cref c ) const { return equal( cross( c ), 0.0 ); }
-    bool above( Coordinate cref c, cbool inclusive = false ) const { return greater( inclusive, cross( c ), 0.0 ); }
-    bool below( Coordinate cref c, cbool inclusive = false ) const { return less( inclusive, cross( c ), 0.0 ); }
+    bool on( Coordinate cref c ) const { return equal( cross( c ), 0.0 ) && ( ( c1( ) != c2( ) ) || ( c == c1( ) ) ); }
+    bool above( Coordinate cref c, cbool inclusive = false ) const { return greater( inclusive, cross( c ), 0.0 ) && ( c1( ) != c2( ) ); }
+    bool below( Coordinate cref c, cbool inclusive = false ) const { return less( inclusive, cross( c ), 0.0 ) && ( c1( ) != c2( ) ); }
 
     bool in_bounds( Coordinate cref c, cbool inclusive = true ) const { return ( in_range( c.x( ), lower_bound_x( ), upper_bound_x( ), inclusive ) && in_range( c.y( ), lower_bound_y( ), upper_bound_y( ), inclusive ) ); }
 
@@ -155,7 +155,7 @@ public:
                 }
                 else
                 {
-                    return Coordinate( ( c1( ).y( ) - l.b( ) ) / l.m( ), c1( ).y( ) );
+                    return Coordinate( l.x( c1( ).y( ) ), c1( ).y( ) );
                 }
             }
             else
@@ -166,7 +166,7 @@ public:
                 }
                 else if( l.horizontal( ) )
                 {
-                    return Coordinate( ( c1( ).y( ) - l.b( ) ) / l.m( ), c1( ).y( ) );
+                    return Coordinate( x( l.c1( ).y( ) ), l.c1( ).y( ) );
                 }
                 else
                 {

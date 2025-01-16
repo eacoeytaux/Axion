@@ -423,6 +423,9 @@ public:
 
     Transform cref transform( ) const { return m_transform; }
     Transform cref cumulative_transform( ) const { return m_cumulative_transform; }
+    
+    Transform transform_inverse( ) const { return m_transform.inverse( ); }
+    Transform cumulative_transform_inverse( ) const { return m_cumulative_transform.inverse( ); }
 
     virtual Transformable & transform( Transform cref t ) { dirty( ); m_transform.chain( t ); m_cumulative_transform.chain( t ); rethis; }
 
@@ -436,6 +439,9 @@ public:
 
     Coordinate apply_transform( Coordinate cref coordinate ) const { return transform( ).apply( coordinate ); }
     Coordinate apply_cumulative_transform( Coordinate cref coordinate ) const { return cumulative_transform( ).apply( coordinate ); }
+    
+    Coordinate apply_transform_inverse( Coordinate cref coordinate ) const { return transform_inverse( ).apply( coordinate ); }
+    Coordinate apply_cumulative_transform_inverse( Coordinate cref coordinate ) const { return cumulative_transform_inverse( ).apply( coordinate ); }
 
     Transformable & move( Vector cref v ) { return transform( Transform::move( v ) ); }
     Transformable & stretch( Vector cref v ) { return transform( Transform::stretch( v ) ); }

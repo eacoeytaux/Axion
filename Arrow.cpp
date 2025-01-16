@@ -36,10 +36,10 @@ const Color TIP_COLOR = GRAY_LIGHT;
 const Color SHAFT_COLOR = Color::rgb( 0x8B4513 );
 } // namespace
 
-Arrow Arrow::tip( World * world, Coordinate cref tip, Vector cref launch_speed, Color cref feather_color ) { return Arrow( world, tip, launch_speed, feather_color ); }
-Arrow Arrow::base( World * world, Coordinate cref base, Vector cref launch_speed, Color cref feather_color ) { return Arrow( world, base + Vector::A( launch_speed.angle( ), ( SHAFT_LENGTH + HEAD_LENGTH_INNER ) ), launch_speed, feather_color ); }
+Arrow Arrow::tip( Room * room, Coordinate cref tip, Vector cref launch_speed, Color cref feather_color ) { return Arrow( room, tip, launch_speed, feather_color ); }
+Arrow Arrow::base( Room * room, Coordinate cref base, Vector cref launch_speed, Color cref feather_color ) { return Arrow( room, base + Vector::A( launch_speed.angle( ), ( SHAFT_LENGTH + HEAD_LENGTH_INNER ) ), launch_speed, feather_color ); }
 
-Arrow::Arrow( World * world, Coordinate cref tip, Vector cref launch_speed, Color cref _feather_color ) : Object( world, tip )
+Arrow::Arrow( Room * room, Coordinate cref tip, Vector cref launch_speed, Color cref _feather_color ) : Object( room, tip )
 {
     #ifdef AXN_DEBUG
     m_draw_debug = true;
@@ -128,7 +128,7 @@ void Arrow::update( )
         needs_render( true );
         if( age( ) >= LIFESPAN + FADESPAN )
         {
-            mark_deleted( );
+            mark_to_delete( );
         }
     }
 }

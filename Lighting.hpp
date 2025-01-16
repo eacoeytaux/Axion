@@ -28,6 +28,7 @@ public:
 
     const varray<LightSource> & light_sources( ) const;
     void add_light_source( LightSource cref );
+    void add_light_sources( varray<LightSource> cref );
     void clear_light_sources( );
 
     Color cref ambient_color( ) const;

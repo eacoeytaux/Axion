@@ -59,7 +59,7 @@ const Color INNER_EAR_COLOR = RED;
 const Color NOSE_COLOR = RED;
 }
 
-Unalope::Unalope( World * world, Coordinate cref _position ) : Enemy( world, _position, 10000.0 )
+Unalope::Unalope( Room * room, Coordinate cref _position ) : Enemy( room, _position, 10000.0 )
 {
     space( Polygon::rectangle( 16.0, 16.0 ) );
 

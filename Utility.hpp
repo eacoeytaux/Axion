@@ -18,7 +18,6 @@ namespace utility
 
 // -- defines --
 
-#define ref & 
 #define cref const & 
 
 #define typeT template <typename T>
@@ -128,7 +127,7 @@ typeT inline T twice( T cref t ) { return ( t * 2.0 ); }
 typeT inline T square( T cref t ) { return ( t * t ); }
 typeT inline T cube( T cref t ) { return ( t * t * t ); }
 
-typeT inline T log( T cref base, T cref t ) { return ( ::log( t ) / ::log( base ) ); }
+typeT inline T log( T cref base, T cref t ) { return ( ::log( (dec)t ) / ::log( (dec)base ) ); }
 
 typeT inline T cref min( T cref t1, T cref t2 ) { return ( t1 < t2 ) ? t1 : t2; }
 typeT inline T cref min( const varray<T> & list )
@@ -242,25 +241,28 @@ inline dec pythagorean( cdec a, cdec b )
 
 // -- util classes --
 
-class Counter
+class Countdown
 {
 private:
     uint m_countdown_top = 0;
     uint m_countdown_remaining = 0;
 
 public:
-    Counter( ) { }
-    Counter( cuint countdown ) { reset( countdown ); }
+    Countdown( ) { }
+    Countdown( cuint countdown ) { reset( countdown ); }
+    
+    uint remaining( ) const { return m_countdown_remaining; }
+    uint duration( ) const { return m_countdown_top; }
+    
+    void duration( uint countdown ) { m_countdown_top = countdown; }
+    
+    bool tick( ) { return ( !m_countdown_remaining || !m_countdown_remaining-- ); } // returns true is countdown is finished
+    void complete( ) { m_countdown_remaining = 0; }
 
-    bool tick( ) { if( m_countdown_remaining ) { return !m_countdown_remaining--; } else { return true; } }
-
-    void set( cuint countdown ) { m_countdown_top = countdown; }
-    void reset( cuint countdown ) { set( countdown ); reset( ); }
+    void reset( cuint countdown ) { duration( countdown ); reset( ); }
     void reset( ) { m_countdown_remaining = m_countdown_top; }
 
-    uint remaining( ) const { return m_countdown_remaining; }
-
-    default_equal( Counter );
+    default_equal( Countdown );
 };
 
 classT Span

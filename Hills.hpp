@@ -10,7 +10,7 @@ class Hills : public Object
 {
 public:
     virtual ~Hills( ) { }
-    Hills( World *, Planc base_bottom, dec z );
+    Hills( Room *, Planc base_bottom, dec z );
 };
 
 } // namespace mtmercy

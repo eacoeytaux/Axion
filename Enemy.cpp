@@ -3,7 +3,7 @@
 
 void Enemy::update( )
 {
-    for_each( player, world( )->players( ) )
+    for_each( player, room( )->players( ) )
     {
         if( target( ) == player )
         {
@@ -24,9 +24,9 @@ void Enemy::update( )
     Mob::update( );
 }
 
-bool Enemy::overrides_target( const Player * player ) const
+bool Enemy::overrides_target( const Object * target ) const
 {
-    return ( !target_locked( ) && position( ).closer_than( m_target->position( ), player->position( ) ) );
+    return ( !target_locked( ) && position( ).closer_than( m_target->position( ), target->position( ) ) );
 }
 
 void Enemy::sight_range( Planc cref _range )
