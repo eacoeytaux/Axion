@@ -1,6 +1,7 @@
 #ifndef PineTree_hpp
 #define PineTree_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy
@@ -9,7 +10,6 @@ namespace mtmercy
 class PineTree : public Object
 {
 public:
-    virtual ~PineTree( ) { }
     PineTree( Room *, Coordinate cref root, dec z = 1.0 );
 
     virtual void render( ) override;

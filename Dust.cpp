@@ -27,7 +27,7 @@ Dust::Dust( Room * room, Coordinate cref _position, Vector cref _velocity, Color
     m_alpha = Random::rPlanc( ALPHA_START );
     m_sides = Random::rint( SIDE_COUNT );
     m_rotation = Random::rAngle( );
-    m_rotation_speed = Random::negate( Random::rAngle( ROTATION_SPEED ) );
+    m_rotation_speed = Random::negated( Random::rAngle( ROTATION_SPEED ) );
     m_color = _color;
 }
 

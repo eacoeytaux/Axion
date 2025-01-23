@@ -2,9 +2,11 @@
 #define Random_hpp
 
 #include "Utility.hpp"
+#include "Color.hpp"
 #include "Planc.hpp"
 #include "Angle.hpp"
-#include "Color.hpp"
+#include "Coordinate.hpp"
+#include "Vector.hpp"
 
 namespace axn
 {
@@ -53,7 +55,7 @@ public:
     static Color rColor( bool include_alpha = false );
 
     template <typename T>
-    static T & flip( T & t, dec flip_odds = 0.5 )
+    static T & negate( T & t, dec flip_odds = 0.5 )
     {
         if( rbool( flip_odds ) )
         {
@@ -63,7 +65,7 @@ public:
     }
 
     template <typename T>
-    static T negate( T cref t, dec flip_odds = 0.5 )
+    static T negated( T cref t, dec flip_odds = 0.5 )
     {
         if( rbool( flip_odds ) )
         {

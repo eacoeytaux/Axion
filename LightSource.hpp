@@ -12,8 +12,6 @@ namespace graphics
 class LightSource
 {
 public:
-    virtual ~LightSource( ) { }
-
     LightSource( ) { }
     LightSource( Coordinate cref source, Planc cref distance );
 

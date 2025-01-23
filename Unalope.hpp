@@ -1,6 +1,7 @@
 #ifndef Unalope_hpp
 #define Unalope_hpp
 
+#include "MountMerciless.hpp"
 #include "Enemy.hpp"
 
 namespace mtmercy
@@ -9,7 +10,6 @@ namespace mtmercy
 class Unalope : public Enemy
 {
 public:
-    virtual ~Unalope( ) { }
     Unalope( Room *, Coordinate cref position );
 
     virtual void render( ) override;

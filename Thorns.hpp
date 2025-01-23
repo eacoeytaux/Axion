@@ -1,6 +1,7 @@
 #ifndef Dust_hpp
 #define Dust_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy
@@ -9,8 +10,6 @@ namespace mtmercy
 class Thorns : public Object
 {
 public:
-    virtual ~Thorns( ) { }
-    
     Thorns( Room *, const Coordinate &, const Coordinate & );
     
     bool collide( Object * ) override;

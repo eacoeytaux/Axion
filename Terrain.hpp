@@ -11,8 +11,6 @@ namespace reality
 class TerrainNode
 {
 public:
-    virtual ~TerrainNode( ) { }
-
     virtual bool passable( ) const { return true; }
     virtual Angle normal( ) const = 0;
     virtual dec resistance( ) const = 0;
@@ -24,7 +22,6 @@ class TerrainEdge;
 class TerrainVertex : public TerrainNode
 {
 public:
-    virtual ~TerrainVertex( ) { }
     TerrainVertex( Coordinate cref pos );
 
     Coordinate cref position( ) const;
@@ -38,7 +35,7 @@ public:
     Angle normal( ) const override;
     dec resistance( ) const override;
 
-    FixedRectangle bounding_box( ) const;
+    FixedRectangle bounding_box( ) const override;
 
 private:
     Coordinate m_position;
@@ -51,7 +48,6 @@ private:
 class TerrainEdge : public TerrainNode
 {
 public:
-    virtual ~TerrainEdge( ) { }
     TerrainEdge( TerrainVertex * v1, TerrainVertex * v2, dec resistance = 0.1 );
     TerrainEdge( TerrainEdge cref );
 

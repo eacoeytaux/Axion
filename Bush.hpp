@@ -1,6 +1,7 @@
 #ifndef Bush_hpp
 #define Bush_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy

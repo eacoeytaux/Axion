@@ -11,7 +11,6 @@ namespace reality
 class Enemy : public Mob
 {
 public:
-    virtual ~Enemy( ) { }
     Enemy( Room * room, Coordinate cref position, dec health = 1.0 ) : Mob( room, position, health ) { }
 
 protected:

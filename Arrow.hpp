@@ -1,6 +1,7 @@
 #ifndef Arrow_hpp
 #define Arrow_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy

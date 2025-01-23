@@ -17,8 +17,6 @@ class Camera;
 class Lighting : public Visible
 {
 public:
-    virtual ~Lighting( ) { }
-
     Lighting( );
 
     bool darkness_active( ) const;

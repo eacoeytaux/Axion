@@ -9,12 +9,16 @@ namespace
 {
 const Planc HEAD_RADIUS = 10.0;
 const dec FACE_RADIUS_RATIO = 0.8;
-const Planc FACE_RADIUS = HEAD_RADIUS * FACE_RADIUS_RATIO;
+const Planc FACE_RADIUS = FACE_RADIUS_RATIO * HEAD_RADIUS;
 const dec FACE_RADIUS_OFFSET_RATIO = 0.5;
-const Planc FACE_OFFSET_DISTANCE = ( HEAD_RADIUS - FACE_RADIUS ) * FACE_RADIUS_OFFSET_RATIO;
+const Planc FACE_OFFSET_DISTANCE = FACE_RADIUS_OFFSET_RATIO * ( HEAD_RADIUS - FACE_RADIUS );
 const dec EYE_OFFSET = 0.5;
-const Angle EYE_OFFSET_ANGLE = TAU / 12.0;
-const Planc EYE_RADIUS = FACE_RADIUS * ( ( 1.0 - EYE_OFFSET ) * 0.4 );
+const Angle EYE_OFFSET_ANGLE = ( TAU / 12.0 );
+const Planc EYE_RADIUS = ( ( 1.0 - EYE_OFFSET ) * 0.4 ) * FACE_RADIUS;;
+const dec MOUTH_OFFSET_RATIO = 0.75;
+const Planc MOUTH_OFFSET = MOUTH_OFFSET_RATIO * FACE_RADIUS;
+const dec MOUTH_RADIUS_RATIO = 0.625;
+const Planc MOUTH_RADIUS = MOUTH_RADIUS_RATIO * FACE_RADIUS;
 const Color COLOR = BLACK;
 
 const Span<uint> FLAME_PAUSE = { 5, 8 };
@@ -23,12 +27,12 @@ const Planc FLAME_RADIUS_MIN = 0.1;
 const Planc FLAME_SPEED = 1.0;
 const Planc FLAME_SHRINK_RATE = 0.4;
 const Planc FLAME_ALPHA_SHRINK_RATE = 0.025;
-const Angle FLAME_DEVIATION = RIGHT_ANGLE / 2.0;
+const Angle FLAME_DEVIATION = ( RIGHT_ANGLE / 2.0 );
 const dec FLAME_WIND_RESISTANCE_RATIO = 0.5;
 const dec FLAME_MOVEMENT_RESISTANCE_RATIO = 0.9;
 const Span<dec> FLAME_BASE_RADIUS_RATIO = { 1.0, 1.1 };
 const dec FLAME_BASE_OFFSET = 0.01;
-const Planc FLAME_LIGHT_DISTANCE = FLAME_RADIUS * 2.0;
+const Planc FLAME_LIGHT_DISTANCE = ( FLAME_RADIUS * 2.0 );
 const Color FLAME_COLOR = CYAN;
 
 const Planc BULLET_RADIUS = 4.0;
@@ -83,7 +87,7 @@ void Wisp::render( )
     draw( FLAME_COLOR, Polygon::circle( EYE_RADIUS, Vector::A( EYE_OFFSET_ANGLE, EYE_OFFSET * FACE_RADIUS ) + face_offset ) );
     draw( FLAME_COLOR, Polygon::circle( EYE_RADIUS, Vector::A( PI - EYE_OFFSET_ANGLE, EYE_OFFSET * FACE_RADIUS ) + face_offset ) );
     
-    draw( FLAME_COLOR, Polygon( Arc::ccw( Coordinate( 0.0, -6.0 ), 5.0, Angle( 0.0 ), Angle( PI ) ).path( ).loop( ).points( ) ) + face_offset );
+    draw( FLAME_COLOR, Polygon( Arc::ccw( Coordinate::Y( -MOUTH_OFFSET ), MOUTH_RADIUS, 0.0, PI ).path( ).points( ) ) + face_offset );
 }
 
 void Wisp::update( )

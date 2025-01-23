@@ -1,6 +1,7 @@
 #ifndef Fire_hpp
 #define Fire_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy

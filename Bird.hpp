@@ -1,6 +1,7 @@
 #ifndef Bird_hpp
 #define Bird_hpp
 
+#include "MountMerciless.hpp"
 #include "Mob.hpp"
 
 namespace mtmercy

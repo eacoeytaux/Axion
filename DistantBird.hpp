@@ -1,6 +1,7 @@
 #ifndef DistantBird_hpp
 #define DistantBird_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy
@@ -9,7 +10,6 @@ namespace mtmercy
 class DistantBird : public Object
 {
 public:
-    virtual ~DistantBird( ) { }
     DistantBird( Room *, Coordinate cref position );
 
     virtual void render( ) override;

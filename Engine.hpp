@@ -5,6 +5,7 @@
 
 #include "Audio.hpp"
 #include "Graphics.hpp"
+#include "Settings.hpp"
 
 namespace axn
 {
@@ -27,8 +28,6 @@ private:
     Engine( ) { }
 
 public:
-    virtual ~Engine( ) { }
-
     static cuint FPS = 60; // frames per second
 
     static error run( World * world, const string app_name = "" );

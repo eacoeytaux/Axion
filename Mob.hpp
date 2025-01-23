@@ -11,7 +11,6 @@ namespace reality
 class Mob : public Object
 {
 public:
-    virtual ~Mob( ) { }
     Mob( Room * room, Coordinate cref position, dec health = 1 );
 
     #ifdef AXN_DEBUG
@@ -61,7 +60,6 @@ protected:
 
     // eyes
 protected:
-    // todo annoying to always cast span to (dec)
     virtual void eye_info( Planc eye_radius, uint blink_duration, const Span<uint> & blink_wait_span, Color cref eye_color = BLACK );
     virtual void eye_info( Planc eye_radius, Color cref eye_color ) { return eye_info( eye_radius, 0.0, { (uint)0, (uint)0 }, eye_color ); }
     virtual void eye_info( Planc eye_radius ) { return eye_info( eye_radius, 0.0, { (uint)0, (uint)0 } ); }

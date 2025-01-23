@@ -1,6 +1,7 @@
 #ifndef Stalagmite_hpp
 #define Stalagmite_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy
@@ -9,7 +10,6 @@ namespace mtmercy
 class Stalagmite : public Object
 {
 public:
-    virtual ~Stalagmite( ) { }
     Stalagmite( Room *, const Coordinate & base, Planc height, dec z, const Color & color );
 };
 

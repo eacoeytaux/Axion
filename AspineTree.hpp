@@ -1,6 +1,7 @@
 #ifndef AspineTree_hpp
 #define AspineTree_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy

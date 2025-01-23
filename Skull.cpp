@@ -50,7 +50,7 @@ void Skull::update( )
     if( ground( ) )
     {
         Planc distance = velocity( ).magnitude( );
-        dec ratio = Random::negate( distance / SKULL_CIRCUMFERENCE, is_neg( velocity( ).dx( ) ) );
+        dec ratio = Random::negated( distance / SKULL_CIRCUMFERENCE, is_neg( velocity( ).dx( ) ) );
         m_skull_drawing.rotate( Angle( TAU * ratio ) );
     }
 }

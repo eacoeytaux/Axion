@@ -9,7 +9,6 @@
 //class Speaker
 //{
 //public:
-//    virtual ~Speaker( ) { }
 //    Speaker( );
 //};
 //

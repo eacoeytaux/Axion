@@ -6,14 +6,20 @@ using mtmercy::Porkupine;
 
 namespace
 {
-Span<uint> QUILL_COUNT = { 16, 24 };
-Angle QUILL_FAR = PI;
-Angle QUILL_CLOSE = PI / 5.0;
+cPlanc WIDTH = 25.0;
+cPlanc HEIGHT = WIDTH;
+
+cPlanc QUILL_OFFSET = 2.5;
+const Span<uint> QUILL_COUNT = { 16, 24 };
+const Angle QUILL_FAR = ( TAU / 2.0 );
+const Angle QUILL_CLOSE = ( TAU / 10.0 );
+
+const Color QUILL_COLOR = YELLOW;
 }
 
-Porkupine::Porkupine( Room * room, Coordinate cref _position ) : Enemy( room, _position, 10000.0 )
+Porkupine::Porkupine( Room * room, Coordinate cref _position ) : Enemy( room, _position )
 {
-    space( FixedRectangle( 25.0, 25.0 ) );
+    space( FixedRectangle( WIDTH, HEIGHT ) );
 
     uint quill_count = Random::rint( QUILL_COUNT );
 
@@ -36,7 +42,7 @@ void Porkupine::render( )
 
     for_each( quill, m_quills )
     {
-        Vector offset = Vector::A( quill.angle( ) + RIGHT_ANGLE, 2.5 );
-        draw( RED, Polygon( { quill.c2( ), offset, -offset } ) );
+        Vector offset = Vector::A( quill.angle( ) + RIGHT_ANGLE, QUILL_OFFSET );
+        draw( QUILL_COLOR, Polygon( { quill.c2( ), quill.c1( ) + offset, quill.c1( ) - offset } ) );
     }
 }

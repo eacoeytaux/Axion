@@ -50,39 +50,36 @@ void Plains::create( )
     add_object( new MountainRange( this, -1000.0, 0.07, GRAY_LIGHT ) );
     // add_object( new Hills( this, -1500.0, 0.1 ) );
 
-    add_object( new DistantBird( this, Coordinate( -600.0, 800.0 ) ) );
-    add_object( new DistantBird( this, Coordinate( -666.0, 866.0 ) ) );
-    add_object( new DistantBird( this, Coordinate( -550.0, 900.0 ) ) );
+    // add_object( new DistantBird( this, Coordinate( -600.0, 800.0 ) ) );
+    // add_object( new DistantBird( this, Coordinate( -666.0, 866.0 ) ) );
+    // add_object( new DistantBird( this, Coordinate( -550.0, 900.0 ) ) );
 
-    // add_object( new Waterfall( this, Coordinate( 0.0, 10.0 ), METER * 4.0, METER * 8.0, 0.95 ) );
+    add_object( new Waterfall( this, Coordinate( 0.0, 10.0 ), METER * 4.0, METER * 8.0, 0.95 ) );
 
-    terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
-                            [ & ] ( Coordinate cref c, const TerrainEdge * e )
+    list<dec> aspine_zs = { 1.0 };
+    for_each( z, aspine_zs )
     {
-        add_object( new AspineTree( this, c ) );
-    } );
-
-    // terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
-    //                        [ & ]( Coordinate cref c, const TerrainEdge * e )
-    //                        { add_object( new AspineTree( this, c, 0.5 ) ); } );
-
-    // terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
-    //                         [ & ]( Coordinate cref c, const TerrainEdge * e )
-    //                         { add_object( new Stalagmite( this, c, 100.0, 1.0, GRAY_DARK ) ); } );
+        terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
+                               [ & ] ( Coordinate cref c, const TerrainEdge * e )
+                               {
+            add_object( new AspineTree( this, c, z ) );
+        } );
+    }
 
     add_object( new CampFire( this, Coordinate( 50, 20 ) ) );
 
     // add_object( new Thorns( this, Coordinate( 100, 20 ), Coordinate( 150, 15 ) ) );
 
     // add_object( new Skull( this, Coordinate( 250.0, 500.0 ) ) );
-
+    
+    // add_object( new Butterfly( this, Coordinate( 200, 50 ) ) );
+    // add_object( new Snail( this, Coordinate( 200.0, 150.0 ) ) );
+    
     // add_object( new Bird( this, Coordinate( -100.0, 100.0 ) ) );
     // add_object( new Fox( this, Coordinate( 200.0, 150.0 ) ) );
     // add_object( new Gopher( this, Coordinate( 150, 20 ) ) );
     // add_object( new Unalope( this, Coordinate( 150, 20 ) ) );
     // add_object( new Porkupine( this, Coordinate( 100, 30 ) ) );
-    // add_object( new Butterfly( this, Coordinate( 200, 50 ) ) );
-    // add_object( new Snail( this, Coordinate( 200.0, 150.0 ) ) );
     add_object( new Wisp( this, Coordinate( 200.0, 150.0 ) ) );
     
     add_player( Coordinate( 0.0, 300.0 ) );

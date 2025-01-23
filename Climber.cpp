@@ -36,7 +36,7 @@ const Span<uint> DUST_WALKING_COUNT = { 1, 3 };
 const Span<uint> DUST_WALKING_TIME = { 0, 5 };
 
 cPlanc HEAD_RADIUS = HEIGHT / 3.9;
-cPlanc HEAD_Y_OFFSET = HEAD_RADIUS * 0.05;
+cPlanc HEAD_OFFSET_Y = HEAD_RADIUS * 0.05;
 cPlanc FACE_RADIUS = HEAD_RADIUS * 0.75;
 cPlanc EYE_SPACING = FACE_RADIUS * 0.55;
 cPlanc EYE_RADIUS = 1.5;
@@ -113,6 +113,15 @@ const Color HOOK_PATH_COLOR = WHITE;
 cPlanc ARROW_PATH_LENGTH = HOOK_PATH_LENGTH;
 cdec ARROW_PATH_ALPHA_START = HOOK_PATH_ALPHA_START;
 const Color ARROW_PATH_COLOR = RED;
+
+cdec HEALTH_BAR_CENTER_X = 0.5;
+cdec HEALTH_BAR_CENTER_Y = 0.015;
+cdec HEALTH_BAR_WIDTH = 1.0;
+cdec HEALTH_BAR_HEIGHT = 0.03;
+cPlanc HEALTH_BAR_BORDER_WIDTH = 4.0;
+
+cdec HEALTH_BAR_RED_START = 0.1;
+cdec HEALTH_BAR_YELLOW_START = 0.5;
 } // namespace
 
 Climber::~Climber( )
@@ -196,7 +205,7 @@ void Climber::update( )
                 // twang.play( 0.5 );
 
                 Angle aim = aim_angle( ) + aim_shake( );
-                Arrow * arrow = new Arrow( Arrow::base( room( ), position( ), Vector::A( aim, DEFAULT_ARROW_LAUNCH_SPEED ) + ( velocity( ) * ARROW_VELOCITY_DAMPEN ), m_arrow_feather_color ) );
+                Arrow * arrow = new Arrow( Arrow::tip( room( ), position( ), Vector::A( aim, DEFAULT_ARROW_LAUNCH_SPEED ) + ( velocity( ) * ARROW_VELOCITY_DAMPEN ), m_arrow_feather_color ) );
                 arrow->position( arrow->position( ) + Vector::A( aim_angle( ), arrow->length( ) ) );
 
                 room( )->add_object( arrow );
@@ -438,7 +447,7 @@ void Climber::aim_shake( Angle cref _aim_shake_angle )
 
 Angle Climber::aim_shake( ) const
 {
-    return Random::negate( half( m_aim_shake_angle ) );
+    return Random::negated( half( Random::rAngle( m_aim_shake_angle ) ) );
 }
 
 Angle Climber::aim_shake_range( ) const
@@ -464,7 +473,7 @@ void Climber::release_bow( )
 
 Coordinate Climber::head_center( ) const
 {
-    return Coordinate( 0.0, BODY_HEIGHT + HEAD_Y_OFFSET + ( HEAD_BOB_DISTANCE * sin( (dec)age( ) / BOB_PERIOD ) ) );
+    return Coordinate( 0.0, BODY_HEIGHT + HEAD_OFFSET_Y + ( HEAD_BOB_DISTANCE * sin( (dec)age( ) / BOB_PERIOD ) ) );
 }
 
 Coordinate Climber::face_center( ) const
@@ -675,21 +684,21 @@ void Climber::draw_legs( )
 {
     Drawing boot_drawing;
 
-    Planc x_offset_base = half( BOOT_BASE_WIDTH - BOOT_TOP_WIDTH );
-    Polygon boot_sole = Polygon::rectangle( BOOT_BASE_WIDTH, BOOT_SOLE_HEIGHT, Coordinate( x_offset_base, -half( BOOT_SOLE_HEIGHT ) ) );
+    Planc offset_base_x = half( BOOT_BASE_WIDTH - BOOT_TOP_WIDTH );
+    Polygon boot_sole = Polygon::rectangle( BOOT_BASE_WIDTH, BOOT_SOLE_HEIGHT, Coordinate( offset_base_x, -half( BOOT_SOLE_HEIGHT ) ) );
     boot_drawing.draw( color( BOOT_SOLE ), boot_sole );
     {
-        Polygon boot_sub_sole = Polygon::rectangle( BOOT_SOLE_SUB_WIDTH, BOOT_SOLE_SUB_HEIGHT, Coordinate( x_offset_base - half( BOOT_BASE_WIDTH ) + half( BOOT_SOLE_SUB_WIDTH ), -BOOT_SOLE_SUB_HEIGHT - half( BOOT_SOLE_HEIGHT ) ) );
+        Polygon boot_sub_sole = Polygon::rectangle( BOOT_SOLE_SUB_WIDTH, BOOT_SOLE_SUB_HEIGHT, Coordinate( offset_base_x - half( BOOT_BASE_WIDTH ) + half( BOOT_SOLE_SUB_WIDTH ), -BOOT_SOLE_SUB_HEIGHT - half( BOOT_SOLE_HEIGHT ) ) );
         boot_drawing.draw( color( BOOT_SOLE ), boot_sub_sole );
         for_range( i, floor( half( half( BOOT_BASE_WIDTH ) ) ) )
         {
-            Polygon boot_sub_sole = Polygon::rectangle( BOOT_SOLE_SUB_WIDTH, BOOT_SOLE_SUB_HEIGHT, Coordinate( x_offset_base + half( BOOT_BASE_WIDTH ) - half( BOOT_SOLE_SUB_WIDTH ) - ( ( BOOT_SOLE_SUB_WIDTH + BOOT_SOLE_SUB_GAP_WIDTH ) * (Planc)i ), -BOOT_SOLE_SUB_HEIGHT - half( BOOT_SOLE_HEIGHT ) ) );
+            Polygon boot_sub_sole = Polygon::rectangle( BOOT_SOLE_SUB_WIDTH, BOOT_SOLE_SUB_HEIGHT, Coordinate( offset_base_x + half( BOOT_BASE_WIDTH ) - half( BOOT_SOLE_SUB_WIDTH ) - ( ( BOOT_SOLE_SUB_WIDTH + BOOT_SOLE_SUB_GAP_WIDTH ) * (Planc)i ), -BOOT_SOLE_SUB_HEIGHT - half( BOOT_SOLE_HEIGHT ) ) );
             boot_drawing.draw( color( BOOT_SOLE ), boot_sub_sole );
         }
     }
 
     Polygon boot_shin = Polygon::rectangle( BOOT_TOP_WIDTH, BOOT_TOP_HEIGHT, Coordinate( 0.0, half( BOOT_TOP_HEIGHT ) ) );
-    Polygon boot_base = Polygon::rectangle( BOOT_BASE_WIDTH, BOOT_BASE_HEIGHT, Coordinate( x_offset_base, half( BOOT_BASE_HEIGHT ) ) );
+    Polygon boot_base = Polygon::rectangle( BOOT_BASE_WIDTH, BOOT_BASE_HEIGHT, Coordinate( offset_base_x, half( BOOT_BASE_HEIGHT ) ) );
     boot_drawing.draw( color( BOOT ), boot_shin );
     boot_drawing.draw( color( BOOT ), boot_base );
 
@@ -762,8 +771,6 @@ void Climber::draw_legs( )
             }
         }
 
-        Coordinate knee = foot + Vector::Y( LEG_HEIGHT * ( 2.0 / 3.0 ) );
-
         Drawing boot_drawing_front = boot_drawing;
         if( facing_left( ) )
         {
@@ -772,10 +779,6 @@ void Climber::draw_legs( )
         boot_drawing_front.move( foot );
 
         draw( color( PANTS ), Line( hip, foot ), LEG_WIDTH );
-        // draw( pants_color( ), Line( hip, knee ), LEG_WIDTH );
-        // draw( pants_color( ), Polygon::circle( half( LEG_WIDTH ), knee ) );
-        // draw( pants_color( ), Line( knee, foot ), LEG_WIDTH );
-
         draw( boot_drawing_front );
     }
 }
@@ -846,18 +849,14 @@ void Climber::draw_arrow( )
     draw( Drawing( arrow ).move( v ) );
 }
 
-// todo make variable
-Climber::HealthBar::HealthBar( Climber * climber ) : HeadUpDisplay( 0.5, 0.015, 1.0, 0.03 ), m_climber( climber ) { }
+Climber::HealthBar::HealthBar( Climber * climber ) : HeadUpDisplay( HEALTH_BAR_CENTER_X, HEALTH_BAR_CENTER_Y, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT ), m_climber( climber )
+{
+    static_once( ) { Assert( HEALTH_BAR_RED_START < HEALTH_BAR_YELLOW_START ); }
+}
 
 void Climber::HealthBar::render( Camera * camera )
 {
     HeadUpDisplay::render( camera );
-
-    cPlanc HEALTH_BAR_BORDER_WIDTH = 4.0;
-
-    cdec RED_START = 0.1;
-    cdec YELLOW_START = 0.5;
-    static_once( ) { Assert( RED_START < YELLOW_START ); }
 
     if( Climber * climber = m_climber )
     {
@@ -886,13 +885,13 @@ void Climber::HealthBar::render( Camera * camera )
             {
                 health_color = GREEN;
             }
-            else if( health_percentage >= YELLOW_START )
+            else if( health_percentage >= HEALTH_BAR_YELLOW_START )
             {
-                health_color = ColorSlider( YELLOW, GREEN ).color_at( ( health_percentage - YELLOW_START ) * inverse( 1.0 - YELLOW_START ) );
+                health_color = ColorSlider( YELLOW, GREEN ).color_at( ( health_percentage - HEALTH_BAR_YELLOW_START ) * inverse( 1.0 - HEALTH_BAR_YELLOW_START ) );
             }
-            else if( health_percentage >= RED_START )
+            else if( health_percentage >= HEALTH_BAR_RED_START )
             {
-                health_color = ColorSlider( RED, YELLOW ).color_at( ( health_percentage - RED_START ) * inverse( 1.0 - RED_START ) );
+                health_color = ColorSlider( RED, YELLOW ).color_at( ( health_percentage - HEALTH_BAR_RED_START ) * inverse( 1.0 - HEALTH_BAR_RED_START ) );
             }
             else
             {
@@ -924,7 +923,7 @@ void Climber::LowHealthAlertEffect::render( Camera * camera )
 
     Assert( HEALTH_THRESHOLD_UPPER > HEALTH_THRESHOLD_LOWER );
 
-    if( m_climber->health_percentage( ) <= HEALTH_THRESHOLD_UPPER )
+    if( m_climber->alive( ) && ( m_climber->health_percentage( ) <= HEALTH_THRESHOLD_UPPER ) )
     {
         dec alpha_health = 1.0;
         if( m_climber->health_percentage( ) > HEALTH_THRESHOLD_LOWER )

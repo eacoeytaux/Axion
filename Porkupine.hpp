@@ -1,6 +1,7 @@
 #ifndef Porkupine_hpp
 #define Porkupine_hpp
 
+#include "MountMerciless.hpp"
 #include "Enemy.hpp"
 
 namespace mtmercy
@@ -9,7 +10,6 @@ namespace mtmercy
 class Porkupine : public Enemy
 {
 public:
-    virtual ~Porkupine( ) { }
     Porkupine( Room *, Coordinate cref position );
 
     virtual void render( ) override;

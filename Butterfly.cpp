@@ -14,7 +14,7 @@ Butterfly::Butterfly( Room * room, Coordinate cref _position ) : Mob( room, _pos
 {
     needs_render_always( true );
 
-    // space( Square( SHELL_RADIUS * 2 ) );
+    // space( Polygon::square( SHELL_RADIUS * 2 ) );
 }
 
 void Butterfly::render( )

@@ -90,7 +90,19 @@ public:
     }
 
     bool intersects( Line cref line, bool inclusive = false ) const { for_each( line, m_lines ) { return_true_if( line.intersects( line, inclusive ) ); } return false; }
-    bool intersects_self( ) const { for_range( i, line_count( ) - 1 ) { for_range( j, line_count( ) - i ) { return_true_if( m_lines[ i ].intersects( m_lines[ i + j + 1 ] ) ); } } return false; } default_equal( Path );
+    bool intersects_self( ) const { for_range( i, line_count( ) - 1 ) { for_range( j, line_count( ) - i - 1 ) { return_true_if( m_lines[ i ].intersects( m_lines[ i + j + 1 ], false ) ); } } return false; } default_equal( Path );
+    
+    Path operator+( Line cref l ) const { return Path( lines( ) + l ); }
+    Path operator+( Path cref p ) const { return Path( lines( ) + p.lines( ) ); }
+    
+    Path & operator+=( Line cref l ) { m_lines.insert_back( l ); rethis; }
+    Path & operator+=( Path cref p ) { m_lines.insert_back( p.lines( ) ); rethis; }
+    
+    Path operator+( Vector cref v ) const { varray<Line> new_lines = m_lines; for_each( line, new_lines ) { line += v; } return new_lines; }
+    Path operator-( Vector cref v ) const { varray<Line> new_lines = m_lines; for_each( line, new_lines ) { line -= v; } return new_lines; }
+
+    Path & operator+=( Vector cref v ) { rethis = *this + v; }
+    Path & operator-=( Vector cref v ) { rethis = *this - v; }
 };
 
 } // namespace geometry

@@ -1,6 +1,7 @@
 #ifndef Wisp_hpp
 #define Wisp_hpp
 
+#include "MountMerciless.hpp"
 #include "Enemy.hpp"
 #include "Fire.hpp"
 

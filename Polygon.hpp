@@ -37,7 +37,7 @@ public:
 
     Polygon( varray<Coordinate> cref coordinates )
     {
-        m_coordinates = m_coordinates_raw = coordinates;
+        m_coordinates = coordinates;
         uint coordinate_count = m_coordinates.size( );
 
         m_convex = true;
@@ -78,35 +78,40 @@ public:
                 bool convex_ccw = true;
 
                 dec edge_curve = 0.0;
-
+                
                 for_range( i, coordinate_count )
                 {
                     Coordinate cref coordinate = m_coordinates[ i ];
-
-                    // TODO
-                    // Assert( !is_inf( coordinate.x( ) ) && !is_inf( coordinate.y( ) ), "no infinities allowed!" );
-
-                    m_lower_bound_x = min( m_lower_bound_x, coordinate.x( ) );
-                    m_lower_bound_y = min( m_lower_bound_y, coordinate.y( ) );
-                    m_upper_bound_x = max( m_upper_bound_x, coordinate.x( ) );
-                    m_upper_bound_y = max( m_upper_bound_y, coordinate.y( ) );
-
-                    Coordinate cref prev_coordinate = m_coordinates[ ( i + coordinate_count - 1 ) % coordinate_count ];
-                    edge_curve += (dec)( ( coordinate.x( ) - prev_coordinate.x( ) ) * ( coordinate.y( ) + prev_coordinate.y( ) ) );
-
-                    if( convex_cw || convex_ccw )
+                    
+                    if( i && ( coordinate == m_coordinates[ i - 1 ] ) )
                     {
-                        Coordinate cref prev_prev_coordinate = m_coordinates[ ( i + coordinate_count - 2 ) % coordinate_count ];
-                        Line line = Line( prev_prev_coordinate, prev_coordinate );
-
-                        if( convex_cw && line.above( coordinate ) )
+                        m_coordinates.remove_index( i-- );
+                        --coordinate_count;
+                    }
+                    else
+                    {
+                        m_lower_bound_x = min( m_lower_bound_x, coordinate.x( ) );
+                        m_lower_bound_y = min( m_lower_bound_y, coordinate.y( ) );
+                        m_upper_bound_x = max( m_upper_bound_x, coordinate.x( ) );
+                        m_upper_bound_y = max( m_upper_bound_y, coordinate.y( ) );
+                        
+                        Coordinate cref prev_coordinate = m_coordinates[ ( i + coordinate_count - 1 ) % coordinate_count ];
+                        edge_curve += (dec)( ( coordinate.x( ) - prev_coordinate.x( ) ) * ( coordinate.y( ) + prev_coordinate.y( ) ) );
+                        
+                        if( convex_cw || convex_ccw )
                         {
-                            convex_cw = false;
-                        }
-
-                        if( convex_ccw && line.below( coordinate ) )
-                        {
-                            convex_ccw = false;
+                            Coordinate cref prev_prev_coordinate = m_coordinates[ ( i + coordinate_count - 2 ) % coordinate_count ];
+                            Line line = Line( prev_prev_coordinate, prev_coordinate );
+                            
+                            if( convex_cw && line.above( coordinate ) )
+                            {
+                                convex_cw = false;
+                            }
+                            
+                            if( convex_ccw && line.below( coordinate ) )
+                            {
+                                convex_ccw = false;
+                            }
                         }
                     }
                 }
@@ -122,6 +127,8 @@ public:
                 m_convex = clockwise ? convex_cw : convex_ccw;
             }
         }
+        
+        m_coordinates_raw = m_coordinates;
     }
 
     static Polygon triangle( Coordinate cref c1, Coordinate cref c2, Coordinate cref c3 ) { return Polygon( { c1, c2, c3 } ); }
@@ -170,7 +177,7 @@ public:
         return Polygon( equilaterals[ side_count ] ).scale( radius );
     }
 
-    static Polygon circle( Planc cref radius = 1.0, Coordinate cref center = ORIGIN ) { return Polygon::equilateral( 60, radius, center ); }
+    static Polygon circle( Planc cref radius = 1.0, Coordinate cref center = ORIGIN ) { return Polygon::equilateral( ceil( radius ) + 3, radius, center ); }
 
     static Polygon convex_hull( varray<Coordinate> cref coordinates )
     {
@@ -382,18 +389,25 @@ public:
     {
         Coordinate centroid;
         Planc area = 0.0;
-
+        
         varray<Coordinate> cref cs = m_coordinates_raw;
-
+        
         for_each( ti, triangle_indices( ) )
         {
             Triangle t( cs[ ti[ 0 ] ], cs[ ti[ 1 ] ], cs[ ti[ 2 ] ] );
-
+            
             centroid += t.centroid( ) * t.area( );
             area += t.area( );
         }
-
-        return cumulative_transform( ).apply( centroid / area );
+        
+        if( area )
+        {
+            return cumulative_transform( ).apply( centroid / area );
+        }
+        else
+        {
+            return INVALID_COORDINATE;
+        }
     }
 
     bool contains( Coordinate cref coordinate, cbool inclusive = true ) const
@@ -415,16 +429,11 @@ public:
             }
         }
 
-        return is_odd( intersection_count );
+        return is_odd( intersection_count ) && !is_zero( intersection_count );
     }
 
     bool intersects( Line cref line ) const
     {
-        if( contains( line.c1( ) ) || contains( line.c2( ) ) )
-        {
-            return true;
-        }
-
         Line line_transformed = line;
         line_transformed.transform( cumulative_transform_inverse( ) );
 
@@ -436,20 +445,31 @@ public:
                 return true;
             }
         }
-
-        return false;
+        
+        return ( contains( line.c1( ) ) || contains( line.c2( ) ) );
     }
 
     varray<Line> intersection( Line cref line ) const
     {
         varray<Coordinate> intersection_coordinates = { };
 
-        if( contains( line.c1( ) ) )
+        bool c1 = contains( line.c1( ) );
+        bool c2 = contains( line.c2( ) );
+        
+        if( c1 && c2 )
+        {
+            if( convex( ) )
+            {
+                return { line };
+            }
+        }
+        
+        if( c1 )
         {
             intersection_coordinates.insert_back( line.c1( ) );
         }
 
-        if( contains( line.c2( ) ) )
+        if( c2 )
         {
             intersection_coordinates.insert_back( line.c2( ) );
         }
@@ -463,6 +483,14 @@ public:
             if( line.intersects( line_transformed ) )
             {
                 intersection_coordinates.insert_back( apply_cumulative_transform( line.intersection( line_transformed ) ) );
+                
+                if( convex( ) )
+                {
+                    if( intersection_coordinates.size( ) )
+                    {
+                        break;
+                    }
+                }
             }
         }
 

@@ -45,6 +45,8 @@ error Engine::run( World * world, const string _app_name )
     }
 
     running = true;
+    
+    Settings::init( );
 
     #ifdef AXN_DEBUG
     try_return_error( Logger::init( ), error_not_init );

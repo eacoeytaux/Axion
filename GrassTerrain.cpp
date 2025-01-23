@@ -5,105 +5,147 @@ using mtmercy::GrassTerrain;
 namespace
 {
 cPlanc OUTLINE_THICKNESS = 3.0;
-cPlanc DEPTH_LENGTH = 1000.0; // todo this should be more variable
+
 cPlanc DEPTH_COLOR_LENGTH = 400.0;
 
-const Angle GLASS_MAX_ANGLE = PI / 6.0;
-cPlanc GRASS_BASE = 2.0;
-const Span<Planc> GRASS_RADIUS = { 13.0, 17. };
-const Span<Planc> GRASS_TIP_SWAY = { 0.25, 0.4 };
+cPlanc GRASS_BASE = 5.0;
+const Angle GLASS_MAX_ANGLE = ( TAU / 9.0 );
+const Span<Planc> GRASS_BASE_LENGTH = { 9.0, 15.0 };
+const Span<Planc> GRASS_TIP_LENGTH = { 8.0, 10.0 };
+const Span<dec> GRASS_TIP_SWAY_RATIO = { 0.2, 0.4 };
 
-const Color GRASS_COLOR_LIGHT = Color::rgb( 0x00C000 );
-const Color GRASS_COLOR_DARK = Color::rgb( 0x008000 );
-const Color DIRT_COLOR = Color::rgb( 0x803000 );
-const Color DUST_COLOR = DIRT_COLOR;
+cPlanc BUSH_OFFSET = 10.0;
+const Span<Planc> BUSH_RADIUS_BACK = { 16.0, 42.0 };
+const Span<Planc> BUSH_RADIUS_FRONT = { 7.0, 25.0 };
 } // namespace
 
 GrassTerrain::GrassTerrain( Room * room, const varray<varray<Coordinate>> & _vertices ) : Terrain( room, _vertices )
 {
     persist_render( true );
+    
+    varray<Polygon> dirt_colored;
+    varray<Polygon> dirt_black;
 
-    varray<Polygon> grass_top;
-    varray<Polygon> grass_bottom;
+    varray<Polygon> grass_front;
+    varray<Polygon> grass_back;
+    
+    varray<Polygon> bushes_front;
+    varray<Polygon> bushes_back;
+    
+    Planc world_bottom = room->bounds( ).lower_bound_y( );
 
     for_each( edges, edges( ) )
     {
         for_each( edge, edges )
         {
-            // TODO
             if( abs( edge->line( ).angle( ).radians( ) ) <= GLASS_MAX_ANGLE.radians( ) )
             {
                 Coordinate v1 = edge->vertex1( )->position( );
                 Coordinate v2 = edge->vertex2( )->position( );
+                Vector v( v1, v2 );
+                
+                Vector v_right = v;
+                v_right.rotate( -RIGHT_ANGLE );
+                v_right.normalize( );
+                
+                Planc length;
+                Planc max_length = v.magnitude( );
+                v.normalize( );
+                
+                length = 0.0;
+                while( length < max_length )
+                {
+                    Planc radius = Random::rPlanc( BUSH_RADIUS_BACK );
+                    bushes_back.insert_back( Polygon::circle( radius, ( v * length ) + Vector::Y( BUSH_OFFSET ) ) );
+                    length += radius;
+                }
+                
+                length = 0.0;
+                while( length < max_length )
+                {
+                    Planc radius = Random::rPlanc( BUSH_RADIUS_FRONT );
+                    bushes_back.insert_back( Polygon::circle( radius + 5.0, ( v * length ) ) );
+                    bushes_front.insert_back( Polygon::circle( radius, ( v * length ) ) );
+                    length += radius;
+                }
+                
+                dirt_colored.insert_back(
+                    Polygon( { v2,
+                               v1,
+                               v1 + Vector( 0, -DEPTH_COLOR_LENGTH ),
+                               v2 + Vector( 0, -DEPTH_COLOR_LENGTH ) } ) );
 
-                draw( { DIRT_COLOR, DIRT_COLOR, BLACK, BLACK },
-                      Polygon( { v2,
-                                 v1,
-                                 v1 + Vector( 0, -DEPTH_COLOR_LENGTH ),
-                                 v2 + Vector( 0, -DEPTH_COLOR_LENGTH ) } ) );
-
-                draw( BLACK,
-                      Polygon( { v2 + Vector( 0, -DEPTH_COLOR_LENGTH ),
-                                 v1 + Vector( 0, -DEPTH_COLOR_LENGTH ),
-                                 v1 + Vector( 0, -DEPTH_LENGTH ),
-                                 v2 + Vector( 0, -DEPTH_LENGTH ) } ) );
-
+                dirt_black.insert_back(
+                    Polygon( { v2 + Vector( 0, -DEPTH_COLOR_LENGTH ),
+                               v1 + Vector( 0, -DEPTH_COLOR_LENGTH ),
+                               v1.y( world_bottom ),
+                               v2.y( world_bottom ) } ) );
+                
                 auto generate_grass = [ & ] ( varray<Polygon> & grass )
                 {
                     Vector v = edge->vector( );
                     Planc magnitude = v.magnitude( );
                     Angle normal = edge->normal( ).flipped( );
 
-                    Planc radius = Random::rPlanc( GRASS_RADIUS );
-                    Planc d = radius;
+                    Planc tip_length = Random::rPlanc( GRASS_TIP_LENGTH );
+                    Planc base_length = Random::rPlanc( GRASS_BASE_LENGTH );
+                    Planc d = base_length;
 
                     Vector base_offset = Vector::A( normal, GRASS_BASE );
 
+                    bool first = true;
                     bool last = false;
+                    
                     do_until_break( )
                     {
                         Vector v1 = v;
                         v1.magnitude( d );
 
                         Vector v2 = v;
-                        v2.magnitude( radius );
+                        v2.magnitude( base_length );
 
                         Vector v3 = -v2;
 
-                        Vector v4 = v2;
+                        Vector v4 = v;
+                        v4.magnitude( tip_length );
                         v4.rotate( -RIGHT_ANGLE );
 
-                        Vector v5 = v4 + Vector::A( Random::rAngle( ), radius * Random::rPlanc( GRASS_TIP_SWAY ) );
+                        Vector v5 = v4 + Vector::A( Random::rAngle( ), tip_length * Random::rPlanc( GRASS_TIP_SWAY_RATIO ) );
+                        
+                        Vector v6 = v1 + v3;
+                        if( !first ) { v6 += base_offset; }
+                        
+                        Vector v7 = v1 + v2;
+                        if( !last ) { v7 += base_offset; }
+                        
+                        Vector v8 = v1 + v5 + base_offset;
 
                         grass.insert_back( Polygon( { v1 + v2,
                                                       v1 + v3,
-                                                      v1 + v3 + base_offset,
-                                                      v1 + v5 + base_offset,
-                                                      v1 + v2 + base_offset } ) );
+                                                      v6,
+                                                      v8,
+                                                      v7 } ) );
+                        
+                        if( last ) { break; }
+                        first = false;
+                        
+                        tip_length = Random::rPlanc( GRASS_TIP_LENGTH );
+                        base_length = Random::rPlanc( GRASS_BASE_LENGTH );
+                        Planc dd = Random::rPlanc( GRASS_BASE_LENGTH.min( ), base_length );
 
-                        if( last )
+                        if( magnitude - ( d + dd ) < GRASS_BASE_LENGTH.min( ) )
                         {
-                            break;
+                            last = true;
+                            dd = magnitude - d - GRASS_BASE_LENGTH.min( );
+                            base_length = magnitude - ( d + dd );
                         }
-                        else
-                        {
-                            radius = Random::rPlanc( GRASS_RADIUS );
-                            Planc dd = Random::rPlanc( GRASS_RADIUS.min( ), radius );
 
-                            if( magnitude - ( d + dd ) < GRASS_RADIUS.min( ) )
-                            {
-                                last = true;
-                                dd = magnitude - d - GRASS_RADIUS.min( );
-                                radius = magnitude - ( d + dd );
-                            }
-
-                            d += dd;
-                        }
+                        d += dd;
                     }
                 };
 
-                generate_grass( grass_top );
-                generate_grass( grass_bottom );
+                generate_grass( grass_front );
+                generate_grass( grass_back );
             }
         }
     }
@@ -113,14 +155,16 @@ GrassTerrain::GrassTerrain( Room * room, const varray<varray<Coordinate>> & _ver
         for_each( vertex, vertices )
         {
             if( !vertex->edge1( ) || !vertex->edge2( ) )
+            {
                 continue;
-
+            }
+            
             Coordinate base = vertex->position( );
             Angle normal = vertex->normal( );
 
-            Planc radius = Random::rPlanc( GRASS_RADIUS );
-            Vector offset = Vector::A( Random::rAngle( ), radius * Random::rPlanc( GRASS_TIP_SWAY ) );
-            Coordinate tip = base + Vector::A( normal, radius, offset );
+            Planc tip_length = Random::rPlanc( GRASS_TIP_LENGTH );
+            Vector offset = Vector::A( Random::rAngle( ), tip_length * Random::rPlanc( GRASS_TIP_SWAY_RATIO ) );
+            Coordinate tip = base + Vector::A( normal, tip_length ) + offset;
 
             Coordinate intersect1 = base;
             Coordinate intersect2 = base;
@@ -149,29 +193,36 @@ GrassTerrain::GrassTerrain( Room * room, const varray<varray<Coordinate>> & _ver
 
                 base_offset2 = edge->normal( ).flipped( );
             }
+            
+            Polygon grass = Polygon( { base,
+                                       intersect1,
+                                       intersect1 + Vector::A( base_offset1, GRASS_BASE ),
+                                       tip + Vector::A( base_offset, GRASS_BASE ),
+                                       intersect2 + Vector::A( base_offset2, GRASS_BASE ),
+                                       intersect2 } );
 
-            grass_top.insert_back( Polygon( { base,
-                                              intersect1,
-                                              intersect1 + Vector::A( base_offset1, GRASS_BASE ),
-                                              tip + Vector::A( base_offset, GRASS_BASE ),
-                                              intersect2 + Vector::A( base_offset2, GRASS_BASE ),
-                                              intersect2 } ) );
-
-            grass_bottom.insert_back( Polygon( { base,
-                                                 intersect1,
-                                                 intersect1 + Vector::A( base_offset1, GRASS_BASE ),
-                                                 tip + Vector::A( normal, OUTLINE_THICKNESS ) + Vector::A( base_offset, GRASS_BASE ),
-                                                 intersect2 + Vector::A( base_offset2, GRASS_BASE ),
-                                                 intersect2 } ) );
+            grass_front.insert_back( grass );
+            grass_back.insert_back( grass );
         }
     }
 
-    for_each( polygon, grass_bottom ) draw( GRASS_COLOR_DARK, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
-    for_each( polygon, grass_top ) draw( GRASS_COLOR_DARK, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
-    for_each( polygon, grass_top ) draw( GRASS_COLOR_LIGHT, polygon );
+    for_each( polygon, bushes_back ) draw( Colors::PLANT_GREEN_4, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
+    for_each( polygon, bushes_front ) draw( Colors::PLANT_GREEN_4, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
+    for_each( polygon, bushes_front ) draw( Colors::PLANT_GREEN_3, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
+    
+    for_each( polygon, dirt_black ) draw( BLACK, polygon );
+    for_each( polygon, dirt_colored ) draw( { Colors::DIRT_COLOR, Colors::DIRT_COLOR, BLACK, BLACK }, polygon );
+    
+    for_each( polygon, dirt_colored ) add_bound( polygon );
+    
+    for_each( polygon, grass_back ) draw( Colors::PLANT_GREEN_2, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
+    for_each( polygon, grass_front ) draw( Colors::PLANT_GREEN_2, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
+    for_each( polygon, grass_front ) draw( Colors::PLANT_GREEN_1, polygon );
+    
+    clear_bounds( );
 }
 
 Color cref GrassTerrain::dust_color( ) const
 {
-    return DUST_COLOR;
+    return Colors::DIRT_COLOR;
 }

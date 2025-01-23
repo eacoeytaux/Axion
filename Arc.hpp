@@ -34,8 +34,8 @@ public:
     static Arc cw( Planc cref radius, Angle cref start, Angle cref end ) { return Arc( ORIGIN, radius, start, end, true ); }
     static Arc ccw( Planc cref radius, Angle cref start, Angle cref end ) { return Arc( ORIGIN, radius, start, end, false ); }
 
-    Path path( ) { return path( 60 ); } // todo
-    Path path( uint point_count )
+    Path path( ) { return path( 12 ); } // todo 12?
+    Path path( uint line_count )
     {
         return_if( ( m_start == m_end ), Path( ) );
 
@@ -58,10 +58,7 @@ public:
             d_angle = end_angle - start_angle;
         }
 
-        // TODO 60?
-        uint line_count = max<uint>( 1, ceil( ( d_angle.radians( ) / TAU ) * 60 ) );
         Angle dd_angle = d_angle / (dec)line_count;
-
         Coordinate start_coordinate = m_center + Vector::A( start_angle, m_radius );
 
         for_range( i, line_count - 1 )

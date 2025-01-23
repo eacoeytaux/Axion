@@ -60,15 +60,11 @@ void Fox::render( )
     head_drawing.draw( FUR_COLOR1, head3 );
     head_drawing.draw( NOSE_COLOR, nose );
 
-    //draw_eyes( Coordinate( -7.0, 3.0 ).rotate( m_head_angle ) + neck );
-
     Polygon ear = Polygon( { Coordinate( -3.0, 5.0 ),
                              Coordinate( 0.0, 15.0 ),
                              Coordinate( 3.0, 10.0 ) } ) + neck;
 
-    head_drawing.draw( RED, ear );
-
-    //head_drawing.rotate( m_head_angle, neck );
+    head_drawing.draw( FUR_COLOR1, ear );
 
     draw( head_drawing );
 }

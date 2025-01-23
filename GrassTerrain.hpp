@@ -1,6 +1,7 @@
 #ifndef GrassTerrain_hpp
 #define GrassTerrain_hpp
 
+#include "MountMerciless.hpp"
 #include "Terrain.hpp"
 
 namespace mtmercy
@@ -9,8 +10,6 @@ namespace mtmercy
 class GrassTerrain : public Terrain
 {
 public:
-    virtual ~GrassTerrain( ) { }
-
     GrassTerrain( Room *, const varray<varray<Coordinate>> & vertices = { } );
 
     virtual Color cref dust_color( ) const;

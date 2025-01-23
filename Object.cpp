@@ -192,6 +192,8 @@ void Object::update_movement( )
             m_ground = nullptr;
         }
     }
+    
+    uset<Object *> all_collided_objects;
 
     dec remaining_percentage = 1.0;
     while( ( greater( remaining_percentage, 0.0 ) && !isnan( remaining_percentage ) ) )
@@ -320,7 +322,7 @@ void Object::update_movement( )
             Line movement_line( movement );
             for_each( object, objects )
             {
-                if( this == object )
+                if( ( this == object ) || all_collided_objects.contains( object ) )
                 {
                     continue;
                 }
@@ -382,8 +384,9 @@ void Object::update_movement( )
                 
                 for_each( collision, collided_objects )
                 {
-                    if( collide( collision.object ) )
+                    if( collide( collision.object ) || collision.object->collide( this ) )
                     {
+                        all_collided_objects.insert( collision.object );
                         movement = Vector( position( ), collision.line.c1( ) );
                         break;
                     }

@@ -22,7 +22,7 @@ void Fire::render( )
     
     auto draw_flame = [ & ] ( Flame cref flame, bool inner = false, bool border = false )
     {
-        draw( Color( inner ? m_flame_inner_color : m_flame_color ).a( flame.alpha ), Polygon::equilateral( EDGE_COUNT, flame.radius / ( border ? m_flame_inner_outline_ratio : 1.0 ), flame.offset ) );
+        draw( Color( inner ? m_flame_inner_color : m_flame_color ).a( Settings::get( Settings::GRAPHICS_DETAIL_ALPHA ) ? flame.alpha : 1.0 ), Polygon::equilateral( EDGE_COUNT, flame.radius / ( border ? m_flame_inner_outline_ratio : 1.0 ), flame.offset ) );
     };
     
     if( m_flame_base_enabled )

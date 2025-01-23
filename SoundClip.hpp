@@ -9,7 +9,6 @@
 //class SoundClip
 //{
 //public:
-//    virtual ~SoundClip( ) { }
 //    SoundClip( string load_name );
 //};
 //

@@ -146,7 +146,7 @@ Drawing & Drawing::draw( Color cref _color,
                          cbool _preserve_thickness,
                          cbool _extend_lines )
 {
-    return draw( varray<Color>( _polygon.sides( ), _color ), _polygon, _thickness, _preserve_thickness, _extend_lines );
+    return draw( varray<Color>( max<uint>( 1, _polygon.sides( ) ), _color ), _polygon, _thickness, _preserve_thickness, _extend_lines );
 }
 
 Drawing & Drawing::draw( Color cref _color1,

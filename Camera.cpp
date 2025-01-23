@@ -60,7 +60,7 @@ void Camera::clear_screen_effects( )
 {
     for_each( effect, m_owned_screen_effects )
     {
-        // todo safe_delete( effect );
+        // safe_delete( effect );
     }
 
     m_owned_screen_effects.clear( );
@@ -71,7 +71,7 @@ void Camera::clear_hud_elements( )
 {
     for_each( hud_element, m_owned_hud_elements )
     {
-        // todo safe_delete( hud_element );
+        // safe_delete( hud_element );
     }
 
     m_owned_hud_elements.clear( );
@@ -142,6 +142,8 @@ void Camera::render( )
             {
                 return;
             }
+            
+            Drawing cref _drawing = *visible;
 
             ogl::clear_depth( );
             ogl::depth_always( );
@@ -161,10 +163,8 @@ void Camera::render( )
                     }
                 }
 
-                Drawing cref _drawing = *visible;
-
                 ogl::translate( _drawing.center( ).x( ), _drawing.center( ).y( ) );
-
+                
                 for_each( _colored_polygon, _drawing.colored_polygons( ) )
                 {
                     if( _colored_polygon.reset )
@@ -205,7 +205,13 @@ void Camera::render( )
 
                                 for_range( i, t.size( ) )
                                 {
-                                    render_convex_polygon( { _colored_polygon.colors[ t[ i ][ 0 ], t[ i ][ 1 ], t[ i ][ 2 ] ] }, { cs[ t[ i ][ 0 ] ], cs[ t[ i ][ 1 ] ], cs[ t[ i ][ 2 ] ] }, _colored_polygon.polygon.cumulative_transform( ) );
+                                    render_convex_polygon( { _colored_polygon.colors[ t[ i ][ 0 ] ],
+                                                             _colored_polygon.colors[ t[ i ][ 1 ] ],
+                                                             _colored_polygon.colors[ t[ i ][ 2 ] ] },
+                                                           { cs[ t[ i ][ 0 ] ],
+                                                             cs[ t[ i ][ 1 ] ],
+                                                             cs[ t[ i ][ 2 ] ] },
+                                                           _colored_polygon.polygon.cumulative_transform( ) );
                                 }
                             }
                         }

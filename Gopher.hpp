@@ -1,6 +1,7 @@
 #ifndef Gopher_hpp
 #define Gopher_hpp
 
+#include "MountMerciless.hpp"
 #include "Enemy.hpp"
 
 namespace mtmercy
@@ -9,7 +10,6 @@ namespace mtmercy
 class Gopher : public Enemy
 {
 public:
-    virtual ~Gopher( ) { }
     Gopher( Room *, Coordinate cref position );
 
     virtual void render( ) override;
@@ -28,7 +28,6 @@ private:
 class DirtBall : public Object
 {
 public:
-    virtual ~DirtBall( ) { }
     DirtBall( Room *, Planc cref radius, Coordinate cref position, Vector cref velocity );
 };
 

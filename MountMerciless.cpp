@@ -63,22 +63,17 @@ inline queue<uint> score_layer_position( Object * object )
     }
 
     o( Thorns )
+    o( Enemy )
+    o( Player )
+    o( Mob )
+    o( Gopher )
+    o( Arrow )
+    o( CampFire )
+    o( Bush )
+    o( Terrain )
+    o( AspineTree )
 
-        o( Enemy )
-        o( Player )
-        o( Mob )
-
-        o( Gopher )
-
-        o( Arrow )
-
-        o( Terrain )
-
-        o( CampFire )
-
-        o( AspineTree )
-
-        return p.scores;
+    return p.scores;
 };
 
 } // namespace

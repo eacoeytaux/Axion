@@ -29,7 +29,11 @@ namespace utility
     typedef const Class & x##Class; \
     typedef Class & r##Class; \
     typedef Class * p##Class; \
-    class Class 
+    class Class
+
+#define axnhash( Class, class, fn ) \
+    struct Hasher { size_t operator( )( Class cref class ) const { return hash<uint>( )( fn ); } }; \
+    uint hash( ) const { return Hasher<Class>( *this ); }
 
 #define rethis return *this
 
@@ -44,7 +48,7 @@ namespace utility
     while( true )
 
 #define do_count( x ) \
-    for( uint do_counter = 0; do_counter < x; ++do_counter)
+    for( uint do_counter = 0; do_counter < x; ++do_counter )
 
 #define for_range( i, range ) \
     for( uint i = 0; i < range; ++i )

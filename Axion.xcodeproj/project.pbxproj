@@ -19,6 +19,7 @@
 		AA1744B22D387A620078E160 /* Fire.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA1744B02D387A620078E160 /* Fire.cpp */; };
 		AA1744B52D38C14C0078E160 /* Room.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA1744B32D38C14C0078E160 /* Room.cpp */; };
 		AA1744B82D38CAE90078E160 /* Plains.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA1744B62D38CAE90078E160 /* Plains.cpp */; };
+		AA1744BE2D3CC6D20078E160 /* Settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA1744BC2D3CC6D20078E160 /* Settings.cpp */; };
 		AA22A1812BCA2DD10048F445 /* Dust.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA22A17F2BCA2DD10048F445 /* Dust.cpp */; };
 		AA22A1842BD038B40048F445 /* Skull.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA22A1822BD038B30048F445 /* Skull.cpp */; };
 		AA269A9729D790B90093CF81 /* Waterfall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA269A9529D790B90093CF81 /* Waterfall.cpp */; };
@@ -56,6 +57,7 @@
 		AA97521F2BB2C0D6003289EF /* LightSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA97521D2BB2C0D6003289EF /* LightSource.cpp */; };
 		AAA436BC2A243F58001FA92C /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAA436BA2A243F58001FA92C /* Engine.cpp */; };
 		AAA436BE2A244C23001FA92C /* EngineSDL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAA436BD2A244C23001FA92C /* EngineSDL.cpp */; };
+		AADBD81E2D3CE7590058E28B /* WaterDrop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADBD81C2D3CE7580058E28B /* WaterDrop.cpp */; };
 		AADC31C12C71733A00CD1417 /* Stalagmite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADC31BF2C71733A00CD1417 /* Stalagmite.cpp */; };
 		AADC31C72C851B0400CD1417 /* Gopher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADC31C52C851B0400CD1417 /* Gopher.cpp */; };
 		AADC31CA2C8554CC00CD1417 /* Enemy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADC31C82C8554CC00CD1417 /* Enemy.cpp */; };
@@ -102,6 +104,8 @@
 		AA1744B42D38C14C0078E160 /* Room.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Room.hpp; sourceTree = "<group>"; };
 		AA1744B62D38CAE90078E160 /* Plains.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Plains.cpp; sourceTree = "<group>"; };
 		AA1744B72D38CAE90078E160 /* Plains.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Plains.hpp; sourceTree = "<group>"; };
+		AA1744BC2D3CC6D20078E160 /* Settings.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Settings.cpp; sourceTree = "<group>"; };
+		AA1744BD2D3CC6D20078E160 /* Settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Settings.hpp; sourceTree = "<group>"; };
 		AA22A1762BC617DC0048F445 /* STD.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = STD.hpp; sourceTree = "<group>"; };
 		AA22A1792BC6517C0048F445 /* STDc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = STDc.hpp; sourceTree = "<group>"; };
 		AA22A17C2BC65A090048F445 /* STDptr.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = STDptr.hpp; sourceTree = "<group>"; };
@@ -200,6 +204,9 @@
 		AAA6D0D72BB2999300077030 /* .clang-format-run.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ".clang-format-run.sh"; sourceTree = SOURCE_ROOT; };
 		AAB55A3E29D12ABC0088E000 /* Transform.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Transform.hpp; sourceTree = "<group>"; };
 		AAB55A4129D132950088E000 /* Planc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Planc.hpp; sourceTree = "<group>"; };
+		AADBD81C2D3CE7580058E28B /* WaterDrop.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WaterDrop.cpp; sourceTree = "<group>"; };
+		AADBD81D2D3CE7590058E28B /* WaterDrop.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = WaterDrop.hpp; sourceTree = "<group>"; };
+		AADBD8202D418DA70058E28B /* ColorPalette.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ColorPalette.hpp; sourceTree = "<group>"; };
 		AADC31BF2C71733A00CD1417 /* Stalagmite.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Stalagmite.cpp; sourceTree = "<group>"; };
 		AADC31C02C71733A00CD1417 /* Stalagmite.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Stalagmite.hpp; sourceTree = "<group>"; };
 		AADC31C52C851B0400CD1417 /* Gopher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Gopher.cpp; sourceTree = "<group>"; };
@@ -290,6 +297,8 @@
 				AA1744B02D387A620078E160 /* Fire.cpp */,
 				AA7A3DEA29B6E2540005EEA7 /* CampFire.hpp */,
 				AA7A3DF129B6E2540005EEA7 /* CampFire.cpp */,
+				AADBD81D2D3CE7590058E28B /* WaterDrop.hpp */,
+				AADBD81C2D3CE7580058E28B /* WaterDrop.cpp */,
 				AA01DC0D2BF323EE006FE720 /* background */,
 			);
 			name = enviroment;
@@ -302,18 +311,18 @@
 				AA7A3DED29B6E2540005EEA7 /* Sky.cpp */,
 				AA7A3DF029B6E2540005EEA7 /* Cloud.hpp */,
 				AA7A3DEC29B6E2540005EEA7 /* Cloud.cpp */,
-				AA0257092BB939BC00DB1313 /* Hills.hpp */,
-				AA0257082BB939BC00DB1313 /* Hills.cpp */,
 				AA92BE602BAF672900181FEA /* MountainRange.hpp */,
 				AA92BE5F2BAF672900181FEA /* MountainRange.cpp */,
-				AA92BE5D2BABC62200181FEA /* DistantBird.hpp */,
-				AA92BE5C2BABC62200181FEA /* DistantBird.cpp */,
+				AA0257092BB939BC00DB1313 /* Hills.hpp */,
+				AA0257082BB939BC00DB1313 /* Hills.cpp */,
 				AA13ACA82BD357D4005DAD3C /* Bush.hpp */,
 				AA13ACA72BD357D4005DAD3C /* Bush.cpp */,
 				AA1744A62D34A3ED0078E160 /* AspineTree.hpp */,
 				AA1744A12D34A3EC0078E160 /* AspineTree.cpp */,
 				AA7A3DEE29B6E2540005EEA7 /* PineTree.hpp */,
 				AA7A3DEB29B6E2540005EEA7 /* PineTree.cpp */,
+				AA92BE5D2BABC62200181FEA /* DistantBird.hpp */,
+				AA92BE5C2BABC62200181FEA /* DistantBird.cpp */,
 				AA269A9629D790B90093CF81 /* Waterfall.hpp */,
 				AA269A9529D790B90093CF81 /* Waterfall.cpp */,
 				AADC31C02C71733A00CD1417 /* Stalagmite.hpp */,
@@ -364,6 +373,7 @@
 		AA597D902BF3217F0032B3BC /* mt */ = {
 			isa = PBXGroup;
 			children = (
+				AADBD8202D418DA70058E28B /* ColorPalette.hpp */,
 				AA9752082BB2BF6B003289EF /* MountMerciless.hpp */,
 				AA9752022BB2BF6B003289EF /* MountMerciless.cpp */,
 				AA1744B72D38CAE90078E160 /* Plains.hpp */,
@@ -441,6 +451,8 @@
 				AA7A3DD929B6E2540005EEA7 /* Logger.cpp */,
 				AA7A3DCC29B6E2530005EEA7 /* Clock.hpp */,
 				AA7A3DD829B6E2540005EEA7 /* Clock.cpp */,
+				AA1744BD2D3CC6D20078E160 /* Settings.hpp */,
+				AA1744BC2D3CC6D20078E160 /* Settings.cpp */,
 				AAA436BB2A243F58001FA92C /* Engine.hpp */,
 				AAA436BA2A243F58001FA92C /* Engine.cpp */,
 				AAA436BD2A244C23001FA92C /* EngineSDL.cpp */,
@@ -562,7 +574,9 @@
 				AA7A3E5429B6E2540005EEA7 /* Speaker.cpp in Sources */,
 				AA13AC9C2BD1FADB005DAD3C /* GrassTerrain.cpp in Sources */,
 				AA6CA99A2AFCD6A7003CEA0A /* OGL.cpp in Sources */,
+				AADBD81E2D3CE7590058E28B /* WaterDrop.cpp in Sources */,
 				AADC31CA2C8554CC00CD1417 /* Enemy.cpp in Sources */,
+				AA1744BE2D3CC6D20078E160 /* Settings.cpp in Sources */,
 				AA13ACA32BD33859005DAD3C /* Snail.cpp in Sources */,
 				AA9752152BB2BF6B003289EF /* Fox.cpp in Sources */,
 				AADC31D02C85992B00CD1417 /* Hook.cpp in Sources */,

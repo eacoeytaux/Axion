@@ -5,6 +5,8 @@ using mtmercy::DirtBall;
 
 namespace
 {
+cdec GRAVITY_RATIO = 0.125;
+
 cPlanc SIGHT_RANGE = METER * 10.0;
 cPlanc ALERT_RANGE = SIGHT_RANGE * 0.75;
 
@@ -131,7 +133,7 @@ DirtBall::DirtBall( Room * room, Planc cref _radius, Coordinate cref _position, 
     solid( true );
     interactive( true );
 
-    gravity_ratio( 0.125 );
+    gravity_ratio( GRAVITY_RATIO );
     terrain_boundaries( false );
 
     velocity( _velocity );

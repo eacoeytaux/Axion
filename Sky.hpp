@@ -1,6 +1,7 @@
 #ifndef Sky_hpp
 #define Sky_hpp
 
+#include "MountMerciless.hpp"
 #include "Cloud.hpp"
 
 namespace mtmercy
@@ -9,7 +10,6 @@ namespace mtmercy
 class Sky : public Object
 {
 public:
-    virtual ~Sky( ) { }
     Sky( Room * );
 
     virtual void render( ) override;

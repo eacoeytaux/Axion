@@ -6,22 +6,22 @@ using mtmercy::Cloud;
 
 namespace
 {
-cdec PUFF_OUTLINE_RATIO = 0.64;
-const Color INSIDE_COLOR = Color::rgb( 0x87CDEB );
-const Color OUTSIDE_COLOR = WHITE;
+cdec WIND_RATIO = 5.0;
 
-cdec SCALE = 10.0;
-cdec WIND_SCALE = 5.0;
+cdec PUFF_OUTLINE_RATIO = 0.64;
 
 cdec X_STRETCH_LARGE = 2.5;
 const Span<uint> LARGE_PUFF_COUNT = { 16, 32 };
-const Span<Planc> LARGE_PUFF_RADIUS = { 21.0 * SCALE, 72.0 * SCALE };
-const Span<Planc> LARGE_PUFF_DISTANCE = { 24.0 * SCALE, 60.0 * SCALE };
+const Span<Planc> LARGE_PUFF_RADIUS = { 210.0, 720.0 };
+const Span<Planc> LARGE_PUFF_DISTANCE = { 240.0, 600.0 };
 
 cdec X_STRETCH_SMALL = 1.5;
 const Span<uint> SMALL_PUFF_COUNT = { 1, 3 };
-const Span<Planc> SMALL_PUFF_RADIUS = { 2.0 * SCALE, 9.0 * SCALE };
+const Span<Planc> SMALL_PUFF_RADIUS = { 20.0, 90.0 };
 const Span<Planc> SMALL_PUFF_DISTANCE = { ( LARGE_PUFF_RADIUS.max( ) * PUFF_OUTLINE_RATIO ) + SMALL_PUFF_RADIUS.max( ), ( LARGE_PUFF_RADIUS.max( ) * PUFF_OUTLINE_RATIO ) + ( SMALL_PUFF_RADIUS.max( ) * 2.0 ) };
+
+const Color INSIDE_COLOR = Color::rgb( 0x87CDEB );
+const Color OUTSIDE_COLOR = WHITE;
 } // namespace
 
 Cloud::Cloud( Room * room ) : Object( room )
@@ -64,13 +64,13 @@ Cloud::Cloud( Room * room ) : Object( room )
         int small_puff_count = Random::rint( SMALL_PUFF_COUNT );
         do_count( small_puff_count )
         {
-            Puff & puff = small_puffs.insert_back( );
+            Puff & spuff = small_puffs.insert_back( );
 
-            puff.radius = Random::rint( SMALL_PUFF_RADIUS ) * scale;
+            spuff.radius = Random::rint( SMALL_PUFF_RADIUS ) * scale;
 
-            puff.center_offset = Vector::A( Random::rAngle( ), Random::rdec( SMALL_PUFF_DISTANCE ) );
-            puff.center_offset.dx( puff.center_offset.dx( ) * X_STRETCH_SMALL );
-            puff.center_offset *= scale;
+            spuff.center_offset = puff.center_offset + Vector::A( Random::rAngle( ), Random::rdec( SMALL_PUFF_DISTANCE ) );
+            spuff.center_offset.dx( spuff.center_offset.dx( ) * X_STRETCH_SMALL );
+            spuff.center_offset *= scale;
         }
     }
 
@@ -92,7 +92,7 @@ void Cloud::render( )
 
 void Cloud::update( )
 {
-    velocity( room( )->wind( ) * WIND_SCALE );
+    velocity( room( )->wind( ) * WIND_RATIO );
 
     Object::update( );
 }

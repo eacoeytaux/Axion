@@ -1,6 +1,7 @@
 #ifndef CampFire_hpp
 #define CampFire_hpp
 
+#include "MountMerciless.hpp"
 #include "Fire.hpp"
 
 namespace mtmercy

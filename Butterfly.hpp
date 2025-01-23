@@ -1,6 +1,7 @@
 #ifndef Butterfly_hpp
 #define Butterfly_hpp
 
+#include "MountMerciless.hpp"
 #include "Mob.hpp"
 
 namespace mtmercy

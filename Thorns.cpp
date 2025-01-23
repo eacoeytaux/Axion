@@ -48,7 +48,7 @@ Thorns::Thorns( Room * room, const Coordinate & _start, const Coordinate & _end 
             Planc l = 0.0;
             while( l < length )
             {
-                draw( THORN_COLOR, Polygon::equilateral( 4, THORN_LENGTH, ( v_norm * l ) + ( offset * Random::rPlanc( -1.0, 1.0 ) ) ) );
+                draw( THORN_COLOR, Polygon::equilateral( 4, THORN_LENGTH, ( v_norm * l ) + ( Random::negated( offset * Random::rPlanc( 1.0 ) ) ) ) );
                 
                 l += Random::rPlanc( THORN_SPACING );
             }

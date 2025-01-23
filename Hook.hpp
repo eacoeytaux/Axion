@@ -1,6 +1,7 @@
 #ifndef Hook_hpp
 #define Hook_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy
@@ -11,7 +12,6 @@ class Climber;
 class Hook : public Object
 {
 public:
-    virtual ~Hook( ) { }
     Hook( Room *, const Climber * );
 
     void render( ) override;

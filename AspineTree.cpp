@@ -41,8 +41,8 @@ Drawing draw_trunk( cbool _draw_leaves, Planc cref _length, Planc cref _base_wid
         for_range( i, 10 )
         {
             // todo
-            Coordinate top = Vector::A( RIGHT_ANGLE, _length * leaves_top + Random::rPlanc( -5.0, 5.0 ) );
-            Coordinate bottom = Vector::A( RIGHT_ANGLE, _length * leaves_bottom + Random::rPlanc( -5.0, 5.0 ) );
+            Coordinate top = Vector::A( RIGHT_ANGLE, ( _length * leaves_top ) + Random::rPlanc( -5.0, 5.0 ) );
+            Coordinate bottom = Vector::A( RIGHT_ANGLE, ( _length * leaves_bottom ) + Random::rPlanc( -5.0, 5.0 ) );
 
             tree_drawing.draw( LEAF_COLOR,
                                Polygon( { top,
@@ -71,7 +71,7 @@ Drawing draw_trunk( cbool _draw_leaves, Planc cref _length, Planc cref _base_wid
     }
 
     Polygon trunk_base = Polygon::circle( half( _base_width ) );
-    Polygon trunk_polygon( { base_right, top, base_left } );
+    Polygon trunk_polygon( { base_right, Vector( top ) * 0.95, base_left } );
 
     tree_drawing.draw( TRUNK_COLOR, trunk_base );
     tree_drawing.draw( TRUNK_COLOR, trunk_polygon );

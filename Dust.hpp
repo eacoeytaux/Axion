@@ -1,6 +1,7 @@
 #ifndef Dust_hpp
 #define Dust_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy
@@ -9,7 +10,6 @@ namespace mtmercy
 class Dust : public Object
 {
 public:
-    virtual ~Dust( ) { }
     Dust( Room *, Coordinate cref position, Vector cref velocity, Color cref color );
 
     virtual void render( ) override;

@@ -174,8 +174,6 @@ public:
         };
 
     public:
-        virtual ~Grid( ) { }
-
         void init( FixedRectangle cref bounds );
 
         Block & block( uint x, uint y );

@@ -1,6 +1,7 @@
 #ifndef Cloud_hpp
 #define Cloud_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy
@@ -25,6 +26,7 @@ public:
 
 private:
     Drawing m_cloud_drawing;
+    
     static Planc max_dx( );
     static Planc max_dy( );
 };

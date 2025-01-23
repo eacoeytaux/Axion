@@ -123,6 +123,13 @@ public:
     {
         std::list<T>::reverse( );
     }
+    
+    virtual list<T> reversed( )
+    {
+        list<T> l = *this;
+        l.reverse( );
+        return l;
+    }
 
     virtual void sort( std::function<bool( const T & t1, const T & t2 )> comparator )
     {
@@ -495,7 +502,6 @@ public:
 
     virtual void remove( const T & t )
     {
-        uint original_size = size( );
         uint deleted_count = 0;
 
         varray<uint> indices = find_indices( t );
@@ -567,6 +573,13 @@ public:
     virtual void reverse( )
     {
         std::reverse( begin( ), end( ) );
+    }
+    
+    virtual varray<T> reversed( )
+    {
+        varray<T> v = *this;
+        v.reverse( );
+        return v;
     }
 
     virtual void sort( std::function<bool( const T & t1, const T & t2 )> comparator, bool stable = false )

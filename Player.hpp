@@ -11,7 +11,6 @@ namespace reality
 class Player : public Mob
 {
 public:
-    virtual ~Player( ) { }
     Player( Room * room, Coordinate cref position );
 
     virtual void render( ) override;

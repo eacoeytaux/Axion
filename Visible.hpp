@@ -12,8 +12,6 @@ namespace graphics
 class Visible : public Drawing
 {
 public:
-    virtual ~Visible( ) { }
-
     Visible( dec z = 1.0 ) : m_z( z ) { }
     Visible( Drawing cref drawing, dec z = 1.0 ) : Drawing( drawing ), m_z( z ) { }
 

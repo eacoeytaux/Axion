@@ -13,7 +13,7 @@ cdec NOON = 0.5;
 cdec SUNSET_START = 0.75;
 cdec SUNSET_END = 0.8;
 
-const Span<uint> CLOUD_REGEN_RATE = { 0, 0 }; // 0 for no clouds
+const Span<uint> CLOUD_REGEN_RATE = { 0 }; // 0 for no clouds
 
 const Color MIDNIGHT_COLOR = BLACK;
 const Color SUNRISE_COLOR = Color::rgb( 0xFF7800 );
