@@ -23,7 +23,9 @@ namespace graphics
 
 class Camera
 {
+
 public:
+
     class HeadUpDisplay;
     class ScreenEffect;
 
@@ -134,11 +136,14 @@ public:
     void cursor_world_position_reset( );
 
 private:
+
     Drawing cursor_drawing( ) const;
     #ifdef AXN_DEBUG
 public:
+
     bool m_draw_debug = false;
 private:
+
     Drawing debug_overlay_drawing( ) const;
     #endif
 
@@ -170,9 +175,11 @@ private:
     #endif
 
 public:
+
     class HeadUpDisplay : public Visible
     {
     public:
+
         HeadUpDisplay( dec center_x_percent, dec center_y_percent, dec width_percent, dec height_percent );
 
         virtual void render( Camera * ) { Visible::render( ); }
@@ -180,6 +187,7 @@ public:
         FixedRectangle bounds( Camera * ) const;
 
     private:
+
         dec m_center_x_percent;
         dec m_center_y_percent;
         dec m_width_percent;
@@ -189,6 +197,7 @@ public:
     class ScreenEffect : public Visible
     {
     public:
+
         ScreenEffect( );
 
         virtual void render( Camera * ) { Visible::render( ); }

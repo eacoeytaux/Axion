@@ -16,7 +16,9 @@ class Camera;
 
 class Lighting : public Visible
 {
+
 public:
+
     Lighting( );
 
     bool darkness_active( ) const;
@@ -33,6 +35,7 @@ public:
     void ambient_color( Color cref );
 
 private:
+
     varray<LightSource> m_light_sources;
 
     bool m_darkness_active = false;

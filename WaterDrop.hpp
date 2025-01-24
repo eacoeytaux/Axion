@@ -9,7 +9,9 @@ namespace mtmercy
 
 class WaterDrop : public Object
 {
+
 public:
+
     WaterDrop( Room *, Coordinate cref position );
 
     virtual void render( ) override;

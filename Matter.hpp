@@ -10,7 +10,9 @@ namespace physics
 
 class Matter
 {
+
 private:
+
     dec m_mass = 0.0;
 
     Coordinate m_position = ORIGIN;
@@ -22,6 +24,7 @@ private:
     bool m_solid = false;
 
 public:
+
     Matter( ) { }
 
     Matter( Coordinate cref position, Polygon cref space, cdec mass = 0.0 ) : m_position( position ), m_space( space ), m_mass( mass ) { }

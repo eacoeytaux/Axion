@@ -11,11 +11,14 @@ namespace geometry
 
 class Angle
 {
+
 private:
+
     dec m_radians = 0.0;
     bool m_truncate = false; // keeps radians within [ 0, 2 * pi )
 
 public:
+
     Angle( ) { }
 
     Angle( bool truncate ) : m_truncate( truncate ) { }

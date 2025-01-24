@@ -9,13 +9,16 @@ namespace mtmercy
 
 class Sky : public Object
 {
+
 public:
+
     Sky( Room * );
 
     virtual void render( ) override;
     virtual void update( ) override;
 
 private:
+
     bool m_has_clouds;
     varray<Cloud *> m_clouds;
 

@@ -60,8 +60,8 @@ void Plains::create( )
     for_each( z, aspine_zs )
     {
         terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
-                               [ & ] ( Coordinate cref c, const TerrainEdge * e )
-                               {
+                                [ & ] ( Coordinate cref c, const TerrainEdge * e )
+        {
             add_object( new AspineTree( this, c, z ) );
         } );
     }
@@ -71,17 +71,17 @@ void Plains::create( )
     // add_object( new Thorns( this, Coordinate( 100, 20 ), Coordinate( 150, 15 ) ) );
 
     // add_object( new Skull( this, Coordinate( 250.0, 500.0 ) ) );
-    
+
     // add_object( new Butterfly( this, Coordinate( 200, 50 ) ) );
     // add_object( new Snail( this, Coordinate( 200.0, 150.0 ) ) );
-    
+
     // add_object( new Bird( this, Coordinate( -100.0, 100.0 ) ) );
     // add_object( new Fox( this, Coordinate( 200.0, 150.0 ) ) );
     // add_object( new Gopher( this, Coordinate( 150, 20 ) ) );
     // add_object( new Unalope( this, Coordinate( 150, 20 ) ) );
     // add_object( new Porkupine( this, Coordinate( 100, 30 ) ) );
     add_object( new Wisp( this, Coordinate( 200.0, 150.0 ) ) );
-    
+
     add_player( Coordinate( 0.0, 300.0 ) );
 }
 

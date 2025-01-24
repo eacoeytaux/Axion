@@ -19,10 +19,13 @@ enum MessageType
 
 class Logger
 {
+
 private:
+
     Logger( ) { }
 
 public:
+
     static error close( );
     static error init( bool print_to_file = false );
     static error print_to_console( bool );

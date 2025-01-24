@@ -10,7 +10,9 @@ namespace mtmercy
 
 class Climber : public Player
 {
+
 public:
+
     virtual ~Climber( );
     Climber( Room * room, Coordinate cref position );
 
@@ -26,7 +28,7 @@ public:
 
     Hook cref hook( ) const { return m_hook; }
 
-    void hurt( dec health ) override;
+    void hurt( Damage cref damage ) override;
 
     Planc light_sight( ) const override;
 
@@ -44,6 +46,7 @@ public:
     Angle aim_shake_range( ) const;
 
 protected:
+
     void update_velocity( ) override;
 
     void movement_stop( );
@@ -105,6 +108,7 @@ protected:
     Color eye_color( ) const override { return color( EYE ); }
 
 private:
+
     enum Skin
     {
         NO_SKIN = 0,
@@ -137,14 +141,17 @@ private:
     Countdown m_dust_timer;
 
 public:
+
     class HealthBar : public Camera::HeadUpDisplay
     {
     public:
+
         HealthBar( Climber * climber );
 
         void render( Camera * ) override;
 
     private:
+
         Climber * m_climber = nullptr;
     };
 
@@ -152,17 +159,21 @@ public:
     void healthbar( HealthBar cref healthbar ) { m_healthbar = healthbar; }
 
 private:
+
     HealthBar m_healthbar;
 
 public:
+
     class LowHealthAlertEffect : public Camera::ScreenEffect
     {
     public:
+
         LowHealthAlertEffect( Climber * climber );
 
         void render( Camera * ) override;
 
     private:
+
         Climber * m_climber = nullptr;
     };
 
@@ -170,6 +181,7 @@ public:
     void low_health_effect( LowHealthAlertEffect cref low_health_effect ) { m_low_health_effect = low_health_effect; }
 
 private:
+
     LowHealthAlertEffect m_low_health_effect;
 };
 

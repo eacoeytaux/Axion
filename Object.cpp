@@ -27,20 +27,11 @@ Object::~Object( )
     m_movement_subscriptions.clear( );
 }
 
-Object::Object( Room * room ) : Matter( ORIGIN ), m_room( room )
-{
-    init( );
-}
+Object::Object( Room * room ) : Matter( ORIGIN ), m_room( room ) { init( ); }
 
-Object::Object( Room * room, Coordinate cref _position, Vector cref _velocity ) : Matter( Vector( _velocity ).origin( _position ) ), m_room( room )
-{
-    init( );
-}
+Object::Object( Room * room, Coordinate cref _position, Vector cref _velocity ) : Matter( Vector( _velocity ).origin( _position ) ), m_room( room ) { init( ); }
 
-Object::Object( Room * room, Vector cref _position_velocity ) : Matter( _position_velocity ), m_room( room )
-{
-    init( );
-}
+Object::Object( Room * room, Vector cref _position_velocity ) : Matter( _position_velocity ), m_room( room ) { init( ); }
 
 void Object::init( )
 {
@@ -192,7 +183,7 @@ void Object::update_movement( )
             m_ground = nullptr;
         }
     }
-    
+
     uset<Object *> all_collided_objects;
 
     dec remaining_percentage = 1.0;
@@ -381,7 +372,7 @@ void Object::update_movement( )
                 struct CollisionDistance { CollisionDistance( Coordinate cref c ) : origin( c ) { } Coordinate origin; bool operator( )( ObjectCollision cref c1, ObjectCollision cref c2 ) { return origin.closer_than( c1.line.c1( ), c2.line.c1( ) ); } };
 
                 collided_objects.sort( CollisionDistance( position( ) ) );
-                
+
                 for_each( collision, collided_objects )
                 {
                     if( collide( collision.object ) || collision.object->collide( this ) )
@@ -435,11 +426,7 @@ void Object::move( Vector cref _movement )
     }
 }
 
-Coordinate Object::position( ) const
-{
-    return Matter::position( );
-}
-
+Coordinate Object::position( ) const { return Matter::position( ); }
 void Object::position( Coordinate cref _position )
 {
     if( interactive( ) )
@@ -456,41 +443,17 @@ void Object::position( Coordinate cref _position )
     }
 }
 
-Planc Object::width( ) const
-{
-    return space( ).bound_width( );
-}
+Planc Object::width( ) const { return space( ).bound_width( ); }
 
-Planc Object::height( ) const
-{
-    return space( ).bound_height( );
-}
+Planc Object::height( ) const { return space( ).bound_height( ); }
 
-bool Object::foreground( ) const
-{
-    return m_foreground;
-}
+bool Object::foreground( ) const { return m_foreground; }
+void Object::foreground( cbool _foreground ) { m_foreground = _foreground || ( z( ) > 1.0 ); }
 
-void Object::foreground( cbool _foreground )
-{
-    m_foreground = _foreground || ( z( ) > 1.0 );
-}
+bool Object::background( ) const { return m_background; }
+void Object::background( cbool _background ) { m_background = _background || ( z( ) < 1.0 ); }
 
-bool Object::background( ) const
-{
-    return m_background;
-}
-
-void Object::background( cbool _background )
-{
-    m_background = _background || ( z( ) < 1.0 );
-}
-
-bool Object::interactive( ) const
-{
-    return m_interactive;
-}
-
+bool Object::interactive( ) const { return m_interactive; }
 void Object::interactive( cbool _interactive )
 {
     m_interactive = _interactive;
@@ -526,33 +489,16 @@ dec Object::friction_resistance( ) const
     return m_air_resistance_ratio;
 }
 
-TerrainEdge * Object::ground( ) const
-{
-    return m_ground;
-}
+TerrainEdge * Object::ground( ) const { return m_ground; }
+void Object::ground( TerrainEdge * ground ) { m_ground = ground; }
 
-void Object::ground( TerrainEdge * ground )
-{
-    m_ground = ground;
-}
+void Object::out_of_bounds( ) { mark_to_delete( ); }
 
-void Object::out_of_bounds( )
-{
-    mark_to_delete( );
-}
+bool Object::collide( Object * object ) { return false; }
 
-bool Object::collide( Object * object )
-{
-    return false;
-}
-
-void Object::react_to_movement( Object * object, Vector cref _v )
-{
-    Assert( m_movement_subscriptions.contains( object ), "not subscribed to object's movement" );
-}
+void Object::react_to_movement( Object * object, Vector cref _v ) { Assert( m_movement_subscriptions.contains( object ), "not subscribed to object's movement" ); }
 
 bool Object::terrain_boundaries( ) const { return m_terrain_boundaries; }
-
 void Object::terrain_boundaries( cbool _terrain_boundaries )
 {
     m_terrain_boundaries = _terrain_boundaries;
@@ -563,19 +509,11 @@ void Object::terrain_boundaries( cbool _terrain_boundaries )
 }
 
 dec Object::gravity_ratio( ) const { return m_gravity_ratio; }
-
-void Object::gravity_ratio( cdec _gravity_ratio )
-{
-    m_gravity_ratio = _gravity_ratio;
-}
+void Object::gravity_ratio( cdec _gravity_ratio ) { m_gravity_ratio = _gravity_ratio; }
 
 
 dec Object::air_resistance_ratio( ) const { return m_air_resistance_ratio; }
-
-void Object::air_resistance_ratio( cdec _air_resistance_ratio )
-{
-    m_air_resistance_ratio = _air_resistance_ratio;
-}
+void Object::air_resistance_ratio( cdec _air_resistance_ratio ) { m_air_resistance_ratio = _air_resistance_ratio; }
 
 FixedRectangle Object::hit_box( ) const
 {

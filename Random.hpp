@@ -13,10 +13,13 @@ namespace axn
 
 class Random
 {
+
 private:
+
     Random( ) { }
 
 public:
+
     enum Distribution
     {
         UNIFORM,

@@ -8,7 +8,9 @@ namespace axn
 
 class Joint
 {
+
 private:
+
     Coordinate m_c1;
     Coordinate m_c2;
 
@@ -18,6 +20,7 @@ private:
     bool m_inward;
 
 public:
+
     Joint( Coordinate cref c1, Coordinate cref c2, Planc cref arm_length1, Planc cref arm_length2, cbool inward = true ) : m_c1( c1 ), m_c2( c2 ), m_arm_length1( arm_length1 ), m_arm_length2( arm_length2 ), m_inward( inward ) { }
 
     Coordinate c1( ) const { return m_c1; }

@@ -6,6 +6,7 @@
 #include "Audio.hpp"
 
 #include "World.hpp"
+#include "Damage.hpp"
 
 namespace axn
 {
@@ -20,9 +21,11 @@ class Object : public Identifiable, public Visible, public Matter
 
     #ifdef AXN_DEBUG
 private:
+
     static uint total_objects;
     #endif
 public:
+
     virtual ~Object( );
 
     Object( Room * room );
@@ -30,19 +33,23 @@ public:
     Object( Room * room, Vector cref position_velocity );
 
 private:
+
     bool m_initialized = false;
     void init( );
 
 public:
+
     uint age( ) const { return m_age; }
 
     Room * room( ) const { return m_room; }
     World * world( ) const { return m_room->world( ); }
 
 protected:
+
     virtual void render( ) override;
 
 public:
+
     void render_object( );
 
     Drawing trajection_drawing( Planc cref distance, Color cref path_color, cdec alpha_start = 1.0, cdec alpha_end = 0.0 ) const;
@@ -54,21 +61,23 @@ public:
     #endif
 
 protected:
+
     virtual void update( );
 
 public:
+
     void update_object( );
-    
+
     // todo make setters protected?
-    
+
     virtual bool keep( ) const { return false; }
-    
+
     bool deleted( ) const { return m_deleted; }
     virtual void mark_deleted( ) { m_deleted = true; }
 
     bool marked_to_delete( ) const { return m_marked_to_delete; }
     virtual void mark_to_delete( ) { m_marked_to_delete = true; }
-    
+
     Coordinate position( ) const;
     void position( Coordinate cref );
 
@@ -116,6 +125,7 @@ public:
     default_non_equal( Object );
 
 protected:
+
     virtual void update_movement( );
     virtual void update_velocity( );
 
@@ -133,6 +143,7 @@ protected:
     virtual dec friction_resistance( ) const;
 
 private:
+
     Room * m_room = nullptr;
 
     uint m_age = 0;

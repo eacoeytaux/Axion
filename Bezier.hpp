@@ -16,10 +16,13 @@ namespace geometry
 
 class Bezier
 {
+
 private:
+
     varray<Coordinate> m_control_points;
 
 public:
+
     Bezier( ) { }
 
     Bezier( varray<Coordinate> cref control_points ) : m_control_points( control_points ) { }

@@ -10,40 +10,22 @@ Clock::Clock( ) : m_ms( (uint)system_clock::now( ).time_since_epoch( ).count( ) 
 
 Clock::Clock( cuint _ms ) : m_ms( _ms ) { }
 
-string Clock::timestamp( const char _delim ) const
+string Clock::timestamp( ) const
 {
+    char time_str[ 9 ];
     time_t time = m_ms / 1000.0;
-    #if defined( OS_WINDOWS )
     tm * const ptm = nullptr;
     localtime_s( ptm, &time );
-    #elif defined( OS_APPLE )
-    tm * ptm = nullptr;
-    ptm = localtime( &time );
-    #elif defined( OS_LINUX )
-    tm * ptm = nullptr;
-    ptm = localtime( &time );
-    #endif
-    // char time_str[ 9 ];
-    // strftime( time_str, sizeof( time_str ), ( "%H" + _delim + "%M" + _delim + "%S" ).c_str( ), ptm );
-    // return string( time_str );
-    return "";
+    strftime( time_str, sizeof( time_str ), "%H:%M:%S", ptm );
+    return string( time_str );
 }
 
-string Clock::datestamp( const char _delim ) const
+string Clock::datestamp( ) const
 {
+    char time_str[ 11 ];
     time_t time = m_ms / 1000.0;
-    #if defined( OS_WINDOWS )
     tm * const ptm = nullptr;
     localtime_s( ptm, &time );
-    #elif defined( OS_APPLE )
-    tm * ptm = nullptr;
-    ptm = localtime( &time );
-    #elif defined( OS_LINUX )
-    tm * ptm = nullptr;
-    ptm = localtime( &time );
-    #endif
-    // char time_str[ 11 ];
-    // strftime( time_str, sizeof( time_str ), ( "%m" + _delim + "%d" + _delim + "%Y" ).c_str( ), ptm );
-    // return string( time_str );
-    return "";
+    strftime( time_str, sizeof( time_str ), "%m-%d-%Y", ptm );
+    return string( time_str );
 }

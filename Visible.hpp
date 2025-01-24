@@ -11,7 +11,9 @@ namespace graphics
 
 class Visible : public Drawing
 {
+
 public:
+
     Visible( dec z = 1.0 ) : m_z( z ) { }
     Visible( Drawing cref drawing, dec z = 1.0 ) : Drawing( drawing ), m_z( z ) { }
 
@@ -81,6 +83,7 @@ public:
     }
 
 protected:
+
     bool persist_render( ) { return m_persist_render; }
     void persist_render( bool persist_render ) { m_persist_render = persist_render; }
 
@@ -96,11 +99,12 @@ protected:
     }
 
     void add_light_source( Coordinate cref position, Planc radius, Color cref tint = TRANSPARENT, dec flicker = 0.0 ) { m_light_sources.insert_back( LightSource( position, radius ) ); }
-    
+
     void add_light_source( LightSource cref light_source ) { m_light_sources.insert_back( light_source ); }
     void add_light_sources( varray<LightSource> cref light_sources ) { m_light_sources.insert_back( light_sources ); }
 
 private:
+
     dec m_z = 1.0;                // 1 = player plane, <1 = background, >1 = foreground
     queue<uint> m_layer_position; // determines show order within layer, lower value shows on top of higher values
 

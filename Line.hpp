@@ -14,7 +14,9 @@ namespace geometry
 
 class Line : public Transformable
 {
+
 private:
+
     Coordinate m_c1 = ORIGIN;
     Coordinate m_c2 = ORIGIN;
 
@@ -24,6 +26,7 @@ private:
     Line & solve_mb( ) { if( c1( ).x( ) == c2( ).x( ) ) { m_m = ( ( c1( ).y( ) <= c2( ).y( ) ) ? INFINITY_POS : INFINITY_NEG ); m_b = c1( ).x( ); } else { m_m = ( ( c2( ).y( ) - c1( ).y( ) ) / ( c2( ).x( ) - c1( ).x( ) ) ); m_b = ( c1( ).y( ) - ( m_m * c1( ).x( ) ) ); } rethis; }
 
 public:
+
     Line( ) { }
 
     Line( Coordinate cref c1, Coordinate cref c2 ) : m_c1( c1 ), m_c2( c2 ) { solve_mb( ); }

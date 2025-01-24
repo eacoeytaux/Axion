@@ -9,7 +9,9 @@ namespace mtmercy
 
 class Bush : public Object
 {
+
 public:
+
     Bush( Room *, Coordinate cref root, dec z = 1.0 );
 };
 

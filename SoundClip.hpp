@@ -9,6 +9,7 @@
 //class SoundClip
 //{
 //public:
+
 //    SoundClip( string load_name );
 //};
 //

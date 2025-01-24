@@ -33,9 +33,11 @@
     <ClCompile Include="Bush.cpp" />
     <ClCompile Include="Butterfly.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CampFire.cpp" />
     <ClCompile Include="Climber.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="Cloud.cpp" />
+    <ClCompile Include="Damage.cpp" />
     <ClCompile Include="DistantBird.cpp" />
     <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="Dust.cpp" />
@@ -58,9 +60,13 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="OGL.cpp" />
     <ClCompile Include="PineTree.cpp" />
+    <ClCompile Include="Plains.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Porkupine.cpp" />
+    <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="Random.cpp" />
+    <ClCompile Include="Room.cpp" />
+    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Skull.cpp" />
     <ClCompile Include="Sky.cpp" />
     <ClCompile Include="Snail.cpp" />
@@ -68,7 +74,9 @@
     <ClCompile Include="Speaker.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Unalope.cpp" />
+    <ClCompile Include="WaterDrop.cpp" />
     <ClCompile Include="Waterfall.cpp" />
+    <ClCompile Include="Wisp.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -84,12 +92,15 @@
     <ClInclude Include="Bush.hpp" />
     <ClInclude Include="Butterfly.hpp" />
     <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="CampFire.hpp" />
     <ClInclude Include="Climber.hpp" />
     <ClInclude Include="Clock.hpp" />
     <ClInclude Include="Cloud.hpp" />
     <ClInclude Include="Color.hpp" />
+    <ClInclude Include="ColorPalette.hpp" />
     <ClInclude Include="Constants.hpp" />
     <ClInclude Include="Coordinate.hpp" />
+    <ClInclude Include="Damage.hpp" />
     <ClInclude Include="Debug.hpp" />
     <ClInclude Include="DistantBird.hpp" />
     <ClInclude Include="Drawing.hpp" />
@@ -122,11 +133,15 @@
     <ClInclude Include="Path.hpp" />
     <ClInclude Include="Physics.hpp" />
     <ClInclude Include="PineTree.hpp" />
+    <ClInclude Include="Plains.hpp" />
     <ClInclude Include="Planc.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="Polygon.hpp" />
     <ClInclude Include="Porkupine.hpp" />
+    <ClInclude Include="Projectile.hpp" />
     <ClInclude Include="Random.hpp" />
+    <ClInclude Include="Room.hpp" />
+    <ClInclude Include="Settings.hpp" />
     <ClInclude Include="Skull.hpp" />
     <ClInclude Include="Sky.hpp" />
     <ClInclude Include="Snail.hpp" />
@@ -142,7 +157,9 @@
     <ClInclude Include="Utility.hpp" />
     <ClInclude Include="Vector.hpp" />
     <ClInclude Include="Visible.hpp" />
+    <ClInclude Include="WaterDrop.hpp" />
     <ClInclude Include="Waterfall.hpp" />
+    <ClInclude Include="Wisp.hpp" />
     <ClInclude Include="World.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

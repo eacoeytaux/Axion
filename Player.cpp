@@ -68,14 +68,14 @@ void Player::die( )
     Mob::die( );
 }
 
-void Player::hurt( dec _health )
+void Player::hurt( Damage cref _damage )
 {
     if( god( ) )
     {
         return;
     }
 
-    Mob::hurt( _health );
+    Mob::hurt( _damage );
 }
 
 void Player::out_of_bounds( )

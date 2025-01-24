@@ -12,15 +12,19 @@ namespace axn
 
 class Assert
 {
+
 private:
+
     bool m_passed = true;
     string m_message = "";
 
 public:
+
     operator bool( ) const { return m_passed; }
     operator string( ) const { return m_message; }
 
 private:
+
     void fail( const char * message = "" )
     {
         m_passed = false;
@@ -41,6 +45,7 @@ private:
     }
 
 public:
+
     Assert( ) { fail( ); }
     Assert( const char * message, ... ) { va_list va_args; va_start( va_args, message ); fail( message ); va_end( va_args ); }
 

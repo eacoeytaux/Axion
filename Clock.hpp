@@ -8,10 +8,13 @@ namespace axn
 
 class Clock
 {
+
 private:
+
     uint m_ms; // milliseconds since epoch time
 
 public:
+
     Clock( );
 
     Clock( uint ms );
@@ -23,8 +26,8 @@ public:
     uint minutes( ) const { return seconds( ) / 60.0; }
     uint hours( ) const { return minutes( ) / 60.0; }
 
-    string timestamp( char delim = ':' ) const;
-    string datestamp( char delim = '-' ) const;
+    string timestamp( ) const;
+    string datestamp( ) const;
 
     Clock operator+( Clock c ) const { return Clock( m_ms + c.m_ms ); }
     Clock operator-( Clock c ) const { return Clock( m_ms - c.m_ms ); }
@@ -38,8 +41,8 @@ inline uint seconds( ) { return milliseconds( ) / 1000.0; }
 inline uint minutes( ) { return seconds( ) / 60.0; }
 inline uint hours( ) { return minutes( ) / 60.0; }
 
-inline string timestamp( char delim = ':' ) { return Clock( ).timestamp( delim ); }
-inline string datestamp( char delim = '-' ) { return Clock( ).datestamp( delim ); }
+inline string timestamp( ) { return Clock( ).timestamp( ); }
+inline string datestamp( ) { return Clock( ).datestamp( ); }
 
 } // namespace axn
 

@@ -9,18 +9,23 @@ namespace mtmercy
 
 class Feather : public Object
 {
+
 public:
+
     Feather( Room *, Coordinate cref position );
 
     virtual void render( ) override;
 
 private:
+
     Color m_color;
 };
 
 class Bird : public Mob
 {
+
 public:
+
     Bird( Room *, Coordinate cref position );
 
     virtual void render( ) override;
@@ -28,8 +33,6 @@ public:
     virtual void update( ) override;
 
     virtual void die( ) override;
-
-private:
 };
 
 } // namespace mtmercy

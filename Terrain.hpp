@@ -10,7 +10,9 @@ namespace reality
 
 class TerrainNode
 {
+
 public:
+
     virtual bool passable( ) const { return true; }
     virtual Angle normal( ) const = 0;
     virtual dec resistance( ) const = 0;
@@ -21,7 +23,9 @@ public:
 class TerrainEdge;
 class TerrainVertex : public TerrainNode
 {
+
 public:
+
     TerrainVertex( Coordinate cref pos );
 
     Coordinate cref position( ) const;
@@ -38,6 +42,7 @@ public:
     FixedRectangle bounding_box( ) const override;
 
 private:
+
     Coordinate m_position;
     TerrainEdge * m_e1 = nullptr;
     TerrainEdge * m_e2 = nullptr;
@@ -47,7 +52,9 @@ private:
 
 class TerrainEdge : public TerrainNode
 {
+
 public:
+
     TerrainEdge( TerrainVertex * v1, TerrainVertex * v2, dec resistance = 0.1 );
     TerrainEdge( TerrainEdge cref );
 
@@ -63,6 +70,7 @@ public:
     FixedRectangle bounding_box( ) const;
 
 private:
+
     TerrainVertex * m_v1 = nullptr;
     TerrainVertex * m_v2 = nullptr;
 
@@ -71,7 +79,9 @@ private:
 
 class Terrain : public Object
 {
+
 public:
+
     virtual ~Terrain( );
     Terrain( Room *, const varray<varray<Coordinate>> & vertices = { } );
 
@@ -88,6 +98,7 @@ public:
     virtual Color cref dust_color( ) const { return TRANSPARENT; }
 
 private:
+
     void make( varray<Coordinate> cref positions, bool loop );
 
     varray<varray<TerrainVertex *>> m_vertices;

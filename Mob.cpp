@@ -15,7 +15,7 @@ Mob::Mob( Room * room, Coordinate cref _position, cdec _health ) : Object( room,
 
     health( _health );
 
-    m_hurt_display_timer.duration( 0 );
+    m_hurt_display_timer.duration( 1 );
 }
 
 void Mob::render( )
@@ -148,11 +148,11 @@ void Mob::heal_full( )
     m_health.value( m_health.max( ) );
 }
 
-void Mob::hurt( dec _damage )
+void Mob::hurt( Damage cref _damage )
 {
     if( !invincible( ) )
     {
-        dec health = Mob::health( ) - min( _damage, Mob::health( ) );
+        dec health = Mob::health( ) - min( _damage.value( ), Mob::health( ) );
         if( health <= 0.0 )
         {
             m_health.value( 0.0 );
@@ -160,10 +160,11 @@ void Mob::hurt( dec _damage )
         }
         else
         {
-            m_health.value( health );
-            m_hurt_display_timer.reset( );
             invincible_pause( invincible_duration( ) );
         }
+
+        m_health.value( health );
+        m_hurt_display_timer.reset( );
     }
 }
 

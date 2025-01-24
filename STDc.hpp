@@ -17,6 +17,7 @@ class list : private std::list<T>
     using std::list<T>::list;
 
 public:
+
     bool empty( ) const
     {
         return size( );
@@ -99,14 +100,14 @@ public:
     {
         return insert( t, 0 );
     }
-    
+
     T pop_back( )
     {
         T t = back( );
         std::list<T>::pop_back( );
         return t;
     }
-    
+
     T pop_front( )
     {
         T t = front( );
@@ -123,7 +124,7 @@ public:
     {
         std::list<T>::reverse( );
     }
-    
+
     virtual list<T> reversed( )
     {
         list<T> l = *this;
@@ -177,6 +178,7 @@ public:
     }
 
 private:
+
     bool assert_index( uint index ) const
     {
         return Assert( valid_index( index ), "varray index (%ui) out of range, varray size: %ui", index, size( ) );
@@ -189,6 +191,7 @@ class queue : private std::queue<T>
     using std::queue<T>::queue;
 
 public:
+
     bool empty( ) const
     {
         return size( );
@@ -254,6 +257,7 @@ class stack : private std::stack<T>
     using std::stack<T>::stack;
 
 public:
+
     bool empty( ) const
     {
         return size( );
@@ -315,6 +319,7 @@ class varray : private std::vector<T>
     using std::vector<T>::vector;
 
 public:
+
     varray copy( ) { return varray( this ); }
     varray copy( uint index_end ) { return copy( 0, index_end ); }
     varray copy( uint index_start, uint index_end )
@@ -574,7 +579,7 @@ public:
     {
         std::reverse( begin( ), end( ) );
     }
-    
+
     virtual varray<T> reversed( )
     {
         varray<T> v = *this;
@@ -687,6 +692,7 @@ public:
     }
 
 private:
+
     bool assert_index( uint index, bool exclude_end = true ) const
     {
         return Assert( valid_index( index ) || ( !exclude_end && ( index == size( ) ) ), "varray index (%ui) out of range, varray size: %ui", index, size( ) );
@@ -699,6 +705,7 @@ class oset : private std::set<Key, Compare>
     using std::set<Key, Compare>::set;
 
 public:
+
     bool empty( ) const
     {
         return size( );
@@ -726,6 +733,7 @@ class uset : public std::unordered_set<Key, Hash, Equal>
     using std::unordered_set<Key, Hash, Equal>::unordered_set;
 
 public:
+
     bool contains( const Key & k ) const
     {
         return ( std::unordered_set<Key, Hash, Equal>::find( k ) != std::unordered_set<Key, Hash, Equal>::end( ) );
@@ -738,6 +746,7 @@ class omap : public std::map<Key, Value, Hash, Equal>
     using std::map<Key, Value, Hash, Equal>::map;
 
 public:
+
     bool contains( const Key & k ) const
     {
         return ( std::map<Key, Value, Hash, Equal>::map::find( k ) != std::map<Key, Value, Hash, Equal>::unordered_map::end( ) );
@@ -750,6 +759,7 @@ class umap : public std::unordered_map<Key, Value, Hash, Equal>
     using std::unordered_map<Key, Value, Hash, Equal>::unordered_map;
 
 public:
+
     bool contains( const Key & k ) const
     {
         return ( std::unordered_map<Key, Value, Hash, Equal>::unordered_map::find( k ) != std::unordered_map<Key, Value, Hash, Equal>::unordered_map::end( ) );

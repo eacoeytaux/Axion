@@ -84,11 +84,9 @@ PineTree::PineTree( Room * room, Coordinate cref _root, cdec _z ) : Object( room
         m_leave_bunches_rotation_points.insert_back( last_top );
 
         Drawing & leaves = m_leave_bunches_and_trunk.insert_back( );
-        {
-            // todo change to border
-            Polygon leaf_border = Polygon::expand( Polygon( leaf_bunch ), LEAVES_BORDER_WIDTH );
-            leaves.draw( LEAVES_BORDER_COLOR, leaf_border );
-        }
+
+        Polygon leaf_border = Polygon::expand( Polygon( leaf_bunch ), LEAVES_BORDER_WIDTH );
+        leaves.draw( LEAVES_BORDER_COLOR, leaf_border );
         leaves.draw( LEAVES_COLOR, leaf_bunch );
 
         last_top = ( sub_trunk * SUB_TRUNK_HEIGHT_RATIO ).destination( );

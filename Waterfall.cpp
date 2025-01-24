@@ -5,27 +5,29 @@ using mtmercy::Waterfall;
 
 namespace
 {
-cdec GRAVITY_RATIO = 0.8;
 
-cuint RIPPLE_PAUSE = 125;
+cuint RIPPLE_PAUSE = 25;
 cPlanc RIPPLE_HEIGHT = 12.0;
 cPlanc RIPPLE_TIP_HEIGHT = 8.0;
 const Span<Planc> RIPPLE_RADIUS = { 5.0, 20.0 };
-const dec RIPPLE_ALPHA_GROWTH = 0.0025;
+cuint RIPPLE_EDGE_COUNT = 8;
+const dec RIPPLE_ALPHA_GROWTH = 0.01;
+cdec RIPPLE_GRAVITY_RATIO = 5.0;
 
-cPlanc FOAM_X_SPEED_MAX = 4.0;
-const Span<Planc> FOAM_Y_SPEED = { 3.0, 5.0 };
-cPlanc FOAM_SMALL_Y_SPEED_RATIO = 1.2;
+cPlanc FOAM_X_SPEED_MAX = 2.0;
+const Span<Planc> FOAM_Y_SPEED = { 3.0, 4.0 };
+cPlanc FOAM_SMALL_Y_SPEED_RATIO = 1.01;
 const Span<Planc> FOAM_RADIUS_START = { 5.0, 20.0 };
 const Span<Planc> FOAM_SMALL_RADIUS_START = { 2.5, 7.5 };
-cPlanc FOAM_RADIUS_MIN = 0.5;
-cPlanc FOAM_RADIUS_SHRINK = 0.5;
+cPlanc FOAM_RADIUS_MIN = 0.1;
+cPlanc FOAM_RADIUS_SHRINK = 0.25;
 cPlanc FOAM_ALPHA_START = 1.0;
 cPlanc FOAM_ALPHA_SHRINK = 0.05;
-cuint FOAM_EDGE_COUNT = 16;
+cuint FOAM_EDGE_COUNT = 12;
 const Span<uint> FOAM_NEW_COUNT = { 0, 4 };
 const Span<uint> FOAM_SMALL_NEW_COUNT = { 3, 7 };
 const dec FOAM_COLOR_TOP_ALPHA = 0.75;
+cdec FOAM_GRAVITY_RATIO = 0.75;
 
 const Color WATER_COLOR = CYAN;
 const Color FOAM_COLOR = WHITE;
@@ -40,9 +42,9 @@ Waterfall::Waterfall( Room * room, Coordinate cref _bottom, cPlanc _width, cPlan
     z( _z );
 
     space( Polygon::rectangle( _width, _height ) );
-    
+
     no_gravity( );
-    
+
     m_ripple_countdown.reset( RIPPLE_PAUSE );
 }
 
@@ -51,10 +53,10 @@ void Waterfall::render( )
     Object::render( );
 
     Polygon bounds = Polygon::rectangle( width( ), height( ), Coordinate( 0.0, half( height( ) ) ) );
-    
+
     draw( WATER_COLOR, bounds );
     draw( { FOAM_COLOR.a( 0.0 ), FOAM_COLOR.a( 0.0 ), FOAM_COLOR.a( FOAM_COLOR_TOP_ALPHA ), FOAM_COLOR.a( FOAM_COLOR_TOP_ALPHA ) }, bounds );
-    
+
     add_bound( bounds );
     for_each( ripple, m_ripples ) { draw( FOAM_COLOR.a( ripple.alpha ), ripple.polygon + Vector::Y( ripple.height ) ); }
     clear_bounds( );
@@ -68,43 +70,43 @@ void Waterfall::render( )
 void Waterfall::update( )
 {
     Object::update( );
-    
+
     { // ripples
         if( m_ripple_countdown.tick( ) )
         {
             m_ripple_countdown.reset( );
-            
+
             Planc center_x = -half( Random::rPlanc( RIPPLE_RADIUS ) ) - half( width( ) );
             Planc radius = Random::rPlanc( RIPPLE_RADIUS );
-            
+
             Path ripple_path;
-            
+
             while( ( center_x - radius ) < half( width( ) ) )
             {
-                Planc center_y = RIPPLE_TIP_HEIGHT * abs( center_x / half( width( ) ) );
-                Arc arc = Arc::ccw( Coordinate( center_x, center_y ), radius, PI, 0.0 );
-                
+                Coordinate c( center_x, RIPPLE_TIP_HEIGHT * abs( center_x / half( width( ) ) ) );
+                Arc arc = Arc::ccw( c, radius, PI, 0.0 );
+
                 if( ripple_path.lines( ).size( ) )
                 {
-                    ripple_path += Line( ripple_path.lines( ).back( ).c2( ), arc.path( ).lines( ).front( ).c1( ) );
+                    ripple_path += Line( ripple_path.lines( ).back( ).c2( ), c - Vector::X( radius ) );
                 }
-                
-                ripple_path += arc.path( );
-                
+
+                ripple_path += arc.path( RIPPLE_EDGE_COUNT );
+
                 center_x += radius;
                 radius = Random::rPlanc( RIPPLE_RADIUS );
                 center_x += radius;
             }
-            
+
             Ripple & ripple = m_ripples.insert_back( );
-            
+
             ripple.polygon = Polygon( ripple_path.points( ) + ( ripple_path + Vector::Y( RIPPLE_HEIGHT ) ).points( ).reversed( ) );
             ripple.height = ( height( ) + RIPPLE_HEIGHT + RIPPLE_RADIUS.max( ) );
         }
-        
+
         for_each( ripple, m_ripples )
         {
-            ripple.height += ( GRAVITY * GRAVITY_RATIO ).dy( );
+            ripple.height += ( GRAVITY * RIPPLE_GRAVITY_RATIO ).dy( );
             ripple.alpha = min( ripple.alpha + RIPPLE_ALPHA_GROWTH, 1.0 );
         }
         m_ripples.remove_if( [ ] ( Ripple cref ripple )
@@ -124,7 +126,7 @@ void Waterfall::update( )
             foam.radius = Random::rPlanc( FOAM_RADIUS_START );
             foam.alpha = FOAM_ALPHA_START;
         }
-        
+
         uint new_foam_small_count = Random::rint( FOAM_SMALL_NEW_COUNT );
         while( new_foam_small_count-- )
         {
@@ -134,11 +136,11 @@ void Waterfall::update( )
             foam.radius = Random::rPlanc( FOAM_SMALL_RADIUS_START );
             foam.alpha = FOAM_ALPHA_START;
         }
-        
+
         for_each( foam, m_foam )
         {
             foam.radius -= FOAM_RADIUS_SHRINK;
-            foam.movement += GRAVITY * GRAVITY_RATIO;
+            foam.movement += GRAVITY * FOAM_GRAVITY_RATIO;
             foam.position += foam.movement;
             foam.alpha -= FOAM_ALPHA_SHRINK;
         }

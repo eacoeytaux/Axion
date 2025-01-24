@@ -51,9 +51,8 @@ void World::init( )
 
 void World::create( )
 {
-    // TODO camera width / height should be independent of screen size
-    uint side_buffer = min( Engine::screen_width( ) * CAMERA_SIDE_BUFFER_RATIO, Engine::screen_height( ) * CAMERA_SIDE_BUFFER_RATIO );
-    m_camera = new Camera( this, Engine::screen_width( ) - side_buffer, Engine::screen_height( ) - side_buffer );
+    // TODO camera width / height should be independent of screen size?
+    m_camera = new Camera( this, Engine::screen_width( ) * ( 1.0 - CAMERA_SIDE_BUFFER_RATIO ), Engine::screen_height( ) * ( 1.0 - CAMERA_SIDE_BUFFER_RATIO ) );
 }
 
 void World::input( const varray<Input *> & _inputs )
@@ -260,7 +259,7 @@ void World::input( const varray<Input *> & _inputs )
             }
         }
     }
-    
+
     current_room( )->input( _inputs );
 }
 
@@ -279,7 +278,7 @@ void World::render( )
 {
     Camera * camera = m_camera;
     camera->clear_subjects( );
-    
+
     current_room( )->render( );
 
     camera->render( );
@@ -288,12 +287,12 @@ void World::render( )
 void World::update( )
 {
     ++m_age;
-    
+
     if( current_room( ) )
     {
         current_room( )->update( );
     }
-    
+
     if( m_camera )
     {
         if( current_room( )->players( ).size( ) )

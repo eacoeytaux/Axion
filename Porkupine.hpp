@@ -9,7 +9,9 @@ namespace mtmercy
 
 class Porkupine : public Enemy
 {
+
 public:
+
     Porkupine( Room *, Coordinate cref position );
 
     virtual void render( ) override;
@@ -17,6 +19,7 @@ public:
     virtual void update( ) override;
 
 private:
+
     varray<Line> m_quills;
 };
 

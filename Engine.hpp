@@ -24,10 +24,13 @@ struct Input
 
 class Engine
 {
+
 private:
+
     Engine( ) { }
 
 public:
+
     static cuint FPS = 60; // frames per second
 
     static error run( World * world, const string app_name = "" );
@@ -61,6 +64,7 @@ public:
     static void mute( bool m ) { mute_eng( m ); }
 
 private:
+
     static void init_eng( string app_name );
     static void close_eng( );
 

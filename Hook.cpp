@@ -166,7 +166,7 @@ bool Hook::collide( Object * object )
             {
                 if( Mob * mob = dynamic_cast<Mob *>( object ) )
                 {
-                    mob->hurt( 1000.0 );
+                    mob->hurt( Damage( 1000.0 ) );
                 }
 
                 state( RETRACTING );

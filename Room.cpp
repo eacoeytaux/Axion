@@ -17,7 +17,7 @@ Room::Room( World * world )
     m_object_queue = queue<Object *>( );
     m_foreground_objects = varray<Object *>( );
     m_background_objects = varray<Object *>( );
-    
+
     destroy( ); // from destruction comes creation
 }
 
@@ -179,106 +179,54 @@ void Room::render( )
 
     m_lighting->clear_light_sources( );
 
-    #ifdef AXN_DEBUG
-    if( !Debug::active || world( )->m_display_forebackground )
-        #endif
+    auto capture_objects = [ & ] ( varray<Object *> cref objects, bool light_source )
     {
-        for_each( object, m_background_objects )
+        for_each( object, objects )
         {
             object->render_object( );
 
-            // if( !object->z( ) || camera->in_view( object->bounding_box( ) + object->position( ), object->z( ) ) )
+            if( !object->z( ) || camera->in_view( object->bounding_box( ) + object->position( ), object->z( ) ) )
             {
-                camera->capture( object );
-            }
-
-            #ifdef AXN_DEBUG
-            if( Debug::active )
-            {
-                if( object->m_draw_debug )
+                if( light_source )
                 {
-                    Drawing debug_overlay = object->debug_overlay( );
-                    debug_overlay.move( object->position( ) );
-
-                    camera->capture_debug( new Visible( debug_overlay ), true );
+                    m_lighting->add_light_sources( object->light_sources( ) );
                 }
-            }
-            #endif
-        }
-    }
 
-    m_terrain->render_object( );
-    camera->capture( m_terrain );
+                camera->capture( object );
+
+                #ifdef AXN_DEBUG
+                if( Debug::active )
+                {
+                    if( object->m_draw_debug )
+                    {
+                        Drawing debug_overlay = object->debug_overlay( );
+                        debug_overlay.move( object->position( ) );
+
+                        camera->capture_debug( new Visible( debug_overlay ), true );
+                    }
+                }
+                #endif
+            }
+        }
+    };
+
+    capture_objects( { m_terrain }, false );
+    capture_objects( m_objects, true );
 
     #ifdef AXN_DEBUG
-    if( Debug::active )
+    if( world( )->m_display_forebackground )
+        #endif
     {
-        if( m_terrain->m_draw_debug )
-        {
-            Drawing debug_overlay = m_terrain->debug_overlay( );
-            debug_overlay.move( m_terrain->position( ) );
-            camera->capture_debug( new Visible( debug_overlay ), true );
-        }
+        capture_objects( m_background_objects, false );
+        capture_objects( m_foreground_objects, false );
+    }
 
-        if( world( )->m_draw_grid )
-        {
-            render_object_grid( camera );
-        }
+    #ifdef AXN_DEBUG
+    if( Debug::active && world( )->m_draw_grid )
+    {
+        render_object_grid( camera );
     }
     #endif
-
-    for_each( object, m_objects )
-    {
-        object->render_object( );
-
-        if( camera->in_view( object->bounding_box( ) + object->position( ) ) )
-        {
-            m_lighting->add_light_sources( object->light_sources( ) );
-
-            camera->capture( object );
-
-            #ifdef AXN_DEBUG
-            if( Debug::active )
-            {
-                if( object->m_draw_debug )
-                {
-                    Drawing debug_overlay = object->debug_overlay( );
-                    debug_overlay.move( object->position( ) );
-
-                    camera->capture_debug( new Visible( debug_overlay ), true );
-                }
-            }
-            #endif
-        }
-    }
-
-    #ifdef AXN_DEBUG
-    if( !Debug::active || world( )->m_display_forebackground )
-        #endif
-    {
-        for_each( object, m_foreground_objects )
-        {
-            object->render_object( );
-
-            if( camera->in_view( object->bounding_box( ) + object->position( ), object->z( ) ) )
-            {
-                camera->capture( object );
-            }
-
-            #ifdef AXN_DEBUG
-            if( Debug::active )
-            {
-                if( object->m_draw_debug )
-                {
-                    Drawing debug_overlay = object->debug_overlay( );
-                    debug_overlay.move( object->position( ) );
-
-                    camera->capture_debug( new Visible( debug_overlay ), true );
-                }
-            }
-            #endif
-        }
-    }
 
     render_bounds( camera );
 

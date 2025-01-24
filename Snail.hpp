@@ -9,13 +9,16 @@ namespace mtmercy
 
 class Snail : public Mob
 {
+
 public:
+
     Snail( Room *, Coordinate cref position );
 
     virtual void render( ) override;
     virtual void update( ) override;
 
 private:
+
 };
 
 } // namespace mtmercy

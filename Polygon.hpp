@@ -17,7 +17,9 @@ namespace geometry
 
 class Polygon : public Transformable
 {
+
 private:
+
     varray<Coordinate> m_coordinates_raw;
     mutable varray<Coordinate> m_coordinates;
 
@@ -33,6 +35,7 @@ private:
     bool m_convex = true;
 
 public:
+
     Polygon( ) { }
 
     Polygon( varray<Coordinate> cref coordinates )
@@ -78,11 +81,11 @@ public:
                 bool convex_ccw = true;
 
                 dec edge_curve = 0.0;
-                
+
                 for_range( i, coordinate_count )
                 {
                     Coordinate cref coordinate = m_coordinates[ i ];
-                    
+
                     if( i && ( coordinate == m_coordinates[ i - 1 ] ) )
                     {
                         m_coordinates.remove_index( i-- );
@@ -94,20 +97,20 @@ public:
                         m_lower_bound_y = min( m_lower_bound_y, coordinate.y( ) );
                         m_upper_bound_x = max( m_upper_bound_x, coordinate.x( ) );
                         m_upper_bound_y = max( m_upper_bound_y, coordinate.y( ) );
-                        
+
                         Coordinate cref prev_coordinate = m_coordinates[ ( i + coordinate_count - 1 ) % coordinate_count ];
                         edge_curve += (dec)( ( coordinate.x( ) - prev_coordinate.x( ) ) * ( coordinate.y( ) + prev_coordinate.y( ) ) );
-                        
+
                         if( convex_cw || convex_ccw )
                         {
                             Coordinate cref prev_prev_coordinate = m_coordinates[ ( i + coordinate_count - 2 ) % coordinate_count ];
                             Line line = Line( prev_prev_coordinate, prev_coordinate );
-                            
+
                             if( convex_cw && line.above( coordinate ) )
                             {
                                 convex_cw = false;
                             }
-                            
+
                             if( convex_ccw && line.below( coordinate ) )
                             {
                                 convex_ccw = false;
@@ -127,7 +130,7 @@ public:
                 m_convex = clockwise ? convex_cw : convex_ccw;
             }
         }
-        
+
         m_coordinates_raw = m_coordinates;
     }
 
@@ -146,7 +149,7 @@ public:
                           Coordinate( -half_width, -half_height ),
                           Coordinate( half_width, -half_height ) } );
     }
-    
+
     static Polygon square( Planc cref width ) { return rectangle( width, width ); }
     static Polygon square( Planc cref width, Angle cref rotation ) { return rectangle( width, width, rotation ); }
     static Polygon square( Planc cref width, Coordinate cref center ) { return rectangle( width, width, center ); }
@@ -177,7 +180,7 @@ public:
         return Polygon( equilaterals[ side_count ] ).scale( radius );
     }
 
-    static Polygon circle( Planc cref radius = 1.0, Coordinate cref center = ORIGIN ) { return Polygon::equilateral( ceil( radius ) + 3, radius, center ); }
+    static Polygon circle( Planc cref radius = 1.0, Coordinate cref center = ORIGIN ) { return Polygon::equilateral( max<uint>( 6, min<uint>( 60, ceil( radius * PI ) ) ), radius, center ); }
 
     static Polygon convex_hull( varray<Coordinate> cref coordinates )
     {
@@ -272,7 +275,7 @@ public:
 
     transform_functions( Polygon );
 
-    varray<Coordinate> cref coordinates( bool raw = false ) const { if( raw ) { return m_coordinates_raw; } else { apply_transform( ); return m_coordinates; } }
+    varray<Coordinate> cref coordinates( bool transformed = true ) const { if( !transformed ) { return m_coordinates_raw; } else { apply_transform( ); return m_coordinates; } }
 
     const varray<varray<uint>> & triangle_indices( ) const
     {
@@ -389,17 +392,17 @@ public:
     {
         Coordinate centroid;
         Planc area = 0.0;
-        
+
         varray<Coordinate> cref cs = m_coordinates_raw;
-        
+
         for_each( ti, triangle_indices( ) )
         {
             Triangle t( cs[ ti[ 0 ] ], cs[ ti[ 1 ] ], cs[ ti[ 2 ] ] );
-            
+
             centroid += t.centroid( ) * t.area( );
             area += t.area( );
         }
-        
+
         if( area )
         {
             return cumulative_transform( ).apply( centroid / area );
@@ -445,7 +448,7 @@ public:
                 return true;
             }
         }
-        
+
         return ( contains( line.c1( ) ) || contains( line.c2( ) ) );
     }
 
@@ -455,7 +458,7 @@ public:
 
         bool c1 = contains( line.c1( ) );
         bool c2 = contains( line.c2( ) );
-        
+
         if( c1 && c2 )
         {
             if( convex( ) )
@@ -463,7 +466,7 @@ public:
                 return { line };
             }
         }
-        
+
         if( c1 )
         {
             intersection_coordinates.insert_back( line.c1( ) );
@@ -483,7 +486,7 @@ public:
             if( line.intersects( line_transformed ) )
             {
                 intersection_coordinates.insert_back( apply_cumulative_transform( line.intersection( line_transformed ) ) );
-                
+
                 if( convex( ) )
                 {
                     if( intersection_coordinates.size( ) )
@@ -498,23 +501,23 @@ public:
         {
             // sort intersections by distance from start of line
             struct LineIntersectionDistance { LineIntersectionDistance( Coordinate cref c ) : origin( c ) { } Coordinate origin; bool operator( )( Coordinate cref c1, Coordinate cref c2 ) { return origin.closer_than( c1, c2 ); } };
-            
+
             intersection_coordinates.sort( LineIntersectionDistance( line.c1( ) ) );
-            
+
             varray<Line> intersections( intersection_coordinates.size( ) / 2 );
-            
+
             for_range( i, intersections.size( ) )
             {
                 intersections[ i ] = Line( intersection_coordinates[ ( i * 2 ) ], intersection_coordinates[ ( i * 2 ) + 1 ] );
             }
-            
+
             return intersections;
         }
         else
         {
             return { Line( intersection_coordinates.front( ), intersection_coordinates.front( ) ) };
         }
-        
+
     }
 
     Polygon operator+( Vector cref v ) const { return Polygon( *this ).move( v ); }
@@ -526,6 +529,7 @@ public:
     default_equal( Polygon );
 
 private:
+
     void apply_transform( ) const
     {
         if( is_dirty( ) )

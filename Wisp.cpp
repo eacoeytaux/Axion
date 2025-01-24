@@ -44,12 +44,14 @@ Wisp::Wisp( Room * room, const Coordinate & _position ) : Enemy( room, _position
     needs_render_always( true );
 
     no_gravity( );
-    
+
+    space( Polygon::square( HEAD_RADIUS ) );
+
     sight_range( 300.0 );
     alert_range( 200.0 );
-    
+
     m_reload_timer.reset( 0 );
-    
+
     m_fire.flame_color( FLAME_COLOR );
     m_fire.flame_pause( FLAME_PAUSE );
     m_fire.flame_radius( FLAME_RADIUS );
@@ -69,36 +71,36 @@ Wisp::Wisp( Room * room, const Coordinate & _position ) : Enemy( room, _position
 void Wisp::render( )
 {
     Enemy::render( );
-    
+
     m_fire.render( );
     draw( m_fire );
-    
+
     Vector face_offset;
-    
+
     if( has_target( ) )
     {
         Angle viewing_angle = Angle( position( ), target( )->position( ) );
         face_offset = Vector::A( viewing_angle, FACE_OFFSET_DISTANCE );
     }
-    
+
     draw( COLOR, Polygon::circle( HEAD_RADIUS ) );
     draw( COLOR, Polygon::circle( FACE_RADIUS, face_offset ) );
-    
+
     draw( FLAME_COLOR, Polygon::circle( EYE_RADIUS, Vector::A( EYE_OFFSET_ANGLE, EYE_OFFSET * FACE_RADIUS ) + face_offset ) );
     draw( FLAME_COLOR, Polygon::circle( EYE_RADIUS, Vector::A( PI - EYE_OFFSET_ANGLE, EYE_OFFSET * FACE_RADIUS ) + face_offset ) );
-    
+
     draw( FLAME_COLOR, Polygon( Arc::ccw( Coordinate::Y( -MOUTH_OFFSET ), MOUTH_RADIUS, 0.0, PI ).path( ).points( ) ) + face_offset );
 }
 
 void Wisp::update( )
 {
     Enemy::update( );
-    
+
     m_fire.update( );
-    
+
     clear_light_sources( );
     add_light_sources( m_fire.light_sources( ) );
-    
+
     if( m_reload_timer.tick( ) )
     {
         if( has_target( ) )
@@ -112,7 +114,7 @@ void Wisp::update( )
 void Wisp::move( Vector cref _velocity )
 {
     Enemy::move( _velocity );
-    
+
     m_fire.move( _velocity );
 }
 
@@ -121,13 +123,13 @@ Wisp::Bullet::Bullet( Room * room, const Coordinate & _position, const Vector & 
     needs_render_always( true );
 
     no_gravity( );
-    
+
     interactive( true );
 
     solid( true );
-    
+
     air_resistance_ratio( 0.0 );
-    
+
     m_fire.flame_color( FLAME_COLOR );
     m_fire.flame_pause( FLAME_PAUSE );
     m_fire.flame_radius( FLAME_RADIUS * ( BULLET_FLAME_RATIO * ( BULLET_RADIUS / HEAD_RADIUS ) ) );
@@ -147,24 +149,24 @@ Wisp::Bullet::Bullet( Room * room, const Coordinate & _position, const Vector & 
 void Wisp::Bullet::render( )
 {
     Object::render( );
-    
+
     m_fire.render( );
     draw( m_fire );
-    
+
     draw( COLOR, Polygon::circle( BULLET_RADIUS ) );
 }
 
 void Wisp::Bullet::update( )
 {
     Object::update( );
-    
+
     if( ground( ) )
     {
         m_fire.extinguish( );
     }
-    
+
     m_fire.update( );
-    
+
     clear_light_sources( );
     add_light_sources( m_fire.light_sources( ) );
 }
@@ -172,7 +174,7 @@ void Wisp::Bullet::update( )
 void Wisp::Bullet::move( Vector cref _velocity )
 {
     Object::move( _velocity );
-    
+
     m_fire.move( _velocity );
 }
 
@@ -184,13 +186,15 @@ bool Wisp::Bullet::collide( Object * object )
     {
         if( Mob * mob = dynamic_cast<Mob *>( object ) )
         {
-            mob->hurt( 10.0 );
+            mob->hurt( Damage( 10.0 ) );
         }
 
         subscribe_to_movement( object );
         stationary( true );
         //interactive( false );
         solid( false );
+
+        mark_to_delete( );
 
         return true;
     }

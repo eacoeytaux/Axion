@@ -9,7 +9,9 @@ namespace mtmercy
 
 class Fox : public Mob
 {
+
 public:
+
     Fox( Room *, Coordinate cref position );
 
     virtual void render( ) override;

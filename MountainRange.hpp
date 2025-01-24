@@ -9,7 +9,9 @@ namespace mtmercy
 
 class MountainRange : public Object
 {
+
 public:
+
     MountainRange( Room *, Planc base_bottom, dec z, Color cref color );
 };
 

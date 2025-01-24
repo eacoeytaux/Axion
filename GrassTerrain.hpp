@@ -9,7 +9,9 @@ namespace mtmercy
 
 class GrassTerrain : public Terrain
 {
+
 public:
+
     GrassTerrain( Room *, const varray<varray<Coordinate>> & vertices = { } );
 
     virtual Color cref dust_color( ) const;

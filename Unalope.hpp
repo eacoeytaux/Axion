@@ -9,7 +9,9 @@ namespace mtmercy
 
 class Unalope : public Enemy
 {
+
 public:
+
     Unalope( Room *, Coordinate cref position );
 
     virtual void render( ) override;

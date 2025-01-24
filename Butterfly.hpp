@@ -9,12 +9,15 @@ namespace mtmercy
 
 class Butterfly : public Mob
 {
+
 public:
+
     Butterfly( Room *, Coordinate cref position );
 
     virtual void render( ) override;
 
 private:
+
 };
 
 } // namespace mtmercy

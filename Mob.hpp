@@ -10,7 +10,9 @@ namespace reality
 
 class Mob : public Object
 {
+
 public:
+
     Mob( Room * room, Coordinate cref position, dec health = 1 );
 
     #ifdef AXN_DEBUG
@@ -39,7 +41,7 @@ public:
 
     virtual void heal( dec health ); // won't excede max health
     virtual void heal_full( );
-    virtual void hurt( dec damage );
+    virtual void hurt( Damage cref damage );
 
     virtual dec max_health( ) const;
     virtual void max_health( dec health ); // will decrease health if necessary
@@ -51,6 +53,7 @@ public:
     void facing_left( bool facing_left ) { return facing_right( !facing_left ); }
 
 protected:
+
     virtual void render( ) override;
     virtual void hurt_display_settings( );
 
@@ -60,6 +63,7 @@ protected:
 
     // eyes
 protected:
+
     virtual void eye_info( Planc eye_radius, uint blink_duration, const Span<uint> & blink_wait_span, Color cref eye_color = BLACK );
     virtual void eye_info( Planc eye_radius, Color cref eye_color ) { return eye_info( eye_radius, 0.0, { (uint)0, (uint)0 }, eye_color ); }
     virtual void eye_info( Planc eye_radius ) { return eye_info( eye_radius, 0.0, { (uint)0, (uint)0 } ); }
@@ -101,12 +105,14 @@ protected:
     Color m_eye_color;
 
 protected:
+
     Countdown cref invincible_timer( ) const { return m_invincible_timer; }
 
     Countdown cref hurt_display_timer( ) const { return m_hurt_display_timer; }
     void hurt_display_duration( uint ticks ) { m_hurt_display_timer.duration( ticks ); }
 
 private:
+
     bool m_alive = true;
     Slider<dec> m_health;
 

@@ -14,6 +14,7 @@ class Drawing : public Transformable
     friend class Camera; // be friendly to the camera and smile
 
 public:
+
     Drawing( ) { }
 
     Drawing( Coordinate cref center ) { Drawing::center( center ); }
@@ -105,6 +106,7 @@ public:
     bool operator!=( Drawing cref ) const { return true; }
 
 private:
+
     struct ColoredPolygon
     {
         Polygon polygon;

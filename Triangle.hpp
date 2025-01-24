@@ -16,12 +16,15 @@ namespace geometry
 
 class Triangle : public Transformable
 {
+
 private:
+
     Coordinate m_c1 = ORIGIN;
     Coordinate m_c2 = ORIGIN;
     Coordinate m_c3 = ORIGIN;
 
 public:
+
     Triangle( ) { }
 
     Triangle( xCoordinate c1, xCoordinate c2, xCoordinate c3 ) : m_c1( c1 ), m_c2( c2 ), m_c3( c3 ) { }

@@ -80,6 +80,15 @@ void Camera::clear_hud_elements( )
 
 void Camera::render( )
 {
+    #ifdef AXN_DEBUG
+    static uint total_render_count = 0;
+    static uint total_polygon_count = 0;
+    static uint max_polygon_count = 0;
+    uint polygon_count = 0;
+    uint convex_polygon_count = 0;
+    uint convex_polygon_triangle_count = 0;
+    #endif
+
     cdec screen_width = Engine::screen_width( );
     cdec screen_height = Engine::screen_height( );
 
@@ -94,20 +103,16 @@ void Camera::render( )
 
         Engine::anti_alias( ) ? ogl::enable_anti_alias( ) : ogl::disable_anti_alias( );
 
-        auto render_convex_polygon = [ & ] ( const varray<Color> & _colors, varray<Coordinate> cref _coordinates, Transform cref _transform = IDENTITY_TRANSFORM, cdec _z = 0.0 )
+        auto render_convex_polygon = [ & ] ( const varray<Color> & _colors, varray<Coordinate> cref _coordinates )
         {
             if( !_colors.size( ) || !_coordinates.size( ) )
             {
                 return;
             }
 
-            if( !_transform.is_identity( ) )
-            {
-                ogl::push_matrix( );
-
-                ogl::translate( _transform.translation_x( ), _transform.translation_y( ) );
-                ogl::transform( _transform );
-            }
+            #ifdef AXN_DEBUG
+            ++polygon_count;
+            #endif
 
             ogl::begin_polygons( );
             {
@@ -116,7 +121,7 @@ void Camera::render( )
                     ogl::color( _colors[ 0 ].r( ), _colors[ 0 ].g( ), _colors[ 0 ].b( ), _colors[ 0 ].a( ) );
                     for_range( i, _coordinates.size( ) )
                     {
-                        ogl::vertex( _coordinates[ i ].x( ), _coordinates[ i ].y( ), _z );
+                        ogl::vertex( _coordinates[ i ].x( ), _coordinates[ i ].y( ), 0.0 );
                     }
                 }
                 else
@@ -124,16 +129,11 @@ void Camera::render( )
                     for_range( i, _coordinates.size( ) )
                     {
                         ogl::color( _colors[ i ].r( ), _colors[ i ].g( ), _colors[ i ].b( ), _colors[ i ].a( ) );
-                        ogl::vertex( _coordinates[ i ].x( ), _coordinates[ i ].y( ), _z );
+                        ogl::vertex( _coordinates[ i ].x( ), _coordinates[ i ].y( ), 0.0 );
                     }
                 }
             }
             ogl::end( );
-
-            if( !_transform.is_identity( ) )
-            {
-                ogl::pop_matrix( );
-            }
         };
 
         auto render_visible = [ & ] ( Visible * visible, bool fixed )
@@ -142,13 +142,13 @@ void Camera::render( )
             {
                 return;
             }
-            
+
             Drawing cref _drawing = *visible;
 
-            ogl::clear_depth( );
+            // ogl::clear_depth( );
             ogl::depth_always( );
 
-            ogl::clear_stencil( );
+            // ogl::clear_stencil( );
             ogl::stencil_always( );
 
             ogl::push_matrix( );
@@ -163,9 +163,14 @@ void Camera::render( )
                     }
                 }
 
+                Transform cumulative_transform = _drawing.cumulative_transform( );
+
+                ogl::translate( cumulative_transform.translation_x( ), cumulative_transform.translation_y( ) );
+                ogl::transform( cumulative_transform );
+
                 ogl::translate( _drawing.center( ).x( ), _drawing.center( ).y( ) );
-                
-                for_each( _colored_polygon, _drawing.colored_polygons( ) )
+
+                for_each( _colored_polygon, _drawing.colored_polygons( false ) )
                 {
                     if( _colored_polygon.reset )
                     {
@@ -194,13 +199,20 @@ void Camera::render( )
 
                         if( _colored_polygon.thickness == FILLED )
                         {
+                            ogl::push_matrix( );
+
+                            Transform cumulative_transform = _colored_polygon.polygon.cumulative_transform( );
+
+                            ogl::translate( cumulative_transform.translation_x( ), cumulative_transform.translation_y( ) );
+                            ogl::transform( cumulative_transform );
+
                             if( _colored_polygon.polygon.convex( ) )
                             {
-                                render_convex_polygon( _colored_polygon.colors, _colored_polygon.polygon.coordinates( true ), _colored_polygon.polygon.cumulative_transform( ) );
+                                render_convex_polygon( _colored_polygon.colors, _colored_polygon.polygon.coordinates( false ) );
                             }
                             else
                             {
-                                varray<Coordinate> cref cs = _colored_polygon.polygon.coordinates( true );
+                                varray<Coordinate> cref cs = _colored_polygon.polygon.coordinates( false );
                                 const varray<varray<uint>> & t = _colored_polygon.polygon.triangle_indices( );
 
                                 for_range( i, t.size( ) )
@@ -210,17 +222,23 @@ void Camera::render( )
                                                              _colored_polygon.colors[ t[ i ][ 2 ] ] },
                                                            { cs[ t[ i ][ 0 ] ],
                                                              cs[ t[ i ][ 1 ] ],
-                                                             cs[ t[ i ][ 2 ] ] },
-                                                           _colored_polygon.polygon.cumulative_transform( ) );
+                                                             cs[ t[ i ][ 2 ] ] } );
                                 }
+
+                                #ifdef AXN_DEBUG
+                                ++convex_polygon_count;
+                                convex_polygon_triangle_count += t.size( );
+                                #endif
                             }
+
+                            ogl::pop_matrix( );
                         }
                         else
                         {
                             cdec _thickness = _colored_polygon.preserve_thickness ? ( _colored_polygon.thickness / _zoom ) : ( _colored_polygon.thickness );
 
                             // TODO not raw!
-                            varray<Coordinate> cref cs = _colored_polygon.polygon.coordinates( false );
+                            varray<Coordinate> cref cs = _colored_polygon.polygon.coordinates( true );
                             for_range( i, cs.size( ) )
                             {
                                 const Line _line = Line( cs[ i ? ( i - 1 ) : ( cs.size( ) - 1 ) ], cs[ i ] );
@@ -289,29 +307,33 @@ void Camera::render( )
 
                     const varray<LightSource> & _light_sources = lighting->light_sources( );
 
-                    for_range( i, LIGHTING_LAYERS + 1 )
+                    if( _light_sources.size( ) )
                     {
-                        ogl::clear_depth( );
-                        ogl::depth_always( );
-
                         ogl::push_matrix( );
                         {
-
                             ogl::scale( _zoom );
                             ogl::translate( -_camera_center.x( ),
                                             -_camera_center.y( ) );
 
-                            for_each( light, _light_sources )
+                            Polygon cover = Polygon::rectangle( screen_width / _zoom, screen_height / _zoom, _camera_center );
+
+                            for_range( i, LIGHTING_LAYERS + 1 )
                             {
-                                render_convex_polygon( { TRANSPARENT },
-                                                       Polygon::circle( light.radius( ) * ( ( i * LIGHTING_RADIUS_GROW * pow( LIGHTING_RADIUS_GROW_EXPONENT, i ) ) + 1 ), light.position( ) ).coordinates( ) );
+                                ogl::clear_depth( );
+                                ogl::depth_always( );
+
+                                for_each( light, _light_sources )
+                                {
+                                    render_convex_polygon( { TRANSPARENT },
+                                                           Polygon::circle( light.radius( ) * ( ( i * LIGHTING_RADIUS_GROW * pow( LIGHTING_RADIUS_GROW_EXPONENT, i ) ) + 1 ), light.position( ) ).coordinates( ) );
+                                }
+
+                                ogl::depth_not_equal( );
+
+                                render_convex_polygon( { BLACK.a( min( 1.0, ( (dec)( i + 1 ) / (dec)LIGHTING_LAYERS ) ) * lighting->darkness_intensity( ) ) }, cover.coordinates( ) );
                             }
                         }
                         ogl::pop_matrix( );
-
-                        ogl::depth_not_equal( );
-                        render_convex_polygon( { BLACK.a( min( 1.0, ( (dec)( i + 1 ) / (dec)LIGHTING_LAYERS ) ) * lighting->darkness_intensity( ) ) },
-                                               Polygon::rectangle( screen_width, screen_height ).coordinates( ) );
                     }
                 }
             }
@@ -413,6 +435,18 @@ void Camera::render( )
         render_cursor( );
     }
     ogl::pop_matrix( );
+
+    #ifdef AXN_DEBUG
+    ++total_render_count;
+    total_polygon_count += polygon_count;
+    max_polygon_count = max( polygon_count, max_polygon_count );
+    Log( DEBUG_LOG, "polygons: %u ( convex: %u -> %u ) / average: %u / max: %u",
+         polygon_count,
+         convex_polygon_count,
+         convex_polygon_triangle_count,
+         ( total_polygon_count / total_render_count ),
+         max_polygon_count );
+    #endif
 }
 
 Drawing Camera::cursor_drawing( ) const
@@ -423,8 +457,10 @@ Drawing Camera::cursor_drawing( ) const
         cdec RETICLE_LENGTH = 8.0;
         cdec RETICLE_BORDER_WIDTH = 1.0;
 
-        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * 2.0 ), RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) );
-        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * 2.0 ), RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) );
+        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * 2.0 ),
+                                                        RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) );
+        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_WIDTH + ( RETICLE_BORDER_WIDTH * 2.0 ),
+                                                        RETICLE_LENGTH + ( RETICLE_BORDER_WIDTH * 2.0 ) ) );
         cursor_drawing.draw( WHITE, Polygon::rectangle( RETICLE_WIDTH, RETICLE_LENGTH ) );
         cursor_drawing.draw( WHITE, Polygon::rectangle( RETICLE_LENGTH, RETICLE_WIDTH ) );
     }
@@ -527,10 +563,7 @@ void Camera::capture( Visible * _subject, cbool _should_delete )
 
     m_subjects.insert_back( _subject );
 
-    if( _should_delete )
-    {
-        m_owned_subjects.insert_back( _subject );
-    }
+    if( _should_delete ) { m_owned_subjects.insert_back( _subject ); }
 }
 
 void Camera::add_hud_element( HeadUpDisplay * _hud_element, cbool _should_delete )
@@ -539,10 +572,7 @@ void Camera::add_hud_element( HeadUpDisplay * _hud_element, cbool _should_delete
 
     m_hud_elements.insert_back( _hud_element );
 
-    if( _should_delete )
-    {
-        m_owned_hud_elements.insert_back( _hud_element );
-    }
+    if( _should_delete ) { m_owned_hud_elements.insert_back( _hud_element ); }
 }
 
 void Camera::remove_hud_element( HeadUpDisplay * _hud_element )
@@ -551,10 +581,7 @@ void Camera::remove_hud_element( HeadUpDisplay * _hud_element )
 
     m_hud_elements.remove( _hud_element );
 
-    if( m_owned_hud_elements.contains( _hud_element ) )
-    {
-        m_owned_hud_elements.remove( _hud_element );
-    }
+    if( m_owned_hud_elements.contains( _hud_element ) ) { m_owned_hud_elements.remove( _hud_element ); }
 }
 
 void Camera::add_screen_effect( ScreenEffect * _effect, cbool _should_delete )
@@ -563,10 +590,7 @@ void Camera::add_screen_effect( ScreenEffect * _effect, cbool _should_delete )
 
     m_screen_effects.insert_back( _effect );
 
-    if( _should_delete )
-    {
-        m_owned_screen_effects.insert_back( _effect );
-    }
+    if( _should_delete ) { m_owned_screen_effects.insert_back( _effect ); }
 }
 
 void Camera::remove_screen_effect( ScreenEffect * _effect )
@@ -575,10 +599,7 @@ void Camera::remove_screen_effect( ScreenEffect * _effect )
 
     m_screen_effects.remove( _effect );
 
-    if( m_owned_screen_effects.contains( _effect ) )
-    {
-        m_owned_screen_effects.remove( _effect );
-    }
+    if( m_owned_screen_effects.contains( _effect ) ) { m_owned_screen_effects.remove( _effect ); }
 }
 
 #ifdef AXN_DEBUG
@@ -588,10 +609,7 @@ void Camera::capture_debug( Visible * _subject, cbool _should_delete )
 
     m_debug_subjects.insert_back( _subject );
 
-    if( _should_delete )
-    {
-        m_owned_debug_subjects.insert_back( _subject );
-    }
+    if( _should_delete ) { m_owned_debug_subjects.insert_back( _subject ); }
 }
 #endif
 
@@ -642,20 +660,14 @@ void Camera::target( Coordinate cref _target, cbool _hard_set )
     m_target = _target;
     m_target += target_offset( );
 
-    if( _hard_set )
-    {
-        center( m_target );
-    }
+    if( _hard_set ) { center( m_target ); }
 }
 
 Vector Camera::target_offset( ) const { return Vector( 0.0, ( height( ) * TARGET_OFFSET_Y ) / zoom( ) ); }
 
 bool Camera::in_view( Coordinate cref _world_position, cdec _z ) const
 {
-    if( !_z )
-    {
-        return true;
-    }
+    return_true_if( !_z );
 
     Coordinate screen_position = world_to_screen( _world_position );
     return in_range( screen_position.x( ), width( ) / _z ) && in_range( screen_position.y( ), height( ) / _z );
@@ -663,15 +675,9 @@ bool Camera::in_view( Coordinate cref _world_position, cdec _z ) const
 
 bool Camera::in_view( FixedRectangle cref _world_bounding_box, cdec _z ) const
 {
-    if( !_z )
-    {
-        return true;
-    }
+    return_true_if( !_z );
 
-    Coordinate top = world_to_screen( _world_bounding_box.top( ) );
-    Coordinate bottom = world_to_screen( _world_bounding_box.bottom( ) );
-
-    FixedRectangle bounds( bottom, top );
+    FixedRectangle bounds( world_to_screen( _world_bounding_box.bottom( ) ), world_to_screen( _world_bounding_box.top( ) ) );
     FixedRectangle screen( width( ) / _z, height( ) / _z, world_to_screen( center( ) ) );
 
     return screen.has_intersection_with( bounds );

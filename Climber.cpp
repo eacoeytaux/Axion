@@ -985,6 +985,12 @@ void Climber::input( Input * _input )
                 moving_right( down );
                 break;
             }
+            #ifdef AXN_DEBUG
+            case 'h':
+            {
+                heal_full( );
+                break;
+            }
             case 'g':
             {
                 if( pressed )
@@ -993,6 +999,7 @@ void Climber::input( Input * _input )
                 }
                 break;
             }
+            #endif
             default:
             {
                 break;
@@ -1162,7 +1169,7 @@ void Climber::clear_input( )
     jump( false );
 }
 
-void Climber::hurt( dec health )
+void Climber::hurt( Damage cref _damage )
 {
-    Player::hurt( health );
+    Player::hurt( _damage );
 }

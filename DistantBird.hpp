@@ -9,12 +9,15 @@ namespace mtmercy
 
 class DistantBird : public Object
 {
+
 public:
+
     DistantBird( Room *, Coordinate cref position );
 
     virtual void render( ) override;
 
 private:
+
     uint m_wing_cycle_offset;
     uint m_flight_cycle_offset;
 };

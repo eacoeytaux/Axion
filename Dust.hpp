@@ -9,7 +9,9 @@ namespace mtmercy
 
 class Dust : public Object
 {
+
 public:
+
     Dust( Room *, Coordinate cref position, Vector cref velocity, Color cref color );
 
     virtual void render( ) override;
@@ -17,6 +19,7 @@ public:
     virtual void update( ) override;
 
 private:
+
     Planc m_radius;
     dec m_alpha;
     uint m_sides;

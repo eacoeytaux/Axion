@@ -12,13 +12,16 @@ namespace geometry
 
 class Vector
 {
+
 private:
+
     Planc m_dx = P0;
     Planc m_dy = P0;
 
     Coordinate m_origin = ORIGIN;
 
 public:
+
     Vector( ) { }
 
     Vector( Planc cref dx, Planc cref dy ) : m_dx( dx ), m_dy( dy ) { }

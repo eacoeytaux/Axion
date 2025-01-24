@@ -180,6 +180,30 @@
     <ClCompile Include="Unalope.cpp">
       <Filter>Source Files\mt\mobs</Filter>
     </ClCompile>
+    <ClCompile Include="Plains.cpp">
+      <Filter>Source Files\mt</Filter>
+    </ClCompile>
+    <ClCompile Include="Wisp.cpp">
+      <Filter>Source Files\mt\mobs</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings.cpp">
+      <Filter>Source Files\axn\system</Filter>
+    </ClCompile>
+    <ClCompile Include="WaterDrop.cpp">
+      <Filter>Source Files\mt\environment</Filter>
+    </ClCompile>
+    <ClCompile Include="Room.cpp">
+      <Filter>Source Files\axn\world</Filter>
+    </ClCompile>
+    <ClCompile Include="CampFire.cpp">
+      <Filter>Source Files\mt\environment</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Source Files\axn\world</Filter>
+    </ClCompile>
+    <ClCompile Include="Damage.cpp">
+      <Filter>Source Files\axn\world</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Angle.hpp">
@@ -397,6 +421,33 @@
     </ClInclude>
     <ClInclude Include="Triangle.hpp">
       <Filter>Source Files\axn\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Plains.hpp">
+      <Filter>Source Files\mt</Filter>
+    </ClInclude>
+    <ClInclude Include="Wisp.hpp">
+      <Filter>Source Files\mt\mobs</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings.hpp">
+      <Filter>Source Files\axn\system</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorPalette.hpp">
+      <Filter>Source Files\mt</Filter>
+    </ClInclude>
+    <ClInclude Include="WaterDrop.hpp">
+      <Filter>Source Files\mt\environment</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.hpp">
+      <Filter>Source Files\axn\world</Filter>
+    </ClInclude>
+    <ClInclude Include="CampFire.hpp">
+      <Filter>Source Files\mt\environment</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.hpp">
+      <Filter>Source Files\axn\world</Filter>
+    </ClInclude>
+    <ClInclude Include="Damage.hpp">
+      <Filter>Source Files\axn\world</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

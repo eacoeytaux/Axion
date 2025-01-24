@@ -16,7 +16,9 @@ cdec FILLED = 0.0;
 
 class Color
 {
+
 public:
+
     Color( ) :
         m_r( 0.0 ),
         m_g( 0.0 ),
@@ -276,6 +278,7 @@ public:
     default_equal( Color );
 
 private:
+
     dec m_r = 1.0; // red value
     dec m_g = 1.0; // green value
     dec m_b = 1.0; // blue value
@@ -303,7 +306,9 @@ const Color YELLOW = Color::rgb( 1.0, 1.0, 0.0 );
 
 class ColorSlider
 {
+
 public:
+
     ColorSlider( Color cref start, Color cref end ) : m_color_start( start ), m_color_end( end ), m_slide( 0.0 ) { }
 
     void color_start( Color cref c )
@@ -359,6 +364,7 @@ public:
     default_equal( ColorSlider );
 
 private:
+
     Color m_color_start;
     Color m_color_end;
     dec m_slide;

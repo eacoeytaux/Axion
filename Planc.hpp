@@ -10,6 +10,7 @@ namespace geometry
 
 axnclass( Planc )
 {
+
 private:
 
     dec m_value = 0.0;

@@ -11,7 +11,9 @@ class Climber;
 
 class Hook : public Object
 {
+
 public:
+
     Hook( Room *, const Climber * );
 
     void render( ) override;
@@ -31,9 +33,11 @@ public:
     void load( );
 
 protected:
+
     virtual bool collide( Object * ) override;
 
 private:
+
     const Climber * m_owner;
 
     Angle m_angle;

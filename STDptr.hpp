@@ -15,6 +15,7 @@ class ptr : public std::shared_ptr<T *>
     using std::shared_ptr<T>::shared_ptr;
 
 public:
+
     operator bool( ) const { return ( std::shared_ptr<T *>::get( ) != nullptr ); }
 };
 

@@ -15,10 +15,13 @@ namespace geometry
 
 class Path : public Transformable
 {
+
 private:
+
     varray<Line> m_lines;
 
 public:
+
     Path( ) { }
 
     Path( varray<Coordinate> cref coordinates, bool loop = false )
@@ -46,7 +49,7 @@ public:
     Path( Line cref line ) { m_lines = { line }; }
 
     operator const varray<Line> & ( ) { return m_lines; }
-    
+
     Path loop( ) { if( m_lines.size( ) && ( m_lines.back( ).c2( ) != m_lines.front( ).c1( ) ) ) { return Path( lines( ) + Line( m_lines.back( ).c2( ), m_lines.front( ).c1( ) ) ); } else { rethis; } }
 
     Path & transform( Transform cref _transform ) { Transformable::transform( _transform ); for_each( line, m_lines ) { line.transform( _transform ); } rethis; }
@@ -91,13 +94,13 @@ public:
 
     bool intersects( Line cref line, bool inclusive = false ) const { for_each( line, m_lines ) { return_true_if( line.intersects( line, inclusive ) ); } return false; }
     bool intersects_self( ) const { for_range( i, line_count( ) - 1 ) { for_range( j, line_count( ) - i - 1 ) { return_true_if( m_lines[ i ].intersects( m_lines[ i + j + 1 ], false ) ); } } return false; } default_equal( Path );
-    
+
     Path operator+( Line cref l ) const { return Path( lines( ) + l ); }
     Path operator+( Path cref p ) const { return Path( lines( ) + p.lines( ) ); }
-    
+
     Path & operator+=( Line cref l ) { m_lines.insert_back( l ); rethis; }
     Path & operator+=( Path cref p ) { m_lines.insert_back( p.lines( ) ); rethis; }
-    
+
     Path operator+( Vector cref v ) const { varray<Line> new_lines = m_lines; for_each( line, new_lines ) { line += v; } return new_lines; }
     Path operator-( Vector cref v ) const { varray<Line> new_lines = m_lines; for_each( line, new_lines ) { line -= v; } return new_lines; }
 

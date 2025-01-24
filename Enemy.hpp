@@ -10,10 +10,13 @@ namespace reality
 
 class Enemy : public Mob
 {
+
 public:
+
     Enemy( Room * room, Coordinate cref position, dec health = 1.0 ) : Mob( room, position, health ) { }
 
 protected:
+
     #ifdef AXN_DEBUG
     virtual Drawing debug_overlay( ) const override;
     #endif
@@ -42,6 +45,7 @@ protected:
     virtual bool in_alert_range( const Player * player ) const;
 
 private:
+
     bool m_aggressive = true;
 
     Object * m_target = nullptr;

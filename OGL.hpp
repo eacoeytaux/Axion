@@ -8,17 +8,22 @@ namespace axn
 
 class ogl
 {
+
 private:
+
     ogl( ) { }
 
 public:
+
     static error init( );
     static error close( );
 
 private:
+
     static error clear( int gl_bits );
 
 public:
+
     static error clear( );
 
     static error clear_color( dec r, dec g, dec b );
@@ -49,9 +54,11 @@ public:
     static error scale( dec x, dec y );
 
 private:
+
     static error begin( int gl_enum );
 
 public:
+
     static error end( );
 
     static error begin_points( );
@@ -92,9 +99,11 @@ public:
     static error disable_anti_alias( );
 
 private:
+
     static error depth_func( int gl_enum );
 
 public:
+
     static error depth_always( );
     static error depth_never( );
     static error depth_equal( );
@@ -108,9 +117,11 @@ public:
     static bool depth_mask( );
 
 private:
+
     static error stencil_func( int gl_enum );
 
 public:
+
     static error stencil_always( );
     static error stencil_never( );
     static error stencil_equal( );
@@ -127,6 +138,7 @@ public:
     static error stencil_remove( );
 
 private:
+
     static error m_error;
     static int m_error_code;
     static bool m_disable_error_check;
@@ -157,6 +169,7 @@ private:
     static bool disabled( int gl_enum );
 
 public:
+
     static error error_check( );
 };
 

@@ -9,7 +9,9 @@ namespace mtmercy
 
 class Hills : public Object
 {
+
 public:
+
     Hills( Room *, Planc base_bottom, dec z );
 };
 

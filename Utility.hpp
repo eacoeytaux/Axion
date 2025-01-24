@@ -247,19 +247,22 @@ inline dec pythagorean( cdec a, cdec b )
 
 class Countdown
 {
+
 private:
+
     uint m_countdown_top = 0;
     uint m_countdown_remaining = 0;
 
 public:
+
     Countdown( ) { }
     Countdown( cuint countdown ) { reset( countdown ); }
-    
+
     uint remaining( ) const { return m_countdown_remaining; }
     uint duration( ) const { return m_countdown_top; }
-    
+
     void duration( uint countdown ) { m_countdown_top = countdown; }
-    
+
     bool tick( ) { return ( !m_countdown_remaining || !m_countdown_remaining-- ); } // returns true is countdown is finished
     void complete( ) { m_countdown_remaining = 0; }
 
@@ -271,11 +274,14 @@ public:
 
 classT Span
 {
+
 private:
+
     T m_min = T( 0.0 );
     T m_max = T( 0.0 );
 
 public:
+
     Span( ) { }
     Span( T cref bound ) : m_min( bound ), m_max( bound ) { }
     Span( T cref bound1, T cref bound2 ) : m_min( ::min( bound1, bound2 ) ), m_max( ::max( bound1, bound2 ) ) { };
@@ -303,13 +309,16 @@ public:
 
 classT Slider
 {
+
 private:
+
     T m_value = T( 0.0 );
 
     T m_bound_min = T( 0.0 );
     T m_bound_max = T( 1.0 );
 
 public:
+
     Slider( ) { }
 
     Slider( T cref bound ) : m_bound_min( 0.0 ), m_bound_max( bound ), m_value( bound ) { }
@@ -371,10 +380,13 @@ typeT inline bool in_range( T cref t, const Span<T> & span, bool inclusive = tru
 
 class Identifiable
 {
+
 private:
+
     uint m_id = 0;
 
 public:
+
     struct Hasher { size_t operator( )( Identifiable cref i ) const { return hash<uint>( )( i.id( ) ); } };
 
     Identifiable( ) { static uint total_ids = 0; m_id = ++total_ids; Assert( !is_zero( m_id ) ); }

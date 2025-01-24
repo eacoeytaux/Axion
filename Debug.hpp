@@ -29,12 +29,16 @@
 #define breakpoint Debug::breakpointf( );
 namespace axn
 {
+
 class Debug
 {
+
 public:
+
     static bool active;
     static bool breakpointf( ) { return true; }
 };
+
 } // namespace axn
 #else
 #define breakpoint

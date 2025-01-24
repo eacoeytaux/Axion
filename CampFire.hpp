@@ -9,7 +9,9 @@ namespace mtmercy
 
 class CampFire : public Fire
 {
+
 public:
+
     CampFire( Room *, Coordinate cref position );
 };
 

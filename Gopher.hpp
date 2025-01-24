@@ -9,7 +9,9 @@ namespace mtmercy
 
 class Gopher : public Enemy
 {
+
 public:
+
     Gopher( Room *, Coordinate cref position );
 
     virtual void render( ) override;
@@ -17,6 +19,7 @@ public:
     virtual void update( ) override;
 
 private:
+
     Countdown m_reload_timer;
 
     STATE( EXPOSED,
@@ -27,7 +30,9 @@ private:
 
 class DirtBall : public Object
 {
+
 public:
+
     DirtBall( Room *, Planc cref radius, Coordinate cref position, Vector cref velocity );
 };
 

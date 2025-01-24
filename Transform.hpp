@@ -13,10 +13,13 @@ namespace geometry
 
 class Transform
 {
+
 private:
+
     Planc m_matrix[ 3 ][ 3 ];
 
 public:
+
     Transform( ) { clear( true ); }
 
     Transform( bool identity ) { clear( identity ); }
@@ -382,6 +385,7 @@ public:
     default_equal( Transform );
 
 private:
+
     Transform( Planc cref p1,
                Planc cref p2,
                Planc cref p3,
@@ -409,13 +413,16 @@ const Transform IDENTITY_TRANSFORM = Transform( true );
 
 class Transformable
 {
+
 private:
+
     mutable Transform m_transform = IDENTITY_TRANSFORM;
     mutable Transform m_cumulative_transform = IDENTITY_TRANSFORM;
 
     mutable bool m_dirty = false;
 
 public:
+
     Transformable( ) { }
 
     bool is_dirty( ) const { return m_dirty; }
@@ -423,7 +430,7 @@ public:
 
     Transform cref transform( ) const { return m_transform; }
     Transform cref cumulative_transform( ) const { return m_cumulative_transform; }
-    
+
     Transform transform_inverse( ) const { return m_transform.inverse( ); }
     Transform cumulative_transform_inverse( ) const { return m_cumulative_transform.inverse( ); }
 
@@ -439,7 +446,7 @@ public:
 
     Coordinate apply_transform( Coordinate cref coordinate ) const { return transform( ).apply( coordinate ); }
     Coordinate apply_cumulative_transform( Coordinate cref coordinate ) const { return cumulative_transform( ).apply( coordinate ); }
-    
+
     Coordinate apply_transform_inverse( Coordinate cref coordinate ) const { return transform_inverse( ).apply( coordinate ); }
     Coordinate apply_cumulative_transform_inverse( Coordinate cref coordinate ) const { return cumulative_transform_inverse( ).apply( coordinate ); }
 
@@ -456,6 +463,7 @@ public:
     default_equal( Transformable );
 
 protected:
+
     virtual Transformable cref dirty( ) const { m_dirty = true; rethis; }
     virtual Transformable cref clean( ) const { m_dirty = false; rethis; }
 };

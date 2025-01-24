@@ -32,11 +32,11 @@ error Logger::init( cbool _file )
         Clock clock;
 
         #if defined( OS_WINDOWS )
-        fopen_s( &log_file, ( LOG_DIRECTORY + clock.timestamp( '.' ) + "." + clock.datestamp( '.' ) + ".log" ).c_str( ), "w + " );
+        fopen_s( &log_file, ( LOG_DIRECTORY + clock.timestamp( ) + "." + clock.datestamp( ) + ".log" ).c_str( ), "w + " );
         #elif defined( OS_APPLE )
-        log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( '.' ) + "." + clock.datestamp( '.' ) + ".log" ).c_str( ), "w+" );
+        log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( ) + "." + clock.datestamp( ) + ".log" ).c_str( ), "w+" );
         #elif defined( OS_LINUX )
-        log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( '.' ) + "." + clock.datestamp( '.' ) + ".log" ).c_str( ), "w+" );
+        log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( ) + "." + clock.datestamp( ) + ".log" ).c_str( ), "w+" );
         #endif
 
         if( !( b_using_file = log_file ) )
@@ -109,11 +109,11 @@ error Logger::log_message( MessageType _type, const char * _entry, ... )
 
         if( b_using_file )
         {
-            return_error( fprintf( log_file, "[%s] ", current.timestamp( ).c_str( ) ) );
+            return_error( fprintf( log_file, "[ %s ] ", current.timestamp( ).c_str( ) ) );
 
             if( type )
             {
-                return_error( fprintf( log_file, "[%s] ", type_str ) );
+                return_error( fprintf( log_file, "[ %s ] ", type_str ) );
             }
 
             return_error( vfprintf( log_file, _entry, va_args ) );

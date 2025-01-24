@@ -8,10 +8,13 @@ namespace mtmercy
 
 class Plains : public Room
 {
+
 public:
+
     Plains( World * world ) : Room( world ) { }
     
 protected:
+
     virtual void create( ) override;
     
     virtual Terrain * generate_terrain( ) override;

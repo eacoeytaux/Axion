@@ -17,13 +17,16 @@ namespace geometry
 
 class FixedRectangle
 {
+
 private:
+
     Planc m_width = P0;
     Planc m_height = P0;
 
     Coordinate m_center = ORIGIN;
 
 public:
+
     FixedRectangle( ) { }
 
     FixedRectangle( Planc cref width, Planc cref height ) { FixedRectangle::width( width ); FixedRectangle::height( height ); }

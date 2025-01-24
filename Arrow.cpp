@@ -162,7 +162,7 @@ bool Arrow::collide( Object * object )
     {
         if( Mob * mob = dynamic_cast<Mob *>( object ) )
         {
-            mob->hurt( DAMAGE );
+            mob->hurt( Damage( DAMAGE ) );
         }
 
         subscribe_to_movement( object );

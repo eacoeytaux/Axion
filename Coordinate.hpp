@@ -33,19 +33,22 @@ class Transform;
 
 axnclass( Coordinate )
 {
+
 private:
+
     Planc m_x = P0;
     Planc m_y = P0;
 
 public:
+
     struct Hasher { size_t operator( )( Coordinate cref c ) const { return hash<uint>( )( c.x( ) * c.y( ) ); } };
-    
+
     Coordinate( ) { }
 
     Coordinate( Planc cref x, Planc cref y ) : m_x( x ), m_y( y ) { }
 
     Coordinate( Vector cref );
-    
+
     static Coordinate X( Planc cref x ) { return Coordinate( x, P0 ); }
     static Coordinate Y( Planc cref y ) { return Coordinate( P0, y ); }
 

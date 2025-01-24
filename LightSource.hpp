@@ -11,7 +11,9 @@ namespace graphics
 
 class LightSource
 {
+
 public:
+
     LightSource( ) { }
     LightSource( Coordinate cref source, Planc cref distance );
 
@@ -30,6 +32,7 @@ public:
     default_equal( LightSource );
 
 private:
+
     Coordinate m_position;
     Planc m_radius;
 

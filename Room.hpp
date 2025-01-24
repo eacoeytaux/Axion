@@ -26,7 +26,9 @@ namespace reality
 
 class Room
 {
+
 public:
+
     virtual ~Room( );
     Room( World * );
 
@@ -45,12 +47,14 @@ public:
     FixedRectangle cref bounds( ) const;
     
 private:
+
     virtual void render_bounds( Camera * camera );
     #ifdef AXN_DEBUG
     void render_object_grid( Camera * camera ) const;
     #endif
     
 public:
+
     uint player_count( ) const { return m_players.size( ); }
     const varray<Player *> & players( ) { return m_players; }
     Player * player( uint player_number = 0 );
@@ -69,6 +73,7 @@ public:
     }
 
 protected:
+
     virtual void update_object( Object * object );
     void update_objects( const varray<Object *> & objects )
     {
@@ -89,6 +94,7 @@ protected:
     }
 
 public:
+
     void add_particle( Object * particle ) { return add_object( particle ); }
     void add_particles( const varray<Object *> & particles )
     {
@@ -115,6 +121,7 @@ public:
     varray<TerrainNode *> terrain_in_range( FixedRectangle cref );
 
 public: // todo protected
+
     virtual void create( ) { return create( FixedRectangle( ) ); }
     virtual void create( FixedRectangle cref bounds );
     virtual void destroy( );
@@ -127,10 +134,12 @@ public: // todo protected
     virtual void wind( Vector cref );
 
 private:
+
     void add_objects_from_queue( );
     void clear_objects( );
 
 protected: // todo make private?
+
     World * m_world = nullptr;
     
     uint m_age = 0;
@@ -153,9 +162,11 @@ protected: // todo make private?
     Vector m_wind;
 
 public:
+
     class Grid
     {
     public:
+
         struct Block
         {
             void init( uint xx, uint yy )
@@ -174,6 +185,7 @@ public:
         };
 
     public:
+
         void init( FixedRectangle cref bounds );
 
         Block & block( uint x, uint y );
@@ -206,6 +218,7 @@ public:
         void clear( );
 
     private:
+
         uint m_grid_x_size;
         uint m_grid_y_size;
         Block m_out_of_bounds_block;
@@ -214,9 +227,11 @@ public:
     };
 
 private:
+
     Grid m_object_grid;
 
 public:
+
     Grid & object_grid( ) { return m_object_grid; }
 };
 
