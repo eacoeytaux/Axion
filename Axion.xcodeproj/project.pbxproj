@@ -58,6 +58,8 @@
 		AAA436BC2A243F58001FA92C /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAA436BA2A243F58001FA92C /* Engine.cpp */; };
 		AAA436BE2A244C23001FA92C /* EngineSDL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAA436BD2A244C23001FA92C /* EngineSDL.cpp */; };
 		AADBD81E2D3CE7590058E28B /* WaterDrop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADBD81C2D3CE7580058E28B /* WaterDrop.cpp */; };
+		AADBD8242D4319E10058E28B /* Damage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADBD8222D4319E10058E28B /* Damage.cpp */; };
+		AADBD8272D431A3D0058E28B /* Projectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADBD8252D431A3D0058E28B /* Projectile.cpp */; };
 		AADC31C12C71733A00CD1417 /* Stalagmite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADC31BF2C71733A00CD1417 /* Stalagmite.cpp */; };
 		AADC31C72C851B0400CD1417 /* Gopher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADC31C52C851B0400CD1417 /* Gopher.cpp */; };
 		AADC31CA2C8554CC00CD1417 /* Enemy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADC31C82C8554CC00CD1417 /* Enemy.cpp */; };
@@ -207,6 +209,10 @@
 		AADBD81C2D3CE7580058E28B /* WaterDrop.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WaterDrop.cpp; sourceTree = "<group>"; };
 		AADBD81D2D3CE7590058E28B /* WaterDrop.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = WaterDrop.hpp; sourceTree = "<group>"; };
 		AADBD8202D418DA70058E28B /* ColorPalette.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ColorPalette.hpp; sourceTree = "<group>"; };
+		AADBD8222D4319E10058E28B /* Damage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Damage.cpp; sourceTree = "<group>"; };
+		AADBD8232D4319E10058E28B /* Damage.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Damage.hpp; sourceTree = "<group>"; };
+		AADBD8252D431A3D0058E28B /* Projectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Projectile.cpp; sourceTree = "<group>"; };
+		AADBD8262D431A3D0058E28B /* Projectile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Projectile.hpp; sourceTree = "<group>"; };
 		AADC31BF2C71733A00CD1417 /* Stalagmite.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Stalagmite.cpp; sourceTree = "<group>"; };
 		AADC31C02C71733A00CD1417 /* Stalagmite.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Stalagmite.hpp; sourceTree = "<group>"; };
 		AADC31C52C851B0400CD1417 /* Gopher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Gopher.cpp; sourceTree = "<group>"; };
@@ -259,6 +265,10 @@
 				AA7A3DE229B6E2540005EEA7 /* Object.cpp */,
 				AA7A3DDC29B6E2540005EEA7 /* Terrain.hpp */,
 				AA7A3DF329B6E2540005EEA7 /* Terrain.cpp */,
+				AADBD8232D4319E10058E28B /* Damage.hpp */,
+				AADBD8222D4319E10058E28B /* Damage.cpp */,
+				AADBD8262D431A3D0058E28B /* Projectile.hpp */,
+				AADBD8252D431A3D0058E28B /* Projectile.cpp */,
 				AA7A3DF229B6E2540005EEA7 /* Mob.hpp */,
 				AA7A3DE429B6E2540005EEA7 /* Mob.cpp */,
 				AADC31C92C8554CC00CD1417 /* Enemy.hpp */,
@@ -579,6 +589,8 @@
 				AA1744BE2D3CC6D20078E160 /* Settings.cpp in Sources */,
 				AA13ACA32BD33859005DAD3C /* Snail.cpp in Sources */,
 				AA9752152BB2BF6B003289EF /* Fox.cpp in Sources */,
+				AADBD8242D4319E10058E28B /* Damage.cpp in Sources */,
+				AADBD8272D431A3D0058E28B /* Projectile.cpp in Sources */,
 				AADC31D02C85992B00CD1417 /* Hook.cpp in Sources */,
 				AA92BE5E2BABC62200181FEA /* DistantBird.cpp in Sources */,
 				AA7A3E4929B6E2540005EEA7 /* Mob.cpp in Sources */,

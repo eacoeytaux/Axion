@@ -56,7 +56,7 @@ public:
     static Angle rAngle( Distribution distribution = DEFAULT_DISTRIBUTION ) { return rAngle( Angle( TAU ), distribution ); }
 
     static Color rColor( bool include_alpha = false );
-
+    
     template <typename T>
     static T & negate( T & t, dec flip_odds = 0.5 )
     {

@@ -206,9 +206,9 @@ GrassTerrain::GrassTerrain( Room * room, const varray<varray<Coordinate>> & _ver
         }
     }
 
-    //for_each( polygon, bushes_back ) draw( Colors::PLANT_GREEN_4, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
-    //for_each( polygon, bushes_front ) draw( Colors::PLANT_GREEN_4, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
-    //for_each( polygon, bushes_front ) draw( Colors::PLANT_GREEN_3, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
+    for_each( polygon, bushes_back ) draw( Colors::PLANT_GREEN_4, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
+    for_each( polygon, bushes_front ) draw( Colors::PLANT_GREEN_4, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
+    for_each( polygon, bushes_front ) draw( Colors::PLANT_GREEN_3, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
 
     for_each( polygon, dirt_black ) draw( BLACK, polygon );
     for_each( polygon, dirt_colored ) draw( { Colors::DIRT_COLOR, Colors::DIRT_COLOR, BLACK, BLACK }, polygon );

@@ -68,7 +68,7 @@ bool Thorns::collide( Object * object )
     {
         if( Mob * mob = dynamic_cast<Mob *>( object ) )
         {
-            mob->hurt( DAMAGE );
+            mob->hurt( Damage( DAMAGE ) );
             return true;
         }
     }

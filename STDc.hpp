@@ -598,6 +598,13 @@ public:
             std::sort( begin( ), end( ), comparator );
         }
     }
+    
+    virtual void shuffle( )
+    {
+        // todo should reset with seed reset
+        static auto rng = std::default_random_engine { };
+        std::shuffle( begin( ), end( ), rng );
+    }
 
     auto begin( )
     {

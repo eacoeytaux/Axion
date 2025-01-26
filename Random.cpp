@@ -110,7 +110,7 @@ Angle Random::rAngle( Angle cref _low_bound, Angle cref _high_bound, const Distr
     return Angle( rdec( _low_bound.radians( ), _high_bound.radians( ), _distribution ) );
 }
 
-Color Random::rColor( cbool include_alpha )
+Color Random::rColor( cbool _include_alpha )
 {
-    return Color::rgba( rdec( 1.0 ), rdec( 1.0 ), rdec( 1.0 ), include_alpha ? rdec( 1.0 ) : 1.0 );
+    return Color::rgba( rdec( 1.0 ), rdec( 1.0 ), rdec( 1.0 ), _include_alpha ? rdec( 1.0 ) : 1.0 );
 }

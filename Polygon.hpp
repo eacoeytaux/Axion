@@ -180,7 +180,7 @@ public:
         return Polygon( equilaterals[ side_count ] ).scale( radius );
     }
 
-    static Polygon circle( Planc cref radius = 1.0, Coordinate cref center = ORIGIN ) { return Polygon::equilateral( max<uint>( 6, min<uint>( 60, ceil( radius * PI ) ) ), radius, center ); }
+    static Polygon circle( Planc cref radius = 1.0, Coordinate cref center = ORIGIN ) { return Polygon::equilateral( max<uint>( 4, min<uint>( 60, ceil( radius * PI ) ) ), radius, center ); }
 
     static Polygon convex_hull( varray<Coordinate> cref coordinates )
     {

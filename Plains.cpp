@@ -56,17 +56,26 @@ void Plains::create( )
 
     add_object( new Waterfall( this, Coordinate( 0.0, 10.0 ), METER * 4.0, METER * 8.0, 0.95 ) );
 
+    varray<AspineTree *> aspines;
+    
     list<dec> aspine_zs = { 1.0 };
     for_each( z, aspine_zs )
     {
         terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
                                 [ & ] ( Coordinate cref c, const TerrainEdge * e )
         {
-            add_object( new AspineTree( this, c, z ) );
+            aspines.insert_back( new AspineTree( this, c, z ) );
         } );
     }
+    
+    aspines.shuffle( );
+    
+    for_each( aspine, aspines )
+    {
+        add_object( aspine );
+    }
 
-    add_object( new CampFire( this, Coordinate( 50, 20 ) ) );
+    add_object( new CampFire( this, Coordinate( 50.0, 20.0 ) ) );
 
     // add_object( new Thorns( this, Coordinate( 100, 20 ), Coordinate( 150, 15 ) ) );
 

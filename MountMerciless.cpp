@@ -72,6 +72,7 @@ inline queue<uint> score_layer_position( Object * object )
     o( Bush )
     o( Terrain )
     o( AspineTree )
+    o( AspineTree::Leaf )
 
     return p.scores;
 };

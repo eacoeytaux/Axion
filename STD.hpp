@@ -7,6 +7,8 @@
 #include <memory>
 #include <chrono>
 #include <functional>
+#include <algorithm>
+#include <random>
 #include <queue>
 #include <stack>
 #include <list>
