@@ -4,10 +4,12 @@ using mtmercy::Butterfly;
 
 namespace
 {
+
 cPlanc WING_RADIUS = 5.0;
 cdec UNDER_WING_RATIO = 0.9;
 cdec UNDER_WING_OFFSET = 0.75;
 const Color WING_COLOR = RED;
+
 } // namespace
 
 Butterfly::Butterfly( Room * room, Coordinate cref _position ) : Mob( room, _position )

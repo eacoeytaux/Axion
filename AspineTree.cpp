@@ -5,15 +5,16 @@ using mtmercy::AspineTree;
 
 namespace
 {
+
 const dec TRUNK_LEAF_OFFSET = 0.95;
 const Span<Planc> TRUNK_HEIGHT = { 300.0, 500.0 };
 const Span<Planc> TRUNK_BASE_WIDTH = { 8.0, 12.0 };
-const Angle TRUNK_SWAY_MAX = RIGHT_ANGLE / 16.0;
+const Angle TRUNK_SWAY_MAX = ( TAU / 64.0 );
 
 const Span<uint> BRANCH_COUNT = { 3, 5 };
 const Span<dec> BRANCH_BASE_HEIGHT = { 0.3, 0.333 };
 const Span<dec> BRANCH_LENGTH = { 0.333, 0.4444 };
-const Angle BRANCH_OFFSET = RIGHT_ANGLE / 2.0;
+const Angle BRANCH_OFFSET = ( TAU / 8.0 );
 
 const uint LEAF_TOP_COUNT = 10;
 const uint LEAF_BOTTOM_COUNT = 5;
@@ -36,6 +37,7 @@ const Span<dec> LEAF_FALL_DISTANCE = { 0.1, 0.9 };
 const Color TRUNK_COLOR = WHITE;
 const Color TRUNK_MARK_COLOR = BLACK;
 const ColorSlider LEAF_COLOR = { RED, Color::rgb( 1.0, 0.7, 0.0 ) };
+
 } // namespace
 
 namespace
@@ -166,6 +168,7 @@ Drawing draw_trunk( Color cref leaf_color, cbool _draw_leaves, Planc cref _lengt
     return tree_drawing;
 
 };
+
 } // namespace
 
 AspineTree::AspineTree( Room * room, Coordinate cref _root, cdec _z ) : Object( room, _root )

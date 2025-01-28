@@ -57,7 +57,9 @@ public:
 } // namespace axn
 
 #else
+
 #define Assert( ... ) true
+
 #endif
 
 #endif /* Assert_hpp */

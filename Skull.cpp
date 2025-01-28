@@ -5,6 +5,7 @@ using mtmercy::Skull;
 
 namespace
 {
+
 cPlanc SKULL_RADIUS = METER / 3.0;
 cPlanc SKULL_DIAMETER = SKULL_RADIUS * 2.0;
 cPlanc SKULL_CIRCUMFERENCE = SKULL_RADIUS * SKULL_RADIUS * PI;
@@ -21,6 +22,7 @@ cdec EYE_SPACING = 0.5;
 
 const Color BONE_COLOR = WHITE;
 const Color HOLE_COLOR = BLACK;
+
 } // namespace
 
 Skull::Skull( Room * room, Coordinate cref _position ) : Object( room, _position )

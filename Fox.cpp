@@ -4,6 +4,7 @@ using mtmercy::Fox;
 
 namespace
 {
+
 cPlanc EYE_RADIUS = 1.0;
 cuint BLINK_DURATION = 2;
 const Span<uint> BLINK_WAIT = { 180, 240 };

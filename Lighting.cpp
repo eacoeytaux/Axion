@@ -3,6 +3,7 @@
 
 namespace
 {
+
 const Color NIGHT_AMBIENT_COLOR = Color::rgba( 0.0, 0.0, 0.5, 0.2 );
 
 #if defined ( AXN_DEBUG )

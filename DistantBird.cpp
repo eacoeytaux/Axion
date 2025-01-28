@@ -5,6 +5,7 @@ using mtmercy::DistantBird;
 
 namespace
 {
+
 cdec GRAIVTY_RATIO = 0.5;
 cPlanc X_SPEED = 2.0;
 
@@ -26,6 +27,7 @@ const Coordinate WING_COORDINATE_BASE_2 = Coordinate( -27.0, -3.0 );
 cPlanc WING_TIP_X = -15.0;
 
 const Color BIRD_COLOR = BLACK;
+
 } // namespace
 
 DistantBird::DistantBird( Room * room, Coordinate cref _position ) : Object( room, _position )

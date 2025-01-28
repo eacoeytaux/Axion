@@ -7,6 +7,7 @@ using mtmercy::Feather;
 
 namespace
 {
+
 cuint BIRD_HEALTH = 1;
 
 cPlanc FEATHER_LENGTH = 15.0;
@@ -19,6 +20,7 @@ cPlanc ROTATIONAL_SPEED = 1.0;
 cPlanc ROTATIONAL_RADIUS = 160.0;
 cPlanc LIFT_SPEED = 0.5;
 cPlanc LIFT_DISTANCE = 16.0;
+
 } // namespace
 
 Feather::Feather( Room * room, Coordinate cref _position ) : Object( room, _position )

@@ -6,6 +6,7 @@ using mtmercy::Porkupine;
 
 namespace
 {
+
 cPlanc WIDTH = 25.0;
 cPlanc HEIGHT = WIDTH;
 

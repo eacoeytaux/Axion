@@ -7,6 +7,7 @@ using mtmercy::Climber;
 
 namespace
 {
+
 cPlanc HEIGHT = METER * 1.85;
 cPlanc WIDTH = HEIGHT / 2.5;
 
@@ -122,6 +123,7 @@ cPlanc HEALTH_BAR_BORDER_WIDTH = 4.0;
 
 cdec HEALTH_BAR_RED_START = 0.1;
 cdec HEALTH_BAR_YELLOW_START = 0.5;
+
 } // namespace
 
 Climber::~Climber( )

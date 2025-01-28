@@ -6,6 +6,7 @@
 
 namespace
 {
+
 cuint START_AGE = 0; // 1024;
 cdec CAMERA_ZOOM_RATIO = 0.96875;
 #if defined ( AXN_DEBUG )
@@ -13,6 +14,7 @@ cdec CAMERA_SIDE_BUFFER_RATIO = 0.1;
 #else
 cdec CAMERA_SIDE_BUFFER_RATIO = 0.0;
 #endif
+
 } // namespace
 
 World::World( )

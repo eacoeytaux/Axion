@@ -10,12 +10,14 @@ namespace axn
 namespace graphics
 {
 class Camera;
+
 } // namespace graphics
 
 namespace reality
 {
 class Object;
 class Player;
+
 } // namespace reality
 
 class Event
@@ -30,7 +32,7 @@ public:
     bool processed( ) const { return ( processed_count( ) > 0 ); }
     uint processed_count( ) const { return m_processed_count; }
     virtual void process( Object * object = nullptr ) { ++m_processed_count; }
-    
+
 };
 
 namespace reality
@@ -75,7 +77,7 @@ protected: // todo make private?
 
     Camera * m_camera = nullptr;
     Room * m_current_room = nullptr;
-    
+
 };
 
 } // namespace reality

@@ -5,6 +5,7 @@ using mtmercy::Hills;
 
 namespace
 {
+
 cPlanc HILL_RADIUS = 1000.0;
 cPlanc HILL_SCALE_X = 2.0;
 const Span<Planc> HILL_OFFSET_X = { HILL_RADIUS * 0.8, HILL_RADIUS * 1.75 };

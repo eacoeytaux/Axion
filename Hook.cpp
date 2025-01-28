@@ -18,6 +18,7 @@ const Color HOOK_COLOR = Color::rgb( 0x9C9C9C );
 cPlanc ROPE_WIDTH = 4.0;
 const Color ROPE_BASE_COLOR = Color::rgb( 0xDAA420 );
 const Color ROPE_ALT_COLOR = Color::rgb( 0xB9870F );
+
 } // namespace
 
 using mtmercy::Hook;

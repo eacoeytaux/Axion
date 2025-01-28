@@ -1,19 +1,19 @@
 #include "OGL.hpp"
 
 #include "OS.hpp"
-#ifdef OS_WINDOW
+#if defined( OS_WINDOWS )
 // ---------------- //
 #include <GLFW/glfw3.h>
 // ---------------- //
-#elifdef OS_APPLE
+#elif defined( OS_APPLE )
 // ---------------- //
 #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 // ---------------- //
-#elifdef OS_LINUX
+#elif defined( OS_LINUX )
 // ---------------- //
-// todo             //
+//                  //
 // ---------------- //
 #endif
 

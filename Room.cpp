@@ -6,8 +6,10 @@
 
 namespace
 {
+
 cuint GRID_BLOCK_SIZE = 256;
 cuint START_AGE = 0; // 1024;
+
 } // namespace
 
 Room::Room( World * world )

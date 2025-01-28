@@ -6,6 +6,7 @@ using mtmercy::Cloud;
 
 namespace
 {
+
 cdec WIND_RATIO = 5.0;
 
 cdec PUFF_OUTLINE_RATIO = 0.64;
@@ -22,6 +23,7 @@ const Span<Planc> SMALL_PUFF_DISTANCE = { ( LARGE_PUFF_RADIUS.max( ) * PUFF_OUTL
 
 const Color INSIDE_COLOR = Color::rgb( 0x87CDEB );
 const Color OUTSIDE_COLOR = WHITE;
+
 } // namespace
 
 Cloud::Cloud( Room * room ) : Object( room )

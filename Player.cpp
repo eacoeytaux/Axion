@@ -4,6 +4,7 @@
 
 namespace
 {
+
 cuint PLAYER_HEALTH_START = 100;
 }
 

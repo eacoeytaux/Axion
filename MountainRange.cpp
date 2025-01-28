@@ -5,9 +5,11 @@ using mtmercy::MountainRange;
 
 namespace
 {
+
 const Span<Planc> MOUNTAIN_HEIGHT = { 1200, 3000 };
 const Span<Planc> MOUNTAIN_BASE_LENGTH = { 4000, 7500 };
 const Span<Planc> MOUNTAIN_OFFSET = { 500, 1500 };
+
 } // namespace
 
 MountainRange::MountainRange( Room * room, cPlanc _base_bottom, cdec _z, Color cref _color ) : Object( room )

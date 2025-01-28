@@ -5,6 +5,7 @@
 
 namespace
 {
+
 cdec MIN_ZOOM = 0.64;
 cdec MAX_ZOOM = 2.5;
 cdec TARGET_OFFSET_Y = 0.125;
@@ -12,6 +13,7 @@ cuint LIGHTING_LAYERS = 6;
 cdec LIGHTING_RADIUS_GROW = 0.333;
 cdec LIGHTING_RADIUS_GROW_EXPONENT = 0.88;
 cdec DEFAULT_HUD_OFFSET = 0.025;
+
 } // namespace
 
 Camera::Camera( World * world, Planc cref _width, Planc cref _height, cdec _zoom ) : m_world( world )

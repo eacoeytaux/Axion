@@ -6,6 +6,7 @@ using mtmercy::Arrow;
 
 namespace
 {
+
 cdec DAMAGE = 10.0;
 
 cuint LIFESPAN = 300;
@@ -34,6 +35,7 @@ const Polygon FEATHER( { Coordinate( 4.0, 0.0 ),
 
 const Color TIP_COLOR = GRAY_LIGHT;
 const Color SHAFT_COLOR = Color::rgb( 0x8B4513 );
+
 } // namespace
 
 Arrow Arrow::tip( Room * room, Coordinate cref tip, Vector cref launch_speed, Color cref feather_color ) { return Arrow( room, tip, launch_speed, feather_color ); }

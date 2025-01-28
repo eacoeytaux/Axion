@@ -6,6 +6,7 @@ using mtmercy::Unalope;
 
 namespace
 {
+
 cdec TEMP_SCALE_TODO = 1.0;
 
 cPlanc SIGHT_RANGE = METER * 10.0;

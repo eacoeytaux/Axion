@@ -5,8 +5,10 @@ using mtmercy::Fire;
 
 namespace
 {
+
 const uint EDGE_COUNT = 4;
 const Planc FLAME_RADIUS_MIN_ABSOLUTE = 0.0001;
+
 } // namespace
 
 Fire::Fire( Room * room, Coordinate cref _position ) : Object( room, _position )
@@ -19,17 +21,17 @@ Fire::Fire( Room * room, Coordinate cref _position ) : Object( room, _position )
 void Fire::render( )
 {
     Object::render( );
-    
+
     auto draw_flame = [ & ] ( Flame cref flame, bool inner = false, bool border = false )
     {
         draw( Color( inner ? m_flame_inner_color : m_flame_color ).a( Settings::get( Settings::GRAPHICS_DETAIL_ALPHA ) ? flame.alpha : 1.0 ), Polygon::equilateral( EDGE_COUNT, flame.radius / ( border ? m_flame_inner_outline_ratio : 1.0 ), flame.offset ) );
     };
-    
+
     if( m_flame_base_enabled )
     {
         draw_flame( m_flame_base );
     }
-    
+
     for_each( flame, m_flames )
     {
         draw_flame( flame );
@@ -41,12 +43,12 @@ void Fire::render( )
         {
             draw_flame( flame, false, true );
         }
-        
+
         for_each( flame, m_flames_inner )
         {
             draw_flame( flame, true, false );
         }
-        
+
         if( m_flame_base_enabled )
         {
             draw_flame( m_flame_base_inner, false, true );
@@ -58,40 +60,40 @@ void Fire::render( )
 void Fire::update( )
 {
     Object::update( );
-    
+
     if( m_flame_timer.tick( ) )
     {
         if( lit( ) )
         {
             m_flame_timer.reset( Random::rint( m_flame_pause ) );
             m_flames.insert_back( ).radius = m_flame_radius;
-            
+
             if( m_flames_inner_enabled )
             {
                 m_flames_inner.insert_back( ).radius = m_flame_inner_radius_ratio * m_flame_radius;
             }
         }
     }
-    
+
     if( m_flame_base_enabled )
     {
         m_flame_base.radius = Random::rPlanc( m_flame_base_radius_ratio ) * m_flame_radius;
         m_flame_base.offset = VectorA( Random::rAngle( ), Random::rPlanc( m_flame_base_max_offset_ratio ) * m_flame_base.radius );
-        
+
         if( m_flames_inner_enabled )
         {
             m_flame_base_inner.radius = m_flame_base.radius * m_flame_inner_radius_ratio;
             m_flame_base_inner.offset = m_flame_base.offset;
         }
     }
-    
+
     auto update_flames = [ & ] ( list<Flame> & flames, dec radius_ratio = 1.0 )
     {
         for_each( flame, flames )
         {
             flame.radius -= min( m_flame_shrink * radius_ratio, flame.radius );
             flame.offset += VectorA( RIGHT + Random::negated( Random::rAngle( m_flame_deviation ) ), m_flame_speed ) + ( room( )->wind( ) * ( 1.0 - m_wind_resistance_ratio ) );
-            
+
             if( m_flame_alpha_shrink )
             {
                 flame.alpha -= min( m_flame_alpha_shrink, flame.alpha );
@@ -102,14 +104,14 @@ void Fire::update( )
             return ( ( flame.radius < max( m_flame_radius_min, FLAME_RADIUS_MIN_ABSOLUTE ) ) || is_zero( flame.alpha ) );
         } );
     };
-    
+
     update_flames( m_flames );
 
     if( m_flames_inner_enabled )
     {
         update_flames( m_flames_inner, m_flame_inner_shrink_ratio );
     }
-    
+
     if( !lit( ) && !m_flames.size( ) && ( !m_flames_inner_enabled || !m_flames_inner.size( ) ) )
     {
         mark_to_delete( );
@@ -122,7 +124,7 @@ void Fire::move( Vector cref _velocity )
     {
         flame.offset -= ( _velocity * ( 1.0 - m_movement_resistance_ratio ) );
     }
-    
+
     if( m_flames_inner_enabled )
     {
         for_each( flame, m_flames_inner )
@@ -138,12 +140,12 @@ void Fire::extinguish( )
     if( m_lit )
     {
         m_lit = false;
-        
+
         if( m_flame_base_enabled )
         {
             m_flame_base_enabled = false;
             m_flames.insert_back( m_flame_base );
-            
+
             if( m_flames_inner_enabled )
             {
                 m_flames_inner.insert_back( m_flame_base_inner );
@@ -195,7 +197,7 @@ void Fire::set_light_source( )
     if( m_light_distance )
     {
         add_light_source( position( ), m_light_distance );
-        
+
         if( m_tint_distance && m_tint_intensity )
         {
             add_light_source( position( ), m_tint_distance, Color( m_flame_color, m_tint_intensity ), m_tint_flicker );

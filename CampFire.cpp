@@ -5,6 +5,7 @@ using mtmercy::CampFire;
 
 namespace
 {
+
 const Span<uint> FLAME_PAUSE = { 8 };
 
 cPlanc FLAME_ORANGE_RADIUS = 30.0;
@@ -34,6 +35,7 @@ cdec FLAME_ALPHA_SHRINK = 0.01;
 
 const Color FLAME_COLOR_ORANGE = Color::rgb( 0xFF8000 );
 const Color FLAME_COLOR_YELLOW = Color::rgb( 0xFFC000 );
+
 } // namespace
 
 CampFire::CampFire( Room * room, Coordinate cref _position ) : Fire( room, _position )

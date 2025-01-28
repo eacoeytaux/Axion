@@ -5,6 +5,7 @@ using mtmercy::PineTree;
 
 namespace
 {
+
 const Angle MAX_SWAY = TAU / 64.0;
 cuint SWAY_PERIOD = 40;
 cPlanc TRUNK_HEIGHT = 72.0;
@@ -27,6 +28,7 @@ const Color TRUNK_COLOR = Color::rgb( 0xA56405 );
 const Color TRUNK_BORDER_COLOR = Color::rgb( 0x804800 );
 const Color LEAVES_COLOR = Color::rgb( 0x00C000 );
 const Color LEAVES_BORDER_COLOR = Color::rgb( 0x008000 );
+
 } // namespace
 
 PineTree::PineTree( Room * room, Coordinate cref _root, cdec _z ) : Object( room, _root )

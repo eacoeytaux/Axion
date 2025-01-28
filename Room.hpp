@@ -10,6 +10,7 @@ namespace graphics
 {
 class Camera;
 class Lighting;
+
 } // namespace graphics
 
 namespace reality
@@ -19,6 +20,7 @@ class Object;
 class Player;
 class Terrain;
 class TerrainNode;
+
 } // namespace reality
 
 namespace reality

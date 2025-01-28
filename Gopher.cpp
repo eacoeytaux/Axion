@@ -5,6 +5,7 @@ using mtmercy::DirtBall;
 
 namespace
 {
+
 cdec GRAVITY_RATIO = 0.125;
 
 cPlanc SIGHT_RANGE = METER * 10.0;

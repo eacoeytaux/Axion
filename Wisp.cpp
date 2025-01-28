@@ -7,6 +7,7 @@ using mtmercy::Wisp;
 
 namespace
 {
+
 const Planc HEAD_RADIUS = 10.0;
 const dec FACE_RADIUS_RATIO = 0.8;
 const Planc FACE_RADIUS = FACE_RADIUS_RATIO * HEAD_RADIUS;
@@ -37,6 +38,7 @@ const Color FLAME_COLOR = CYAN;
 
 const Planc BULLET_RADIUS = 4.0;
 const Planc BULLET_FLAME_RATIO = 1.1;
+
 } // namespace
 
 Wisp::Wisp( Room * room, const Coordinate & _position ) : Enemy( room, _position ), m_fire( room, _position )

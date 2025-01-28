@@ -5,6 +5,7 @@ using mtmercy::Sky;
 
 namespace
 {
+
 cuint DAY_LENGTH = 2048;
 
 cdec SUNRISE_START = 0.2;
@@ -27,6 +28,7 @@ const ColorSlider SKY_NOON = ColorSlider( NOON_COLOR, NOON_COLOR );
 const ColorSlider SKY_NOON_TO_SUNSET = ColorSlider( NOON_COLOR, SUNSET_COLOR );
 const ColorSlider SKY_SUNSET = ColorSlider( SUNSET_COLOR, SUNSET_COLOR );
 const ColorSlider SKY_SUNSET_TO_MIDNIGHT = ColorSlider( SUNSET_COLOR, MIDNIGHT_COLOR );
+
 } // namespace
 
 Sky::Sky( Room * room ) : Object( room )

@@ -4,6 +4,7 @@ using mtmercy::GrassTerrain;
 
 namespace
 {
+
 cPlanc OUTLINE_THICKNESS = 3.0;
 
 cPlanc DEPTH_COLOR_LENGTH = 400.0;
@@ -17,6 +18,7 @@ const Span<dec> GRASS_TIP_SWAY_RATIO = { 0.2, 0.4 };
 cPlanc BUSH_OFFSET = 10.0;
 const Span<Planc> BUSH_RADIUS_BACK = { 16.0, 42.0 };
 const Span<Planc> BUSH_RADIUS_FRONT = { 7.0, 25.0 };
+
 } // namespace
 
 GrassTerrain::GrassTerrain( Room * room, const varray<varray<Coordinate>> & _vertices ) : Terrain( room, _vertices )
