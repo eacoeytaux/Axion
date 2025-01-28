@@ -6,7 +6,7 @@ namespace axn
 
 dec ControllerJoystickInput::DEAD_ZONE = 0.25;
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 // define debug global statics here
 bool Debug::active = false;
 
@@ -35,10 +35,10 @@ error Engine::quit( )
 error Engine::run( World * world, const string _app_name )
 {
     return_if( !world, error_system );
-    
+
     Settings::init( );
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     try_return_error( Logger::init( ), error_not_init );
     #endif
 
@@ -74,7 +74,7 @@ error Engine::run( World * world, const string _app_name )
             }
             else
             {
-                #ifdef AXN_DEBUG
+                #if defined ( AXN_DEBUG )
                 if( b_step )
                 {
                     check_quit( world->update( ); );
@@ -101,7 +101,7 @@ error Engine::run( World * world, const string _app_name )
     try_catch_error( clear_inputs( ) );
     try_catch_error( safe_delete( world ); );
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     try_catch_error( Logger::close( ) );
     #endif
 

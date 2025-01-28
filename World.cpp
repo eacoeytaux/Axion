@@ -8,7 +8,7 @@ namespace
 {
 cuint START_AGE = 0; // 1024;
 cdec CAMERA_ZOOM_RATIO = 0.96875;
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 cdec CAMERA_SIDE_BUFFER_RATIO = 0.1;
 #else
 cdec CAMERA_SIDE_BUFFER_RATIO = 0.0;
@@ -107,13 +107,13 @@ void World::input( const list<Input *> & _inputs )
                         break;
                     }
 
-                    #ifdef AXN_DEBUG
+                    #if defined ( AXN_DEBUG )
                     case '`':
                     {
                         Debug::active = !Debug::active;
                         break;
                     }
-                        
+
                     case '\'':
                     {
                         Engine::step( );
@@ -151,19 +151,19 @@ void World::input( const list<Input *> & _inputs )
                         Engine::mute( !Engine::muted( ) );
                         break;
                     }
-                        
+
                     case 'l':
                     {
                         m_current_room->lighting_active( !m_current_room->lighting_active( ) );
                         break;
                     }
-                        
+
                     case 'h':
                     {
                         Settings::flip( Settings::DEBUG_HEALTH );
                         break;
                     }
-                        
+
                     case '1':
                     {
                         Settings::flip( Settings::DEBUG_CAMERA );
@@ -175,7 +175,7 @@ void World::input( const list<Input *> & _inputs )
                         Settings::flip( Settings::DEBUG_PHYSICS );
                         break;
                     }
-                        
+
                     case '3':
                     {
                         Settings::flip( Settings::DEBUG_GRID );
@@ -187,7 +187,7 @@ void World::input( const list<Input *> & _inputs )
                         Settings::flip( Settings::DEBUG_BACKGROUND );
                         break;
                     }
-                        
+
                     #endif
                 }
             }
@@ -230,7 +230,7 @@ void World::input( const list<Input *> & _inputs )
                         Engine::pause( !Engine::paused( ) );
                         break;
                     }
-                    #ifdef AXN_DEBUG
+                    #if defined ( AXN_DEBUG )
                     case ControllerButtonInput::START_OPPOSITE_BUTTON:
                     {
                         Engine::step( );

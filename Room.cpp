@@ -120,7 +120,7 @@ void Room::render_bounds( Camera * camera )
     camera->capture( new Visible( bounds_drawing ), true );
 }
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 void Room::render_object_grid( Camera * camera ) const
 {
     cdec GRID_LINE_THICKNESS = 1.0;
@@ -194,7 +194,7 @@ void Room::render( )
 
                 camera->capture( object );
 
-                #ifdef AXN_DEBUG
+                #if defined ( AXN_DEBUG )
                 if( Debug::active )
                 {
                     if( object->draw_debug )
@@ -213,7 +213,7 @@ void Room::render( )
     capture_objects( { m_terrain }, false );
     capture_objects( m_objects, true );
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     if( Settings::get( Settings::DEBUG_BACKGROUND ) )
         #endif
     {
@@ -221,7 +221,7 @@ void Room::render( )
         capture_objects( m_foreground_objects, false );
     }
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     if( Debug::active && Settings::get( Settings::DEBUG_GRID ) )
     {
         render_object_grid( camera );
@@ -275,7 +275,7 @@ void Room::update( )
 
     update_objects( m_objects );
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     if( Settings::get( Settings::DEBUG_BACKGROUND ) )
         #endif
     {

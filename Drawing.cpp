@@ -182,7 +182,7 @@ Drawing & Drawing::draw( Color cref _color,
     rethis;
 }
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 Drawing & Drawing::draw( Color cref _color,
                          Vector cref _vector,
                          cdec _arrow_head_length,

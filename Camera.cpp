@@ -45,7 +45,7 @@ void Camera::clear_subjects( )
     m_owned_subjects.clear( );
     m_subjects.clear( );
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     for_each( subject, m_owned_debug_subjects )
     {
         safe_delete( subject );
@@ -74,7 +74,7 @@ void Camera::clear_hud_elements( )
 
 void Camera::render( )
 {
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     static uint total_render_count = 0;
     static uint total_polygon_count = 0;
     static uint max_polygon_count = 0;
@@ -104,7 +104,7 @@ void Camera::render( )
                 return;
             }
 
-            #ifdef AXN_DEBUG
+            #if defined ( AXN_DEBUG )
             ++polygon_count;
             #endif
 
@@ -219,7 +219,7 @@ void Camera::render( )
                                                              cs[ t[ i ][ 2 ] ] } );
                                 }
 
-                                #ifdef AXN_DEBUG
+                                #if defined ( AXN_DEBUG )
                                 ++convex_polygon_count;
                                 convex_polygon_triangle_count += t.size( );
                                 #endif
@@ -335,7 +335,7 @@ void Camera::render( )
 
         auto render_world_bounds = [ & ] ( )
         {
-            #ifdef AXN_DEBUG
+            #if defined ( AXN_DEBUG )
             const Color COLOR = BLACK.a( 0.5 );
             #else
             const Color COLOR = WHITE;
@@ -354,10 +354,10 @@ void Camera::render( )
         auto render_camera_bounds = [ & ] ( )
         {
             const Color COLOR =
-            #ifdef AXN_DEBUG
-            ( Debug::active && Settings::get( Settings::DEBUG_CAMERA ) ) ? BLACK.a( 0.5 ) :
-            #endif
-            BLACK;
+                #if defined ( AXN_DEBUG )
+                ( Debug::active && Settings::get( Settings::DEBUG_CAMERA ) ) ? BLACK.a( 0.5 ) :
+                #endif
+                BLACK;
 
             ogl::clear_depth( );
             ogl::depth_not_equal( );
@@ -403,7 +403,7 @@ void Camera::render( )
 
         auto render_debug_elements = [ & ] ( )
         {
-            #ifdef AXN_DEBUG
+            #if defined ( AXN_DEBUG )
             if( Debug::active )
             {
                 for_each( visible, m_debug_subjects )
@@ -430,7 +430,7 @@ void Camera::render( )
     }
     ogl::pop_matrix( );
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     ++total_render_count;
     total_polygon_count += polygon_count;
     max_polygon_count = max( polygon_count, max_polygon_count );
@@ -462,7 +462,7 @@ Drawing Camera::cursor_drawing( ) const
     return cursor_drawing;
 }
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 Drawing Camera::debug_overlay_drawing( ) const
 {
     cPlanc BORDER_LINE_THICKNESS = 1.5;
@@ -596,7 +596,7 @@ void Camera::remove_screen_effect( ScreenEffect * _effect )
     if( m_owned_screen_effects.contains( _effect ) ) { m_owned_screen_effects.remove( _effect ); }
 }
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 void Camera::capture_debug( Visible * _subject, cbool _should_delete )
 {
     Assert( (bool)_subject );

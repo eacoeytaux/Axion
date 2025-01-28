@@ -5,14 +5,14 @@
 
 #include "OS.hpp"
 // -------------------- //
-#ifdef OS_WINDOWS
+#if defined ( OS_WINDOWS )
 // -------------------- //
 #include <SDL.h>
 #include <SDL_opengl.h>
 // #include <SDL_ttf.h>
 // #include <SDL_mixer.h>
 // -------------------- //
-#elifdef OS_APPLE
+#elif defined ( OS_APPLE )
 // -------------------- //
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wquoted-include-in-framework-header"
@@ -22,7 +22,7 @@
 // #include <SDL2_mixer/SDL_mixer.h>
 #pragma GCC diagnostic pop
 // -------------------- //
-#elifdef OS_LINUX
+#elif defined ( OS_LINUX )
 // -------------------- //
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -89,8 +89,8 @@ void Engine::init_eng( const string _app_name )
     WINDOW_WIDTH = display_mode.w;
     WINDOW_HEIGHT = display_mode.h;
 
-    #ifdef AXN_DEBUG
-    #ifdef OS_WINDOWS
+    #if defined ( AXN_DEBUG )
+    #if defined ( OS_WINDOWS )
     SDL_SetWindowFullscreen( WINDOW, 0 );
     SDL_SetWindowSize( WINDOW, WINDOW_WIDTH, WINDOW_HEIGHT );
     SDL_SetWindowPosition( WINDOW, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED );

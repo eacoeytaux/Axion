@@ -123,7 +123,7 @@ void Gopher::render( )
 
 DirtBall::DirtBall( Room * room, Planc cref _radius, Coordinate cref _position, Vector cref _velocity ) : Object( room, _position, _velocity )
 {
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     draw_debug = true;
     #endif
 

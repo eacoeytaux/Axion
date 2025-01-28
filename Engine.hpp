@@ -20,7 +20,7 @@ class World;
 struct Input
 {
     virtual void do_nothing( ) const { }
-    
+
 };
 
 class Engine
@@ -40,7 +40,7 @@ public:
     static bool paused( ) { return paused_eng( ); }
     static void pause( bool p ) { pause_eng( p ); }
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     static void step( );
     #endif
 
@@ -98,7 +98,7 @@ private:
     static void volume_down_eng( );
     static bool muted_eng( );
     static void mute_eng( bool );
-    
+
 };
 
 struct KeyInput : public Input
@@ -116,7 +116,7 @@ struct KeyInput : public Input
 
     const Key key;
     const Dynamic dynamic;
-    
+
 };
 
 struct MouseInput : public Input
@@ -143,7 +143,7 @@ struct MouseInput : public Input
     const Button button;
     const Dynamic dynamic;
     const Coordinate position;
-    
+
 };
 
 struct ControllerInput : public Input
@@ -188,7 +188,7 @@ struct ControllerButtonInput : public ControllerInput
 
     const Button button;
     const Dynamic dynamic;
-    
+
 };
 
 struct ControllerJoystickInput : public ControllerInput
@@ -211,7 +211,7 @@ struct ControllerJoystickInput : public ControllerInput
     const Joystick joystick;
     const Vector vector;
     cbool dead_zone;
-    
+
 };
 
 } // namespace axn

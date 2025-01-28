@@ -2,13 +2,13 @@
 #include "World.hpp"
 #include "Terrain.hpp"
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 uint Object::total_objects = 0;
 #endif
 
 Object::~Object( )
 {
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     --total_objects;
     #endif
 
@@ -36,7 +36,7 @@ void Object::init( )
     Assert( !m_initialized );
     m_initialized = true;
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     ++total_objects;
     #endif
 
@@ -552,7 +552,7 @@ void Object::remove_movement_subscriber( Object * object )
     m_movement_subscribers.remove( object );
 }
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 Drawing Object::debug_overlay( ) const
 {
     cPlanc HIT_BOX_THICKNESS = 1.5;

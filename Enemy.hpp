@@ -17,7 +17,7 @@ public:
 
 protected:
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     virtual Drawing debug_overlay( ) const override;
     #endif
 
@@ -54,7 +54,7 @@ private:
     // zero range means no limit
     Planc m_sight_range;
     Planc m_alert_range;
-    
+
 };
 
 } // namespace reality

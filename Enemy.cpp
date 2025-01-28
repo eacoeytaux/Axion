@@ -63,7 +63,7 @@ bool Enemy::in_alert_range( const Player * player ) const
     return ( !alert_range( ) || position( ).in_distance_range( player->position( ), alert_range( ) ) );
 }
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 Drawing Enemy::debug_overlay( ) const
 {
     cPlanc SIGHT_LINE_THICKNESS = 0.8;

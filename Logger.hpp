@@ -4,7 +4,7 @@
 #include "Debug.hpp"
 #include "Error.hpp"
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 
 namespace axn
 {
@@ -34,7 +34,7 @@ public:
     static bool paused( );
 
     static error log_message( MessageType type, const char * entry, ... );
-    
+
 };
 
 #define Log( ... ) Logger::log_message( __VA_ARGS__ )

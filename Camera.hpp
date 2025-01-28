@@ -87,7 +87,7 @@ public:
         }
     }
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     void capture_debug( Visible * subject, bool should_delete = false );
     void capture_debug( varray<Visible *> & subjects, bool should_delete = false )
     {
@@ -138,12 +138,12 @@ public:
 private:
 
     Drawing cursor_drawing( ) const;
-    #ifdef AXN_DEBUG
-    
+    #if defined ( AXN_DEBUG )
+
 public:
 
     bool draw_debug = false;
-    
+
 private:
 
     Drawing debug_overlay_drawing( ) const;
@@ -171,7 +171,7 @@ private:
     dec m_hud_offset_percentage;
     bool m_show_hud;
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     varray<Visible *> m_debug_subjects;
     varray<Visible *> m_owned_debug_subjects; // subset of debug subjects that camera needs to delete
     #endif
@@ -180,7 +180,7 @@ public:
 
     class HeadUpDisplay : public Visible
     {
-        
+
     public:
 
         HeadUpDisplay( dec center_x_percent, dec center_y_percent, dec width_percent, dec height_percent );
@@ -199,15 +199,15 @@ public:
 
     class ScreenEffect : public Visible
     {
-        
+
     public:
 
         ScreenEffect( );
 
         virtual void render( Camera * ) { Visible::render( ); }
-        
+
     };
-    
+
 };
 
 } // namespace graphics

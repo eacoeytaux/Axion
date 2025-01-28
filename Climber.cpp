@@ -473,7 +473,7 @@ void Climber::release_bow( )
 
 Coordinate Climber::head_center( ) const
 {
-    return CoordinateY(  BODY_HEIGHT + HEAD_OFFSET_Y + ( HEAD_BOB_DISTANCE * sin( (dec)age( ) / BOB_PERIOD ) ) );
+    return CoordinateY( BODY_HEIGHT + HEAD_OFFSET_Y + ( HEAD_BOB_DISTANCE * sin( (dec)age( ) / BOB_PERIOD ) ) );
 }
 
 Coordinate Climber::face_center( ) const
@@ -573,7 +573,7 @@ Color Climber::color( ColorPiece component ) const
     }
 }
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 Drawing Climber::debug_overlay( ) const
 {
     Drawing debug_overlay;
@@ -734,7 +734,7 @@ void Climber::draw_legs( )
         {
             boot_drawing_back.mirror_y( );
         }
-        
+
         boot_drawing_back.move( foot );
 
         draw( color( PANTS ), Line( hip, foot ), LEG_WIDTH );
@@ -828,7 +828,7 @@ void Climber::draw_arrow( )
 
     Vector v = VectorA( aim_angle( ), arrow.length( ) );
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     if( Debug::active && Settings::get( Settings::DEBUG_PHYSICS ) )
     {
         draw( arrow.trajection_drawing( ARROW_PATH_LENGTH, ARROW_PATH_COLOR, ARROW_PATH_ALPHA_START ).move( v ) );
@@ -974,7 +974,7 @@ void Climber::input( Input * _input )
                 moving_right( down );
                 break;
             }
-            #ifdef AXN_DEBUG
+            #if defined ( AXN_DEBUG )
             case 'h':
             {
                 heal_full( );

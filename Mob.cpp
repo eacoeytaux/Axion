@@ -2,7 +2,7 @@
 
 Mob::Mob( Room * room, Coordinate cref _position, cdec _health ) : Object( room, _position )
 {
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     draw_debug = true;
     #endif
 
@@ -186,7 +186,7 @@ void Mob::facing_right( cbool _facing_right )
     m_facing_right = _facing_right;
 }
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 Drawing Mob::debug_overlay( ) const
 {
     cPlanc HEALTH_BAR_BORDER_WIDTH = 1.5;

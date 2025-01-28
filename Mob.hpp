@@ -15,38 +15,38 @@ public:
 
     Mob( Room * room, Coordinate cref position, dec health = 1 );
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     virtual Drawing debug_overlay( ) const override;
     #endif
 
 protected:
-    
+
     virtual void render( ) override;
     virtual void hurt_display_settings( );
 
     virtual void update( ) override;
     virtual void update_movement( ) override;
     virtual void update_velocity( ) override;
-    
+
 public:
-    
+
     virtual bool alive( ) const;
     bool dead( ) const { return !alive( ); }
-    
+
     dec health_percentage( ) const;
     virtual dec health( ) const;
     virtual dec max_health( ) const;
-    
+
     bool invincible( ) const { return ( m_invincible_always || m_invincible_timer.remaining( ) ); }
-    
+
     virtual bool invincible_always( ) const { return m_invincible_always; }
     virtual uint invincible_duration( ) const { return m_invincible_duration; }
-    
+
     virtual bool facing_right( ) const;
     bool facing_left( ) const { return !facing_right( ); }
-    
+
     virtual void die( );
-    
+
     void health_percentage( dec health_percentage );
     virtual void health( dec health ); // will increase max health if necessary
     virtual void max_health( dec health ); // will decrease health if necessary
@@ -54,12 +54,12 @@ public:
     virtual void heal( dec health ); // won't excede max health
     virtual void heal_full( );
     virtual void hurt( Damage cref damage );
-    
+
     virtual void invincible_pause( uint invincible_duration ) { if( invincible_duration ) { m_invincible_timer.reset( max( invincible_duration, m_invincible_timer.remaining( ) ) ); } }
 
     virtual void invincible_always( bool invincible ) { m_invincible_always = invincible; }
     virtual void invincible_duration( uint duration ) { m_invincible_duration = duration; }
-    
+
     Countdown cref invincible_timer( ) const { return m_invincible_timer; }
 
     Countdown cref hurt_display_timer( ) const { return m_hurt_display_timer; }
@@ -111,7 +111,7 @@ private:
     Countdown m_hurt_display_timer;
 
     bool m_facing_right = true;
-    
+
 };
 
 } // namespace reality

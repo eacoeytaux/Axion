@@ -35,31 +35,31 @@ public:
     virtual void init( );
     virtual void render( );
     virtual void update( );
-    
+
     virtual void input( const list<Input *> & inputs = { } );
-    
+
     uint age( ) const;
-    
+
     Camera * camera( );
-    
+
     World * world( ) { return m_world; }
-    
+
     FixedRectangle cref bounds( ) const;
-    
+
 private:
 
     virtual void render_bounds( Camera * camera );
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     void render_object_grid( Camera * camera ) const;
     #endif
-    
+
 public:
 
     uint player_count( ) const { return m_players.size( ); }
     const varray<Player *> & players( ) { return m_players; }
     Player * player( uint player_number = 0 );
     Player * player_main( );
-    
+
     virtual Player * add_player( Coordinate cref );
     virtual Player * create_player( Coordinate cref ) = 0;
 
@@ -141,13 +141,13 @@ private:
 protected: // todo make private?
 
     World * m_world = nullptr;
-    
+
     uint m_age = 0;
 
     FixedRectangle m_bounds;
-    
+
     varray<Player *> m_players;
-    
+
     varray<Object *> m_objects;
     queue<Object *> m_object_queue;
 
@@ -233,7 +233,7 @@ private:
 public:
 
     Grid & object_grid( ) { return m_object_grid; }
-    
+
 };
 
 } // namespace reality

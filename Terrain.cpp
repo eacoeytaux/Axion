@@ -23,7 +23,7 @@ Terrain::~Terrain( )
 
 Terrain::Terrain( Room * room, const varray<varray<Coordinate>> & _vertices ) : Object( room )
 {
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     draw_debug = true;
     #endif
 
@@ -124,10 +124,10 @@ void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( 
             }
         }
     }
-    
+
 };
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 Drawing Terrain::debug_overlay( ) const
 {
     cPlanc GROUND_WIDTH = 1.5;

@@ -18,7 +18,7 @@ public:
     virtual dec resistance( ) const = 0;
 
     virtual FixedRectangle bounding_box( ) const = 0;
-    
+
 };
 
 class TerrainEdge;
@@ -49,7 +49,7 @@ private:
     TerrainEdge * m_e2 = nullptr;
 
     dec m_resistance;
-    
+
 };
 
 class TerrainEdge : public TerrainNode
@@ -77,7 +77,7 @@ private:
     TerrainVertex * m_v2 = nullptr;
 
     dec m_resistance;
-    
+
 };
 
 class Terrain : public Object
@@ -88,7 +88,7 @@ public:
     virtual ~Terrain( );
     Terrain( Room *, const varray<varray<Coordinate>> & vertices = { } );
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     virtual Drawing debug_overlay( ) const override;
     #endif
 
@@ -106,7 +106,7 @@ private:
 
     varray<varray<TerrainVertex *>> m_vertices;
     varray<varray<TerrainEdge *>> m_edges;
-    
+
 };
 
 } // namespace reality

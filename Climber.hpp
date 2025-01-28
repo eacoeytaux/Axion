@@ -18,7 +18,7 @@ public:
 
     virtual void render( ) override;
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     virtual Drawing debug_overlay( ) const override;
     #endif
 
@@ -183,7 +183,7 @@ public:
 private:
 
     LowHealthAlertEffect m_low_health_effect;
-    
+
 };
 
 } // namespace mtmercy

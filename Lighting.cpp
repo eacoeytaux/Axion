@@ -5,7 +5,7 @@ namespace
 {
 const Color NIGHT_AMBIENT_COLOR = Color::rgba( 0.0, 0.0, 0.5, 0.2 );
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 cdec LIGHT_DEBUG_MAX_INTENSITY = 0.25;
 #endif
 } // namespace
@@ -28,7 +28,7 @@ void Lighting::darkness_active( cbool _darkness_active )
 
 dec Lighting::darkness_intensity( ) const
 {
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     if( Debug::active )
     {
         return min( m_darkness_slider.value( ), LIGHT_DEBUG_MAX_INTENSITY );

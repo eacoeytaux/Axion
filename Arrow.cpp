@@ -41,7 +41,7 @@ Arrow Arrow::base( Room * room, Coordinate cref base, Vector cref launch_speed, 
 
 Arrow::Arrow( Room * room, Coordinate cref tip, Vector cref launch_speed, Color cref _feather_color ) : Object( room, tip )
 {
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     draw_debug = true;
     #endif
 

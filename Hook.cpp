@@ -23,7 +23,7 @@ const Color ROPE_ALT_COLOR = Color::rgb( 0xB9870F );
 using mtmercy::Hook;
 Hook::Hook( Room * room, const Climber * owner ) : Object( room ), m_owner( owner )
 {
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     draw_debug = true;
     #endif
 
@@ -72,7 +72,7 @@ void Hook::render( )
         }
     }
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     // if( Debug::active )
     {
         if( m_rope_length >= m_max_rope_length )

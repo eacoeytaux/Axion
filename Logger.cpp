@@ -1,6 +1,6 @@
 #include "Logger.hpp"
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -31,11 +31,11 @@ error Logger::init( cbool _file )
     {
         Clock clock;
 
-        #ifdef OS_WINDOWS
+        #if defined ( OS_WINDOWS )
         fopen_s( &log_file, ( LOG_DIRECTORY + clock.timestamp( ) + "." + clock.datestamp( ) + ".log" ).c_str( ), "w + " );
-        #elifdef OS_APPLE
+        #elif defined ( OS_APPLE )
         log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( ) + "." + clock.datestamp( ) + ".log" ).c_str( ), "w+" );
-        #elifdef OS_LINUX
+        #elif defined ( OS_LINUX )
         log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( ) + "." + clock.datestamp( ) + ".log" ).c_str( ), "w+" );
         #endif
 

@@ -6,7 +6,7 @@ using mtmercy::Projectile;
 
 Projectile::Projectile( Room * room, Coordinate cref _position ) : Object( room, _position )
 {
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     draw_debug = true;
     #endif
 

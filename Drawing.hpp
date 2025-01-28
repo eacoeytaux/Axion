@@ -57,7 +57,7 @@ public:
                     bool preserve_thickness = false,
                     bool extend_lines = false );
 
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     Drawing & draw( Color cref color,
                     Vector cref vector,
                     dec arrow_head_length,
@@ -132,7 +132,7 @@ private:
 
     bool m_filter_function_set = false;
     function<void( Color & )> m_filter_function = [ ] ( Color & ) { };
-    
+
 };
 
 } // namespace graphics
