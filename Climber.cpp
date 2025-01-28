@@ -95,6 +95,14 @@ cdec SHOULDER_BOB_OFFSET = 0.75;
 static uint BLINK_DURATION = 6;
 static Span<uint> BLINK_WAIT = { 240, 480 };
 
+const Polygon CROSSBOW_SHAPE = Polygon( { { 30.0, 0.0 },
+                                        { 0.0, 0.0 },
+                                        { -10.0, -10.0 },
+                                        { -20.0, -10.0 },
+                                        { -20.0, -20.0 },
+                                        { 10.0, -5.0 },
+                                        { 25.0, -5.0 } } );
+
 const Color CROSSBOW_COLOR = Color::rgb( 0xA54B23 );
 
 cPlanc HOOK_LENGTH = 38.0;
@@ -480,7 +488,7 @@ Coordinate Climber::head_center( ) const
 
 Coordinate Climber::face_center( ) const
 {
-    return head_center( ) + VectorA( aim_angle( ), ( HEAD_RADIUS - FACE_RADIUS ) / 2.0 );
+    return head_center( ) + VectorA( aim_angle( ), half( HEAD_RADIUS - FACE_RADIUS ) );
 }
 
 Coordinate Climber::shoulder( cbool _front ) const
@@ -657,10 +665,10 @@ void Climber::draw_torso( )
     Coordinate waist = CoordinateY( -half( BODY_HEIGHT ) );
 
     // pants base
-    draw( color( PANTS ), Polygon( { waist + Coordinate( half( PANTS_WIDTH_UPPER ), 0.0 ),
-                                                  waist + Coordinate( -half( PANTS_WIDTH_UPPER ), 0.0 ),
-                                                  waist + Coordinate( -half( PANTS_WIDTH_LOWER ), -half( PANTS_HEIGHT ) ),
-                                                  waist + Coordinate( half( PANTS_WIDTH_LOWER ), -half( PANTS_HEIGHT ) ) } ) );
+    draw( color( PANTS ), Polygon( { waist + CoordinateX( half( PANTS_WIDTH_UPPER ) ),
+                                     waist + CoordinateX( -half( PANTS_WIDTH_UPPER ) ),
+                                     waist + Coordinate( -half( PANTS_WIDTH_LOWER ), -half( PANTS_HEIGHT ) ),
+                                     waist + Coordinate( half( PANTS_WIDTH_LOWER ), -half( PANTS_HEIGHT ) ) } ) );
 
     // undershirt
     draw( color( UNDERSHIRT ), Polygon::rectangle( half( BODY_WIDTH ), BODY_HEIGHT ) );
@@ -811,16 +819,12 @@ void Climber::draw_hand( cbool _front )
 
 void Climber::draw_crossbow( )
 {
-    Polygon crossbow_polygon = Polygon( { { 6.0, 0.0 }, Coordinate( 0.0, 0.0 ), Coordinate( -2.0, -2.0 ), Coordinate( -4.0, -2.0 ), Coordinate( -4.0, -4.0 ), Coordinate( 2.0, -1.0 ), Coordinate( 5.0, -1.0 ) } ).scale( 5.0 );
+    Polygon crossbow = CROSSBOW_SHAPE;
 
-    if( aiming_left( ) )
-    {
-        crossbow_polygon.mirror_x( );
-    }
+    if( aiming_left( ) ) { crossbow.mirror_x( ); }
+    crossbow.rotate( aim_angle( ) );
 
-    crossbow_polygon.rotate( aim_angle( ) );
-
-    draw( CROSSBOW_COLOR, crossbow_polygon );
+    draw( CROSSBOW_COLOR, crossbow );
 }
 
 void Climber::draw_arrow( )

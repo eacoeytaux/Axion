@@ -31,7 +31,7 @@ const dec LEAF_GRAVITY_RATIO = 0.025;
 const Planc LEAF_TIP_LENGTH = 7.5;
 const Planc LEAF_CROSS_LENGTH = 7.5;
 const Planc LEAF_BASE_LENGTH = 3.0;
-const Span<uint> LEAF_COUNTDOWN = { 25, 150 };
+const Span<uint> LEAF_COUNTDOWN = { 100, 300 };
 const Span<dec> LEAF_FALL_DISTANCE = { 0.1, 0.9 };
 
 const Color TRUNK_COLOR = WHITE;
@@ -49,8 +49,8 @@ Drawing draw_trunk( Color cref leaf_color, cbool _draw_leaves, Planc cref _lengt
 
     Vector trunk = Vector( 0, _length );
     Coordinate top = trunk.destination( );
-    Coordinate base_left( -half( _base_width ), 0 );
-    Coordinate base_right( half( _base_width ), 0 );
+    CoordinateX base_left( -half( _base_width ) );
+    CoordinateX base_right( half( _base_width ) );
 
     dec branch_height = Random::rdec( BRANCH_BASE_HEIGHT );
 
@@ -224,7 +224,7 @@ AspineTree::Leaf::Leaf( Room * room, Color cref color, Coordinate cref _center, 
 
     needs_render_always( true );
 
-    gravity_ratio( 0.1 );
+    gravity_ratio( LEAF_GRAVITY_RATIO );
 
     m_offset = Random::rAngle( );
 }
@@ -233,12 +233,12 @@ void AspineTree::Leaf::render( )
 {
     Object::render( );
 
-    Planc offset_x = sin( age( ) * 0.25 ) * 5.0;
-    Planc cross_length = LEAF_CROSS_LENGTH * sin( age( ) * 0.3 );
+    Planc offset_x = sin( age( ) * 0.05 ) * 5.0;
+    Planc cross_length = LEAF_CROSS_LENGTH * sin( age( ) * 0.05 );
 
     Polygon leaf( { CoordinateY( LEAF_TIP_LENGTH ), CoordinateX( -half( cross_length ) ), CoordinateY( -LEAF_BASE_LENGTH ), CoordinateX( half( cross_length ) ) } );
 
-    leaf.rotate( Angle( age( ) * 0.25 ) + m_offset );
+    leaf.rotate( Angle( age( ) * 0.05 ) + m_offset );
 
     draw( m_color, leaf + VectorX( offset_x ) );
 }

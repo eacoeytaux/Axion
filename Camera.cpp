@@ -519,8 +519,8 @@ Drawing Camera::debug_overlay_drawing( ) const
                           BORDER_LINE_THICKNESS, true, true );
 
     overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
-                          Line( Coordinate( -_half_width, 0.0 ),
-                                Coordinate( _half_width, 0.0 ) ),
+                          Line( CoordinateX( -_half_width ),
+                                CoordinateX( _half_width ) ),
                           CROSSHAIR_LINE_THICKNESS_ZOOM, true );
     overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
                           Line( CoordinateY( -_half_height ),
