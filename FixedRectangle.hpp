@@ -92,7 +92,7 @@ public:
         {
             if( width( ) )
             {
-                Line line( center( ) - Vector::X( half( width( ) ) ), center( ) + Vector::X( half( width( ) ) ) );
+                Line line( center( ) - VectorX( half( width( ) ) ), center( ) + VectorX( half( width( ) ) ) );
                 if( line.intersects( line ) )
                 {
                     Coordinate c = line.intersection( line );
@@ -101,7 +101,7 @@ public:
             }
             else if( height( ) )
             {
-                Line line( center( ) - Vector::Y( half( height( ) ) ), center( ) + Vector::Y( half( height( ) ) ) );
+                Line line( center( ) - VectorY( half( height( ) ) ), center( ) + VectorY( half( height( ) ) ) );
                 if( line.intersects( line ) )
                 {
                     Coordinate c = line.intersection( line );
@@ -193,6 +193,7 @@ public:
     operator Polygon( ) const { return Polygon::rectangle( width( ), height( ), center( ) ); }
 
     default_equal( FixedRectangle );
+    
 };
 
 } // namespace geometry

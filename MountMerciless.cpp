@@ -37,6 +37,7 @@ struct object_layer_param
     uint score = 0;
     queue<uint> scores;
     const Object * object = nullptr;
+    
 };
 
 typeT inline bool score_layer_position_i( object_layer_param & p )
@@ -50,6 +51,7 @@ typeT inline bool score_layer_position_i( object_layer_param & p )
     {
         return ++p.score;
     }
+    
 };
 
 #define o( c ) if( score_layer_position_i<c>( p ) ) { }
@@ -75,6 +77,7 @@ inline queue<uint> score_layer_position( Object * object )
     o( AspineTree::Leaf )
 
     return p.scores;
+    
 };
 
 } // namespace

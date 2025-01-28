@@ -8,7 +8,7 @@ namespace
 cPlanc BASE_WIDTH = 33.0;
 cPlanc LEAF_LENGTH = 45.0;
 const Span<uint> LEAF_COUNT = { 5, 7 };
-const Angle LEAF_BASE = RIGHT_ANGLE / 4.0;
+const Angle LEAF_BASE = RIGHT / 4.0;
 cPlanc LEAF_TIP_OFFSET = 5.0;
 
 const Color BUSH_COLOR = GREEN;
@@ -33,7 +33,7 @@ Bush::Bush( Room * room, Coordinate cref _root, cdec _z ) : Object( room, _root 
     for_range( i, leaf_count + 1 )
     {
         bush_drawing.draw( BUSH_COLOR, Polygon( { base_right,
-                                                  Vector::A( LEAF_BASE + ( leaf_delta * (dec)i ), LEAF_LENGTH ) + Vector::A( Random::rAngle( ), Random::rPlanc( LEAF_TIP_OFFSET ) ),
+                                                  VectorA( LEAF_BASE + ( leaf_delta * (dec)i ), LEAF_LENGTH ) + VectorA( Random::rAngle( ), Random::rPlanc( LEAF_TIP_OFFSET ) ),
                                                   base_left } ) );
     }
 

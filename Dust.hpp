@@ -26,6 +26,7 @@ private:
     Angle m_rotation;
     Angle m_rotation_speed;
     Color m_color;
+    
 };
 
 } // namespace mtmercy

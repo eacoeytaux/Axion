@@ -42,6 +42,7 @@ private:
     Slider<dec> m_darkness_slider;
 
     Color m_ambient_color = TRANSPARENT;
+    
 };
 
 } // namespace graphics

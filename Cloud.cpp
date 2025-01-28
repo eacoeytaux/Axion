@@ -57,7 +57,7 @@ Cloud::Cloud( Room * room ) : Object( room )
 
         puff.radius = Random::rint( LARGE_PUFF_RADIUS ) * scale;
 
-        puff.center_offset = Vector::A( Random::rAngle( ), Random::rdec( LARGE_PUFF_DISTANCE ) );
+        puff.center_offset = VectorA( Random::rAngle( ), Random::rdec( LARGE_PUFF_DISTANCE ) );
         puff.center_offset.dx( puff.center_offset.dx( ) * X_STRETCH_LARGE );
         puff.center_offset *= scale;
 
@@ -68,7 +68,7 @@ Cloud::Cloud( Room * room ) : Object( room )
 
             spuff.radius = Random::rint( SMALL_PUFF_RADIUS ) * scale;
 
-            spuff.center_offset = puff.center_offset + Vector::A( Random::rAngle( ), Random::rdec( SMALL_PUFF_DISTANCE ) );
+            spuff.center_offset = puff.center_offset + VectorA( Random::rAngle( ), Random::rdec( SMALL_PUFF_DISTANCE ) );
             spuff.center_offset.dx( spuff.center_offset.dx( ) * X_STRETCH_SMALL );
             spuff.center_offset *= scale;
         }

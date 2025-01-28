@@ -286,6 +286,7 @@ private:
 
     dec max_rgb( ) const { return max<dec>( { m_r, m_g, m_b } ); }
     dec min_rgb( ) const { return min<dec>( { m_r, m_g, m_b } ); }
+    
 };
 
 const Color TRANSPARENT = Color::rgba( 1.0, 1.0, 1.0, 0.0 );
@@ -368,6 +369,7 @@ private:
     Color m_color_start;
     Color m_color_end;
     dec m_slide;
+    
 };
 
 } // namespace graphics

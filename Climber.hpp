@@ -183,6 +183,7 @@ public:
 private:
 
     LowHealthAlertEffect m_low_health_effect;
+    
 };
 
 } // namespace mtmercy

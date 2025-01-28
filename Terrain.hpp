@@ -18,6 +18,7 @@ public:
     virtual dec resistance( ) const = 0;
 
     virtual FixedRectangle bounding_box( ) const = 0;
+    
 };
 
 class TerrainEdge;
@@ -48,6 +49,7 @@ private:
     TerrainEdge * m_e2 = nullptr;
 
     dec m_resistance;
+    
 };
 
 class TerrainEdge : public TerrainNode
@@ -55,7 +57,7 @@ class TerrainEdge : public TerrainNode
 
 public:
 
-    TerrainEdge( TerrainVertex * v1, TerrainVertex * v2, dec resistance = 0.1 );
+    TerrainEdge( TerrainVertex * v1, TerrainVertex * v2, dec resistance = 0.1 ); // todo make constant or variable
     TerrainEdge( TerrainEdge cref );
 
     Line line( ) const;
@@ -67,7 +69,7 @@ public:
     Angle normal( ) const override;
     dec resistance( ) const override;
 
-    FixedRectangle bounding_box( ) const;
+    FixedRectangle bounding_box( ) const override;
 
 private:
 
@@ -75,6 +77,7 @@ private:
     TerrainVertex * m_v2 = nullptr;
 
     dec m_resistance;
+    
 };
 
 class Terrain : public Object
@@ -103,6 +106,7 @@ private:
 
     varray<varray<TerrainVertex *>> m_vertices;
     varray<varray<TerrainEdge *>> m_edges;
+    
 };
 
 } // namespace reality

@@ -172,14 +172,11 @@ public:
 
     static Transform reflect( Angle cref a )
     {
-        Planc s = a.sin( );
-        Planc c = a.cos( );
+        Planc s = ( a * 2.0 ).sin( );
+        Planc c = ( a * 2.0 ).cos( );
 
-        Planc s2 = ( a * 2.0 ).sin( );
-        Planc c2 = ( a * 2.0 ).cos( );
-
-        return Transform( c2, s2, 0.0,
-                          s2, -c2, 0.0,
+        return Transform( c, s, 0.0,
+                          s, -c, 0.0,
                           0.0, 0.0, 1.0 );
     }
 
@@ -188,15 +185,12 @@ public:
         if( v.origin( ).x( ) || v.origin( ).y( ) )
         {
             Angle a = v.angle( );
+            
+            Planc s = ( a * 2.0 ).sin( );
+            Planc c = ( a * 2.0 ).cos( );
 
-            Planc s = a.sin( );
-            Planc c = a.cos( );
-
-            Planc s2 = ( a * 2.0 ).sin( );
-            Planc c2 = ( a * 2.0 ).cos( );
-
-            return Transform( c2, s2, ( v.origin( ).x( ) * ( 1.0 - c2 ) ) - ( v.origin( ).y( ) * s2 ),
-                              s2, -c2, ( v.origin( ).y( ) * ( 1.0 + c2 ) ) - ( v.origin( ).x( ) * s2 ),
+            return Transform( c, s, ( v.origin( ).x( ) * ( 1.0 - c ) ) - ( v.origin( ).y( ) * s ),
+                              s, -c, ( v.origin( ).y( ) * ( 1.0 + c ) ) - ( v.origin( ).x( ) * s ),
                               0.0, 0.0, 1.0 );
         }
         else
@@ -406,6 +400,7 @@ private:
         m_matrix[ 2 ][ 1 ] = p8;
         m_matrix[ 2 ][ 2 ] = p9;
     }
+    
 };
 
 const Transform ZERO_TRANSFORM = Transform( false );
@@ -466,6 +461,7 @@ protected:
 
     virtual Transformable cref dirty( ) const { m_dirty = true; rethis; }
     virtual Transformable cref clean( ) const { m_dirty = false; rethis; }
+    
 };
 
 inline Coordinate & Coordinate::transform( Transform cref t ) { rethis = t.apply( *this ); }

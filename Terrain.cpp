@@ -24,7 +24,7 @@ Terrain::~Terrain( )
 Terrain::Terrain( Room * room, const varray<varray<Coordinate>> & _vertices ) : Object( room )
 {
     #ifdef AXN_DEBUG
-    m_draw_debug = true;
+    draw_debug = true;
     #endif
 
     no_gravity( );
@@ -124,6 +124,7 @@ void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( 
             }
         }
     }
+    
 };
 
 #ifdef AXN_DEBUG
@@ -135,7 +136,7 @@ Drawing Terrain::debug_overlay( ) const
 
     Drawing debug_overlay;
 
-    if( Object::draw_physics )
+    if( Settings::get( Settings::DEBUG_PHYSICS ) )
     {
         for_each( edges, edges( ) )
         {
@@ -195,7 +196,7 @@ Angle TerrainVertex::normal( ) const
         return m_e2->normal( );
     }
 
-    return Angle( RIGHT_ANGLE );
+    return Angle( RIGHT );
 }
 
 dec TerrainVertex::resistance( ) const { return m_resistance; }
@@ -235,7 +236,7 @@ TerrainVertex * TerrainEdge::vertex2( ) const { return m_v2; }
 
 Angle TerrainEdge::normal( ) const
 {
-    return vector( ).angle( ) + RIGHT_ANGLE;
+    return vector( ).angle( ) + RIGHT;
 }
 
 dec TerrainEdge::resistance( ) const { return m_resistance; }

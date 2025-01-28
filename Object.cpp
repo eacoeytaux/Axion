@@ -4,8 +4,6 @@
 
 #ifdef AXN_DEBUG
 uint Object::total_objects = 0;
-
-bool Object::draw_physics = true;
 #endif
 
 Object::~Object( )
@@ -246,11 +244,11 @@ void Object::update_movement( )
                     checked_edges.insert( terrain_edge );
 
                     Line movement_line = movement;
-                    if( movement_line.intersects( terrain_edge->line( ) + Vector::Y( half( space( ).bound_height( ) ) ) ) )
+                    if( movement_line.intersects( terrain_edge->line( ) + VectorY( half( space( ).bound_height( ) ) ) ) )
                     {
                         next_ground = terrain_edge;
 
-                        Coordinate intersection = movement_line.intersection( terrain_edge->line( ) + Vector::Y( half( space( ).bound_height( ) ) ) );
+                        Coordinate intersection = movement_line.intersection( terrain_edge->line( ) + VectorY( half( space( ).bound_height( ) ) ) );
 
                         movement = Vector( center, intersection );
 
@@ -272,7 +270,7 @@ void Object::update_movement( )
         {
             if( ( movement.dx( ) > 0.0 ) && ( center + movement ).x( ) > m_ground->line( ).upper_bound_x( ) )
             {
-                movement = Vector( center, m_ground->vertex2( )->position( ) + Vector::Y( half( space( ).bound_height( ) ) ) );
+                movement = Vector( center, m_ground->vertex2( )->position( ) + VectorY( half( space( ).bound_height( ) ) ) );
 
                 if( m_ground->vertex2( ) )
                 {
@@ -285,7 +283,7 @@ void Object::update_movement( )
             }
             else if( ( movement.dx( ) < 0.0 ) && ( center + movement ).x( ) < m_ground->line( ).lower_bound_x( ) )
             {
-                movement = Vector( center, m_ground->vertex1( )->position( ) + Vector::Y( half( space( ).bound_height( ) ) ) );
+                movement = Vector( center, m_ground->vertex1( )->position( ) + VectorY( half( space( ).bound_height( ) ) ) );
 
                 if( m_ground->vertex1( ) )
                 {
@@ -331,8 +329,8 @@ void Object::update_movement( )
                 {
                     if( hit_box.width( ) )
                     {
-                        Line hit_box_line( hit_box.center( ) - Vector::X( half( hit_box.width( ) ) ),
-                                           hit_box.center( ) + Vector::X( half( hit_box.width( ) ) ) );
+                        Line hit_box_line( hit_box.center( ) - VectorX( half( hit_box.width( ) ) ),
+                                           hit_box.center( ) + VectorX( half( hit_box.width( ) ) ) );
 
                         if( movement_line.intersects( hit_box_line ) )
                         {
@@ -341,8 +339,8 @@ void Object::update_movement( )
                     }
                     else if( hit_box.height( ) )
                     {
-                        Line hit_box_line( hit_box.center( ) - Vector::Y( half( hit_box.height( ) ) ),
-                                           hit_box.center( ) + Vector::Y( half( hit_box.height( ) ) ) );
+                        Line hit_box_line( hit_box.center( ) - VectorY( half( hit_box.height( ) ) ),
+                                           hit_box.center( ) + VectorY( half( hit_box.height( ) ) ) );
 
                         if( movement_line.intersects( hit_box_line ) )
                         {
@@ -540,7 +538,7 @@ void Object::subscribe_to_movement( Object * object )
 
 void Object::unsubscribe_to_movement( Object * object )
 {
-    m_movement_subscriptions.erase( object );
+    m_movement_subscriptions.remove( object );
     object->remove_movement_subscriber( this );
 }
 
@@ -551,7 +549,7 @@ void Object::add_movement_subscriber( Object * object )
 
 void Object::remove_movement_subscriber( Object * object )
 {
-    m_movement_subscribers.erase( object );
+    m_movement_subscribers.remove( object );
 }
 
 #ifdef AXN_DEBUG
@@ -569,7 +567,7 @@ Drawing Object::debug_overlay( ) const
 
     // physics
     // (only for objects on plane)
-    if( draw_physics && ( z( ) == 1.0 ) )
+    if( Settings::get( Settings::DEBUG_PHYSICS ) && ( z( ) == 1.0 ) )
     {
         // hit box
         debug_overlay.draw( PHYSICS_COLOR, hit_box( ) - position( ), HIT_BOX_THICKNESS, true );

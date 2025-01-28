@@ -166,11 +166,11 @@ public:
         {
             varray<Coordinate> coordinates( side_count );
 
-            Angle start_angle = Angle( RIGHT_ANGLE, true ); // start at the top + rotation
+            Angle start_angle = Angle( RIGHT, true ); // start at the top + rotation
             Angle delta_angle( TAU / (dec)side_count );
             for_each( offset, coordinates )
             {
-                offset = Vector::A( start_angle );
+                offset = VectorA( start_angle );
                 start_angle += delta_angle;
             }
 
@@ -255,8 +255,8 @@ public:
             Vector vector_prev( line_prev.c1( ), line_prev.c2( ) );
             Vector vector_next( line_next.c1( ), line_next.c2( ) );
 
-            vector_prev.rotate( -RIGHT_ANGLE );
-            vector_next.rotate( -RIGHT_ANGLE );
+            vector_prev.rotate( -RIGHT );
+            vector_next.rotate( -RIGHT );
 
             vector_prev.magnitude( expansion );
             vector_next.magnitude( expansion );
@@ -578,6 +578,7 @@ private:
             m_bounds_dirty = false;
         }
     }
+    
 };
 
 } // namespace geometry

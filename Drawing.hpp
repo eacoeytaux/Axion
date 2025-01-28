@@ -89,8 +89,6 @@ public:
     {
         Transformable::clear_transform( );
 
-        uint mem_size = ( reserve_mem ? m_colored_polygons.size( ) : 0 );
-
         m_colored_polygons.clear( !reserve_mem );
 
         m_bounding_box.width( 0.0 );
@@ -133,7 +131,8 @@ private:
     mutable bool m_opaque = true;
 
     bool m_filter_function_set = false;
-    std::function<void( Color & )> m_filter_function = [ ] ( Color & ) { };
+    function<void( Color & )> m_filter_function = [ ] ( Color & ) { };
+    
 };
 
 } // namespace graphics

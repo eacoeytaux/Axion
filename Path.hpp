@@ -106,6 +106,7 @@ public:
 
     Path & operator+=( Vector cref v ) { rethis = *this + v; }
     Path & operator-=( Vector cref v ) { rethis = *this - v; }
+    
 };
 
 } // namespace geometry

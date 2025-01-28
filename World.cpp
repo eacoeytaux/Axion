@@ -55,7 +55,7 @@ void World::create( )
     m_camera = new Camera( this, Engine::screen_width( ) * ( 1.0 - CAMERA_SIDE_BUFFER_RATIO ), Engine::screen_height( ) * ( 1.0 - CAMERA_SIDE_BUFFER_RATIO ) );
 }
 
-void World::input( const varray<Input *> & _inputs )
+void World::input( const list<Input *> & _inputs )
 {
     for_each( input, _inputs )
     {
@@ -65,8 +65,8 @@ void World::input( const varray<Input *> & _inputs )
             KeyInput::Dynamic dynamic = key_input->dynamic;
 
             bool pressed = ( dynamic == KeyInput::PRESSED );
-            bool held = ( dynamic == KeyInput::HELD );
-            bool down = ( pressed || held );
+            // bool held = ( dynamic == KeyInput::HELD );
+            // bool down = ( pressed || held );
 
             if( pressed )
             {
@@ -108,17 +108,17 @@ void World::input( const varray<Input *> & _inputs )
                     }
 
                     #ifdef AXN_DEBUG
+                    case '`':
+                    {
+                        Debug::active = !Debug::active;
+                        break;
+                    }
+                        
                     case '\'':
                     {
                         Engine::step( );
                         break;
                     };
-
-                    case 'l':
-                    {
-                        m_current_room->lighting_active( !m_current_room->lighting_active( ) );
-                        break;
-                    }
 
                     case '.':
                     {
@@ -151,48 +151,43 @@ void World::input( const varray<Input *> & _inputs )
                         Engine::mute( !Engine::muted( ) );
                         break;
                     }
-
+                        
+                    case 'l':
+                    {
+                        m_current_room->lighting_active( !m_current_room->lighting_active( ) );
+                        break;
+                    }
+                        
+                    case 'h':
+                    {
+                        Settings::flip( Settings::DEBUG_HEALTH );
+                        break;
+                    }
+                        
                     case '1':
                     {
-                        Mob::draw_health = !Mob::draw_health;
+                        Settings::flip( Settings::DEBUG_CAMERA );
                         break;
                     }
 
                     case '2':
                     {
-                        Object::draw_physics = !Object::draw_physics;
+                        Settings::flip( Settings::DEBUG_PHYSICS );
                         break;
                     }
-
+                        
                     case '3':
                     {
-                        m_draw_grid = !m_draw_grid;
-                        break;
-                    }
-
-                    case '4':
-                    {
-                        m_display_forebackground = !m_display_forebackground;
-                        break;
-                    }
-
-                    case '8':
-                    {
-                        m_camera->m_draw_debug = !m_camera->m_draw_debug;
+                        Settings::flip( Settings::DEBUG_GRID );
                         break;
                     }
 
                     case '9':
                     {
-                        Engine::anti_alias( !Engine::anti_alias( ) );
+                        Settings::flip( Settings::DEBUG_BACKGROUND );
                         break;
                     }
-
-                    case '`':
-                    {
-                        Debug::active = !Debug::active;
-                        break;
-                    }
+                        
                     #endif
                 }
             }
@@ -242,6 +237,10 @@ void World::input( const varray<Input *> & _inputs )
                         break;
                     }
                     #endif
+                    default:
+                    {
+                        break;
+                    }
                 }
             }
         }

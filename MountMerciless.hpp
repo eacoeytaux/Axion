@@ -15,6 +15,7 @@ protected:
     virtual void create( ) override;
 
     virtual void assign_layer_position( Object * ) override;
+    
 };
 
 } // namespace mtmercy

@@ -52,6 +52,8 @@ use_std( string );
 
 use_std( chrono::system_clock );
 
+typedef std::default_random_engine rng_engine;
+
 // -- math std --
 
 use_std_dec( abs );
@@ -75,11 +77,9 @@ use_std_dec2( atan2 );
 
 cdec TAU = 6.283185307179586476925;
 cdec PI = 3.141592653589793236926;
-cdec RIGHT_ANGLE = 1.570796326794896618463;
-cdec RIGHT_ANGLE_0 = RIGHT_ANGLE * 0.0;
-cdec RIGHT_ANGLE_1 = RIGHT_ANGLE * 1.0;
-cdec RIGHT_ANGLE_2 = RIGHT_ANGLE * 2.0;
-cdec RIGHT_ANGLE_3 = RIGHT_ANGLE * 3.0;
+cdec RIGHT = 1.570796326794896618463;
+
+cdec EULER = 2.7182818284590452;
 
 cdec INFINITY_POS = INFINITY;
 cdec INFINITY_NEG = -INFINITY;

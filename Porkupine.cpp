@@ -27,7 +27,7 @@ Porkupine::Porkupine( Room * room, Coordinate cref _position ) : Enemy( room, _p
 
     for_range( i, quill_count + 1 )
     {
-        m_quills.insert_back( Line( ORIGIN, Vector::A( QUILL_CLOSE + ( d_angle * i ), METER ) ) );
+        m_quills.insert_back( Line( ORIGIN, VectorA( QUILL_CLOSE + ( d_angle * i ), METER ) ) );
     }
 }
 
@@ -42,7 +42,7 @@ void Porkupine::render( )
 
     for_each( quill, m_quills )
     {
-        Vector offset = Vector::A( quill.angle( ) + RIGHT_ANGLE, QUILL_OFFSET );
+        Vector offset = VectorA( quill.angle( ) + RIGHT, QUILL_OFFSET );
         draw( QUILL_COLOR, Polygon( { quill.c2( ), quill.c1( ) + offset, quill.c1( ) - offset } ) );
     }
 }

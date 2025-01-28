@@ -21,6 +21,7 @@ public:
 private:
 
     varray<Line> m_quills;
+    
 };
 
 } // namespace mtmercy

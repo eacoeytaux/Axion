@@ -32,11 +32,11 @@ void Snail::render( )
         angle = ground( )->vector( ).angle( );
     }
 
-    Coordinate tail = Vector::A( angle, -SHELL_RADIUS );
-    Coordinate head = Vector::A( angle, SHELL_RADIUS + ( half( SLUG_THICKNESS ) * sin( (dec)age( ) / STRETCH_PERIOD ) ) );
-    Coordinate head_top = head + Vector::A( angle, SLUG_THICKNESS ) + Vector::A( angle + RIGHT_ANGLE, SLUG_THICKNESS );
+    Coordinate tail = VectorA( angle, -SHELL_RADIUS );
+    Coordinate head = VectorA( angle, SHELL_RADIUS + ( half( SLUG_THICKNESS ) * sin( (dec)age( ) / STRETCH_PERIOD ) ) );
+    Coordinate head_top = head + VectorA( angle, SLUG_THICKNESS ) + VectorA( angle + RIGHT, SLUG_THICKNESS );
 
-    draw( SHELL_COLOR, Polygon::circle( SHELL_RADIUS, Vector::A( angle + RIGHT_ANGLE, SHELL_RADIUS ) ) );
+    draw( SHELL_COLOR, Polygon::circle( SHELL_RADIUS, VectorA( angle + RIGHT, SHELL_RADIUS ) ) );
     draw( SLUG_COLOR, Polygon( { head, head_top, tail } ) );
 }
 

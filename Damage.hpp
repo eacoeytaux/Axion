@@ -21,6 +21,7 @@ public:
 private:
 
     dec m_damage = 0.0;
+    
 };
 
 } // namespace reality

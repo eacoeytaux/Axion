@@ -114,6 +114,7 @@ private:
     bool m_needs_render_always = false;
     bool m_persist_render = false;
     bool m_ever_rendered = false;
+    
 };
 
 } // namespace graphics

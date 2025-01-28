@@ -58,10 +58,7 @@ void Camera::clear_subjects( )
 
 void Camera::clear_screen_effects( )
 {
-    for_each( effect, m_owned_screen_effects )
-    {
-        // safe_delete( effect );
-    }
+    for_each( effect, m_owned_screen_effects ) { safe_delete( effect ); }
 
     m_owned_screen_effects.clear( );
     m_screen_effects.clear( );
@@ -69,10 +66,7 @@ void Camera::clear_screen_effects( )
 
 void Camera::clear_hud_elements( )
 {
-    for_each( hud_element, m_owned_hud_elements )
-    {
-        // safe_delete( hud_element );
-    }
+    for_each( hud_element, m_owned_hud_elements ) { safe_delete( hud_element ); }
 
     m_owned_hud_elements.clear( );
     m_hud_elements.clear( );
@@ -263,9 +257,9 @@ void Camera::render( )
                                 if( ( _line.c1( ) != _line.c2( ) ) && ( _next_line.c1( ) != _next_line.c2( ) ) )
                                 {
                                     Coordinate c0 = _line.c2( );
-                                    Coordinate c1 = c0 + Vector::A( _line_angle - RIGHT_ANGLE, half( _thickness ) );
-                                    Coordinate c2 = c0 + Vector::A( _next_line_angle - RIGHT_ANGLE, half( _thickness ) );
-                                    Coordinate c3 = Line( c1, c1 + Vector::A( _line_angle ) ).intersection( Line( c2, c2 - Vector::A( _next_line_angle ) ) );
+                                    Coordinate c1 = c0 + VectorA( _line_angle - RIGHT, half( _thickness ) );
+                                    Coordinate c2 = c0 + VectorA( _next_line_angle - RIGHT, half( _thickness ) );
+                                    Coordinate c3 = Line( c1, c1 + VectorA( _line_angle ) ).intersection( Line( c2, c2 - VectorA( _next_line_angle ) ) );
                                     corner_polygon = Polygon( { c0, c1, c3, c2 } );
                                 }
 
@@ -359,11 +353,11 @@ void Camera::render( )
 
         auto render_camera_bounds = [ & ] ( )
         {
+            const Color COLOR =
             #ifdef AXN_DEBUG
-            const Color COLOR = ( Debug::active && m_draw_debug ) ? BLACK.a( 0.5 ) : BLACK;
-            #else
-            const Color COLOR = BLACK;
+            ( Debug::active && Settings::get( Settings::DEBUG_CAMERA ) ) ? BLACK.a( 0.5 ) :
             #endif
+            BLACK;
 
             ogl::clear_depth( );
             ogl::depth_not_equal( );
@@ -417,7 +411,7 @@ void Camera::render( )
                     render_visible( visible, false );
                 }
 
-                if( m_draw_debug )
+                if( Settings::get( Settings::DEBUG_CAMERA ) )
                 {
                     render_visible( new Visible( debug_overlay_drawing( ) ), true );
                 }
@@ -440,12 +434,12 @@ void Camera::render( )
     ++total_render_count;
     total_polygon_count += polygon_count;
     max_polygon_count = max( polygon_count, max_polygon_count );
-    Log( DEBUG_LOG, "polygons: %u ( convex: %u -> %u ) / average: %u / max: %u",
-         polygon_count,
-         convex_polygon_count,
-         convex_polygon_triangle_count,
-         ( total_polygon_count / total_render_count ),
-         max_polygon_count );
+    // Log( DEBUG_LOG, "polygons: %u ( convex: %u -> %u ) / average: %u / max: %u",
+    //     polygon_count,
+    //     convex_polygon_count,
+    //     convex_polygon_triangle_count,
+    //     ( total_polygon_count / total_render_count ),
+    //     max_polygon_count );
     #endif
 }
 
@@ -499,7 +493,7 @@ Drawing Camera::debug_overlay_drawing( ) const
     const Polygon _target_inner = Polygon::circle( TARGET_RADIUS, _target_offset );
     const Polygon _target_cover = Polygon::circle( TARGET_RADIUS );
 
-    const Line _fps_line = Line( ORIGIN, Coordinate( 0.0, FPS_RADIUS ).rotate( delta ) );
+    const Line _fps_line = Line( ORIGIN, CoordinateY( FPS_RADIUS ).rotate( delta ) );
     const Polygon _fps_circle = Polygon::circle( FPS_RADIUS );
     const Polygon _fps_dot = Polygon::circle( TARGET_RADIUS );
 
@@ -527,8 +521,8 @@ Drawing Camera::debug_overlay_drawing( ) const
                                 Coordinate( _half_width, 0.0 ) ),
                           CROSSHAIR_LINE_THICKNESS_ZOOM, true );
     overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
-                          Line( Coordinate( 0.0, -_half_height ),
-                                Coordinate( 0.0, _half_height ) ),
+                          Line( CoordinateY( -_half_height ),
+                                CoordinateY( _half_height ) ),
                           CROSSHAIR_LINE_THICKNESS_ZOOM, true );
 
     overlay_drawing.draw( MAIN_COLOR, _target_outer, FILLED );

@@ -54,6 +54,7 @@ private:
     // zero range means no limit
     Planc m_sight_range;
     Planc m_alert_range;
+    
 };
 
 } // namespace reality

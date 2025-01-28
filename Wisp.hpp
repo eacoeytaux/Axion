@@ -44,6 +44,7 @@ private:
 
     Countdown m_reload_timer;
     Fire m_fire;
+    
 };
 
 } // namespace mtmercy

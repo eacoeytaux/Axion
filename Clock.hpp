@@ -34,6 +34,7 @@ public:
 
     Clock & operator+=( Clock c ) { m_ms += c.m_ms; return *this; }
     Clock & operator-=( Clock c ) { m_ms -= c.m_ms; return *this; }
+    
 };
 
 inline uint milliseconds( ) { return Clock( ).milliseconds( ); }

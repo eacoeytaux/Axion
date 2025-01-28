@@ -111,6 +111,7 @@ private:
     Color m_flame_inner_color = TRANSPARENT;
 
     void set_light_source( );
+    
 };
 
 } // namespace mtmercy

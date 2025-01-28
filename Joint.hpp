@@ -45,13 +45,14 @@ public:
 
         if( m < aT )
         {
-            return Vector::A( Angle( negate( acos( ( square( m ) + square( a1 ) - square( a2 ) ) / ( m * a1 * 2.0 ) ), m_inward ) ) + v.angle( ), a1, c1( ) );
+            return VectorA( Angle( negate( acos( ( square( m ) + square( a1 ) - square( a2 ) ) / ( m * a1 * 2.0 ) ), m_inward ) ) + v.angle( ), a1, c1( ) );
         }
         else
         {
             return ( v * ( a1 / aT ) );
         }
     }
+    
 };
 
 } // namespace axn

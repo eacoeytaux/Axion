@@ -75,7 +75,7 @@ Drawing Enemy::debug_overlay( ) const
 
     Drawing debug_overlay;
 
-    if( Object::draw_physics )
+    if( Settings::get( Settings::DEBUG_PHYSICS ) )
     {
         if( has_target( ) )
         {

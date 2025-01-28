@@ -11,6 +11,7 @@ class Stalagmite : public Object
 {
 public:
     Stalagmite( Room *, const Coordinate & base, Planc height, dec z, const Color & color );
+    
 };
 
 } // namespace mtmercy

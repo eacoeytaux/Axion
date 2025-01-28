@@ -16,9 +16,9 @@ const Color THORN_COLOR = WHITE;
 
 Thorns::Thorns( Room * room, const Coordinate & _start, const Coordinate & _end ) : Object( room )
 {
-#ifdef AXN_DEBUG
-    m_draw_debug = true;
-#endif
+    #ifdef AXN_DEBUG
+    draw_debug = true;
+    #endif
     
     persist_render( true );
     needs_render_always( false );
@@ -37,7 +37,7 @@ Thorns::Thorns( Room * room, const Coordinate & _start, const Coordinate & _end 
     
     Vector offset = v;
     offset.magnitude( half( VINE_THICKNESS ) );
-    offset.rotate( RIGHT_ANGLE );
+    offset.rotate( RIGHT );
     
     Planc length = v.magnitude( );
     

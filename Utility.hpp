@@ -11,29 +11,12 @@
 
 #include "Namespaces.hpp"
 
-namespace axn
-{
-namespace utility
-{
-
 // -- defines --
 
-#define cref const & 
+#define cref const &
 
 #define typeT template <typename T>
 #define classT template <typename T> class
-
-#define axnclass( Class ) \
-    class Class; \
-    typedef const Class c##Class; \
-    typedef const Class & x##Class; \
-    typedef Class & r##Class; \
-    typedef Class * p##Class; \
-    class Class
-
-#define axnhash( Class, class, fn ) \
-    struct Hasher { size_t operator( )( Class cref class ) const { return hash<uint>( )( fn ); } }; \
-    uint hash( ) const { return Hasher<Class>( *this ); }
 
 #define rethis return *this
 
@@ -86,6 +69,19 @@ namespace utility
 #define default_virtual_non_equal( Class ) \
     virtual bool operator!=( Class cref c ) const { return !( *this == c ); }
 
+#define axnclass( Class ) \
+    class Class; \
+    typedef const Class c##Class; \
+    typedef const Class & x##Class; \
+    typedef Class & r##Class; \
+    typedef Class * p##Class; \
+    class Class
+
+namespace axn
+{
+namespace utility
+{
+
 inline void nothing( ) { }
 
 typeT inline void safe_delete( T *& t ) { if( t && dynamic_cast<T *>( t ) ) { delete t; } t = nullptr; }
@@ -107,10 +103,10 @@ inline bool is_nan( cdec d ) { return ( ::isnan( d ) ); }
 inline bool is_num( cdec d ) { return ( !is_nan( d ) && !is_inf( d ) ); }
 inline bool is_int( cdec d ) { return ( equal( d, ::rint( d ) ) ); }
 inline bool is_zero( cdec d ) { return ( equal( d, 0.0 ) ); }
-inline bool is_pos( cdec d ) { return greater( d, 0.0 ); }
-inline bool is_neg( cdec d ) { return less( d, 0.0 ); }
-inline bool is_even( cdec d ) { return is_zero( (int)( d ) % 2 ); }
-inline bool is_odd( cdec d ) { return is_zero( (int)( d + 1 ) % 2 ); }
+inline bool is_pos( cdec d ) { return ( greater( d, 0.0 ) ); }
+inline bool is_neg( cdec d ) { return ( less( d, 0.0 ) ); }
+inline bool is_even( cdec d ) { return ( is_zero( (int)( d ) % 2 ) ); }
+inline bool is_odd( cdec d ) { return ( is_zero( (int)( d + 1 ) % 2 ) ); }
 
 inline bool is_divisible( cdec x, cdec y ) { return !is_zero( remainder( x, y ) ); }
 
@@ -126,48 +122,36 @@ typeT inline T negate( T cref t ) { return -t; }
 typeT inline T negate( T cref t, bool f ) { return ( f ? -t : t ); }
 
 typeT inline T half( T cref t ) { return ( t / 2.0 ); }
-typeT inline T twice( T cref t ) { return ( t * 2.0 ); }
 
 typeT inline T square( T cref t ) { return ( t * t ); }
 typeT inline T cube( T cref t ) { return ( t * t * t ); }
 
-typeT inline T log( T cref base, T cref t ) { return ( ::log( (dec)t ) / ::log( (dec)base ) ); }
+typeT inline T log( T cref t ) { return ::log( (dec)t ); }
+typeT inline T log( T cref t, T cref base ) { return ( ::log( (dec)t ) / ::log( (dec)base ) ); }
 
 typeT inline T cref min( T cref t1, T cref t2 ) { return ( t1 < t2 ) ? t1 : t2; }
-typeT inline T cref min( const varray<T> & list )
+typeT inline T cref min( const varray<T> & v )
 {
-    Assert( list.size( ), "list must not be empty" );
+    Assert( v.size( ), "varray must not be empty" );
 
     int min_i = 0;
-
-    for_range( i, list.size( ) - 1 )
-    {
-        if( list[ i + 1 ] < list[ min_i ] )
-        {
-            min_i = i + 1;
-        }
-    }
-
-    return list[ min_i ];
+    for_range( i, v.size( ) - 1 ) { if( v[ i + 1 ] < v[ min_i ] ) { min_i = i + 1; } }
+    return v[ min_i ];
 }
 
 typeT inline T cref max( T cref t1, T cref t2 ) { return ( t1 > t2 ) ? t1 : t2; }
-typeT inline T cref max( const varray<T> & list )
+typeT inline T cref max( const varray<T> & v )
 {
-    Assert( list.size( ), "list must not be empty" );
+    Assert( v.size( ), "varray must not be empty" );
 
     int max_i = 0;
-
-    for_range( i, list.size( ) - 1 )
-    {
-        if( list[ i + 1 ] > list[ max_i ] )
-        {
-            max_i = i + 1;
-        }
-    }
-
-    return list[ max_i ];
+    for_range( i, v.size( ) - 1 ) { if( v[ i + 1 ] > v[ max_i ] ) { max_i = i + 1; } }
+    return v[ max_i ];
 }
+
+inline dec pythagorean( cdec a, cdec b ) { return ( ( a && b ) ? ( sqrt( square( a ) + square( b ) ) ) : abs( a + b ) ); }
+
+inline uint fibonacci( cuint n ) { uint f[ 3 ] = { 1, 0, 1 }; do_count( n ) { f[ 0 ] = f[ 1 ] + f[ 2 ]; f[ 2 ] = f[ 1 ]; f[ 1 ] = f[ 0 ]; } return f[ 0 ]; }
 
 inline uint factorial( cuint n ) { if( n ) { uint f = 1; for_range( i, n - 1 ) { f *= ( i + 2 ); } return f; } else { return 1; } }
 
@@ -205,44 +189,6 @@ inline varray<uint> pascal( cint row )
     return v;
 }
 
-inline uint fibonacci( cuint n )
-{
-    Assert( !is_neg( n ) );
-
-    if( n > 1 )
-    {
-        uint f;
-
-        uint f1 = 0;
-        uint f2 = 1;
-
-        do_count( n )
-        {
-            f = f1 + f2;
-            f2 = f1;
-            f1 = f;
-        }
-
-        return f;
-    }
-    else
-    {
-        return 1;
-    }
-}
-
-inline dec pythagorean( cdec a, cdec b )
-{
-    if( a && b )
-    {
-        return sqrt( square( a ) + square( b ) );
-    }
-    else
-    {
-        return abs( a + b );
-    }
-}
-
 // -- util classes --
 
 class Countdown
@@ -270,6 +216,7 @@ public:
     void reset( ) { m_countdown_remaining = m_countdown_top; }
 
     default_equal( Countdown );
+    
 };
 
 classT Span
@@ -299,12 +246,13 @@ public:
         m_min = T( v[ 0 ] );
         m_max = ( v.size( ) == 1 ) ? m_min : T( v[ 1 ] );
 
-        Assert( m_min < m_max );
+        Assert( m_min <= m_max );
 
         rethis;
     }
 
     default_equal( Span );
+    
 };
 
 classT Slider
@@ -359,21 +307,22 @@ public:
     void delta( T cref delta, bool set_new_bounds = false ) { value( m_value + delta, set_new_bounds ); }
 
     default_equal( Slider );
+    
 };
 
 // -- range util functions --
 
-typeT inline bool in_range( T cref t, T cref low, T cref high, bool include_low, bool include_high )
+typeT inline bool in_range( T cref t, T cref bound1, T cref bound2, bool include_bound1, bool include_bound2 )
 {
-    return ( ( low < high ) ?
-             ( ( t > low ) && ( t < high ) ) :
-             ( ( t > high ) && ( t < low ) ) ) ||
-        ( include_low && ( t == low ) ) ||
-        ( include_high && ( t == high ) );
+    return ( ( bound1 < bound2 ) ?
+             ( ( t > bound1 ) && ( t < bound2 ) ) :
+             ( ( t > bound2 ) && ( t < bound1 ) ) ) ||
+        ( include_bound1 && ( t == bound1 ) ) ||
+        ( include_bound2 && ( t == bound2 ) );
 }
 
-typeT inline bool in_range( T cref t, T cref high, bool inclusive = true ) { return in_range<T>( t, T( 0.0 ), high, inclusive, inclusive ); }
-typeT inline bool in_range( T cref t, T cref low, T cref high, bool inclusive = true ) { return in_range<T>( t, low, high, inclusive, inclusive ); }
+typeT inline bool in_range( T cref t, T cref bound, bool inclusive = true ) { return in_range<T>( t, T( 0.0 ), bound, inclusive, inclusive ); }
+typeT inline bool in_range( T cref t, T cref bound1, T cref bound2, bool inclusive = true ) { return in_range<T>( t, bound1, bound2, inclusive, inclusive ); }
 typeT inline bool in_range( T cref t, const Span<T> & span, bool inclusive = true ) { return in_range<T>( t, span.min( ), span.max( ), inclusive, inclusive ); }
 
 // identifiers
@@ -387,21 +336,15 @@ private:
 
 public:
 
-    struct Hasher { size_t operator( )( Identifiable cref i ) const { return hash<uint>( )( i.id( ) ); } };
-
     Identifiable( ) { static uint total_ids = 0; m_id = ++total_ids; Assert( !is_zero( m_id ) ); }
 
     uint id( ) const { return m_id; }
-    operator uint( ) const { return m_id; }
+    
+    operator uint( ) const { return id( ); }
 
     default_equal( Identifiable );
+    
 };
-
-class IDoset : public oset<Identifiable, Identifiable::Hasher> { };
-class IDuset : public uset<Identifiable, Identifiable::Hasher> { };
-
-classT IDomap : public omap<Identifiable, T, Identifiable::Hasher>{ };
-classT IDumap : public umap<Identifiable, T, Identifiable::Hasher>{ };
 
 } // namespace utility
 } // namespace axn

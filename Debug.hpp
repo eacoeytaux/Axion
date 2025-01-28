@@ -3,19 +3,19 @@
 
 #include "OS.hpp"
 // -------------------- //
-#if defined( OS_WINDOWS )
+#ifdef OS_WINDOWS
 // -------------------- //
 #ifdef _DEBUG
 #define AXN_DEBUG
 #endif
 // -------------------- //
-#elif defined( OS_APPLE )
+#elifdef OS_APPLE
 // -------------------- //
 #ifdef DEBUG
 #define AXN_DEBUG
 #endif
 // -------------------- //
-#elif defined( OS_LINUX )
+#elifdef OS_LINUX
 // -------------------- //
 #ifdef DEBUG
 #define AXN_DEBUG
@@ -37,6 +37,7 @@ public:
 
     static bool active;
     static bool breakpointf( ) { return true; }
+    
 };
 
 } // namespace axn

@@ -12,7 +12,7 @@ cPlanc DEFAULT_ROPE_RETRACT_SPEED = 44.0;
 cPlanc HOOK_LENGTH = 38.0;
 cPlanc HOOK_THICKNESS = 5.0;
 cPlanc HOOK_TIP_LENGTH = 2.5;
-const Angle HOOK_ANGLE = RIGHT_ANGLE;
+const Angle HOOK_ANGLE = RIGHT;
 const Color HOOK_COLOR = Color::rgb( 0x9C9C9C );
 
 cPlanc ROPE_WIDTH = 4.0;
@@ -24,7 +24,7 @@ using mtmercy::Hook;
 Hook::Hook( Room * room, const Climber * owner ) : Object( room ), m_owner( owner )
 {
     #ifdef AXN_DEBUG
-    m_draw_debug = true;
+    draw_debug = true;
     #endif
 
     Assert( m_owner, "owner cannot be null" );
@@ -55,8 +55,8 @@ void Hook::render( )
     draw( HOOK_COLOR, Line( rod.origin( ), rod ), HOOK_THICKNESS );
     draw( HOOK_COLOR, Polygon::circle( HOOK_THICKNESS, base ) );
     draw( HOOK_COLOR, Polygon::triangle( tip,
-                                         tip + Vector::A( hook_angle + RIGHT_ANGLE, HOOK_THICKNESS * half( HOOK_TIP_LENGTH ) ) - Vector::A( hook_angle, HOOK_THICKNESS * HOOK_TIP_LENGTH ),
-                                         tip + Vector::A( hook_angle - RIGHT_ANGLE, HOOK_THICKNESS * half( HOOK_TIP_LENGTH ) ) - Vector::A( hook_angle, HOOK_THICKNESS * HOOK_TIP_LENGTH ) ) );
+                                         tip + VectorA( hook_angle + RIGHT, HOOK_THICKNESS * half( HOOK_TIP_LENGTH ) ) - VectorA( hook_angle, HOOK_THICKNESS * HOOK_TIP_LENGTH ),
+                                         tip + VectorA( hook_angle - RIGHT, HOOK_THICKNESS * half( HOOK_TIP_LENGTH ) ) - VectorA( hook_angle, HOOK_THICKNESS * HOOK_TIP_LENGTH ) ) );
 
     Vector rope_vector = hook_base( ) - m_owner->position( );
 
@@ -64,8 +64,8 @@ void Hook::render( )
     draw( ROPE_BASE_COLOR, Line( rope_vector.origin( ), rope_vector ), ROPE_WIDTH );
 
     { // draw rope detail coils
-        Vector rope_chunk = Vector::A( rope_vector.angle( ), ROPE_WIDTH );
-        for_range( i, (uint)half( rope_vector.magnitude( ) / rope_chunk.magnitude( ) ) )
+        Vector rope_chunk = VectorA( rope_vector.angle( ), ROPE_WIDTH );
+        for_range( i, ( half( rope_vector.magnitude( ) / rope_chunk.magnitude( ) ) ) )
         {
             Polygon rope_strip_rect = Polygon::rectangle( ROPE_WIDTH, ROPE_WIDTH, base - ( rope_chunk * ( i + 1 ) * 2 ), rope_chunk.angle( ) );
             draw( ROPE_ALT_COLOR, rope_strip_rect );
@@ -96,7 +96,7 @@ void Hook::update_velocity( )
         no_gravity( );
         velocity( V0 );
         m_angle = m_owner->aim_angle( );
-        position( m_owner->position( ) + Vector::A( m_angle, HOOK_LENGTH ) );
+        position( m_owner->position( ) + VectorA( m_angle, HOOK_LENGTH ) );
     }
     else if( state( ) == LAUNCHING )
     {
@@ -122,7 +122,7 @@ void Hook::update_velocity( )
     {
         stationary( false );
         ground( nullptr );
-        velocity( Vector::A( Angle( position( ), m_owner->position( ) ), m_rope_retract_speed ) );
+        velocity( VectorA( Angle( position( ), m_owner->position( ) ), m_rope_retract_speed ) );
         m_rope_length -= m_rope_retract_speed;
         if( m_rope_length <= HOOK_LENGTH )
         {
@@ -192,7 +192,7 @@ Coordinate Hook::hook_base( ) const
     }
     else
     {
-        return hook_tip( ) - Vector::A( m_angle, HOOK_LENGTH );
+        return hook_tip( ) - VectorA( m_angle, HOOK_LENGTH );
     }
 }
 

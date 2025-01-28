@@ -38,6 +38,7 @@ private:
 
     // dec m_flicker;
     // color m_tint;
+    
 };
 
 } // namespace graphics

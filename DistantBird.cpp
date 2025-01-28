@@ -39,7 +39,7 @@ DistantBird::DistantBird( Room * room, Coordinate cref _position ) : Object( roo
     air_resistance_ratio( 0.0 );
     terrain_boundaries( false );
 
-    velocity( Vector::X( X_SPEED ) );
+    velocity( VectorX( X_SPEED ) );
 
     m_wing_cycle_offset = Random::rdec( WING_CYCLE ) * TAU;
     m_flight_cycle_offset = Random::rdec( FLIGHT_HEIGHT_CYCLE ) * half( PI );
@@ -55,8 +55,8 @@ void DistantBird::render( )
     Polygon bird_body = BIRD_BODY;
     Polygon bird_wing = Polygon( { WING_COORDINATE_BASE_1, WING_COORDINATE_BASE_2, Coordinate( WING_TIP_X, wing_y ) } );
 
-    bird_body.move( Vector::Y( flight_y ) );
-    bird_wing.move( Vector::Y( flight_y ) );
+    bird_body.move( VectorY( flight_y ) );
+    bird_wing.move( VectorY( flight_y ) );
 
     if( is_neg( velocity( ).dx( ) ) )
     {

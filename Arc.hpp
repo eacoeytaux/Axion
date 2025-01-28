@@ -62,22 +62,23 @@ public:
         }
 
         Angle dd_angle = d_angle / (dec)line_count;
-        Coordinate start_coordinate = m_center + Vector::A( start_angle, m_radius );
+        Coordinate start_coordinate = m_center + VectorA( start_angle, m_radius );
 
         varray<Line> lines;
 
         for_range( i, line_count )
         {
-            Coordinate c = m_center + Vector::A( start_angle + ( dd_angle * (dec)i ), m_radius );
+            Coordinate c = m_center + VectorA( start_angle + ( dd_angle * (dec)i ), m_radius );
             lines.insert_back( Line( start_coordinate, c ) );
             start_coordinate = c;
         }
 
-        Coordinate end_coordinate = m_center + Vector::A( end_angle, m_radius );
+        Coordinate end_coordinate = m_center + VectorA( end_angle, m_radius );
         lines.insert_back( Line( start_coordinate, end_coordinate ) );
 
         return lines;
     }
+    
 };
 
 } // namespace geometry

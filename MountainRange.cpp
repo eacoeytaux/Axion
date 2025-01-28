@@ -24,7 +24,6 @@ MountainRange::MountainRange( Room * room, cPlanc _base_bottom, cdec _z, Color c
     FixedRectangle bounds = room->bounds( );
 
     // todo what if camera specs change?
-    Planc offset_z = ( z( ) * camera->min_zoom( ) );
     Planc offset_x = ( half( camera->width( ) ) / ( z( ) * camera->min_zoom( ) ) );
     Planc offset_y = ( half( camera->height( ) ) / ( z( ) * camera->min_zoom( ) ) );
 

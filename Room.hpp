@@ -36,7 +36,7 @@ public:
     virtual void render( );
     virtual void update( );
     
-    virtual void input( const varray<Input *> & inputs = { } );
+    virtual void input( const list<Input *> & inputs = { } );
     
     uint age( ) const;
     
@@ -233,6 +233,7 @@ private:
 public:
 
     Grid & object_grid( ) { return m_object_grid; }
+    
 };
 
 } // namespace reality

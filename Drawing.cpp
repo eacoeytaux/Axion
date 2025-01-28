@@ -190,8 +190,8 @@ Drawing & Drawing::draw( Color cref _color,
                          cbool _preserve_thickness )
 {
     draw( _color, Line( _vector.origin( ), _vector.destination( ) ), _thickness, _preserve_thickness );
-    draw( _color, Line( _vector.destination( ), _vector.destination( ) - Vector::A( _vector.angle( ) + ( half( RIGHT_ANGLE ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
-    draw( _color, Line( _vector.destination( ), _vector.destination( ) - Vector::A( _vector.angle( ) - ( half( RIGHT_ANGLE ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
+    draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) + ( half( RIGHT ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
+    draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) - ( half( RIGHT ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
     rethis;
 }
 #endif

@@ -86,7 +86,6 @@ public:
 
         bool l1i = l1.intersects( line );
         bool l2i = l2.intersects( line );
-        bool l3i = l3.intersects( line );
 
         return_if( c1c, Line( line.c1( ), l1i ? l1.intersection( line ) : ( l2i ? l2.intersection( line ) : l3.intersection( line ) ) ) );
         return_if( c2c, Line( l1i ? l1.intersection( line ) : ( l2i ? l2.intersection( line ) : l3.intersection( line ) ), line.c2( ) ) );
@@ -106,6 +105,7 @@ public:
     Triangle & operator-=( Vector cref v ) { rethis = *this - v; }
 
     default_equal( Triangle );
+    
 };
 
 } // namespace geometry

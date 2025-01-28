@@ -1,13 +1,9 @@
 #include "Mob.hpp"
 
-#ifdef AXN_DEBUG
-bool Mob::draw_health = true;
-#endif
-
 Mob::Mob( Room * room, Coordinate cref _position, cdec _health ) : Object( room, _position )
 {
     #ifdef AXN_DEBUG
-    m_draw_debug = true;
+    draw_debug = true;
     #endif
 
     solid( true );
@@ -38,7 +34,7 @@ void Mob::hurt_display_settings( )
     } );
 }
 
-void Mob::draw_eyes( Coordinate cref _position, Angle cref _angle )
+void Mob::draw_eye( Coordinate cref _position, Angle cref _angle )
 {
     if( m_eye_info_set )
     {
@@ -197,7 +193,6 @@ Drawing Mob::debug_overlay( ) const
     cPlanc HEALTH_BAR_WIDTH_MIN = 20.0;
     cdec HEALTH_BAR_TO_OBJECT_RATIO = 1.2;
     cPlanc HEALTH_BAR_HEIGHT = 5.0;
-    cPlanc HEALTH_BAR_OFFSET = HEALTH_BAR_HEIGHT;
 
     cdec RED_START = 0.1;
     cdec YELLOW_START = 0.5;
@@ -205,7 +200,7 @@ Drawing Mob::debug_overlay( ) const
 
     Drawing debug_overlay;
 
-    if( draw_health )
+    if( Settings::get( Settings::DEBUG_HEALTH ) )
     {
         // if( !invincible_always( ) )
         {
@@ -239,7 +234,7 @@ Drawing Mob::debug_overlay( ) const
                 }
 
                 debug_overlay.draw( health_color, Polygon::rectangle( health_width * health_percentage, health_height,
-                                                                      offset + Vector::X( ( half( health_width ) * health_percentage ) - half( health_width ) ) ) );
+                                                                      offset + VectorX( ( half( health_width ) * health_percentage ) - half( health_width ) ) ) );
             }
 
             debug_overlay.draw( WHITE, Polygon::rectangle( health_width, health_height, offset ), HEALTH_BAR_BORDER_WIDTH, true );

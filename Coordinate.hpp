@@ -40,17 +40,12 @@ private:
     Planc m_y = P0;
 
 public:
-
-    struct Hasher { size_t operator( )( Coordinate cref c ) const { return hash<uint>( )( c.x( ) * c.y( ) ); } };
-
+    
     Coordinate( ) { }
 
     Coordinate( Planc cref x, Planc cref y ) : m_x( x ), m_y( y ) { }
 
     Coordinate( Vector cref );
-
-    static Coordinate X( Planc cref x ) { return Coordinate( x, P0 ); }
-    static Coordinate Y( Planc cref y ) { return Coordinate( P0, y ); }
 
     Planc cref x( ) const { return m_x; }
     Planc cref y( ) const { return m_y; }
@@ -95,7 +90,11 @@ public:
     Coordinate & operator-=( Vector cref );
 
     default_equal( Coordinate );
+    
 };
+
+class CoordinateX : public Coordinate { public: CoordinateX( Planc cref x ) : Coordinate( x, P0 ) { } };
+class CoordinateY : public Coordinate { public: CoordinateY( Planc cref y ) : Coordinate( P0, y ) { } };
 
 const Coordinate ORIGIN( 0.0, 0.0 );
 const Coordinate INVALID_COORDINATE( INFINITY_NEG, INFINITY_NEG );

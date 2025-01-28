@@ -65,7 +65,7 @@ void Room::create( FixedRectangle cref _bounds )
     m_lighting = new Lighting( );
 }
 
-void Room::input( const varray<Input *> & _inputs )
+void Room::input( const list<Input *> & _inputs )
 {
     if( !Engine::paused( ) )
     {
@@ -197,7 +197,7 @@ void Room::render( )
                 #ifdef AXN_DEBUG
                 if( Debug::active )
                 {
-                    if( object->m_draw_debug )
+                    if( object->draw_debug )
                     {
                         Drawing debug_overlay = object->debug_overlay( );
                         debug_overlay.move( object->position( ) );
@@ -214,7 +214,7 @@ void Room::render( )
     capture_objects( m_objects, true );
 
     #ifdef AXN_DEBUG
-    if( world( )->m_display_forebackground )
+    if( Settings::get( Settings::DEBUG_BACKGROUND ) )
         #endif
     {
         capture_objects( m_background_objects, false );
@@ -222,7 +222,7 @@ void Room::render( )
     }
 
     #ifdef AXN_DEBUG
-    if( Debug::active && world( )->m_draw_grid )
+    if( Debug::active && Settings::get( Settings::DEBUG_GRID ) )
     {
         render_object_grid( camera );
     }
@@ -276,7 +276,7 @@ void Room::update( )
     update_objects( m_objects );
 
     #ifdef AXN_DEBUG
-    if( world( )->m_display_forebackground )
+    if( Settings::get( Settings::DEBUG_BACKGROUND ) )
         #endif
     {
         m_foreground_objects.sort( object_sort, true );
@@ -656,7 +656,7 @@ void Room::Grid::remove( Object * object )
     {
         traverse( object->hit_box( ), [ & ] ( Grid::Block & block )
         {
-            block.objects.erase( object );
+            block.objects.remove( object );
         } );
     }
 }
@@ -673,7 +673,7 @@ void Room::Grid::remove( TerrainNode * terrain_node )
 {
     traverse( terrain_node->bounding_box( ), [ & ] ( Grid::Block & block )
     {
-        block.terrain_nodes.erase( terrain_node );
+        block.terrain_nodes.remove( terrain_node );
     } );
 }
 

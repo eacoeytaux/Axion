@@ -15,6 +15,7 @@ public:
     Fox( Room *, Coordinate cref position );
 
     virtual void render( ) override;
+    
 };
 
 } // namespace mtmercy

@@ -19,6 +19,7 @@ public:
 private:
 
     Color m_color;
+    
 };
 
 class Bird : public Mob
@@ -33,6 +34,7 @@ public:
     virtual void update( ) override;
 
     virtual void die( ) override;
+    
 };
 
 } // namespace mtmercy

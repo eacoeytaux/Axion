@@ -26,6 +26,7 @@ private:
     Color m_top_color;
     Color m_mid_color;
     Color m_bottom_color;
+    
 };
 
 } // namespace mtmercy

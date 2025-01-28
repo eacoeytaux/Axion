@@ -9,313 +9,13 @@
 namespace axn
 {
 
-using std::hash;
-
-template <typename T>
-class list : private std::list<T>
-{
-    using std::list<T>::list;
-
-public:
-
-    bool empty( ) const
-    {
-        return size( );
-    }
-
-    uint size( ) const
-    {
-        return (uint)std::list<T>::size( );
-    }
-
-    virtual T & at( uint index )
-    {
-        assert_index( index );
-        auto it = std::list<T>::begin( );
-        for( uint i = 0; i < index; ++i )
-        {
-            ++it;
-        }
-        return *it;
-    }
-
-    virtual const T & at( uint index ) const
-    {
-        assert_index( index );
-        auto it = std::list<T>::cbegin( );
-        for( uint i = 0; i < index; ++i )
-        {
-            ++it;
-        }
-        return *it;
-    }
-
-    const T & front( ) const
-    {
-        assert_index( 0 );
-        return at( 0 );
-    }
-
-    const T & back( ) const
-    {
-        assert_index( size( ) - 1 );
-        return at( size( ) - 1 );
-    }
-
-    T & insert( uint index )
-    {
-        return insert( T( ), index );
-    }
-
-    T & insert( const T & t, uint index )
-    {
-        if( !index )
-        {
-            std::list<T>::push_front( t );
-        }
-        else if( index == size( ) )
-        {
-            std::list<T>::push_back( t );
-        }
-        else
-        {
-            assert_index( index );
-            auto it = std::list<T>::begin( );
-            for( uint i = 0; i < index; ++i )
-            {
-                ++it;
-            }
-            std::list<T>::insert( it, t );
-        }
-
-        return at( index );
-    }
-
-    T & insert_back( const T & t = T( ) )
-    {
-        return insert( t, size( ) );
-    }
-
-    T & insert_front( const T & t = T( ) )
-    {
-        return insert( t, 0 );
-    }
-
-    T pop_back( )
-    {
-        T t = back( );
-        std::list<T>::pop_back( );
-        return t;
-    }
-
-    T pop_front( )
-    {
-        T t = front( );
-        std::list<T>::pop_front( );
-        return t;
-    }
-
-    virtual void clear( )
-    {
-        std::list<T>::clear( );
-    }
-
-    virtual void reverse( )
-    {
-        std::list<T>::reverse( );
-    }
-
-    virtual list<T> reversed( )
-    {
-        list<T> l = *this;
-        l.reverse( );
-        return l;
-    }
-
-    virtual void sort( std::function<bool( const T & t1, const T & t2 )> comparator )
-    {
-        std::list<T>::sort( comparator );
-    }
-
-    virtual void remove_if( std::function<bool( const T & t )> checker )
-    {
-        std::erase_if( *this, checker );
-    }
-
-    auto begin( )
-    {
-        return std::list<T>::begin( );
-    }
-
-    auto end( )
-    {
-        return std::list<T>::end( );
-    }
-
-    auto begin( ) const
-    {
-        return std::list<T>::begin( );
-    }
-
-    auto end( ) const
-    {
-        return std::list<T>::end( );
-    }
-
-    T & operator[]( uint index )
-    {
-        return at( index );
-    }
-
-    const T & operator[]( uint index ) const
-    {
-        return at( index );
-    }
-
-    bool valid_index( uint index ) const
-    {
-        return index < size( );
-    }
-
-private:
-
-    bool assert_index( uint index ) const
-    {
-        return Assert( valid_index( index ), "varray index (%ui) out of range, varray size: %ui", index, size( ) );
-    }
-};
-
-template <typename T>
-class queue : private std::queue<T>
-{
-    using std::queue<T>::queue;
-
-public:
-
-    bool empty( ) const
-    {
-        return size( );
-    }
-
-    uint size( ) const
-    {
-        return std::queue<T>::size( );
-    }
-
-    void push( const T & t )
-    {
-        std::queue<T>::push( t );
-    }
-
-    T pop( )
-    {
-        T t = front( );
-        std::queue<T>::pop( );
-        return t;
-    }
-
-    const T & front( ) const
-    {
-        return std::queue<T>::front( );
-    }
-
-    const T & back( ) const
-    {
-        return std::queue<T>::back( );
-    }
-
-    bool operator==( const queue<T> & q ) const
-    {
-        if( size( ) != q.size( ) )
-        {
-            return false;
-        }
-
-        queue<T> q1 = *this;
-        queue<T> q2 = q;
-
-        while( q1.size( ) )
-        {
-            if( q1.pop( ) != q2.pop( ) )
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    bool operator!=( const queue<T> & q ) const
-    {
-        return !( *this == q );
-    }
-};
-
-template <typename T>
-class stack : private std::stack<T>
-{
-    using std::stack<T>::stack;
-
-public:
-
-    bool empty( ) const
-    {
-        return size( );
-    }
-
-    uint size( ) const
-    {
-        return std::stack<T>::size( );
-    }
-
-    void push( const T & t )
-    {
-        return std::stack<T>::push( t );
-    }
-
-    T pop( )
-    {
-        T t = top( );
-        std::stack<T>::pop( );
-        return t;
-    }
-
-    const T & top( ) const
-    {
-        return std::stack<T>::top( );
-    }
-
-    bool operator==( const stack<T> & s ) const
-    {
-        if( size( ) != s.size( ) )
-        {
-            return false;
-        }
-
-        stack<T> s1 = *this;
-        stack<T> s2 = s;
-
-        while( s1.size( ) )
-        {
-            if( s1.pop( ) != s2.pop( ) )
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    bool operator!=( const stack<T> & s ) const
-    {
-        return !( *this == s );
-    }
-};
-
 // avoid confusion between std::vector and axn::Vector
 template <typename T>
 class varray : private std::vector<T>
 {
+    
+private:
+    
     using std::vector<T>::vector;
 
 public:
@@ -350,7 +50,7 @@ public:
 
     uint size( ) const
     {
-        return (uint)std::vector<T>::size( );
+        return (uint)( std::vector<T>::size( ) );
     }
 
     bool contains( const T & t ) const
@@ -553,7 +253,7 @@ public:
 
     void resize_more( uint size, const T & t = T( ) )
     {
-        resize( (uint)std::vector<T>::size( ) + size, t );
+        resize( (uint)( std::vector<T>::size( ) ) + size, t );
     }
 
     void reserve( uint size )
@@ -597,13 +297,6 @@ public:
         {
             std::sort( begin( ), end( ), comparator );
         }
-    }
-    
-    virtual void shuffle( )
-    {
-        // todo should reset with seed reset
-        static auto rng = std::default_random_engine { };
-        std::shuffle( begin( ), end( ), rng );
     }
 
     auto begin( )
@@ -674,29 +367,9 @@ public:
         insert_back( v );
         return *this;
     }
-
-    bool operator==( const varray & v ) const
-    {
-        if( size( ) != v.size( ) )
-        {
-            return false;
-        }
-
-        for( uint i = 0; i < size( ); ++i )
-        {
-            if( at( i ) != v.at( i ) )
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    bool operator!=( const varray & v ) const
-    {
-        return !( *this == v );
-    }
+    
+    bool operator==( const varray<T> & v ) const { return ( *this == (std::vector<T>)v ); }
+    bool operator!=( const varray<T> & v ) const { return ( *this != (std::vector<T>)v ); }
 
 private:
 
@@ -704,11 +377,285 @@ private:
     {
         return Assert( valid_index( index ) || ( !exclude_end && ( index == size( ) ) ), "varray index (%ui) out of range, varray size: %ui", index, size( ) );
     }
+    
+};
+
+template <typename T>
+class list : private std::list<T>
+{
+    
+private:
+    
+    using std::list<T>::list;
+
+public:
+
+    bool empty( ) const
+    {
+        return size( );
+    }
+
+    uint size( ) const
+    {
+        return (uint)( std::list<T>::size( ) );
+    }
+
+    virtual T & at( uint index )
+    {
+        assert_index( index );
+        auto it = std::list<T>::begin( );
+        for( uint i = 0; i < index; ++i )
+        {
+            ++it;
+        }
+        return *it;
+    }
+
+    virtual const T & at( uint index ) const
+    {
+        assert_index( index );
+        auto it = std::list<T>::cbegin( );
+        for( uint i = 0; i < index; ++i )
+        {
+            ++it;
+        }
+        return *it;
+    }
+
+    const T & front( ) const
+    {
+        assert_index( 0 );
+        return at( 0 );
+    }
+
+    const T & back( ) const
+    {
+        assert_index( size( ) - 1 );
+        return at( size( ) - 1 );
+    }
+
+    T & insert( uint index )
+    {
+        return insert( T( ), index );
+    }
+
+    T & insert( const T & t, uint index )
+    {
+        if( !index )
+        {
+            std::list<T>::push_front( t );
+        }
+        else if( index == size( ) )
+        {
+            std::list<T>::push_back( t );
+        }
+        else
+        {
+            assert_index( index );
+            auto it = std::list<T>::begin( );
+            for( uint i = 0; i < index; ++i )
+            {
+                ++it;
+            }
+            std::list<T>::insert( it, t );
+        }
+
+        return at( index );
+    }
+
+    T & insert_back( const T & t = T( ) )
+    {
+        return insert( t, size( ) );
+    }
+
+    T & insert_front( const T & t = T( ) )
+    {
+        return insert( t, 0 );
+    }
+
+    T pop_back( )
+    {
+        T t = back( );
+        std::list<T>::pop_back( );
+        return t;
+    }
+
+    T pop_front( )
+    {
+        T t = front( );
+        std::list<T>::pop_front( );
+        return t;
+    }
+
+    virtual void clear( )
+    {
+        std::list<T>::clear( );
+    }
+
+    virtual void reverse( )
+    {
+        std::list<T>::reverse( );
+    }
+
+    virtual list<T> reversed( )
+    {
+        list<T> l = *this;
+        l.reverse( );
+        return l;
+    }
+
+    virtual void sort( std::function<bool( const T & t1, const T & t2 )> comparator )
+    {
+        std::list<T>::sort( comparator );
+    }
+
+    virtual void remove_if( std::function<bool( const T & t )> checker )
+    {
+        std::erase_if( *this, checker );
+    }
+
+    auto begin( )
+    {
+        return std::list<T>::begin( );
+    }
+
+    auto end( )
+    {
+        return std::list<T>::end( );
+    }
+
+    auto begin( ) const
+    {
+        return std::list<T>::begin( );
+    }
+
+    auto end( ) const
+    {
+        return std::list<T>::end( );
+    }
+
+    T & operator[]( uint index )
+    {
+        return at( index );
+    }
+
+    const T & operator[]( uint index ) const
+    {
+        return at( index );
+    }
+
+    bool valid_index( uint index ) const
+    {
+        return index < size( );
+    }
+    
+    bool operator==( const list<T> & l ) const { return ( *this == (std::list<T>)l ); }
+    bool operator!=( const list<T> & l ) const { return ( *this != (std::list<T>)l ); }
+
+private:
+
+    bool assert_index( uint index ) const
+    {
+        return Assert( valid_index( index ), "varray index (%ui) out of range, varray size: %ui", index, size( ) );
+    }
+    
+};
+
+template <typename T>
+class queue : private std::queue<T>
+{
+    
+private:
+    
+    using std::queue<T>::queue;
+
+public:
+
+    bool empty( ) const
+    {
+        return size( );
+    }
+
+    uint size( ) const
+    {
+        return (uint)( std::queue<T>::size( ) );
+    }
+
+    void push( const T & t )
+    {
+        std::queue<T>::push( t );
+    }
+
+    T pop( )
+    {
+        T t = front( );
+        std::queue<T>::pop( );
+        return t;
+    }
+
+    const T & front( ) const
+    {
+        return std::queue<T>::front( );
+    }
+
+    const T & back( ) const
+    {
+        return std::queue<T>::back( );
+    }
+    
+    bool operator==( const queue<T> & q ) const { return ( *this == (std::queue<T>)q ); }
+    bool operator!=( const queue<T> & q ) const { return ( *this != (std::queue<T>)q ); }
+    
+};
+
+template <typename T>
+class stack : private std::stack<T>
+{
+    
+private:
+    
+    using std::stack<T>::stack;
+
+public:
+
+    bool empty( ) const
+    {
+        return size( );
+    }
+
+    uint size( ) const
+    {
+        return std::stack<T>::size( );
+    }
+
+    void push( const T & t )
+    {
+        return std::stack<T>::push( t );
+    }
+
+    T pop( )
+    {
+        T t = top( );
+        std::stack<T>::pop( );
+        return t;
+    }
+
+    const T & top( ) const
+    {
+        return std::stack<T>::top( );
+    }
+    
+    bool operator==( const stack<T> & s ) const { return ( *this == (std::stack<T>)s ); }
+    bool operator!=( const stack<T> & s ) const { return ( *this != (std::stack<T>)s ); }
+    
 };
 
 template <typename Key, typename Compare = std::less<Key>>
 class oset : private std::set<Key, Compare>
 {
+    
+private:
+    
     using std::set<Key, Compare>::set;
 
 public:
@@ -732,37 +679,116 @@ public:
     {
         std::set<Key, Compare>::clear( );
     }
+    
+    bool operator==( const oset<Key, Compare> & s ) const { return ( *this == s ); }
+    bool operator!=( const oset<Key, Compare> & s ) const { return ( *this != s ); }
+    
 };
 
+// todo private
 template <typename Key, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
-class uset : public std::unordered_set<Key, Hash, Equal>
+class uset : private std::unordered_set<Key, Hash, Equal>
 {
+    
+private:
+    
     using std::unordered_set<Key, Hash, Equal>::unordered_set;
 
 public:
+    
+    bool empty( ) const
+    {
+        return size( );
+    }
+    
+    uint size( ) const
+    {
+        return (uint)( std::unordered_set<Key, Hash, Equal>::size( ) );
+    }
 
     bool contains( const Key & k ) const
     {
         return ( std::unordered_set<Key, Hash, Equal>::find( k ) != std::unordered_set<Key, Hash, Equal>::end( ) );
     }
+    
+    void insert( const Key & k )
+    {
+        std::unordered_set<Key, Hash, Equal>::insert( k );
+    }
+    
+    void remove( const Key & k )
+    {
+        std::unordered_set<Key, Hash, Equal>::erase( k );
+    }
+    
+    void clear( )
+    {
+        std::unordered_set<Key, Hash, Equal>::clear( );
+    }
+    
+    auto begin( )
+    {
+        return std::unordered_set<Key, Hash, Equal>::begin( );
+    }
+
+    auto end( )
+    {
+        return std::unordered_set<Key, Hash, Equal>::end( );
+    }
+
+    auto begin( ) const
+    {
+        return std::unordered_set<Key, Hash, Equal>::begin( );
+    }
+
+    auto end( ) const
+    {
+        return std::unordered_set<Key, Hash, Equal>::end( );
+    }
+    
+    bool operator==( const uset<Key, Hash, Equal> & s ) const { return ( *this == (std::unordered_set<Key, Hash, Equal>)s ); }
+    bool operator!=( const uset<Key, Hash, Equal> & s ) const { return ( *this != (std::unordered_set<Key, Hash, Equal>)s ); }
+    
 };
 
+// todo private
 template <typename Key, typename Value, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
 class omap : public std::map<Key, Value, Hash, Equal>
 {
+    
+private:
+    
     using std::map<Key, Value, Hash, Equal>::map;
 
 public:
+    
+    bool empty( ) const
+    {
+        return size( );
+    }
+    
+    uint size( ) const
+    {
+        return (uint)( std::map<Key, Value, Hash, Equal>::size( ) );
+    }
 
     bool contains( const Key & k ) const
     {
         return ( std::map<Key, Value, Hash, Equal>::map::find( k ) != std::map<Key, Value, Hash, Equal>::unordered_map::end( ) );
     }
+    
+    bool operator==( const omap<Key, Value, Hash, Equal> & m ) const { return ( *this == (std::map<Key, Value, Hash, Equal>)m ); }
+    bool operator!=( const omap<Key, Value, Hash, Equal> & m ) const { return ( *this != (std::map<Key, Value, Hash, Equal>)m ); }
+    
 };
 
+// todo private
 template <typename Key, typename Value, typename Hash = std::hash<Key>, typename Equal = std::equal_to<Key>>
 class umap : public std::unordered_map<Key, Value, Hash, Equal>
 {
+    
+private:
+    
     using std::unordered_map<Key, Value, Hash, Equal>::unordered_map;
 
 public:
@@ -771,6 +797,10 @@ public:
     {
         return ( std::unordered_map<Key, Value, Hash, Equal>::unordered_map::find( k ) != std::unordered_map<Key, Value, Hash, Equal>::unordered_map::end( ) );
     }
+    
+    bool operator==( const umap<Key, Value, Hash, Equal> & m ) const { return ( *this == (std::unordered_map<Key, Value, Hash, Equal>)m ); }
+    bool operator!=( const umap<Key, Value, Hash, Equal> & m ) const { return ( *this != (std::unordered_map<Key, Value, Hash, Equal>)m ); }
+    
 };
 
 } // namespace axn

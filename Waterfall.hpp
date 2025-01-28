@@ -40,6 +40,7 @@ private:
     list<Foam> m_foam;
     list<Ripple> m_ripples;
     Countdown m_ripple_countdown;
+    
 };
 
 } // namespace mtmercy

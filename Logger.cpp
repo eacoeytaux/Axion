@@ -31,11 +31,11 @@ error Logger::init( cbool _file )
     {
         Clock clock;
 
-        #if defined( OS_WINDOWS )
+        #ifdef OS_WINDOWS
         fopen_s( &log_file, ( LOG_DIRECTORY + clock.timestamp( ) + "." + clock.datestamp( ) + ".log" ).c_str( ), "w + " );
-        #elif defined( OS_APPLE )
+        #elifdef OS_APPLE
         log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( ) + "." + clock.datestamp( ) + ".log" ).c_str( ), "w+" );
-        #elif defined( OS_LINUX )
+        #elifdef OS_LINUX
         log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( ) + "." + clock.datestamp( ) + ".log" ).c_str( ), "w+" );
         #endif
 

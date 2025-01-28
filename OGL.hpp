@@ -171,6 +171,7 @@ private:
 public:
 
     static error error_check( );
+    
 };
 
 } // namespace axn

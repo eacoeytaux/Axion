@@ -51,8 +51,8 @@ public:
         }
     }
 
-    void add_screen_effect( ScreenEffect * effect, bool should_delete = true );
-    void add_screen_effects( varray<ScreenEffect *> & effects, bool should_delete = true )
+    void add_screen_effect( ScreenEffect * effect, bool should_delete = false );
+    void add_screen_effects( varray<ScreenEffect *> & effects, bool should_delete = false )
     {
         for_each( effect, effects )
         {
@@ -69,8 +69,8 @@ public:
         }
     }
 
-    void add_hud_element( HeadUpDisplay * hud_element, bool should_delete = true );
-    void add_hud_elements( varray<HeadUpDisplay *> & hud_elements, bool should_delete = true )
+    void add_hud_element( HeadUpDisplay * hud_element, bool should_delete = false );
+    void add_hud_elements( varray<HeadUpDisplay *> & hud_elements, bool should_delete = false )
     {
         for_each( hud_element, hud_elements )
         {
@@ -139,9 +139,11 @@ private:
 
     Drawing cursor_drawing( ) const;
     #ifdef AXN_DEBUG
+    
 public:
 
-    bool m_draw_debug = false;
+    bool draw_debug = false;
+    
 private:
 
     Drawing debug_overlay_drawing( ) const;
@@ -178,6 +180,7 @@ public:
 
     class HeadUpDisplay : public Visible
     {
+        
     public:
 
         HeadUpDisplay( dec center_x_percent, dec center_y_percent, dec width_percent, dec height_percent );
@@ -196,12 +199,15 @@ public:
 
     class ScreenEffect : public Visible
     {
+        
     public:
 
         ScreenEffect( );
 
         virtual void render( Camera * ) { Visible::render( ); }
+        
     };
+    
 };
 
 } // namespace graphics

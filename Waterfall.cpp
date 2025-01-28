@@ -58,7 +58,7 @@ void Waterfall::render( )
     draw( { FOAM_COLOR.a( 0.0 ), FOAM_COLOR.a( 0.0 ), FOAM_COLOR.a( FOAM_COLOR_TOP_ALPHA ), FOAM_COLOR.a( FOAM_COLOR_TOP_ALPHA ) }, bounds );
 
     add_bound( bounds );
-    for_each( ripple, m_ripples ) { draw( FOAM_COLOR.a( ripple.alpha ), ripple.polygon + Vector::Y( ripple.height ) ); }
+    for_each( ripple, m_ripples ) { draw( FOAM_COLOR.a( ripple.alpha ), ripple.polygon + VectorY( ripple.height ) ); }
     clear_bounds( );
 
     if( m_create_foam )
@@ -88,7 +88,7 @@ void Waterfall::update( )
 
                 if( ripple_path.lines( ).size( ) )
                 {
-                    ripple_path += Line( ripple_path.lines( ).back( ).c2( ), c - Vector::X( radius ) );
+                    ripple_path += Line( ripple_path.lines( ).back( ).c2( ), c - VectorX( radius ) );
                 }
 
                 ripple_path += arc.path( RIPPLE_EDGE_COUNT );
@@ -100,7 +100,7 @@ void Waterfall::update( )
 
             Ripple & ripple = m_ripples.insert_back( );
 
-            ripple.polygon = Polygon( ripple_path.points( ) + ( ripple_path + Vector::Y( RIPPLE_HEIGHT ) ).points( ).reversed( ) );
+            ripple.polygon = Polygon( ripple_path.points( ) + ( ripple_path + VectorY( RIPPLE_HEIGHT ) ).points( ).reversed( ) );
             ripple.height = ( height( ) + RIPPLE_HEIGHT + RIPPLE_RADIUS.max( ) );
         }
 
@@ -121,8 +121,8 @@ void Waterfall::update( )
         while( new_foam_count-- )
         {
             Foam & foam = m_foam.insert_back( Foam( ) );
-            foam.position = Vector::X( Random::negated( Random::rdec( half( width( ) ) ) ) );
-            foam.movement = Vector( Random::rPlanc( -FOAM_X_SPEED_MAX, FOAM_X_SPEED_MAX ), Random::rPlanc( FOAM_Y_SPEED ) );
+            foam.position = VectorX( Random::negated( Random::rdec( half( width( ) ) ) ) );
+            foam.movement = Vector( Random::negated( Random::rPlanc( FOAM_X_SPEED_MAX ) ), Random::rPlanc( FOAM_Y_SPEED ) );
             foam.radius = Random::rPlanc( FOAM_RADIUS_START );
             foam.alpha = FOAM_ALPHA_START;
         }
@@ -131,8 +131,8 @@ void Waterfall::update( )
         while( new_foam_small_count-- )
         {
             Foam & foam = m_foam.insert_back( Foam( ) );
-            foam.position = Vector::X( Random::negated( Random::rdec( half( width( ) ) ) ) );
-            foam.movement = Vector( Random::rPlanc( -FOAM_X_SPEED_MAX, FOAM_X_SPEED_MAX ), Random::rPlanc( FOAM_Y_SPEED ) * FOAM_SMALL_Y_SPEED_RATIO );
+            foam.position = VectorX( Random::negated( Random::rdec( half( width( ) ) ) ) );
+            foam.movement = Vector( Random::negated( Random::rPlanc( FOAM_X_SPEED_MAX ) ), Random::rPlanc( FOAM_Y_SPEED ) * FOAM_SMALL_Y_SPEED_RATIO );
             foam.radius = Random::rPlanc( FOAM_SMALL_RADIUS_START );
             foam.alpha = FOAM_ALPHA_START;
         }

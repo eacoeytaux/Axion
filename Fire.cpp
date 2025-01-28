@@ -76,7 +76,7 @@ void Fire::update( )
     if( m_flame_base_enabled )
     {
         m_flame_base.radius = Random::rPlanc( m_flame_base_radius_ratio ) * m_flame_radius;
-        m_flame_base.offset = Vector::A( Random::rAngle( ), Random::rPlanc( m_flame_base_max_offset_ratio ) * m_flame_base.radius );
+        m_flame_base.offset = VectorA( Random::rAngle( ), Random::rPlanc( m_flame_base_max_offset_ratio ) * m_flame_base.radius );
         
         if( m_flames_inner_enabled )
         {
@@ -90,7 +90,7 @@ void Fire::update( )
         for_each( flame, flames )
         {
             flame.radius -= min( m_flame_shrink * radius_ratio, flame.radius );
-            flame.offset += Vector::A( Angle( RIGHT_ANGLE_1 + Random::rAngle( -m_flame_deviation, m_flame_deviation ) ), m_flame_speed ) + ( room( )->wind( ) * ( 1.0 - m_wind_resistance_ratio ) );
+            flame.offset += VectorA( RIGHT + Random::negated( Random::rAngle( m_flame_deviation ) ), m_flame_speed ) + ( room( )->wind( ) * ( 1.0 - m_wind_resistance_ratio ) );
             
             if( m_flame_alpha_shrink )
             {

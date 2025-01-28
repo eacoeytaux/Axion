@@ -13,7 +13,7 @@ cPlanc TREE_HEIGHT = 225.0;
 cPlanc TREE_BASE = 150.0;
 const Span<uint> INNER_TREE_COUNT = { 20, 30 };
 const Span<uint> TOP_TREE_COUNT = { 8, 12 };
-const Angle TOP_TREE_ANGLE = RIGHT_ANGLE / 1.5;
+const Angle TOP_TREE_ANGLE = RIGHT / 1.5;
 cPlanc TREE_LINE_BASE = HILL_RADIUS;
 cPlanc TREE_LINE_PENUMBRA = TREE_LINE_BASE * 2.0;
 cuint TREE_LINE_PENUMBRA_PASSES = 2;
@@ -37,7 +37,6 @@ Hills::Hills( Room * room, cPlanc _base_bottom, cdec _z ) : Object( room )
     FixedRectangle bounds = room->bounds( );
 
     // todo what if camera specs change?
-    Planc offset_z = ( z( ) * camera->min_zoom( ) );
     Planc offset_x = ( half( camera->width( ) ) / ( z( ) * camera->min_zoom( ) ) );
     Planc offset_y = ( half( camera->height( ) ) / ( z( ) * camera->min_zoom( ) ) );
 
@@ -52,7 +51,7 @@ Hills::Hills( Room * room, cPlanc _base_bottom, cdec _z ) : Object( room )
                                   Coordinate( end_x, _base_bottom ) } ) );
 
     Polygon tree( { Coordinate( 0.0, TREE_HEIGHT ), Coordinate( -half( TREE_BASE ), 0.0 ), Coordinate( half( TREE_BASE ), 0.0 ) } );
-    Polygon hill = Polygon::circle( HILL_RADIUS, Coordinate( 0.0, _base_bottom ) ).stretch( Vector::X( HILL_SCALE_X ) );
+    Polygon hill = Polygon::circle( HILL_RADIUS, Coordinate( 0.0, _base_bottom ) ).stretch( VectorX( HILL_SCALE_X ) );
 
     varray<Vector> centers = { };
 
@@ -72,9 +71,9 @@ Hills::Hills( Room * room, cPlanc _base_bottom, cdec _z ) : Object( room )
         uint tree_count = Random::rPlanc( INNER_TREE_COUNT );
         do_count( tree_count )
         {
-            Vector offset_vector = Vector::A( Random::rAngle( ), Random::rPlanc( HILL_RADIUS ) );
-            Coordinate offset_coordinate = Transform::stretch( Vector::X( HILL_SCALE_X ) ).apply( offset_vector );
-            offset_coordinate += Vector::Y( _base_bottom );
+            Vector offset_vector = VectorA( Random::rAngle( ), Random::rPlanc( HILL_RADIUS ) );
+            Coordinate offset_coordinate = Transform::stretch( VectorX( HILL_SCALE_X ) ).apply( offset_vector );
+            offset_coordinate += VectorY( _base_bottom );
             offset_coordinate += center;
 
             draw( TREE_COLOR, Polygon( tree ).move( offset_coordinate ) );
@@ -83,9 +82,9 @@ Hills::Hills( Room * room, cPlanc _base_bottom, cdec _z ) : Object( room )
         uint top_tree_count = Random::rPlanc( TOP_TREE_COUNT );
         do_count( top_tree_count )
         {
-            Vector offset_vector = Vector::A( Random::rAngle( -TOP_TREE_ANGLE, TOP_TREE_ANGLE ) + RIGHT_ANGLE, HILL_RADIUS );
-            Coordinate offset_coordinate = Transform::stretch( Vector::X( HILL_SCALE_X ) ).apply( offset_vector );
-            offset_coordinate += Vector::Y( _base_bottom );
+            Vector offset_vector = VectorA( RIGHT + Random::negated( Random::rAngle( TOP_TREE_ANGLE ) ), HILL_RADIUS );
+            Coordinate offset_coordinate = Transform::stretch( VectorX( HILL_SCALE_X ) ).apply( offset_vector );
+            offset_coordinate += VectorY( _base_bottom );
             offset_coordinate += center;
 
             //draw( TREE_COLOR, Polygon( tree ).move( offset_coordinate ) );
@@ -111,7 +110,7 @@ Hills::Hills( Room * room, cPlanc _base_bottom, cdec _z ) : Object( room )
                     Planc y = 0.0;
                     if( _y_raise )
                     {
-                        y = _y_raise - ( log( _y_raise, Random::rPlanc( _y_raise ) + 1.0 ) * _y_raise );
+                        y = _y_raise - ( log( Random::rPlanc( _y_raise ) + 1.0, _y_raise ) * _y_raise );
                     }
 
                     draw( _color, Polygon( tree ).move( Vector( center_x, _base + y ) ) );

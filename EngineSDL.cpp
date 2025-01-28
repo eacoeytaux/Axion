@@ -5,14 +5,14 @@
 
 #include "OS.hpp"
 // -------------------- //
-#if defined( OS_WINDOWS )
+#ifdef OS_WINDOWS
 // -------------------- //
 #include <SDL.h>
 #include <SDL_opengl.h>
 // #include <SDL_ttf.h>
 // #include <SDL_mixer.h>
 // -------------------- //
-#elif defined( OS_APPLE )
+#elifdef OS_APPLE
 // -------------------- //
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wquoted-include-in-framework-header"
@@ -22,7 +22,7 @@
 // #include <SDL2_mixer/SDL_mixer.h>
 #pragma GCC diagnostic pop
 // -------------------- //
-#elif defined( OS_LINUX )
+#elifdef OS_LINUX
 // -------------------- //
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -90,9 +90,11 @@ void Engine::init_eng( const string _app_name )
     WINDOW_HEIGHT = display_mode.h;
 
     #ifdef AXN_DEBUG
+    #ifdef OS_WINDOWS
     SDL_SetWindowFullscreen( WINDOW, 0 );
     SDL_SetWindowSize( WINDOW, WINDOW_WIDTH, WINDOW_HEIGHT );
     SDL_SetWindowPosition( WINDOW, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED );
+    #endif
     #endif
 
     assert_check = SDL_GL_CreateContext( WINDOW );
@@ -117,11 +119,11 @@ void Engine::init_eng( const string _app_name )
     Assert( assert_check, "SDL controller initialization failed: ", SDL_GetErrorStr( ) );
     for_range( i, MAX_CONTROLLERS )
     {
-        if( CONTROLLERS[ i ] = SDL_JoystickOpen( i ) )
+        if( ( CONTROLLERS[ i ] = SDL_JoystickOpen( i ) ) )
         {
             if( SDL_JoystickIsHaptic( CONTROLLERS[ i ] ) )
             {
-                if( CONTROLLER_HAPTICS[ i ] = SDL_HapticOpenFromJoystick( CONTROLLERS[ i ] ) )
+                if( ( CONTROLLER_HAPTICS[ i ] = SDL_HapticOpenFromJoystick( CONTROLLERS[ i ] ) ) )
                 {
                     assert_check = SDL_HapticRumbleInit( CONTROLLER_HAPTICS[ i ] );
                     Assert( assert_check, "SDL controller haptic initialization failed: ", SDL_GetErrorStr( ) );
@@ -162,11 +164,11 @@ void Engine::sync_controllers_eng( )
         SDL_JoystickClose( CONTROLLERS[ i ] );
         SDL_HapticClose( CONTROLLER_HAPTICS[ i ] );
 
-        if( CONTROLLERS[ i ] = SDL_JoystickOpen( i ) )
+        if( ( CONTROLLERS[ i ] = SDL_JoystickOpen( i ) ) )
         {
             if( SDL_JoystickIsHaptic( CONTROLLERS[ i ] ) )
             {
-                if( CONTROLLER_HAPTICS[ i ] = SDL_HapticOpenFromJoystick( CONTROLLERS[ i ] ) )
+                if( ( CONTROLLER_HAPTICS[ i ] = SDL_HapticOpenFromJoystick( CONTROLLERS[ i ] ) ) )
                 {
                     SDL_HapticRumbleInit( CONTROLLER_HAPTICS[ i ] );
                 }
@@ -229,7 +231,7 @@ uint Engine::screen_height_eng( ) { return WINDOW_HEIGHT; }
 
 Coordinate world_position_from_event( const SDL_Event & event, World * world ) { return world->camera( )->screen_to_world( Coordinate( event.motion.x, event.motion.y ) ); }
 
-void Engine::input_eng( varray<Input *> & inputs, World * world )
+void Engine::input_eng( list<Input *> & inputs, World * world )
 {
     SDL_HapticRumblePlay( CONTROLLER_HAPTICS[ 0 ], 0.75, 500 );
 
@@ -402,7 +404,6 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
             case SDL_JOYAXISMOTION:
             {
                 cint MAX_AXIS_VALUE = 32767;
-                cint MIN_AXIS_VALUE = -32767;
 
                 // L2 and R2
                 if( ( event.jaxis.axis == 4 ) || ( event.jaxis.axis == 5 ) )

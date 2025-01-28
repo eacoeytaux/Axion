@@ -189,6 +189,7 @@ public:
     Line & operator-=( Vector cref v ) { rethis = *this - v; }
 
     default_equal( Line );
+    
 };
 
 } // namespace geometry

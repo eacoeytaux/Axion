@@ -23,21 +23,21 @@ void Butterfly::render( )
 
     Drawing wings;
 
-    //Path path1 = Arc::ccw( WING_RADIUS, 0.0, PI );
-    //Path path2 = Arc::ccw( WING_RADIUS * UNDER_WING_RATIO, 0.0, PI );
+    Path path1 = Arc::ccw( WING_RADIUS, 0.0, PI ).path( );
+    Path path2 = Arc::ccw( WING_RADIUS * UNDER_WING_RATIO, 0.0, PI ).path( );
 
-    //Polygon wing1 = Polygon( path1.points( ) );
-    //wing1.stretch( Vector( 0.0, 2.0 ) );
+    Polygon wing1 = Polygon( path1.points( ) );
+    wing1.stretch( Vector( 0.0, 2.0 ) );
 
-    //Polygon wing2 = Polygon( path2.points( ) );
-    //wing2.stretch( Vector( 0.0, 2.0 ) );
-    //wing2.move( Vector::X( WING_RADIUS * ( UNDER_WING_RATIO + 1.0 ) * UNDER_WING_OFFSET ) );
+    Polygon wing2 = Polygon( path2.points( ) );
+    wing2.stretch( Vector( 0.0, 2.0 ) );
+    wing2.move( VectorX( WING_RADIUS * ( UNDER_WING_RATIO + 1.0 ) * UNDER_WING_OFFSET ) );
 
-    //wings.draw( WING_COLOR, wing1 );
-    //wings.draw( WING_COLOR, wing2 );
+    wings.draw( WING_COLOR, wing1 );
+    wings.draw( WING_COLOR, wing2 );
 
-    //wings.stretch( Vector::Y( 0.5 ) );
-    //wings.rotate( RIGHT_ANGLE );
+    wings.stretch( VectorY( 0.5 ) );
+    wings.rotate( RIGHT );
 
     draw( wings );
 }

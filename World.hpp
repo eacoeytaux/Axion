@@ -30,6 +30,7 @@ public:
     bool processed( ) const { return ( processed_count( ) > 0 ); }
     uint processed_count( ) const { return m_processed_count; }
     virtual void process( Object * object = nullptr ) { ++m_processed_count; }
+    
 };
 
 namespace reality
@@ -52,7 +53,7 @@ public:
 
     virtual void pause( bool );
 
-    virtual void input( const varray<Input *> & inputs = { } );
+    virtual void input( const list<Input *> & inputs = { } );
 
     uint age( ) const;
 
@@ -74,13 +75,7 @@ protected: // todo make private?
 
     Camera * m_camera = nullptr;
     Room * m_current_room = nullptr;
-
-    #ifdef AXN_DEBUG
-public:
-
-    bool m_display_forebackground = true;
-    bool m_draw_grid = false;
-    #endif
+    
 };
 
 } // namespace reality

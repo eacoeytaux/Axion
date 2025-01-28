@@ -20,6 +20,7 @@ private:
 
     varray<Drawing> m_leave_bunches_and_trunk;
     varray<Coordinate> m_leave_bunches_rotation_points;
+    
 };
 
 } // namespace mtmercy

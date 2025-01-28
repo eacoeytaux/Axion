@@ -35,6 +35,7 @@ private:
     bool m_active = true;
     Damage m_damage;
     Object * m_stuck_object;
+    
 };
 
 } // namespace mtmercy

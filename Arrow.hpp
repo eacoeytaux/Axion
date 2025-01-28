@@ -46,6 +46,7 @@ private:
     Angle m_angle;
     Color m_feather_color;
     Object * m_stuck_object;
+    
 };
 
 } // namespace mtmercy

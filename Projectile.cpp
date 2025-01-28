@@ -7,7 +7,7 @@ using mtmercy::Projectile;
 Projectile::Projectile( Room * room, Coordinate cref _position ) : Object( room, _position )
 {
     #ifdef AXN_DEBUG
-    m_draw_debug = true;
+    draw_debug = true;
     #endif
 
     interactive( true );

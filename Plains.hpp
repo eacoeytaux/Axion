@@ -21,6 +21,7 @@ protected:
 
     virtual Player * add_player( Coordinate cref position ) override;
     virtual Player * create_player( Coordinate cref position ) override;
+    
 };
 
 } // namespace mtmercy

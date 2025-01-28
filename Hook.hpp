@@ -50,6 +50,7 @@ private:
            HOOKED,
            LAUNCHING,
            RETRACTING );
+    
 };
 
 } // namespace mtmercy

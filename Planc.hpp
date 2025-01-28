@@ -53,6 +53,7 @@ public:
     PlancOpsLeft( uint );
     PlancOpsLeft( dec );
     PlancOpsLeft( Planc );
+    
 };
 
 #define PlancOpsRight( type ) \

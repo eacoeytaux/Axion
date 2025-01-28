@@ -26,16 +26,9 @@
 using namespace mtmercy;
 using mtmercy::Plains;
 
-Player * Plains::create_player( Coordinate cref _position )
-{
-    return new Climber( this, _position );
-}
+Player * Plains::create_player( Coordinate cref _position ) { return new Climber( this, _position ); }
 
-Player * Plains::add_player( Coordinate cref _position )
-{
-    Player * player = Room::add_player( _position );
-    return player;
-}
+Player * Plains::add_player( Coordinate cref _position ) { return Room::add_player( _position ); }
 
 void Plains::create( )
 {
@@ -54,11 +47,11 @@ void Plains::create( )
     // add_object( new DistantBird( this, Coordinate( -666.0, 866.0 ) ) );
     // add_object( new DistantBird( this, Coordinate( -550.0, 900.0 ) ) );
 
-    add_object( new Waterfall( this, Coordinate( 0.0, 10.0 ), METER * 4.0, METER * 8.0, 0.95 ) );
+    add_object( new Waterfall( this, Coordinate( 0.0, 50.0 ), METER * 4.0, METER * 8.0, 0.95 ) );
 
     varray<AspineTree *> aspines;
     
-    list<dec> aspine_zs = { 1.0 };
+    list<dec> aspine_zs = { 1.0 }; // { 1.0, 0.5 };
     for_each( z, aspine_zs )
     {
         terrain( )->traverse_x( Span<Planc>( 50.0, 500.0 ),
@@ -68,7 +61,7 @@ void Plains::create( )
         } );
     }
     
-    aspines.shuffle( );
+    Random::shuffle( aspines );
     
     for_each( aspine, aspines )
     {

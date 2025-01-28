@@ -33,6 +33,7 @@ private:
 
     static Planc max_dx( );
     static Planc max_dy( );
+    
 };
 
 } // namespace mtmercy

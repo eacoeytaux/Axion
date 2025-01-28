@@ -46,6 +46,7 @@ private:
     Countdown m_leaf_drop_countdown2;
     
     Color m_leaf_color;
+    
 };
 
 } // namespace mtmercy

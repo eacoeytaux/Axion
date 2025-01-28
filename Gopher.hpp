@@ -26,6 +26,7 @@ private:
            BURIED,
            ASCENDING,
            DESCENDING );
+    
 };
 
 class DirtBall : public Object
@@ -34,6 +35,7 @@ class DirtBall : public Object
 public:
 
     DirtBall( Room *, Planc cref radius, Coordinate cref position, Vector cref velocity );
+    
 };
 
 } // namespace mtmercy

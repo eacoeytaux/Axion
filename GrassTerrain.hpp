@@ -15,6 +15,7 @@ public:
     GrassTerrain( Room *, const varray<varray<Coordinate>> & vertices = { } );
 
     virtual Color cref dust_color( ) const;
+    
 };
 
 } // namespace mtmercy

@@ -51,6 +51,7 @@ public:
 
     Assert( bool b ) { if( !b ) { fail( ); } }
     Assert( bool b, const char * message, ... ) { if( !b ) { va_list va_args; va_start( va_args, message ); fail( message ); va_end( va_args ); } }
+    
 };
 
 } // namespace axn

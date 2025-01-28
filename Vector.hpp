@@ -31,18 +31,6 @@ public:
 
     Vector( Coordinate cref start, Coordinate cref end ) : m_dx( end.x( ) - start.x( ) ), m_dy( end.y( ) - start.y( ) ), m_origin( start ) { }
 
-    static Vector X( Planc cref dx ) { return Vector( dx, P0 ); }
-    static Vector X( Planc cref dx, Coordinate cref origin ) { return Vector( dx, P0, origin ); }
-
-    static Vector Y( Planc cref dy ) { return Vector( P0, dy ); }
-    static Vector Y( Planc cref dy, Coordinate cref origin ) { return Vector( P0, dy, origin ); }
-
-    static Vector A( Angle cref a ) { return Vector( a.cos( ), a.sin( ) ); }
-    static Vector A( Angle cref a, Coordinate cref origin ) { return Vector( a.cos( ), a.sin( ), origin ); }
-
-    static Vector A( Angle cref a, Planc cref magnitude ) { return Vector( a.cos( ) * magnitude, a.sin( ) * magnitude ); }
-    static Vector A( Angle cref a, Planc cref magnitude, Coordinate cref origin ) { return Vector( a.cos( ) * magnitude, a.sin( ) * magnitude, origin ); }
-
     Planc dx( ) const { return m_dx; }
     Vector & dx( Planc cref dx ) { m_dx = dx; rethis; }
 
@@ -87,6 +75,40 @@ public:
     Vector & operator/=( cdec scale ) { dx( dx( ) / scale ); dy( dy( ) / scale ); rethis; }
 
     default_equal( Vector );
+    
+};
+
+class VectorX : public Vector
+{
+    
+public:
+    
+    VectorX( Planc cref dx ) : Vector( dx, P0 ) { }
+    VectorX( Planc cref dx, Coordinate cref origin ) : Vector( dx, P0, origin ) { }
+    
+};
+
+class VectorY : public Vector
+{
+    
+public:
+    
+    VectorY( Planc cref dy ) : Vector( P0, dy ) { }
+    VectorY( Planc cref dy, Coordinate cref origin ) : Vector( P0, dy, origin ) { }
+    
+};
+
+class VectorA : public Vector
+{
+    
+public:
+    
+    VectorA( Angle cref a ) : Vector( a.cos( ), a.sin( ) ) { }
+    VectorA( Angle cref a, Coordinate cref origin ) : Vector( a.cos( ), a.sin( ), origin ) { }
+
+    VectorA( Angle cref a, Planc cref magnitude ) : Vector( a.cos( ) * magnitude, a.sin( ) * magnitude ) { }
+    VectorA( Angle cref a, Planc cref magnitude, Coordinate cref origin ) : Vector( a.cos( ) * magnitude, a.sin( ) * magnitude, origin ) { }
+    
 };
 
 const Vector V0( 0.0, 0.0 );

@@ -51,6 +51,7 @@ public:
 
     bool solid( ) const { return m_solid; }
     void solid( cbool _solid ) { m_solid = _solid; }
+    
 };
 
 } // namespace physics

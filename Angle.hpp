@@ -59,10 +59,10 @@ public:
     Axis axis( ) const { return Coordinate( cos( ), sin( ) ).axis( ); }
     bool on_axis( Axis a ) const { return ( axis( ) == a ); }
 
-    bool right( ) const { return equal( radians( ), RIGHT_ANGLE ); }
+    bool right( ) const { return equal( radians( ), RIGHT ); }
     bool straight( ) const { return equal( radians( ), PI ); }
-    bool acute( ) const { return ( is_pos( radians( ) ) && less( radians( ), RIGHT_ANGLE ) ); }
-    bool obtuse( ) const { return ( is_pos( radians( ) ) && greater( radians( ), RIGHT_ANGLE ) && less( radians( ), PI ) ); }
+    bool acute( ) const { return ( is_pos( radians( ) ) && less( radians( ), RIGHT ) ); }
+    bool obtuse( ) const { return ( is_pos( radians( ) ) && greater( radians( ), RIGHT ) && less( radians( ), PI ) ); }
     bool reflex( ) const { return ( is_pos( radians( ) ) && greater( radians( ), PI ) && less( radians( ), TAU ) ); }
 
     Angle operator-( ) const { return Angle( -radians( ), truncating( ) ); }
@@ -88,6 +88,7 @@ public:
     AngleOps( uint );
     AngleOps( dec );
     AngleOps( Angle );
+    
 };
 
 const Angle A0 = Angle( );

@@ -55,8 +55,7 @@ public:
     Drawing trajection_drawing( Planc cref distance, Color cref path_color, cdec alpha_start = 1.0, cdec alpha_end = 0.0 ) const;
 
     #ifdef AXN_DEBUG
-    bool m_draw_debug = false;
-    static bool draw_physics;
+    bool draw_debug = false;
     virtual Drawing debug_overlay( ) const;
     #endif
 
@@ -174,6 +173,7 @@ private:
 
     uset<Object *> m_movement_subscribers;
     uset<Object *> m_movement_subscriptions;
+    
 };
 
 } // namespace reality

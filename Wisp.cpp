@@ -27,7 +27,7 @@ const Planc FLAME_RADIUS_MIN = 0.1;
 const Planc FLAME_SPEED = 1.0;
 const Planc FLAME_SHRINK_RATE = 0.4;
 const Planc FLAME_ALPHA_SHRINK_RATE = 0.025;
-const Angle FLAME_DEVIATION = ( RIGHT_ANGLE / 2.0 );
+const Angle FLAME_DEVIATION = ( RIGHT / 2.0 );
 const dec FLAME_WIND_RESISTANCE_RATIO = 0.5;
 const dec FLAME_MOVEMENT_RESISTANCE_RATIO = 0.9;
 const Span<dec> FLAME_BASE_RADIUS_RATIO = { 1.0, 1.1 };
@@ -80,16 +80,16 @@ void Wisp::render( )
     if( has_target( ) )
     {
         Angle viewing_angle = Angle( position( ), target( )->position( ) );
-        face_offset = Vector::A( viewing_angle, FACE_OFFSET_DISTANCE );
+        face_offset = VectorA( viewing_angle, FACE_OFFSET_DISTANCE );
     }
 
     draw( COLOR, Polygon::circle( HEAD_RADIUS ) );
     draw( COLOR, Polygon::circle( FACE_RADIUS, face_offset ) );
 
-    draw( FLAME_COLOR, Polygon::circle( EYE_RADIUS, Vector::A( EYE_OFFSET_ANGLE, EYE_OFFSET * FACE_RADIUS ) + face_offset ) );
-    draw( FLAME_COLOR, Polygon::circle( EYE_RADIUS, Vector::A( PI - EYE_OFFSET_ANGLE, EYE_OFFSET * FACE_RADIUS ) + face_offset ) );
+    draw( FLAME_COLOR, Polygon::circle( EYE_RADIUS, VectorA( EYE_OFFSET_ANGLE, EYE_OFFSET * FACE_RADIUS ) + face_offset ) );
+    draw( FLAME_COLOR, Polygon::circle( EYE_RADIUS, VectorA( PI - EYE_OFFSET_ANGLE, EYE_OFFSET * FACE_RADIUS ) + face_offset ) );
 
-    draw( FLAME_COLOR, Polygon( Arc::ccw( Coordinate::Y( -MOUTH_OFFSET ), MOUTH_RADIUS, 0.0, PI ).path( ).points( ) ) + face_offset );
+    draw( FLAME_COLOR, Polygon( Arc::ccw( CoordinateY( -MOUTH_OFFSET ), MOUTH_RADIUS, 0.0, PI ).path( ).points( ) ) + face_offset );
 }
 
 void Wisp::update( )
@@ -106,7 +106,7 @@ void Wisp::update( )
         if( has_target( ) )
         {
             m_reload_timer.reset( 60 );
-            room( )->add_object( new Bullet( room( ), position( ), Vector::A( Angle( position( ), target( )->position( ) ), 10.0 ) ) );
+            room( )->add_object( new Bullet( room( ), position( ), VectorA( Angle( position( ), target( )->position( ) ), 10.0 ) ) );
         }
     }
 }

@@ -21,6 +21,7 @@ public:
 private:
 
     Drawing m_skull_drawing;
+    
 };
 
 } // namespace mtmercy

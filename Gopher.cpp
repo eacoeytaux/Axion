@@ -24,7 +24,7 @@ cPlanc INNER_FUR_HEIGHT = BODY_HEIGHT * 0.8;
 cPlanc CHEEK_RADIUS = HEAD_RADIUS * 0.3;
 
 cPlanc NOSE_RADIUS = HEAD_RADIUS * 0.25;
-const Vector NOSE_OFFSET = Vector::X( CHEEK_RADIUS );
+const Vector NOSE_OFFSET = VectorX( CHEEK_RADIUS );
 
 cPlanc TEETH_WIDTH = NOSE_RADIUS * 0.9;
 cPlanc TEETH_LENGTH = HEAD_RADIUS * 0.64;
@@ -32,8 +32,8 @@ cPlanc TEETH_LENGTH = HEAD_RADIUS * 0.64;
 cPlanc EAR_RADIUS = HEAD_RADIUS * 0.3;
 cPlanc EAR_INNER_RADIUS = EAR_RADIUS * 0.5;
 cPlanc EAR_PLACEMENT_DISTANCE = HEAD_RADIUS;
-const Angle EAR_ANGLE_FRONT = RIGHT_ANGLE * 1.5;
-const Angle EAR_ANGLE_BACK = RIGHT_ANGLE * 0.5;
+const Angle EAR_ANGLE_FRONT = RIGHT * 1.5;
+const Angle EAR_ANGLE_BACK = RIGHT * 0.5;
 
 cPlanc EYE_SPACING_UP = NOSE_RADIUS * 1.25;
 cPlanc EYE_SPACING_SIDE = NOSE_RADIUS * 1.75;
@@ -74,7 +74,7 @@ void Gopher::update( )
 
             if( !m_reload_timer.remaining( ) )
             {
-                room( )->add_object( new DirtBall( room( ), 5.0, position( ), Vector::A( Angle( position( ), target( )->position( ) ), 5.0 ) ) );
+                room( )->add_object( new DirtBall( room( ), 5.0, position( ), VectorA( Angle( position( ), target( )->position( ) ), 5.0 ) ) );
                 m_reload_timer.reset( RELOAD_TIME );
             }
         }
@@ -95,18 +95,18 @@ void Gopher::render( )
         Vector head_offset( 0.0, half( BODY_HEIGHT ) );
         Drawing head_drawing;
 
-        head_drawing.draw( FUR_COLOR1, Polygon::circle( EAR_RADIUS, Vector::A( EAR_ANGLE_BACK, EAR_PLACEMENT_DISTANCE ) ) );
-        head_drawing.draw( FUR_COLOR2, Polygon::circle( EAR_INNER_RADIUS, Vector::A( EAR_ANGLE_BACK, EAR_PLACEMENT_DISTANCE ) ) );
+        head_drawing.draw( FUR_COLOR1, Polygon::circle( EAR_RADIUS, VectorA( EAR_ANGLE_BACK, EAR_PLACEMENT_DISTANCE ) ) );
+        head_drawing.draw( FUR_COLOR2, Polygon::circle( EAR_INNER_RADIUS, VectorA( EAR_ANGLE_BACK, EAR_PLACEMENT_DISTANCE ) ) );
 
         head_drawing.draw( FUR_COLOR1, Polygon::circle( HEAD_RADIUS ).stretch( Vector( HEAD_X_STRETCH, 0.0 ) ) );
 
-        head_drawing.draw( FUR_COLOR1, Polygon::circle( EAR_RADIUS, Vector::A( EAR_ANGLE_FRONT, EAR_PLACEMENT_DISTANCE ) ) );
-        head_drawing.draw( FUR_COLOR2, Polygon::circle( EAR_INNER_RADIUS, Vector::A( EAR_ANGLE_FRONT, EAR_PLACEMENT_DISTANCE ) ) );
+        head_drawing.draw( FUR_COLOR1, Polygon::circle( EAR_RADIUS, VectorA( EAR_ANGLE_FRONT, EAR_PLACEMENT_DISTANCE ) ) );
+        head_drawing.draw( FUR_COLOR2, Polygon::circle( EAR_INNER_RADIUS, VectorA( EAR_ANGLE_FRONT, EAR_PLACEMENT_DISTANCE ) ) );
 
         head_drawing.draw( TEETH_COLOR, Polygon::rectangle( TEETH_WIDTH, TEETH_LENGTH, NOSE_OFFSET + Vector( 0.0, -half( TEETH_LENGTH ) ) ) );
 
-        head_drawing.draw( FUR_COLOR2, Polygon::circle( CHEEK_RADIUS, NOSE_OFFSET + Vector::A( RIGHT_ANGLE * 2.5, CHEEK_RADIUS ) ) );
-        head_drawing.draw( FUR_COLOR2, Polygon::circle( CHEEK_RADIUS, NOSE_OFFSET + Vector::A( RIGHT_ANGLE * 3.5, CHEEK_RADIUS ) ) );
+        head_drawing.draw( FUR_COLOR2, Polygon::circle( CHEEK_RADIUS, NOSE_OFFSET + VectorA( RIGHT * 2.5, CHEEK_RADIUS ) ) );
+        head_drawing.draw( FUR_COLOR2, Polygon::circle( CHEEK_RADIUS, NOSE_OFFSET + VectorA( RIGHT * 3.5, CHEEK_RADIUS ) ) );
 
         head_drawing.draw( NOSE_COLOR, Polygon::circle( NOSE_RADIUS, NOSE_OFFSET ) );
 
@@ -124,7 +124,7 @@ void Gopher::render( )
 DirtBall::DirtBall( Room * room, Planc cref _radius, Coordinate cref _position, Vector cref _velocity ) : Object( room, _position, _velocity )
 {
     #ifdef AXN_DEBUG
-    m_draw_debug = true;
+    draw_debug = true;
     #endif
 
     space( Polygon::rectangle( _radius, _radius ) );

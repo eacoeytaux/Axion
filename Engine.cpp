@@ -25,6 +25,7 @@ void Engine::step( ) { b_step = true; }
 
 bool errored = false;
 bool quit_break = false;
+
 error Engine::quit( )
 {
     quit_break = true;
@@ -33,18 +34,7 @@ error Engine::quit( )
 
 error Engine::run( World * world, const string _app_name )
 {
-    if( !Assert( world, "World does not exist!" ) )
-    {
-        return error_not_init;
-    }
-
-    static bool running = false;
-    if( !Assert( !running, "Engine is already running!" ) )
-    {
-        return error_system;
-    }
-
-    running = true;
+    return_if( !world, error_system );
     
     Settings::init( );
 
@@ -52,9 +42,9 @@ error Engine::run( World * world, const string _app_name )
     try_return_error( Logger::init( ), error_not_init );
     #endif
 
-    try_return_error( Random::seed( ), error_not_init );
+    try_return_error( Random::set( ), error_not_init );
 
-    varray<Input *> inputs;
+    list<Input *> inputs;
     auto clear_inputs = [ & ] ( )
     {
         for_each( input, inputs ) { safe_delete( input ); }
@@ -116,8 +106,6 @@ error Engine::run( World * world, const string _app_name )
     #endif
 
     try_catch_error( close_eng( ) );
-
-    running = false;
 
     return errored ? error_system : no_error;
 }

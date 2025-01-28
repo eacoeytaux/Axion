@@ -1,11 +1,11 @@
 #ifndef OS_hpp
 #define OS_hpp
 
-#if defined( _WIN32 )
+#ifdef _WIN32
 #define OS_WINDOWS
-#elif defined( __APPLE__ )
+#elifdef __APPLE__
 #define OS_APPLE
-#elif defined( __linux__ )
+#elifdef __linux__
 #define OS_LINUX
 #else
 #define OS_INVALID
