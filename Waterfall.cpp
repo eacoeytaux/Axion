@@ -29,18 +29,16 @@ const Span<uint> FOAM_SMALL_NEW_COUNT = { 3, 7 };
 const dec FOAM_COLOR_TOP_ALPHA = 0.75;
 cdec FOAM_GRAVITY_RATIO = 0.75;
 
-const Color WATER_COLOR = CYAN;
-const Color FOAM_COLOR = WHITE;
+cColor WATER_COLOR = CYAN;
+cColor FOAM_COLOR = WHITE;
 
 } // namespace
 
-Waterfall::Waterfall( Room * room, Coordinate cref _bottom, cPlanc _width, cPlanc _height, cdec _z ) : Object( room, _bottom )
+Waterfall::Waterfall( Room * room, Coordinate cref _bottom, cPlanc _width, cPlanc _height, cdec _z ) : Object( room, _bottom, _z )
 {
     background( true );
 
     needs_render_always( true );
-
-    z( _z );
 
     space( Polygon::rectangle( _width, _height ) );
 
@@ -58,7 +56,7 @@ void Waterfall::render( )
     draw( WATER_COLOR, bounds );
     draw( { FOAM_COLOR.a( 0.0 ), FOAM_COLOR.a( 0.0 ), FOAM_COLOR.a( FOAM_COLOR_TOP_ALPHA ), FOAM_COLOR.a( FOAM_COLOR_TOP_ALPHA ) }, bounds );
 
-    add_bound( bounds );
+    bind( bounds );
     for_each( ripple, m_ripples ) { draw( FOAM_COLOR.a( ripple.alpha ), ripple.polygon + VectorY( ripple.height ) ); }
     clear_bounds( );
 

@@ -18,7 +18,7 @@ cdec DEFAULT_HUD_OFFSET = 0.025;
 
 Camera::Camera( World * world, Planc cref _width, Planc cref _height, cdec _zoom ) : m_world( world )
 {
-    Assert( (bool)world );
+    Assert( !is_null( world ) );
 
     cursor_world_position_reset( );
 
@@ -48,11 +48,7 @@ void Camera::clear_subjects( )
     m_subjects.clear( );
 
     #if defined ( AXN_DEBUG )
-    for_each( subject, m_owned_debug_subjects )
-    {
-        safe_delete( subject );
-    }
-
+    for_each( subject, m_owned_debug_subjects ) { safe_delete( subject ); }
     m_owned_debug_subjects.clear( );
     m_debug_subjects.clear( );
     #endif
@@ -134,13 +130,8 @@ void Camera::render( )
 
         auto render_visible = [ & ] ( Visible * visible, bool fixed )
         {
-            if( !visible || !visible->polygon_count( ) )
-            {
-                return;
-            }
-
-            Drawing cref _drawing = *visible;
-
+            if( !visible || !visible->polygon_count( ) ) { return; }
+                
             // ogl::clear_depth( );
             ogl::depth_always( );
 
@@ -158,7 +149,8 @@ void Camera::render( )
                                         -_camera_center.y( ) );
                     }
                 }
-
+                
+                Drawing cref _drawing = *visible;
                 Transform cumulative_transform = _drawing.cumulative_transform( );
 
                 ogl::translate( cumulative_transform.translation_x( ), cumulative_transform.translation_y( ) );
@@ -192,16 +184,16 @@ void Camera::render( )
                         {
                             ogl::stencil_mask( false );
                         }
-
+                        
                         if( _colored_polygon.thickness == FILLED )
                         {
                             ogl::push_matrix( );
-
+                            
                             Transform cumulative_transform = _colored_polygon.polygon.cumulative_transform( );
-
+                            
                             ogl::translate( cumulative_transform.translation_x( ), cumulative_transform.translation_y( ) );
                             ogl::transform( cumulative_transform );
-
+                            
                             if( _colored_polygon.polygon.convex( ) )
                             {
                                 render_convex_polygon( _colored_polygon.colors, _colored_polygon.polygon.coordinates( false ) );
@@ -210,41 +202,41 @@ void Camera::render( )
                             {
                                 varray<Coordinate> cref cs = _colored_polygon.polygon.coordinates( false );
                                 const varray<varray<uint>> & t = _colored_polygon.polygon.triangle_indices( );
-
+                                
                                 for_range( i, t.size( ) )
                                 {
                                     render_convex_polygon( { _colored_polygon.colors[ t[ i ][ 0 ] ],
-                                                             _colored_polygon.colors[ t[ i ][ 1 ] ],
-                                                             _colored_polygon.colors[ t[ i ][ 2 ] ] },
-                                                           { cs[ t[ i ][ 0 ] ],
-                                                             cs[ t[ i ][ 1 ] ],
-                                                             cs[ t[ i ][ 2 ] ] } );
+                                        _colored_polygon.colors[ t[ i ][ 1 ] ],
+                                        _colored_polygon.colors[ t[ i ][ 2 ] ] },
+                                                          { cs[ t[ i ][ 0 ] ],
+                                        cs[ t[ i ][ 1 ] ],
+                                        cs[ t[ i ][ 2 ] ] } );
                                 }
-
+                                
                                 #if defined ( AXN_DEBUG )
                                 ++convex_polygon_count;
                                 convex_polygon_triangle_count += t.size( );
                                 #endif
                             }
-
+                            
                             ogl::pop_matrix( );
                         }
                         else
                         {
                             cdec _thickness = _colored_polygon.preserve_thickness ? ( _colored_polygon.thickness / _zoom ) : ( _colored_polygon.thickness );
-
+                            
                             // TODO not raw!
                             varray<Coordinate> cref cs = _colored_polygon.polygon.coordinates( true );
                             for_range( i, cs.size( ) )
                             {
-                                const Line _line = Line( cs[ i ? ( i - 1 ) : ( cs.size( ) - 1 ) ], cs[ i ] );
-                                const Angle _line_angle = _line.angle( );
-                                const Vector _line_vector( _line.c1( ), _line.c2( ) );
-
-                                const Line _next_line = Line( cs[ i ], cs[ ( i == cs.size( ) - 1 ) ? 0 : ( i + 1 ) ] );
-                                const Angle _next_line_angle = _next_line.angle( );
-                                const Vector _next_line_vector( _next_line.c1( ), _next_line.c2( ) );
-
+                                cLine _line = Line( cs[ i ? ( i - 1 ) : ( cs.size( ) - 1 ) ], cs[ i ] );
+                                cAngle _line_angle = _line.angle( );
+                                cVector _line_vector( _line.c1( ), _line.c2( ) );
+                                
+                                cLine _next_line = Line( cs[ i ], cs[ ( i == cs.size( ) - 1 ) ? 0 : ( i + 1 ) ] );
+                                cAngle _next_line_angle = _next_line.angle( );
+                                cVector _next_line_vector( _next_line.c1( ), _next_line.c2( ) );
+                                
                                 Polygon line_polygon;
                                 if( _colored_polygon.extend_lines )
                                 {
@@ -254,7 +246,7 @@ void Camera::render( )
                                 {
                                     line_polygon = Polygon::rectangle( _line_vector.magnitude( ), _thickness, half( _line_vector ), _line_angle );
                                 }
-
+                                
                                 Polygon corner_polygon;
                                 if( ( _line.c1( ) != _line.c2( ) ) && ( _next_line.c1( ) != _next_line.c2( ) ) )
                                 {
@@ -262,14 +254,15 @@ void Camera::render( )
                                     Coordinate c1 = c0 + VectorA( _line_angle - RIGHT, half( _thickness ) );
                                     Coordinate c2 = c0 + VectorA( _next_line_angle - RIGHT, half( _thickness ) );
                                     Coordinate c3 = Line( c1, c1 + VectorA( _line_angle ) ).intersection( Line( c2, c2 - VectorA( _next_line_angle ) ) );
+                                    
                                     corner_polygon = Polygon( { c0, c1, c3, c2 } );
                                 }
-
+                                
                                 render_convex_polygon( { _colored_polygon.colors[ i ] }, corner_polygon.coordinates( ) );
                                 render_convex_polygon( { _colored_polygon.colors[ i ] }, line_polygon.coordinates( ) );
                             }
                         }
-
+                        
                         if( _colored_polygon.fill || _colored_polygon.hole )
                         {
                             ogl::stencil_equal( );
@@ -283,10 +276,7 @@ void Camera::render( )
         auto render_subjects = [ & ] ( )
         {
             m_subjects.sort( Visible::sort, true );
-            for_each( visible, m_subjects )
-            {
-                render_visible( visible, false );
-            }
+            for_each( visible, m_subjects ) { render_visible( visible, false ); }
         };
 
         auto render_lighting = [ & ] ( )
@@ -338,9 +328,9 @@ void Camera::render( )
         auto render_world_bounds = [ & ] ( )
         {
             #if defined ( AXN_DEBUG )
-            const Color COLOR = BLACK.a( 0.5 );
+            cColor COLOR = BLACK.a( 0.5 );
             #else
-            const Color COLOR = WHITE;
+            cColor COLOR = WHITE;
             #endif
 
             ogl::clear_depth( );
@@ -355,7 +345,7 @@ void Camera::render( )
 
         auto render_camera_bounds = [ & ] ( )
         {
-            const Color COLOR =
+            cColor COLOR =
                 #if defined ( AXN_DEBUG )
                 ( Debug::active && Settings::get( Settings::DEBUG_CAMERA ) ) ? BLACK.a( 0.5 ) :
                 #endif
@@ -470,11 +460,11 @@ Drawing Camera::debug_overlay_drawing( ) const
     cPlanc BORDER_LINE_THICKNESS = 1.5;
     cPlanc CROSSHAIR_LINE_THICKNESS = 1.0;
     cPlanc FPS_LINE_THICKNESS = 1.5;
-    const Angle DELTA = TAU / (dec)Engine::FPS;
+    cAngle DELTA = TAU / (dec)Engine::FPS;
     cPlanc TARGET_RADIUS = 2.0;
     cPlanc FPS_RADIUS = 32.0;
-    const Color MAIN_COLOR = WHITE;
-    const Color TARGET_COLOR = RED;
+    cColor MAIN_COLOR = WHITE;
+    cColor TARGET_COLOR = RED;
     cdec COLOR_OPACITY = 1.0;
 
     cPlanc FPS_LINE_THICKNESS_ZOOM = FPS_LINE_THICKNESS * zoom( );
@@ -555,7 +545,7 @@ void Camera::update( )
 
 void Camera::capture( Visible * _subject, cbool _should_delete )
 {
-    Assert( (bool)_subject );
+    Assert( !is_null( _subject ) );
 
     m_subjects.insert_back( _subject );
 
@@ -564,7 +554,7 @@ void Camera::capture( Visible * _subject, cbool _should_delete )
 
 void Camera::add_hud_element( HeadUpDisplay * _hud_element, cbool _should_delete )
 {
-    Assert( (bool)_hud_element );
+    Assert( !is_null( _hud_element ) );
 
     m_hud_elements.insert_back( _hud_element );
 
@@ -573,7 +563,7 @@ void Camera::add_hud_element( HeadUpDisplay * _hud_element, cbool _should_delete
 
 void Camera::remove_hud_element( HeadUpDisplay * _hud_element )
 {
-    Assert( (bool)_hud_element );
+    Assert( !is_null( _hud_element ) );
 
     m_hud_elements.remove( _hud_element );
 
@@ -582,7 +572,7 @@ void Camera::remove_hud_element( HeadUpDisplay * _hud_element )
 
 void Camera::add_screen_effect( ScreenEffect * _effect, cbool _should_delete )
 {
-    Assert( (bool)_effect );
+    Assert( !is_null( _effect ) );
 
     m_screen_effects.insert_back( _effect );
 
@@ -591,7 +581,7 @@ void Camera::add_screen_effect( ScreenEffect * _effect, cbool _should_delete )
 
 void Camera::remove_screen_effect( ScreenEffect * _effect )
 {
-    Assert( (bool)_effect );
+    Assert( !is_null( _effect ) );
 
     m_screen_effects.remove( _effect );
 
@@ -601,7 +591,7 @@ void Camera::remove_screen_effect( ScreenEffect * _effect )
 #if defined ( AXN_DEBUG )
 void Camera::capture_debug( Visible * _subject, cbool _should_delete )
 {
-    Assert( (bool)_subject );
+    Assert( !is_null( _subject ) );
 
     m_debug_subjects.insert_back( _subject );
 

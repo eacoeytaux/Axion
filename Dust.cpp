@@ -8,7 +8,7 @@ namespace
 
 const Span<Planc> RADIUS_START = { 0.5, 0.75 };
 cPlanc RADIUS_INCREASE_RATE = 0.1;
-const Span<dec> ALPHA_START = { 0.75, 1.0 };
+const Span<dec> ALPHA_START = { 0.25, 0.75 };
 cdec ALPHA_DECREASE_RATE = 0.02625;
 const Span<uint> SIDE_COUNT = { 6, 9 };
 const Span<dec> ROTATION_SPEED = { TAU / 28.0, TAU / 8.0 };

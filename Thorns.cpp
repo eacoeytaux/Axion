@@ -6,17 +6,19 @@ using mtmercy::Thorns;
 
 namespace
 {
+
 const Planc DAMAGE = 1.0;
 const Planc VINE_THICKNESS = 6.0;
 const Planc THORN_LENGTH = 3.0;
 const Span<Planc> THORN_SPACING = { THORN_LENGTH * 2.0, THORN_LENGTH * 5.0 };
-const Color VINE_COLOR = GREEN;
-const Color THORN_COLOR = WHITE;
+cColor VINE_COLOR = GREEN;
+cColor THORN_COLOR = WHITE;
+
 } // namespace
 
 Thorns::Thorns( Room * room, const Coordinate & _start, const Coordinate & _end ) : Object( room )
 {
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     draw_debug = true;
     #endif
     

@@ -14,25 +14,23 @@ cPlanc TREE_HEIGHT = 225.0;
 cPlanc TREE_BASE = 150.0;
 const Span<uint> INNER_TREE_COUNT = { 20, 30 };
 const Span<uint> TOP_TREE_COUNT = { 8, 12 };
-const Angle TOP_TREE_ANGLE = RIGHT / 1.5;
+cAngle TOP_TREE_ANGLE = RIGHT / 1.5;
 cPlanc TREE_LINE_BASE = HILL_RADIUS;
 cPlanc TREE_LINE_PENUMBRA = TREE_LINE_BASE * 2.0;
 cuint TREE_LINE_PENUMBRA_PASSES = 2;
 
-const Color GRASS_COLOR = Color::rgb( 0x00EE00 );
-const Color TREE_COLOR = Color::rgb( 0x00CC00 );
-const Color TREE_2_COLOR = Color::rgb( 0x00AA00 );
+cColor GRASS_COLOR = Color::rgb( 0x00EE00 );
+cColor TREE_COLOR = Color::rgb( 0x00CC00 );
+cColor TREE_2_COLOR = Color::rgb( 0x00AA00 );
 }
 
-Hills::Hills( Room * room, cPlanc _base_bottom, cdec _z ) : Object( room )
+Hills::Hills( Room * room, cPlanc _base_bottom, cdec _z ) : Object( room, _z )
 {
     background( true );
 
     persist_render( true );
 
     stationary( true );
-
-    z( _z );
 
     Camera * camera = room->camera( );
     FixedRectangle bounds = room->bounds( );

@@ -33,8 +33,8 @@ const Polygon FEATHER( { Coordinate( 4.0, 0.0 ),
                          Coordinate( -8.0, -4.0 ),
                          Coordinate( 0.0, -4.0 ) } );
 
-const Color TIP_COLOR = GRAY_LIGHT;
-const Color SHAFT_COLOR = Color::rgb( 0x8B4513 );
+cColor TIP_COLOR = GRAY_LIGHT;
+cColor SHAFT_COLOR = Color::rgb( 0x8B4513 );
 
 } // namespace
 
@@ -166,6 +166,8 @@ bool Arrow::collide( Object * object )
         {
             mob->hurt( Damage( DAMAGE ) );
         }
+        
+        object->add_velocity( velocity( ) );
 
         subscribe_to_movement( object );
         stationary( true );

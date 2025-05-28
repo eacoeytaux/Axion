@@ -38,12 +38,20 @@ void Mob::draw_eye( Coordinate cref _position, Angle cref _angle )
 {
     if( m_eye_info_set )
     {
-        Planc eye_width = m_eye_radius * 2.0;
-        Planc eye_height = eyes_closed( ) ? Planc( 1.0 ) : ( eye_width * ( squinting( ) ? 0.5 : 1.0 ) );
-
-        Polygon eye = Polygon::rectangle( eye_width, eye_height ).rotate( _angle ).move( _position );
-
-        draw( eye_color( ), eye );
+        if( alive( ) )
+        {
+            Planc eye_width = m_eye_radius * 2.0;
+            Planc eye_height = eyes_closed( ) ? Planc( 1.0 ) : ( eye_width * ( squinting( ) ? 0.5 : 1.0 ) );
+            
+            Polygon eye = Polygon::rectangle( eye_width, eye_height ).rotate( _angle ).move( _position );
+            
+            draw( eye_color( ), eye );
+        }
+        else
+        {
+            draw( eye_color( ), Line( _position + Vector( m_eye_radius, m_eye_radius ), _position + Vector( -m_eye_radius, -m_eye_radius ) ), 0.75 );
+            draw( eye_color( ), Line( _position + Vector( m_eye_radius, -m_eye_radius ), _position + Vector( -m_eye_radius, m_eye_radius ) ), 0.75 );
+        }
     }
 }
 

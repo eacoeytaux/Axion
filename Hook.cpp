@@ -7,17 +7,17 @@ namespace
 // crossbox / hook
 cPlanc DEFAULT_ROPE_MAX_LENGTH = METER * 10.0;
 cPlanc DEFAULT_ROPE_GROWTH_SPEED = 33.0;
-cPlanc DEFAULT_ROPE_RETRACT_SPEED = 44.0;
+cPlanc DEFAULT_ROPE_RETRACT_SPEED = 64.0;
 
 cPlanc HOOK_LENGTH = 38.0;
 cPlanc HOOK_THICKNESS = 5.0;
 cPlanc HOOK_TIP_LENGTH = 2.5;
-const Angle HOOK_ANGLE = RIGHT;
-const Color HOOK_COLOR = Color::rgb( 0x9C9C9C );
+cAngle HOOK_ANGLE = RIGHT;
+cColor HOOK_COLOR = Color::rgb( 0x9C9C9C );
 
 cPlanc ROPE_WIDTH = 4.0;
-const Color ROPE_BASE_COLOR = Color::rgb( 0xDAA420 );
-const Color ROPE_ALT_COLOR = Color::rgb( 0xB9870F );
+cColor ROPE_BASE_COLOR = Color::rgb( 0xDAA420 );
+cColor ROPE_ALT_COLOR = Color::rgb( 0xB9870F );
 
 } // namespace
 
@@ -60,9 +60,10 @@ void Hook::render( )
                                          tip + VectorA( hook_angle - RIGHT, HOOK_THICKNESS * half( HOOK_TIP_LENGTH ) ) - VectorA( hook_angle, HOOK_THICKNESS * HOOK_TIP_LENGTH ) ) );
 
     Vector rope_vector = hook_base( ) - m_owner->position( );
+    Line rope( rope_vector );
 
     // draw rope base
-    draw( ROPE_BASE_COLOR, Line( rope_vector.origin( ), rope_vector ), ROPE_WIDTH );
+    draw( ROPE_BASE_COLOR, rope, ROPE_WIDTH );
 
     { // draw rope detail coils
         Vector rope_chunk = VectorA( rope_vector.angle( ), ROPE_WIDTH );
@@ -76,9 +77,9 @@ void Hook::render( )
     #if defined ( AXN_DEBUG )
     // if( Debug::active )
     {
-        if( m_rope_length >= m_max_rope_length )
+        if( taut( ) )
         {
-            draw( RED.a( 0.5 ), Line( rope_vector.origin( ), rope_vector ), ROPE_WIDTH );
+            draw( RED.a( 0.5 ), rope, ROPE_WIDTH );
         }
     }
     #endif
@@ -109,7 +110,7 @@ void Hook::update_velocity( )
             state( HOOKED );
             velocity( V0 );
         }
-        else if( m_rope_length > m_max_rope_length )
+        else if( rope( ).magnitude( ) >= m_max_rope_length )
         {
             no_gravity( );
             state( HOOKED );
@@ -167,7 +168,7 @@ bool Hook::collide( Object * object )
             {
                 if( Mob * mob = dynamic_cast<Mob *>( object ) )
                 {
-                    mob->hurt( Damage( 1000.0 ) );
+                    mob->hurt( Damage( 1000.0 ) ); // todo lol
                 }
 
                 state( RETRACTING );
@@ -180,9 +181,9 @@ bool Hook::collide( Object * object )
     return false;
 }
 
-Coordinate Hook::hook_tip( ) const
+Planc Hook::max_rope_length( ) const
 {
-    return position( );
+    return m_max_rope_length;
 }
 
 Coordinate Hook::hook_base( ) const
@@ -197,7 +198,42 @@ Coordinate Hook::hook_base( ) const
     }
 }
 
-void Hook::fire( Vector cref _launch_speed )
+Coordinate Hook::hook_tip( ) const
+{
+    return position( );
+}
+
+Vector Hook::rope( ) const
+{
+    return Vector( m_owner->position( ), hook_base( ) );
+}
+
+bool Hook::taut( ) const
+{
+    return ( ( rope( ).magnitude( ) >= m_max_rope_length ) && !loaded( ) );
+}
+
+bool Hook::hooked( ) const
+{
+    return ( m_state == HOOKED );
+}
+
+bool Hook::loaded( ) const
+{
+    return ( m_state == LOADED );
+}
+
+bool Hook::launching( ) const
+{
+    return ( m_state == LOADED );
+}
+
+bool Hook::retracting( ) const
+{
+    return ( m_state == RETRACTING );
+}
+
+void Hook::launch( Vector cref _launch_speed )
 {
     switch( state( ) )
     {
@@ -249,7 +285,7 @@ void Hook::retract( )
     }
 }
 
-void Hook::load( )
+void Hook::reload( )
 {
     ground( nullptr );
     state( LOADED );

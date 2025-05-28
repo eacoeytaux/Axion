@@ -15,7 +15,7 @@ namespace axn
 namespace geometry
 {
 
-class Polygon : public Transformable
+axnclass( Polygon ) : public Transformable
 {
 
 private:
@@ -56,6 +56,7 @@ public:
             {
                 for_range( i, coordinate_count )
                 {
+                    Assert( m_coordinates[ i ].valid( ) );
                     m_lower_bound_x = min( m_lower_bound_x, m_coordinates[ i ].x( ) );
                     m_lower_bound_y = min( m_lower_bound_y, m_coordinates[ i ].y( ) );
                     m_upper_bound_x = max( m_upper_bound_x, m_coordinates[ i ].x( ) );
@@ -85,6 +86,7 @@ public:
                 for_range( i, coordinate_count )
                 {
                     Coordinate cref coordinate = m_coordinates[ i ];
+                    Assert( coordinate.valid( ) );
 
                     if( i && ( coordinate == m_coordinates[ i - 1 ] ) )
                     {
@@ -180,7 +182,7 @@ public:
         return Polygon( equilaterals[ side_count ] ).scale( radius );
     }
 
-    static Polygon circle( Planc cref radius = 1.0, Coordinate cref center = ORIGIN ) { return Polygon::equilateral( max<uint>( 4, min<uint>( 60, ceil( radius * PI ) ) ), radius, center ); }
+    static Polygon circle( Planc cref radius = 1.0, Coordinate cref center = ORIGIN ) { return Polygon::equilateral( curve_point_count( half( radius * TAU ) ), radius, center ); }
 
     static Polygon convex_hull( varray<Coordinate> cref coordinates )
     {
@@ -311,7 +313,7 @@ public:
 
                     bool is_ear = false;
 
-                    if( !is_neg( ::cross( c_prev, c, c_next ) ) )
+                    if( !is_neg( cross( c_prev, c, c_next ) ) )
                     {
                         bool containing = false;
 

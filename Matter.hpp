@@ -27,25 +27,22 @@ public:
 
     Matter( ) { }
 
-    Matter( Coordinate cref position, Polygon cref space, cdec mass = 0.0 ) : m_position( position ), m_space( space ), m_mass( mass ) { }
-    Matter( Coordinate cref position, Vector cref velocity, Polygon cref space = Polygon( ), cdec mass = 0.0 ) : m_position( position ), m_velocity( velocity ), m_space( space ), m_mass( mass ) { }
-
-    // origin of velocity is the position
-    Matter( Vector cref position_velocity, Polygon cref space = Polygon( ), cdec mass = 0.0 ) : m_position( position_velocity.origin( ) ), m_velocity( Vector( position_velocity.dx( ), position_velocity.dy( ) ) ), m_space( space ), m_mass( mass ) { }
+    Matter( Coordinate cref position ) : m_position( position ) { }
 
     dec mass( ) const { return m_mass; }
     void mass( cdec _mass ) { m_mass = _mass; }
 
     Coordinate position( ) const { return m_position; }
     void position( Coordinate cref _position ) { move( Vector( m_position, _position ) ); }
+    
+    Vector velocity( ) const { return m_velocity; }
+    void velocity( Vector cref _velocity ) { m_velocity = _velocity; }
 
     Polygon space( ) const { return m_space + Vector( position( ) ); }
     void space( Polygon cref _space ) { m_space = _space; }
 
-    Vector velocity( ) const { return m_velocity; }
-    void velocity( Vector cref _velocity ) { m_velocity = _velocity; }
-
     void add_velocity( Vector cref _velocity ) { m_velocity += _velocity; }
+    void add_force( Vector cref _force ) { m_velocity += ( _force * mass( ) ); }
 
     void move( Vector cref _distance ) { m_position += _distance; }
 

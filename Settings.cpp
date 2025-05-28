@@ -6,7 +6,7 @@ void Settings::init( )
 {
     set( GRAPHICS_DETAIL_ALPHA, true );
     
-    #ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     set( DEBUG_BACKGROUND, true );
     set( DEBUG_CAMERA, false );
     set( DEBUG_PHYSICS, true );

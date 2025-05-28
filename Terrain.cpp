@@ -55,14 +55,14 @@ void Terrain::make( varray<Coordinate> cref _positions, cbool _loop )
         Coordinate cref coordinate = _positions[ i ];
         TerrainVertex * vertex = new TerrainVertex( coordinate );
         m_vertices.back( ).insert_back( vertex );
-        room( )->object_grid( ).add( vertex );
+        room( )->object_grid( ).insert( vertex );
 
         if( i )
         {
-            Assert( (bool)previous );
+            Assert( !is_null( previous ) );
             TerrainEdge * edge = new TerrainEdge( previous, vertex );
             m_edges.back( ).insert_back( edge );
-            room( )->object_grid( ).add( edge );
+            room( )->object_grid( ).insert( edge );
         }
 
         previous = vertex;
@@ -86,7 +86,7 @@ void Terrain::make( varray<Coordinate> cref _positions, cbool _loop )
         {
             TerrainEdge * edge = new TerrainEdge( last, first );
             m_edges.back( ).insert_back( edge );
-            room( )->object_grid( ).add( edge );
+            room( )->object_grid( ).insert( edge );
         }
     }
 }
@@ -132,18 +132,32 @@ Drawing Terrain::debug_overlay( ) const
 {
     cPlanc GROUND_WIDTH = 1.5;
     cPlanc GROUND_VERTEX_WIDTH = 2.5;
-    const Color COLOR = CYAN;
+    cPlanc NORMAL_LENGTH = 10.0;
+    cColor COLOR = CYAN;
 
     Drawing debug_overlay;
 
     if( Settings::get( Settings::DEBUG_PHYSICS ) )
     {
+        cdec _zoom = room( )->camera( )->zoom( );
+        
+        auto draw_normal = [ & ] ( Coordinate cref base, Angle cref normal, bool left, bool right )
+        {
+            Planc length = ( NORMAL_LENGTH / _zoom );
+            Coordinate end = base + VectorA( normal.flipped( ), length );
+            Vector offset = VectorA( normal + RIGHT, half( half( length ) ) );
+            
+            debug_overlay.draw( COLOR, Line( base, end ), GROUND_WIDTH, true );
+            if( left ) { debug_overlay.draw( COLOR, Line( end, end + offset ), GROUND_WIDTH, true ); }
+            if( right ) { debug_overlay.draw( COLOR, Line( end, end - offset ), GROUND_WIDTH, true ); }
+        };
+        
         for_each( edges, edges( ) )
         {
             for_each( edge, edges )
             {
                 debug_overlay.draw( COLOR, edge->line( ), GROUND_WIDTH, true );
-
+                draw_normal( midpoint( edge->vertex1( )->position( ), edge->vertex2( )->position( ) ), edge->normal( ), true, true );
             }
         }
 
@@ -151,7 +165,8 @@ Drawing Terrain::debug_overlay( ) const
         {
             for_each( vertex, vertices )
             {
-                debug_overlay.draw( COLOR, Polygon::circle( GROUND_VERTEX_WIDTH / room( )->camera( )->zoom( ), vertex->position( ) ), FILLED, true );
+                debug_overlay.draw( COLOR, Polygon::circle( GROUND_VERTEX_WIDTH / _zoom, vertex->position( ) ), FILLED, true );
+                draw_normal( vertex->position( ), vertex->normal( ), !is_null( vertex->edge1( ) ), !is_null( vertex->edge2( ) ) );
             }
         }
     }
@@ -169,14 +184,14 @@ TerrainEdge * TerrainVertex::edge2( ) const { return m_e2; }
 
 void TerrainVertex::edge1( TerrainEdge * e1 )
 {
-    Assert( !(bool)m_e1, "Edge 1 has already been set" );
+    Assert( is_null( m_e1 ), "edge 1 has already been set" );
 
     m_e1 = e1;
 }
 
 void TerrainVertex::edge2( TerrainEdge * e2 )
 {
-    Assert( !(bool)m_e2, "Edge 2 has already been set" );
+    Assert( is_null( m_e2 ), "edge 2 has already been set" );
 
     m_e2 = e2;
 }
@@ -185,7 +200,7 @@ Angle TerrainVertex::normal( ) const
 {
     if( m_e1 && m_e2 )
     {
-        return half( m_e1->normal( ) + m_e2->normal( ) ).flipped( );
+        return half( m_e1->normal( ) + m_e2->normal( ) );
     }
     else if( m_e1 )
     {
@@ -201,15 +216,11 @@ Angle TerrainVertex::normal( ) const
 
 dec TerrainVertex::resistance( ) const { return m_resistance; }
 
-FixedRectangle TerrainVertex::bounding_box( ) const
-{
-    return FixedRectangle( 0.0, 0.0, position( ) );
-}
+FixedRectangle TerrainVertex::bounding_box( ) const { return FixedRectangle( 0.0, 0.0, position( ) ); }
 
 TerrainEdge::TerrainEdge( TerrainVertex * _v1, TerrainVertex * _v2, cdec _resistance ) : m_v1( _v1 ), m_v2( _v2 ), m_resistance( _resistance )
 {
-    Assert( (bool)m_v1 );
-    Assert( (bool)m_v2 );
+    Assert( !is_null( m_v1 ) && !is_null( m_v2 ) );
 
     m_v1->edge2( this );
     m_v2->edge1( this );
@@ -221,27 +232,15 @@ TerrainEdge::TerrainEdge( TerrainEdge cref _edge )
     m_v2 = _edge.vertex2( );
 }
 
-Line TerrainEdge::line( ) const
-{
-    return Line( m_v1->position( ), m_v2->position( ) );
-}
+Line TerrainEdge::line( ) const { return Line( m_v1->position( ), m_v2->position( ) ); }
 
-Vector TerrainEdge::vector( ) const
-{
-    return Vector( m_v1->position( ), m_v2->position( ) );
-}
+Vector TerrainEdge::vector( ) const { return Vector( m_v1->position( ), m_v2->position( ) ); }
 
 TerrainVertex * TerrainEdge::vertex1( ) const { return m_v1; }
 TerrainVertex * TerrainEdge::vertex2( ) const { return m_v2; }
 
-Angle TerrainEdge::normal( ) const
-{
-    return vector( ).angle( ) + RIGHT;
-}
+Angle TerrainEdge::normal( ) const { return vector( ).angle( ) + RIGHT; }
 
 dec TerrainEdge::resistance( ) const { return m_resistance; }
 
-FixedRectangle TerrainEdge::bounding_box( ) const
-{
-    return FixedRectangle( m_v1->position( ), m_v2->position( ) );
-}
+FixedRectangle TerrainEdge::bounding_box( ) const { return FixedRectangle( m_v1->position( ), m_v2->position( ) ); }

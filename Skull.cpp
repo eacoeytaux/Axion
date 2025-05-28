@@ -20,8 +20,8 @@ cdec EYE_OFFSET_X = 0.4;
 cdec EYE_OFFSET_Y = 0.1;
 cdec EYE_SPACING = 0.5;
 
-const Color BONE_COLOR = WHITE;
-const Color HOLE_COLOR = BLACK;
+cColor BONE_COLOR = WHITE;
+cColor HOLE_COLOR = BLACK;
 
 } // namespace
 

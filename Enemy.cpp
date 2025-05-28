@@ -70,27 +70,30 @@ Drawing Enemy::debug_overlay( ) const
     cPlanc ALERT_LINE_THICKNESS = SIGHT_LINE_THICKNESS;
     cdec ALPHA = 0.75;
     cdec ALPHA_INNER = ALPHA * 0.1;
-    const Color SIGHT_LINE_COLOR = GREEN.a( ALPHA );
-    const Color ALERT_LINE_COLOR = RED.a( ALPHA );
+    cColor SIGHT_LINE_COLOR = GREEN.a( ALPHA );
+    cColor ALERT_LINE_COLOR = RED.a( ALPHA );
 
     Drawing debug_overlay;
 
     if( Settings::get( Settings::DEBUG_PHYSICS ) )
     {
-        if( has_target( ) )
+        if( alert_range( ) )
         {
-            debug_overlay.draw( SIGHT_LINE_COLOR, Line( ORIGIN, target( )->position( ) - position( ) ), SIGHT_LINE_THICKNESS, true );
-
-            if( sight_range( ) )
+            if( has_target( ) )
             {
-                debug_overlay.draw( SIGHT_LINE_COLOR.a( ALPHA_INNER ), Polygon::circle( sight_range( ) ) );
-                debug_overlay.draw( SIGHT_LINE_COLOR, Polygon::circle( sight_range( ) ), ALERT_LINE_THICKNESS, true );
+                debug_overlay.draw( SIGHT_LINE_COLOR, Line( ORIGIN, target( )->position( ) - position( ) ), SIGHT_LINE_THICKNESS, true );
+                
+                if( sight_range( ) )
+                {
+                    debug_overlay.draw( SIGHT_LINE_COLOR.a( ALPHA_INNER ), Polygon::circle( sight_range( ) ) );
+                    debug_overlay.draw( SIGHT_LINE_COLOR, Polygon::circle( sight_range( ) ), ALERT_LINE_THICKNESS, true );
+                }
             }
-        }
-        else if( alert_range( ) )
-        {
-            debug_overlay.draw( ALERT_LINE_COLOR.a( ALPHA_INNER ), Polygon::circle( alert_range( ) ) );
-            debug_overlay.draw( ALERT_LINE_COLOR, Polygon::circle( alert_range( ) ), ALERT_LINE_THICKNESS, true );
+            else
+            {
+                debug_overlay.draw( ALERT_LINE_COLOR.a( ALPHA_INNER ), Polygon::circle( alert_range( ) ) );
+                debug_overlay.draw( ALERT_LINE_COLOR, Polygon::circle( alert_range( ) ), ALERT_LINE_THICKNESS, true );
+            }
         }
     }
 

@@ -9,12 +9,12 @@ namespace
 const dec TRUNK_LEAF_OFFSET = 0.95;
 const Span<Planc> TRUNK_HEIGHT = { 300.0, 500.0 };
 const Span<Planc> TRUNK_BASE_WIDTH = { 8.0, 12.0 };
-const Angle TRUNK_SWAY_MAX = ( TAU / 64.0 );
+cAngle TRUNK_SWAY_MAX = ( TAU / 64.0 );
 
 const Span<uint> BRANCH_COUNT = { 3, 5 };
-const Span<dec> BRANCH_BASE_HEIGHT = { 0.3, 0.333 };
-const Span<dec> BRANCH_LENGTH = { 0.333, 0.4444 };
-const Angle BRANCH_OFFSET = ( TAU / 8.0 );
+const Span<dec> BRANCH_BASE_HEIGHT_RATIO = { 0.3, 0.333 };
+const Span<dec> BRANCH_LENGTH_RATIO = { 0.333, 0.4444 };
+cAngle BRANCH_OFFSET = ( TAU / 8.0 );
 
 const uint LEAF_TOP_COUNT = 10;
 const uint LEAF_BOTTOM_COUNT = 5;
@@ -27,22 +27,31 @@ const Planc LEAF_BOTTOM_BOTTOM_D = -0.0075;
 const Planc LEAF_OFFSET_1 = 5.0;
 const Planc LEAF_OFFSET_2 = 2.0;
 
-const dec LEAF_GRAVITY_RATIO = 0.025;
 const Planc LEAF_TIP_LENGTH = 7.5;
 const Planc LEAF_CROSS_LENGTH = 7.5;
 const Planc LEAF_BASE_LENGTH = 3.0;
+const Span<dec> LEAF_SCALE = { 0.8, 1.1 };
+
+const dec LEAF_GRAVITY_RATIO = 0.1;
+const dec LEAF_SWAY_RATE = 0.25;
+const dec LEAF_SWAY_SCALE = 5.0;
+const dec LEAF_SPIN_RATE = 0.3;
+const dec LEAF_ROTATE_RATE = 0.25;
+
 const Span<uint> LEAF_COUNTDOWN = { 25, 150 };
 const Span<dec> LEAF_FALL_DISTANCE = { 0.1, 0.9 };
 
-const Color TRUNK_COLOR = WHITE;
-const Color TRUNK_MARK_COLOR = BLACK;
-const ColorSlider LEAF_COLOR = { RED, Color::rgb( 1.0, 0.7, 0.0 ) };
+cColor TRUNK_COLOR = WHITE;
+cColor TRUNK_MARK_COLOR = BLACK;
+cColorSlider LEAF_COLOR = { RED, Color::rgb( 1.0, 0.7, 0.0 ) };
 
 } // namespace
 
 namespace
 {
+
 Drawing draw_trunk( Color cref leaf_color, cbool _draw_leaves, Planc cref _length, Planc cref _base_width, cuint _branch_count, Coordinate & leaf_base, Coordinate & leaf_side1, Coordinate & leaf_side2 );
+
 Drawing draw_trunk( Color cref leaf_color, cbool _draw_leaves, Planc cref _length, Planc cref _base_width, cuint _branch_count, Coordinate & leaf_base, Coordinate & leaf_side1, Coordinate & leaf_side2 )
 {
     Drawing tree_drawing;
@@ -52,7 +61,7 @@ Drawing draw_trunk( Color cref leaf_color, cbool _draw_leaves, Planc cref _lengt
     Coordinate base_left( -half( _base_width ), 0 );
     Coordinate base_right( half( _base_width ), 0 );
 
-    dec branch_height = Random::rdec( BRANCH_BASE_HEIGHT );
+    dec branch_height = Random::rdec( BRANCH_BASE_HEIGHT_RATIO );
 
     if( _draw_leaves )
     {
@@ -132,7 +141,7 @@ Drawing draw_trunk( Color cref leaf_color, cbool _draw_leaves, Planc cref _lengt
 
         auto draw_branch = [ & ] ( bool left )
         {
-            Drawing branch_drawing = draw_trunk( leaf_color, false, _length * Random::rdec( BRANCH_LENGTH ) * branch_remaining, _base_width * branch_remaining, 0, leaf_base, leaf_side1, leaf_side2 );
+            Drawing branch_drawing = draw_trunk( leaf_color, false, _length * Random::rdec( BRANCH_LENGTH_RATIO ) * branch_remaining, _base_width * branch_remaining, 0, leaf_base, leaf_side1, leaf_side2 );
 
             branch_drawing.rotate( left ? BRANCH_OFFSET : -BRANCH_OFFSET );
             branch_drawing.move( Vector( branch_base ) );
@@ -149,10 +158,10 @@ Drawing draw_trunk( Color cref leaf_color, cbool _draw_leaves, Planc cref _lengt
             draw_branch( false );
         }
 
-        branch_height += branch_remaining * Random::rdec( BRANCH_BASE_HEIGHT );
+        branch_height += branch_remaining * Random::rdec( BRANCH_BASE_HEIGHT_RATIO );
     }
 
-    tree_drawing.add_bound( trunk_polygon );
+    tree_drawing.bind( trunk_polygon );
 
     branch_height = 0.0;
     while( branch_height < 1.0 )
@@ -171,15 +180,13 @@ Drawing draw_trunk( Color cref leaf_color, cbool _draw_leaves, Planc cref _lengt
 
 } // namespace
 
-AspineTree::AspineTree( Room * room, Coordinate cref _root, cdec _z ) : Object( room, _root )
+AspineTree::AspineTree( Room * room, Coordinate cref _root, cdec _z ) : Object( room, _root, _z )
 {
     background( true );
 
     persist_render( true );
 
     stationary( true );
-
-    z( _z );
 
     m_leaf_drop_countdown1.reset( Random::rint( LEAF_COUNTDOWN.max( ) ) );
     m_leaf_drop_countdown2.reset( Random::rint( LEAF_COUNTDOWN.max( ) ) );
@@ -216,16 +223,15 @@ void AspineTree::update( )
     update_leaf_countdown( m_leaf_drop_countdown2, false );
 }
 
-AspineTree::Leaf::Leaf( Room * room, Color cref color, Coordinate cref _center, dec _z ) : Object( room, _center ), m_color( color )
+AspineTree::Leaf::Leaf( Room * room, Color cref color, Coordinate cref _center, dec _z ) : Object( room, _center, _z ), m_color( color )
 {
     background( true );
 
-    z( _z );
-
     needs_render_always( true );
 
-    gravity_ratio( 0.1 );
-
+    gravity_ratio( LEAF_GRAVITY_RATIO );
+    
+    m_scale = Random::rdec( LEAF_SCALE );
     m_offset = Random::rAngle( );
 }
 
@@ -233,12 +239,13 @@ void AspineTree::Leaf::render( )
 {
     Object::render( );
 
-    Planc offset_x = sin( age( ) * 0.25 ) * 5.0;
-    Planc cross_length = LEAF_CROSS_LENGTH * sin( age( ) * 0.3 );
+    Planc offset_x = sin( age( ) * LEAF_SWAY_RATE ) * LEAF_SWAY_SCALE;
+    Planc cross_length = LEAF_CROSS_LENGTH * sin( age( ) * LEAF_SPIN_RATE );
 
     Polygon leaf( { CoordinateY( LEAF_TIP_LENGTH ), CoordinateX( -half( cross_length ) ), CoordinateY( -LEAF_BASE_LENGTH ), CoordinateX( half( cross_length ) ) } );
-
-    leaf.rotate( Angle( age( ) * 0.25 ) + m_offset );
+        
+    leaf.scale( m_scale );
+    leaf.rotate( Angle( age( ) * LEAF_ROTATE_RATE ) + m_offset );
 
     draw( m_color, leaf + VectorX( offset_x ) );
 }

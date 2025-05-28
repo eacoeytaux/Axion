@@ -67,7 +67,7 @@ public:
 
     Drawing & erase( Polygon cref );
 
-    Drawing & add_bound( Polygon cref );
+    Drawing & bind( Polygon cref );
     Drawing & clear_bounds( );
 
     Drawing & filter_function( const function<void( Color & )> & filter_function ) { m_filter_function = filter_function; m_filter_function_set = true; rethis; }

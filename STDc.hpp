@@ -428,6 +428,8 @@ public:
     uint size( ) const { return std::set<Key, Compare>::size( ); }
 
     bool contains( const Key & k ) const { return ( std::set<Key, Compare>::find( k ) != std::set<Key, Compare>::end( ) ); }
+    
+    virtual void insert( const Key & k ) { std::set<Key, Compare>::insert( k ); }
 
     virtual void clear( ) { std::set<Key, Compare>::clear( ); }
 

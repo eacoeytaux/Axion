@@ -25,7 +25,7 @@ void Player::render( )
         cPlanc GLOW_RADIUS_RATIO1 = 1.35;
         cPlanc GLOW_RADIUS_RATIO2 = 1.75;
         cPlanc GLOW_RADIUS_RATIO3 = 2.0;
-        const Color GLOW_COLOR = Color( WHITE, 0.125 );
+        cColor GLOW_COLOR = Color( WHITE, 0.125 );
 
         Drawing god_drawing;
         god_drawing.draw( GLOW_COLOR, Polygon::circle( GLOW_RADIUS * GLOW_RADIUS_RATIO1 ) );

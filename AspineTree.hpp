@@ -31,6 +31,7 @@ public:
         
     private:
         
+        dec m_scale;
         Angle m_offset;
         
         Color m_color;

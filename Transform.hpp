@@ -11,7 +11,7 @@ namespace axn
 namespace geometry
 {
 
-class Transform
+axnclass( Transform )
 {
 
 private:
@@ -43,7 +43,7 @@ public:
 
     Transform & clear( bool identity ) { m_matrix[ 0 ][ 0 ] = m_matrix[ 1 ][ 1 ] = m_matrix[ 2 ][ 2 ] = identity ? 1.0 : 0.0; m_matrix[ 0 ][ 1 ] = m_matrix[ 0 ][ 2 ] = m_matrix[ 1 ][ 0 ] = m_matrix[ 1 ][ 2 ] = m_matrix[ 2 ][ 0 ] = m_matrix[ 2 ][ 1 ] = 0.0; rethis; }
 
-    Coordinate apply( Coordinate cref c ) const { return ( is_identity( ) ? c : Coordinate( ( c.x( ) * m_matrix[ 0 ][ 0 ] ) + ( c.y( ) * m_matrix[ 0 ][ 1 ] ) + m_matrix[ 0 ][ 2 ], ( c.x( ) * m_matrix[ 1 ][ 0 ] ) + ( c.y( ) * m_matrix[ 1 ][ 1 ] ) + m_matrix[ 1 ][ 2 ] ) ); }
+    Coordinate apply( Coordinate cref c ) const { return Coordinate( ( c.x( ) * m_matrix[ 0 ][ 0 ] ) + ( c.y( ) * m_matrix[ 0 ][ 1 ] ) + m_matrix[ 0 ][ 2 ], ( c.y( ) * m_matrix[ 1 ][ 1 ] ) + ( c.x( ) * m_matrix[ 1 ][ 0 ] ) + m_matrix[ 1 ][ 2 ] ); }
 
     Transform & chain( Transform cref t ) { return set( t * ( *this ) ); }
 
@@ -100,8 +100,8 @@ public:
     Planc determinant( ) const
     {
         return ( m_matrix[ 0 ][ 0 ] * ( ( m_matrix[ 1 ][ 1 ] * m_matrix[ 2 ][ 2 ] ) - ( m_matrix[ 1 ][ 2 ] * m_matrix[ 2 ][ 1 ] ) ) ) -
-            ( m_matrix[ 0 ][ 1 ] * ( ( m_matrix[ 1 ][ 0 ] * m_matrix[ 2 ][ 2 ] ) - ( m_matrix[ 1 ][ 2 ] * m_matrix[ 2 ][ 0 ] ) ) ) +
-            ( m_matrix[ 0 ][ 2 ] * ( ( m_matrix[ 1 ][ 0 ] * m_matrix[ 2 ][ 1 ] ) - ( m_matrix[ 1 ][ 1 ] * m_matrix[ 2 ][ 0 ] ) ) );
+               ( m_matrix[ 0 ][ 1 ] * ( ( m_matrix[ 1 ][ 0 ] * m_matrix[ 2 ][ 2 ] ) - ( m_matrix[ 1 ][ 2 ] * m_matrix[ 2 ][ 0 ] ) ) ) +
+               ( m_matrix[ 0 ][ 2 ] * ( ( m_matrix[ 1 ][ 0 ] * m_matrix[ 2 ][ 1 ] ) - ( m_matrix[ 1 ][ 1 ] * m_matrix[ 2 ][ 0 ] ) ) );
     }
 
     Transform translation_only( ) const { return Transform( 1.0, 0.0, translation_x( ), 0.0, 1.0, translation_y( ), 0.0, 0.0, 1.0 ); }
@@ -406,7 +406,7 @@ private:
 const Transform ZERO_TRANSFORM = Transform( false );
 const Transform IDENTITY_TRANSFORM = Transform( true );
 
-class Transformable
+axnclass( Transformable )
 {
 
 private:

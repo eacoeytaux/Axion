@@ -47,7 +47,11 @@ public:
 
 protected:
 
+    virtual dec air_resistance_ratio( ) const override;
+    
     void update_velocity( ) override;
+    
+    virtual dec check_movement( Vector cref velocity ) override;
 
     void movement_stop( );
 
@@ -64,6 +68,10 @@ protected:
 
     void launch_hook( );
     void launch_arrow( );
+    
+    void release_hook( );
+    void release_arrow( );
+    
     void release_bow( );
 
     // all of these are offsets from position

@@ -24,13 +24,17 @@ private:
 
     static uint total_objects;
     #endif
+    
 public:
 
     virtual ~Object( );
 
     Object( Room * room );
-    Object( Room * room, Coordinate cref position, Vector cref velocity = V0 );
-    Object( Room * room, Vector cref position_velocity );
+    Object( Room * room, dec z );
+    Object( Room * room, Coordinate cref position );
+    Object( Room * room, Coordinate cref position, dec z );
+    Object( Room * room, Coordinate cref position, Vector cref velocity );
+    Object( Room * room, Coordinate cref position, Vector cref velocity, dec z );
 
 private:
 
@@ -101,7 +105,7 @@ public:
     void no_gravity( ) { return gravity_ratio( 0.0 ); }
     bool has_gravity( ) const { return gravity_ratio( ); }
 
-    dec air_resistance_ratio( ) const;
+    virtual dec air_resistance_ratio( ) const;
     void air_resistance_ratio( dec );
 
     bool terrain_boundaries( ) const;
@@ -124,9 +128,12 @@ public:
     default_non_equal( Object );
 
 protected:
-
-    virtual void update_movement( );
+    
     virtual void update_velocity( );
+    virtual void update_movement( );
+    
+    // returns 0 if should not move, 1 if no interruption, and (0,1) for interruption
+    virtual dec check_movement( Vector cref velocity );
 
     virtual void move( Vector cref );
     virtual void ground( TerrainEdge * ground );

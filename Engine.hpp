@@ -204,12 +204,14 @@ struct ControllerJoystickInput : public ControllerInput
         RIGHT_JOYSTICK,
         LEFT_JOYSTICK,
     };
+    
+    typedef const Joystick cJoystick;
 
     ControllerJoystickInput( Joystick j ) : joystick( j ), dead_zone( true ) { }
     ControllerJoystickInput( Joystick j, Vector cref v ) : vector( v ), joystick( j ), dead_zone( false ) { }
 
-    const Joystick joystick;
-    const Vector vector;
+    cJoystick joystick;
+    cVector vector;
     cbool dead_zone;
 
 };

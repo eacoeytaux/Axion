@@ -6,14 +6,14 @@ using mtmercy::PineTree;
 namespace
 {
 
-const Angle MAX_SWAY = TAU / 64.0;
+cAngle MAX_SWAY = TAU / 64.0;
 cuint SWAY_PERIOD = 40;
 cPlanc TRUNK_HEIGHT = 72.0;
 cPlanc TRUNK_THICKNESS = 16.0;
 cPlanc SUB_TRUNK_HEIGHT_INITIAL = 101.0;
 cPlanc SUB_TRUNK_HEIGHT_RATIO = 0.75;
 const Span<uint> LEAVES_COUNT = { 3, 3 };
-const Angle LEAVES_SPAN = TAU / 8.0;
+cAngle LEAVES_SPAN = TAU / 8.0;
 cPlanc LEAVES_HEIGHT_BASE_LENGTH = 172.0;
 cPlanc LEAVES_SHRINK_RATIO = 0.64;
 cPlanc LEAVES_BORDER_WIDTH = 4.0;
@@ -24,21 +24,19 @@ cdec SPIKE_INNER_RATIO = 0.9;
 cPlanc SPIKE_OFFSET_INNER = 3.0;
 cPlanc SPIKE_OFFSET_OUTER = 6.0;
 
-const Color TRUNK_COLOR = Color::rgb( 0xA56405 );
-const Color TRUNK_BORDER_COLOR = Color::rgb( 0x804800 );
-const Color LEAVES_COLOR = Color::rgb( 0x00C000 );
-const Color LEAVES_BORDER_COLOR = Color::rgb( 0x008000 );
+cColor TRUNK_COLOR = Color::rgb( 0xA56405 );
+cColor TRUNK_BORDER_COLOR = Color::rgb( 0x804800 );
+cColor LEAVES_COLOR = Color::rgb( 0x00C000 );
+cColor LEAVES_BORDER_COLOR = Color::rgb( 0x008000 );
 
 } // namespace
 
-PineTree::PineTree( Room * room, Coordinate cref _root, cdec _z ) : Object( room, _root )
+PineTree::PineTree( Room * room, Coordinate cref _root, cdec _z ) : Object( room, _root, _z )
 {
     background( true );
 
     needs_render_always( true );
-
-    z( _z );
-
+    
     dec shrink_ratio = LEAVES_SHRINK_RATIO;
 
     Drawing & trunk = m_leave_bunches_and_trunk.insert_back( );

@@ -48,6 +48,7 @@
 		AA92BE5E2BABC62200181FEA /* DistantBird.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA92BE5C2BABC62200181FEA /* DistantBird.cpp */; };
 		AA92BE612BAF672900181FEA /* MountainRange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA92BE5F2BAF672900181FEA /* MountainRange.cpp */; };
 		AA93208E2C23C2720018540D /* Thorns.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93208C2C23C2720018540D /* Thorns.cpp */; };
+		AA9529212DDEE67300A6F3A6 /* Spikes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA95291F2DDEE67300A6F3A6 /* Spikes.cpp */; };
 		AA9752142BB2BF6B003289EF /* MountMerciless.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA9752022BB2BF6B003289EF /* MountMerciless.cpp */; };
 		AA9752152BB2BF6B003289EF /* Fox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA9752042BB2BF6B003289EF /* Fox.cpp */; };
 		AA9752162BB2BF6B003289EF /* Bird.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA9752062BB2BF6B003289EF /* Bird.cpp */; };
@@ -57,10 +58,12 @@
 		AA97521F2BB2C0D6003289EF /* LightSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA97521D2BB2C0D6003289EF /* LightSource.cpp */; };
 		AAA436BC2A243F58001FA92C /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAA436BA2A243F58001FA92C /* Engine.cpp */; };
 		AAA436BE2A244C23001FA92C /* EngineSDL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAA436BD2A244C23001FA92C /* EngineSDL.cpp */; };
+		AAAC220B2D4F60A5002F5203 /* Boulder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAAC22092D4F60A5002F5203 /* Boulder.cpp */; };
+		AAAC220E2D51E96E002F5203 /* Caves.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAAC220C2D51E96E002F5203 /* Caves.cpp */; };
 		AADBD81E2D3CE7590058E28B /* WaterDrop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADBD81C2D3CE7580058E28B /* WaterDrop.cpp */; };
 		AADBD8242D4319E10058E28B /* Damage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADBD8222D4319E10058E28B /* Damage.cpp */; };
 		AADBD8272D431A3D0058E28B /* Projectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADBD8252D431A3D0058E28B /* Projectile.cpp */; };
-		AADC31C12C71733A00CD1417 /* Stalagmite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADC31BF2C71733A00CD1417 /* Stalagmite.cpp */; };
+		AADC31C12C71733A00CD1417 /* Stalite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADC31BF2C71733A00CD1417 /* Stalite.cpp */; };
 		AADC31C72C851B0400CD1417 /* Gopher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADC31C52C851B0400CD1417 /* Gopher.cpp */; };
 		AADC31CA2C8554CC00CD1417 /* Enemy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADC31C82C8554CC00CD1417 /* Enemy.cpp */; };
 		AADC31D02C85992B00CD1417 /* Hook.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADC31CE2C85992B00CD1417 /* Hook.cpp */; };
@@ -187,6 +190,8 @@
 		AA92BE602BAF672900181FEA /* MountainRange.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MountainRange.hpp; sourceTree = "<group>"; };
 		AA93208C2C23C2720018540D /* Thorns.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Thorns.cpp; sourceTree = "<group>"; };
 		AA93208D2C23C2720018540D /* Thorns.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Thorns.hpp; sourceTree = "<group>"; };
+		AA95291F2DDEE67300A6F3A6 /* Spikes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Spikes.cpp; sourceTree = "<group>"; };
+		AA9529202DDEE67300A6F3A6 /* Spikes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Spikes.hpp; sourceTree = "<group>"; };
 		AA9752022BB2BF6B003289EF /* MountMerciless.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MountMerciless.cpp; sourceTree = "<group>"; };
 		AA9752042BB2BF6B003289EF /* Fox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Fox.cpp; sourceTree = "<group>"; };
 		AA9752052BB2BF6B003289EF /* Bird.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Bird.hpp; sourceTree = "<group>"; };
@@ -204,6 +209,10 @@
 		AAA436BB2A243F58001FA92C /* Engine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Engine.hpp; sourceTree = "<group>"; };
 		AAA436BD2A244C23001FA92C /* EngineSDL.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EngineSDL.cpp; sourceTree = "<group>"; };
 		AAA6D0D72BB2999300077030 /* .clang-format-run.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ".clang-format-run.sh"; sourceTree = SOURCE_ROOT; };
+		AAAC22092D4F60A5002F5203 /* Boulder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Boulder.cpp; sourceTree = "<group>"; };
+		AAAC220A2D4F60A5002F5203 /* Boulder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Boulder.hpp; sourceTree = "<group>"; };
+		AAAC220C2D51E96E002F5203 /* Caves.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Caves.cpp; sourceTree = "<group>"; };
+		AAAC220D2D51E96E002F5203 /* Caves.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Caves.hpp; sourceTree = "<group>"; };
 		AAB55A3E29D12ABC0088E000 /* Transform.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Transform.hpp; sourceTree = "<group>"; };
 		AAB55A4129D132950088E000 /* Planc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Planc.hpp; sourceTree = "<group>"; };
 		AADBD81C2D3CE7580058E28B /* WaterDrop.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WaterDrop.cpp; sourceTree = "<group>"; };
@@ -213,8 +222,8 @@
 		AADBD8232D4319E10058E28B /* Damage.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Damage.hpp; sourceTree = "<group>"; };
 		AADBD8252D431A3D0058E28B /* Projectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Projectile.cpp; sourceTree = "<group>"; };
 		AADBD8262D431A3D0058E28B /* Projectile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Projectile.hpp; sourceTree = "<group>"; };
-		AADC31BF2C71733A00CD1417 /* Stalagmite.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Stalagmite.cpp; sourceTree = "<group>"; };
-		AADC31C02C71733A00CD1417 /* Stalagmite.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Stalagmite.hpp; sourceTree = "<group>"; };
+		AADC31BF2C71733A00CD1417 /* Stalite.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Stalite.cpp; sourceTree = "<group>"; };
+		AADC31C02C71733A00CD1417 /* Stalite.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Stalite.hpp; sourceTree = "<group>"; };
 		AADC31C52C851B0400CD1417 /* Gopher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Gopher.cpp; sourceTree = "<group>"; };
 		AADC31C62C851B0400CD1417 /* Gopher.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Gopher.hpp; sourceTree = "<group>"; };
 		AADC31C82C8554CC00CD1417 /* Enemy.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Enemy.cpp; sourceTree = "<group>"; };
@@ -297,6 +306,8 @@
 			children = (
 				AA13AC9B2BD1FADB005DAD3C /* GrassTerrain.hpp */,
 				AA13AC9A2BD1FADB005DAD3C /* GrassTerrain.cpp */,
+				AA9529202DDEE67300A6F3A6 /* Spikes.hpp */,
+				AA95291F2DDEE67300A6F3A6 /* Spikes.cpp */,
 				AA93208D2C23C2720018540D /* Thorns.hpp */,
 				AA93208C2C23C2720018540D /* Thorns.cpp */,
 				AA22A1802BCA2DD10048F445 /* Dust.hpp */,
@@ -335,8 +346,10 @@
 				AA92BE5C2BABC62200181FEA /* DistantBird.cpp */,
 				AA269A9629D790B90093CF81 /* Waterfall.hpp */,
 				AA269A9529D790B90093CF81 /* Waterfall.cpp */,
-				AADC31C02C71733A00CD1417 /* Stalagmite.hpp */,
-				AADC31BF2C71733A00CD1417 /* Stalagmite.cpp */,
+				AAAC220A2D4F60A5002F5203 /* Boulder.hpp */,
+				AAAC22092D4F60A5002F5203 /* Boulder.cpp */,
+				AADC31C02C71733A00CD1417 /* Stalite.hpp */,
+				AADC31BF2C71733A00CD1417 /* Stalite.cpp */,
 			);
 			name = background;
 			sourceTree = "<group>";
@@ -388,6 +401,8 @@
 				AA9752022BB2BF6B003289EF /* MountMerciless.cpp */,
 				AA1744B72D38CAE90078E160 /* Plains.hpp */,
 				AA1744B62D38CAE90078E160 /* Plains.cpp */,
+				AAAC220D2D51E96E002F5203 /* Caves.hpp */,
+				AAAC220C2D51E96E002F5203 /* Caves.cpp */,
 				AA01DC092BF32397006FE720 /* player */,
 				AA01DC0E2BF3240A006FE720 /* mobs */,
 				AA01DC0C2BF323D0006FE720 /* enviroment */,
@@ -592,6 +607,7 @@
 				AADBD8242D4319E10058E28B /* Damage.cpp in Sources */,
 				AADBD8272D431A3D0058E28B /* Projectile.cpp in Sources */,
 				AADC31D02C85992B00CD1417 /* Hook.cpp in Sources */,
+				AAAC220B2D4F60A5002F5203 /* Boulder.cpp in Sources */,
 				AA92BE5E2BABC62200181FEA /* DistantBird.cpp in Sources */,
 				AA7A3E4929B6E2540005EEA7 /* Mob.cpp in Sources */,
 				AA22A1812BCA2DD10048F445 /* Dust.cpp in Sources */,
@@ -607,12 +623,14 @@
 				AA1744B22D387A620078E160 /* Fire.cpp in Sources */,
 				AA7A3E4C29B6E2540005EEA7 /* PineTree.cpp in Sources */,
 				AA7A3E6229B6E2540005EEA7 /* Camera.cpp in Sources */,
-				AADC31C12C71733A00CD1417 /* Stalagmite.cpp in Sources */,
+				AADC31C12C71733A00CD1417 /* Stalite.cpp in Sources */,
 				AA13ACA92BD357D4005DAD3C /* Bush.cpp in Sources */,
 				AA01DC022BF32283006FE720 /* Random.cpp in Sources */,
 				AA1744A72D34A3ED0078E160 /* AspineTree.cpp in Sources */,
 				AA7A3E4A29B6E2540005EEA7 /* Lighting.cpp in Sources */,
+				AA9529212DDEE67300A6F3A6 /* Spikes.cpp in Sources */,
 				AA7A3E4E29B6E2540005EEA7 /* Sky.cpp in Sources */,
+				AAAC220E2D51E96E002F5203 /* Caves.cpp in Sources */,
 				AA7A3E5329B6E2540005EEA7 /* SoundClip.cpp in Sources */,
 				AA02570A2BB939BC00DB1313 /* Hills.cpp in Sources */,
 				AA9752142BB2BF6B003289EF /* MountMerciless.cpp in Sources */,

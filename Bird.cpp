@@ -53,7 +53,7 @@ void Bird::render( )
 {
     Mob::render( );
 
-    const Color COLOR = RED;
+    cColor COLOR = RED;
 
     Polygon wing = Polygon( { Coordinate( 0.0, 0.0 ), Coordinate( -24.0, sin( room( )->age( ) / 16.0 ) * 16.0 ), Coordinate( 16.0, 0.0 ) } );
     if( velocity( ).dx( ) < 0.0 )

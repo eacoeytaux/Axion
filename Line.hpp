@@ -12,7 +12,7 @@ namespace axn
 namespace geometry
 {
 
-class Line : public Transformable
+axnclass( Line ) : public Transformable
 {
 
 private:
@@ -23,7 +23,7 @@ private:
     Planc m_m = INFINITY;
     Planc m_b = P0;
 
-    Line & solve_mb( ) { if( c1( ).x( ) == c2( ).x( ) ) { m_m = ( ( c1( ).y( ) <= c2( ).y( ) ) ? INFINITY_POS : INFINITY_NEG ); m_b = c1( ).x( ); } else { m_m = ( ( c2( ).y( ) - c1( ).y( ) ) / ( c2( ).x( ) - c1( ).x( ) ) ); m_b = ( c1( ).y( ) - ( m_m * c1( ).x( ) ) ); } rethis; }
+    Line & solve_mb( ) { /* Assert( c1.valid( ) && c2.valid( ) ); */ if( c1( ).x( ) == c2( ).x( ) ) { m_m = ( ( c1( ).y( ) <= c2( ).y( ) ) ? INFINITY_POS : INFINITY_NEG ); m_b = c1( ).x( ); } else { m_m = ( ( c2( ).y( ) - c1( ).y( ) ) / ( c2( ).x( ) - c1( ).x( ) ) ); m_b = ( c1( ).y( ) - ( m_m * c1( ).x( ) ) ); } rethis; }
 
 public:
 
@@ -57,7 +57,7 @@ public:
     Planc x( Planc cref y ) const { return ( vertical( ) || horizontal( ) ) ? c1( ).x( ) : ( ( y - b( ) ) / m( ) ); }
     Planc y( Planc cref x ) const { return ( vertical( ) || horizontal( ) ) ? c1( ).y( ) : ( ( m( ) * x ) + b( ) ); }
 
-    Planc cross( Coordinate cref c ) const { return ::cross( c1( ), c2( ), c ); }
+    Planc cross( Coordinate cref c ) const { return ( ( ( c.y( ) - c1( ).y( ) ) * ( c2( ).x( ) - c1( ).x( ) ) ) - ( ( c.x( ) - c1( ).x( ) ) * ( c2( ).y( ) - c1( ).y( ) ) ) ); }
 
     bool on( Coordinate cref c ) const { return equal( cross( c ), 0.0 ) && ( ( c1( ) != c2( ) ) || ( c == c1( ) ) ); }
     bool above( Coordinate cref c, cbool inclusive = false ) const { return greater( inclusive, cross( c ), 0.0 ) && ( c1( ) != c2( ) ); }

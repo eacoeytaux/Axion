@@ -9,20 +9,18 @@ namespace
 cPlanc BASE_WIDTH = 33.0;
 cPlanc LEAF_LENGTH = 45.0;
 const Span<uint> LEAF_COUNT = { 5, 7 };
-const Angle LEAF_BASE = RIGHT / 4.0;
+cAngle LEAF_BASE = RIGHT / 4.0;
 cPlanc LEAF_TIP_OFFSET = 5.0;
 
-const Color BUSH_COLOR = GREEN;
+cColor BUSH_COLOR = GREEN;
 
 } // namespace
 
-Bush::Bush( Room * room, Coordinate cref _root, cdec _z ) : Object( room, _root )
+Bush::Bush( Room * room, Coordinate cref _root, cdec _z ) : Object( room, _root, _z )
 {
     background( true );
 
     persist_render( true );
-
-    z( _z );
 
     Drawing bush_drawing;
 

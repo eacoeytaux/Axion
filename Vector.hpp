@@ -10,7 +10,7 @@ namespace axn
 namespace geometry
 {
 
-class Vector
+axnclass( Vector )
 {
 
 private:
@@ -78,42 +78,21 @@ public:
     
 };
 
-class VectorX : public Vector
-{
-    
-public:
-    
-    VectorX( Planc cref dx ) : Vector( dx, P0 ) { }
-    VectorX( Planc cref dx, Coordinate cref origin ) : Vector( dx, P0, origin ) { }
-    
-};
+cVector V0( 0.0, 0.0 );
+cVector XHAT( 1.0, 0.0 );
+cVector YHAT( 0.0, 1.0 );
 
-class VectorY : public Vector
-{
-    
-public:
-    
-    VectorY( Planc cref dy ) : Vector( P0, dy ) { }
-    VectorY( Planc cref dy, Coordinate cref origin ) : Vector( P0, dy, origin ) { }
-    
-};
+inline Vector VectorX( Planc cref dx ) { return Vector( dx, P0 ); }
+inline Vector VectorX( Planc cref dx, Coordinate cref origin ) { return Vector( dx, P0, origin ); }
 
-class VectorA : public Vector
-{
-    
-public:
-    
-    VectorA( Angle cref a ) : Vector( a.cos( ), a.sin( ) ) { }
-    VectorA( Angle cref a, Coordinate cref origin ) : Vector( a.cos( ), a.sin( ), origin ) { }
+inline Vector VectorY( Planc cref dy ) { return Vector( P0, dy ); }
+inline Vector VectorY( Planc cref dy, Coordinate cref origin ) { return Vector( P0, dy, origin ); }
 
-    VectorA( Angle cref a, Planc cref magnitude ) : Vector( a.cos( ) * magnitude, a.sin( ) * magnitude ) { }
-    VectorA( Angle cref a, Planc cref magnitude, Coordinate cref origin ) : Vector( a.cos( ) * magnitude, a.sin( ) * magnitude, origin ) { }
-    
-};
+inline Vector VectorA( Angle cref a ) { return Vector( a.cos( ), a.sin( ) ); }
+inline Vector VectorA( Angle cref a, Coordinate cref origin ) { return Vector( a.cos( ), a.sin( ), origin ); }
 
-const Vector V0( 0.0, 0.0 );
-const Vector XHAT( 1.0, 0.0 );
-const Vector YHAT( 0.0, 1.0 );
+inline Vector VectorA( Angle cref a, Planc cref magnitude ) { return Vector( a.cos( ) * magnitude, a.sin( ) * magnitude ); }
+inline Vector VectorA( Angle cref a, Planc cref magnitude, Coordinate cref origin ) { return Vector( a.cos( ) * magnitude, a.sin( ) * magnitude, origin ); }
 
 inline Coordinate::Coordinate( Vector cref v ) { *this = v.destination( ); }
 

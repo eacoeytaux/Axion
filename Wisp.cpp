@@ -14,13 +14,13 @@ const Planc FACE_RADIUS = FACE_RADIUS_RATIO * HEAD_RADIUS;
 const dec FACE_RADIUS_OFFSET_RATIO = 0.5;
 const Planc FACE_OFFSET_DISTANCE = FACE_RADIUS_OFFSET_RATIO * ( HEAD_RADIUS - FACE_RADIUS );
 const dec EYE_OFFSET = 0.5;
-const Angle EYE_OFFSET_ANGLE = ( TAU / 12.0 );
+cAngle EYE_OFFSET_ANGLE = ( TAU / 12.0 );
 const Planc EYE_RADIUS = ( ( 1.0 - EYE_OFFSET ) * 0.4 ) * FACE_RADIUS;;
 const dec MOUTH_OFFSET_RATIO = 0.75;
 const Planc MOUTH_OFFSET = MOUTH_OFFSET_RATIO * FACE_RADIUS;
 const dec MOUTH_RADIUS_RATIO = 0.625;
 const Planc MOUTH_RADIUS = MOUTH_RADIUS_RATIO * FACE_RADIUS;
-const Color COLOR = BLACK;
+cColor COLOR = BLACK;
 
 const Span<uint> FLAME_PAUSE = { 5, 8 };
 const Planc FLAME_RADIUS = 16.0;
@@ -28,13 +28,13 @@ const Planc FLAME_RADIUS_MIN = 0.1;
 const Planc FLAME_SPEED = 1.0;
 const Planc FLAME_SHRINK_RATE = 0.4;
 const Planc FLAME_ALPHA_SHRINK_RATE = 0.025;
-const Angle FLAME_DEVIATION = ( RIGHT / 2.0 );
+cAngle FLAME_DEVIATION = ( RIGHT / 2.0 );
 const dec FLAME_WIND_RESISTANCE_RATIO = 0.5;
 const dec FLAME_MOVEMENT_RESISTANCE_RATIO = 0.9;
 const Span<dec> FLAME_BASE_RADIUS_RATIO = { 1.0, 1.1 };
 const dec FLAME_BASE_OFFSET = 0.01;
 const Planc FLAME_LIGHT_DISTANCE = ( FLAME_RADIUS * 2.0 );
-const Color FLAME_COLOR = CYAN;
+cColor FLAME_COLOR = CYAN;
 
 const Planc BULLET_RADIUS = 4.0;
 const Planc BULLET_FLAME_RATIO = 1.1;
@@ -171,6 +171,13 @@ void Wisp::Bullet::update( )
 
     clear_light_sources( );
     add_light_sources( m_fire.light_sources( ) );
+}
+
+void Wisp::die( )
+{
+    Mob::die( );
+    
+    gravity_ratio( 1.0 );
 }
 
 void Wisp::Bullet::move( Vector cref _velocity )

@@ -14,7 +14,7 @@ namespace axn
 namespace geometry
 {
 
-class Triangle : public Transformable
+axnclass( Triangle ) : public Transformable
 {
 
 private:
@@ -27,7 +27,7 @@ public:
 
     Triangle( ) { }
 
-    Triangle( xCoordinate c1, xCoordinate c2, xCoordinate c3 ) : m_c1( c1 ), m_c2( c2 ), m_c3( c3 ) { }
+    Triangle( xCoordinate c1, xCoordinate c2, xCoordinate c3 ) : m_c1( c1 ), m_c2( c2 ), m_c3( c3 ) { Assert( c1.valid( ) && c2.valid( ) && c3.valid( ) );}
 
     Coordinate cref c1( ) const { return m_c1; }
     Coordinate cref c2( ) const { return m_c2; }

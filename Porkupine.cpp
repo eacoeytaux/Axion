@@ -12,10 +12,10 @@ cPlanc HEIGHT = WIDTH;
 
 cPlanc QUILL_OFFSET = 2.5;
 const Span<uint> QUILL_COUNT = { 16, 24 };
-const Angle QUILL_FAR = ( TAU / 2.0 );
-const Angle QUILL_CLOSE = ( TAU / 10.0 );
+cAngle QUILL_FAR = ( TAU / 2.0 );
+cAngle QUILL_CLOSE = ( TAU / 10.0 );
 
-const Color QUILL_COLOR = YELLOW;
+cColor QUILL_COLOR = YELLOW;
 }
 
 Porkupine::Porkupine( Room * room, Coordinate cref _position ) : Enemy( room, _position )

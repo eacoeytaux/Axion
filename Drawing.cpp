@@ -33,7 +33,7 @@ Drawing & Drawing::erase( Polygon cref _polygon )
     rethis;
 }
 
-Drawing & Drawing::add_bound( Polygon cref _polygon )
+Drawing & Drawing::bind( Polygon cref _polygon )
 {
     ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
     colored_polygon.polygon = _polygon;

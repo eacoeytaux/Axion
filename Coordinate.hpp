@@ -52,6 +52,8 @@ public:
 
     Coordinate & x( Planc cref x ) { m_x = x; rethis; }
     Coordinate & y( Planc cref y ) { m_y = y; rethis; }
+    
+    bool valid( ) const { return ( is_num( x( ) ) && is_num( y( ) ) ); }
 
     Planc distance_to_origin( ) const { return pythagorean( x( ), y( ) ); }
     Planc distance_to( Coordinate cref c ) const { return pythagorean( x( ) - c.x( ), y( ) - c.y( ) ); }
@@ -93,31 +95,18 @@ public:
     
 };
 
-class CoordinateX : public Coordinate { public: CoordinateX( Planc cref x ) : Coordinate( x, P0 ) { } };
-class CoordinateY : public Coordinate { public: CoordinateY( Planc cref y ) : Coordinate( P0, y ) { } };
-
 const Coordinate ORIGIN( 0.0, 0.0 );
 const Coordinate INVALID_COORDINATE( INFINITY_NEG, INFINITY_NEG );
+
+inline Coordinate CoordinateX( Planc cref x ) { return Coordinate( x, P0 ); }
+inline Coordinate CoordinateY( Planc cref y ) { return Coordinate( P0, y ); }
+
+inline Coordinate midpoint( Coordinate cref c1, Coordinate cref c2 ) { return Coordinate( c1.x( ) + half( c2.x( ) - c1.x( ) ), c1.y( ) + half( c2.y( ) - c1.y( ) ) ); }
 
 inline Planc distance( Coordinate cref c1, Coordinate cref c2 ) { return c1.distance_to( c2 ); }
 inline bool in_distance_range( Coordinate cref c1, Coordinate cref c2, Planc cref distance, bool inclusive = true ) { return c1.in_distance_range( c2, distance, inclusive ); }
 
 inline Planc cross( Coordinate cref c1, Coordinate cref c2, Coordinate cref c3 ) { return ( ( ( c3.y( ) - c1.y( ) ) * ( c2.x( ) - c1.x( ) ) ) - ( ( c3.x( ) - c1.x( ) ) * ( c2.y( ) - c1.y( ) ) ) ); }
-
-inline Coordinate midpoint( Coordinate cref c1, Coordinate cref c2 ) { return Coordinate( c1.x( ) + half( c2.x( ) - c1.x( ) ), c1.y( ) + half( c2.y( ) - c1.y( ) ) ); }
-
-inline bool contains( Coordinate cref c1, Coordinate cref c2, Coordinate cref c3, Coordinate cref c, bool inclusive = true )
-{
-    dec a = 0.5 / half( ( c1.x( ) * ( c2.y( ) - c3.y( ) ) ) + ( c1.y( ) * ( c3.x( ) - c2.x( ) ) ) + ( c2.x( ) * c3.y( ) ) + ( c3.x( ) * -c2.y( ) ) );
-
-    dec s = a * ( ( c1.y( ) * c3.x( ) ) - ( c1.x( ) * c3.y( ) ) + ( ( c3.y( ) - c1.y( ) ) * c.x( ) ) + ( ( c1.x( ) - c3.x( ) ) * c.y( ) ) );
-    return_false_if( less( !inclusive, s, 0.0 ) );
-
-    dec t = a * ( ( c1.x( ) * c2.y( ) ) - ( c1.y( ) * c2.x( ) ) + ( ( c1.y( ) - c2.y( ) ) * c.x( ) ) + ( ( c2.x( ) - c1.x( ) ) * c.y( ) ) );
-    return_false_if( less( !inclusive, t, 0.0 ) );
-
-    return !less( !inclusive, ( 1.0 - s - t ), 0.0 );
-}
 
 } // namespace geometry
 } // namespace axn

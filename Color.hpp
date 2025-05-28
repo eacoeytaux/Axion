@@ -14,7 +14,7 @@ cdec FILLED = 0.0;
 
 // https://www.calculatorology.com/conversion/color/
 
-class Color
+axnclass( Color )
 {
 
 public:
@@ -289,23 +289,23 @@ private:
     
 };
 
-const Color TRANSPARENT = Color::rgba( 1.0, 1.0, 1.0, 0.0 );
+cColor TRANSPARENT = Color::rgba( 1.0, 1.0, 1.0, 0.0 );
 
-const Color WHITE = Color::rgb( 1.0, 1.0, 1.0 );
-const Color GRAY_LIGHT = Color::rgb( 0.75, 0.75, 0.75 );
-const Color GRAY_MID = Color::rgb( 0.5, 0.5, 0.5 );
-const Color GRAY_DARK = Color::rgb( 0.25, 0.25, 0.25 );
-const Color BLACK = Color::rgb( 0.0, 0.0, 0.0 );
+cColor WHITE = Color::rgb( 1.0, 1.0, 1.0 );
+cColor GRAY_LIGHT = Color::rgb( 0.75, 0.75, 0.75 );
+cColor GRAY_MID = Color::rgb( 0.5, 0.5, 0.5 );
+cColor GRAY_DARK = Color::rgb( 0.25, 0.25, 0.25 );
+cColor BLACK = Color::rgb( 0.0, 0.0, 0.0 );
 
-const Color RED = Color::rgb( 1.0, 0.0, 0.0 );
-const Color GREEN = Color::rgb( 0.0, 1.0, 0.0 );
-const Color BLUE = Color::rgb( 0.0, 0.0, 1.0 );
+cColor RED = Color::rgb( 1.0, 0.0, 0.0 );
+cColor GREEN = Color::rgb( 0.0, 1.0, 0.0 );
+cColor BLUE = Color::rgb( 0.0, 0.0, 1.0 );
 
-const Color CYAN = Color::rgb( 0.0, 1.0, 1.0 );
-const Color MAGENTA = Color::rgb( 1.0, 0.0, 1.0 );
-const Color YELLOW = Color::rgb( 1.0, 1.0, 0.0 );
+cColor CYAN = Color::rgb( 0.0, 1.0, 1.0 );
+cColor MAGENTA = Color::rgb( 1.0, 0.0, 1.0 );
+cColor YELLOW = Color::rgb( 1.0, 1.0, 0.0 );
 
-class ColorSlider
+axnclass( ColorSlider )
 {
 
 public:
