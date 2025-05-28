@@ -9,10 +9,10 @@ cPlanc EYE_RADIUS = 1.0;
 cuint BLINK_DURATION = 2;
 const Span<uint> BLINK_WAIT = { 180, 240 };
 
-const Color EYE_COLOR = BLACK;
-const Color NOSE_COLOR = BLACK;
-const Color FUR_COLOR1 = Color::rgb( 0xFFA500 );
-const Color FUR_COLOR2 = WHITE;
+cColor EYE_COLOR = BLACK;
+cColor NOSE_COLOR = BLACK;
+cColor FUR_COLOR1 = Color::rgb( 0xFFA500 );
+cColor FUR_COLOR2 = WHITE;
 }
 
 Fox::Fox( Room * room, Coordinate cref _position ) : Mob( room, _position )

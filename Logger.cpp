@@ -46,7 +46,7 @@ error Logger::init( cbool _file )
     }
 
     b_initialized = true;
-    log_message( INFO_LOG, "starting ............... ( v%s )\n", VERSION );
+    log_message( INFO_LOG, "starting ............... ( v%s )\n", AXN_VERSION );
     return no_error;
 }
 
@@ -137,7 +137,7 @@ error Logger::close( )
 {
     if( b_initialized )
     {
-        log_message( INFO_LOG, "complete ............... ( :\n" );
+        log_message( INFO_LOG, "complete ............... :)\n" );
     }
 
     b_initialized = false;

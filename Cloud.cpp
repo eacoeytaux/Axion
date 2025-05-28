@@ -21,8 +21,8 @@ const Span<uint> SMALL_PUFF_COUNT = { 1, 3 };
 const Span<Planc> SMALL_PUFF_RADIUS = { 20.0, 90.0 };
 const Span<Planc> SMALL_PUFF_DISTANCE = { ( LARGE_PUFF_RADIUS.max( ) * PUFF_OUTLINE_RATIO ) + SMALL_PUFF_RADIUS.max( ), ( LARGE_PUFF_RADIUS.max( ) * PUFF_OUTLINE_RATIO ) + ( SMALL_PUFF_RADIUS.max( ) * 2.0 ) };
 
-const Color INSIDE_COLOR = Color::rgb( 0x87CDEB );
-const Color OUTSIDE_COLOR = WHITE;
+cColor INSIDE_COLOR = Color::rgb( 0x87CDEB );
+cColor OUTSIDE_COLOR = WHITE;
 
 } // namespace
 

@@ -16,18 +16,18 @@ cdec SUNSET_END = 0.8;
 
 const Span<uint> CLOUD_REGEN_RATE = { 0 }; // 0 for no clouds
 
-const Color MIDNIGHT_COLOR = BLACK;
-const Color SUNRISE_COLOR = Color::rgb( 0xFF7800 );
-const Color NOON_COLOR = BLUE;
-const Color SUNSET_COLOR = Color::rgb( 0xFF7800 );
+cColor MIDNIGHT_COLOR = BLACK;
+cColor SUNRISE_COLOR = Color::rgb( 0xFF7800 );
+cColor NOON_COLOR = BLUE;
+cColor SUNSET_COLOR = Color::rgb( 0xFF7800 );
 
-const ColorSlider SKY_MIDNIGHT_TO_SUNRISE = ColorSlider( MIDNIGHT_COLOR, SUNRISE_COLOR );
-const ColorSlider SKY_SUNRISE = ColorSlider( SUNRISE_COLOR, SUNRISE_COLOR );
-const ColorSlider SKY_SUNRISE_TO_NOON = ColorSlider( SUNRISE_COLOR, NOON_COLOR );
-const ColorSlider SKY_NOON = ColorSlider( NOON_COLOR, NOON_COLOR );
-const ColorSlider SKY_NOON_TO_SUNSET = ColorSlider( NOON_COLOR, SUNSET_COLOR );
-const ColorSlider SKY_SUNSET = ColorSlider( SUNSET_COLOR, SUNSET_COLOR );
-const ColorSlider SKY_SUNSET_TO_MIDNIGHT = ColorSlider( SUNSET_COLOR, MIDNIGHT_COLOR );
+cColorSlider SKY_MIDNIGHT_TO_SUNRISE = ColorSlider( MIDNIGHT_COLOR, SUNRISE_COLOR );
+cColorSlider SKY_SUNRISE = ColorSlider( SUNRISE_COLOR, SUNRISE_COLOR );
+cColorSlider SKY_SUNRISE_TO_NOON = ColorSlider( SUNRISE_COLOR, NOON_COLOR );
+cColorSlider SKY_NOON = ColorSlider( NOON_COLOR, NOON_COLOR );
+cColorSlider SKY_NOON_TO_SUNSET = ColorSlider( NOON_COLOR, SUNSET_COLOR );
+cColorSlider SKY_SUNSET = ColorSlider( SUNSET_COLOR, SUNSET_COLOR );
+cColorSlider SKY_SUNSET_TO_MIDNIGHT = ColorSlider( SUNSET_COLOR, MIDNIGHT_COLOR );
 
 } // namespace
 

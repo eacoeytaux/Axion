@@ -14,7 +14,7 @@ namespace axn
 namespace geometry
 {
 
-class Bezier
+axnclass( Bezier )
 {
 
 private:
@@ -25,7 +25,7 @@ public:
 
     Bezier( ) { }
 
-    Bezier( varray<Coordinate> cref control_points ) : m_control_points( control_points ) { }
+    Bezier( varray<Coordinate> cref control_points ) : m_control_points( control_points ) { for_each( coordinate, control_points ) { Assert( coordinate.valid( ) ); } }
 
     Coordinate position( dec t )
     {
@@ -60,7 +60,7 @@ public:
                 varray<Line> lines;
                 Coordinate last = m_control_points.front( );
 
-                dec dt = 1.0 / point_count;
+                dec dt = ( 1.0 / point_count );
 
                 for_range( x, point_count - 1 )
                 {

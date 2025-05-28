@@ -25,7 +25,7 @@ cPlanc INNER_FUR_HEIGHT = BODY_HEIGHT * 0.8;
 cPlanc CHEEK_RADIUS = HEAD_RADIUS * 0.3;
 
 cPlanc NOSE_RADIUS = HEAD_RADIUS * 0.25;
-const Vector NOSE_OFFSET = VectorX( CHEEK_RADIUS );
+cVector NOSE_OFFSET = VectorX( CHEEK_RADIUS );
 
 cPlanc TEETH_WIDTH = NOSE_RADIUS * 0.9;
 cPlanc TEETH_LENGTH = HEAD_RADIUS * 0.64;
@@ -33,8 +33,8 @@ cPlanc TEETH_LENGTH = HEAD_RADIUS * 0.64;
 cPlanc EAR_RADIUS = HEAD_RADIUS * 0.3;
 cPlanc EAR_INNER_RADIUS = EAR_RADIUS * 0.5;
 cPlanc EAR_PLACEMENT_DISTANCE = HEAD_RADIUS;
-const Angle EAR_ANGLE_FRONT = RIGHT * 1.5;
-const Angle EAR_ANGLE_BACK = RIGHT * 0.5;
+cAngle EAR_ANGLE_FRONT = RIGHT * 1.5;
+cAngle EAR_ANGLE_BACK = RIGHT * 0.5;
 
 cPlanc EYE_SPACING_UP = NOSE_RADIUS * 1.25;
 cPlanc EYE_SPACING_SIDE = NOSE_RADIUS * 1.75;
@@ -42,11 +42,11 @@ cPlanc EYE_RADIUS = 1.0;
 cuint BLINK_DURATION = 4;
 const Span<uint> BLINK_WAIT = { 360, 480 };
 
-const Color EYE_COLOR = BLACK;
-const Color TEETH_COLOR = WHITE;
-const Color NOSE_COLOR = Color::rgb( 0x654321 );
-const Color FUR_COLOR1 = Color::rgb( 0xA0522D );
-const Color FUR_COLOR2 = Color::rgb( 0xF4A460 );
+cColor EYE_COLOR = BLACK;
+cColor TEETH_COLOR = WHITE;
+cColor NOSE_COLOR = Color::rgb( 0x654321 );
+cColor FUR_COLOR1 = Color::rgb( 0xA0522D );
+cColor FUR_COLOR2 = Color::rgb( 0xF4A460 );
 }
 
 Gopher::Gopher( Room * room, Coordinate cref _position ) : Enemy( room, _position, 10000.0 )

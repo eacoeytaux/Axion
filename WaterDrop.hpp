@@ -12,10 +12,18 @@ class WaterDrop : public Object
 
 public:
 
-    WaterDrop( Room *, Coordinate cref position );
+    WaterDrop( Room *, Coordinate cref position, dec z = 1.0 );
+    WaterDrop( Room *, Coordinate cref position, Vector cref upward, dec z = 1.0 );
 
     virtual void render( ) override;
-    virtual void update( ) override;
+    
+    virtual void ground( TerrainEdge * ) override;
+    
+private:
+    
+    bool m_splashed;
+    Planc m_radius;
+    Color m_color;
     
 };
 

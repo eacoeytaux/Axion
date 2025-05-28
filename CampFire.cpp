@@ -22,7 +22,7 @@ const dec FLAME_BASE_OFFSET_MAX_RATIO = 0.01;
 
 cPlanc FLAME_RADIUS_MIN = 0.1;
 
-const Angle FLAME_DEVIATION = RIGHT / 2.0;
+cAngle FLAME_DEVIATION = RIGHT / 2.0;
 
 cdec WIND_RESISTANCE_RATIO = 0.5;
 
@@ -33,8 +33,8 @@ cdec TINT_INTENSITY = 0.125;
 
 cdec FLAME_ALPHA_SHRINK = 0.01;
 
-const Color FLAME_COLOR_ORANGE = Color::rgb( 0xFF8000 );
-const Color FLAME_COLOR_YELLOW = Color::rgb( 0xFFC000 );
+cColor FLAME_COLOR_ORANGE = Color::rgb( 0xFF8000 );
+cColor FLAME_COLOR_YELLOW = Color::rgb( 0xFFC000 );
 
 } // namespace
 

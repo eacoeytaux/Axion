@@ -8,6 +8,7 @@ namespace axn
 
 namespace graphics
 {
+
 class Camera;
 class Lighting;
 
@@ -15,6 +16,7 @@ class Lighting;
 
 namespace reality
 {
+
 class World;
 class Object;
 class Player;
@@ -28,6 +30,34 @@ namespace reality
 
 class Room
 {
+    
+public:
+    
+    class Door
+    {
+        
+    private:
+        
+        Room * m_room;
+        
+        Coordinate m_position;
+        
+        bool m_locked;
+        
+        Door * m_out;
+        
+    public:
+        
+        Door( Room * room, xCoordinate position, bool locked = false ) : m_room( room ), m_position( position ), m_locked( locked ) { }
+        
+        Room * room( ) const { return m_room; }
+        
+        Door * out( ) { return m_out; }
+        
+        virtual void lock( bool b ) { m_locked = b; }
+        virtual bool locked( ) const { return m_locked; }
+        
+    };
 
 public:
 
@@ -62,6 +92,7 @@ public:
     Player * player( uint player_number = 0 );
     Player * player_main( );
 
+    // todo these should be in world
     virtual Player * add_player( Coordinate cref );
     virtual Player * create_player( Coordinate cref ) = 0;
 
@@ -105,6 +136,10 @@ public:
             add_particle( particle );
         }
     }
+    
+    const oset<Door *> & doors( ) const { return m_doors; }
+    
+    oset<Room *> connected_rooms( ) const;
 
     // environment
 
@@ -143,6 +178,8 @@ private:
 protected: // todo make private?
 
     World * m_world = nullptr;
+    
+    oset<Door *> m_doors;
 
     uint m_age = 0;
 
@@ -167,23 +204,54 @@ public:
 
     class Grid
     {
+        
     public:
 
         struct Block
         {
-            void init( uint xx, uint yy )
+            
+        public:
+            
+            void init( uint x, uint y )
             {
-                x = xx;
-                y = yy;
+                #if defined ( AXN_DEBUG )
+                Assert( !m_init );
+                m_init = true;
+                #endif
+                
+                m_x = x;
+                m_y = y;
             }
-
-            uint x = 0;
-            uint y = 0;
-
-            uset<Object *> objects;
-            uset<TerrainNode *> terrain_nodes;
-
+            
+            uint x( ) const { return m_x; }
+            uint y( ) const { return m_y; }
+            
+            const uset<Object *> & objects( ) const { return m_objects; }
+            
+            void insert( Object * object ) { m_objects.insert( object ); }
+            void remove( Object * object ) { m_objects.remove( object ); }
+            
+            const uset<TerrainNode *> & terrain_nodes( ) const { return m_terrain_nodes; }
+            
+            void insert( TerrainNode * terrain ) { m_terrain_nodes.insert( terrain ); }
+            void remove( TerrainNode * terrain ) { m_terrain_nodes.remove( terrain ); }
+            
+            void clear( ) { m_objects.clear( ); m_terrain_nodes.clear( ); }
+            
             default_equal( Block );
+            
+        private:
+        
+            #if defined ( AXN_DEBUG )
+            bool m_init = false;
+            #endif
+            
+            uint m_x = 0;
+            uint m_y = 0;
+
+            uset<Object *> m_objects;
+            
+            uset<TerrainNode *> m_terrain_nodes;
         };
 
     public:
@@ -211,10 +279,10 @@ public:
         void traverse_const( FixedRectangle cref range, function<void( Block cref )> f ) const;
         void traverse_const( function<void( Block cref )> f ) const { return traverse_const( m_bounds, f ); }
 
-        void add( Object * object );
+        void insert( Object * object );
         void remove( Object * object );
 
-        void add( TerrainNode * terrain_node );
+        void insert( TerrainNode * terrain_node );
         void remove( TerrainNode * terrain_node );
 
         void clear( );

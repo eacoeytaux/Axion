@@ -77,6 +77,14 @@
     typedef Class * p##Class; \
     class Class
 
+#define axnclassT( Class ) \
+    class Class; \
+    typedef const Class c##Class; \
+    typedef const Class & x##Class; \
+    typedef Class & r##Class; \
+    typedef Class * p##Class; \
+    class template <typename T> Class
+
 namespace axn
 {
 namespace utility
@@ -84,6 +92,7 @@ namespace utility
 
 inline void nothing( ) { }
 
+typeT inline bool is_null( T * t ) { return ( t == nullptr ); }
 typeT inline void safe_delete( T *& t ) { if( t && dynamic_cast<T *>( t ) ) { delete t; } t = nullptr; }
 
 // -- dec util functions --
@@ -188,6 +197,8 @@ inline varray<uint> pascal( cint row )
 
     return v;
 }
+
+inline uint curve_point_count( dec length ) { return max<uint>( 4, min<uint>( 60, ceil( length ) ) ); }
 
 // -- util classes --
 

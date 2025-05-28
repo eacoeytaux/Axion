@@ -15,7 +15,7 @@ namespace axn
 namespace geometry
 {
 
-class FixedRectangle
+axnclass( FixedRectangle )
 {
 
 private:

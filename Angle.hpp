@@ -9,13 +9,16 @@ namespace axn
 namespace geometry
 {
 
-class Angle
+axnclass( Angle )
 {
 
 private:
 
     dec m_radians = 0.0;
     bool m_truncate = false; // keeps radians within [ 0, 2 * pi )
+    
+    static const int SIN_TABLE_SIZE = 1000;
+    static varray<dec> SIN_TABLE;
 
 public:
 
@@ -91,7 +94,7 @@ public:
     
 };
 
-const Angle A0 = Angle( );
+cAngle A0 = Angle( );
 
 } // namespace geometry
 } // namespace axn

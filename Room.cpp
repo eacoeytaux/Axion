@@ -60,6 +60,8 @@ void Room::init( )
 void Room::create( FixedRectangle cref _bounds )
 {
     bounds( _bounds );
+    
+    m_doors.clear( );
 
     m_terrain = generate_terrain( );
     world( )->assign_layer_position( m_terrain );
@@ -83,7 +85,7 @@ void Room::input( const list<Input *> & _inputs )
 
 void Room::render_bounds( Camera * camera )
 {
-    const Color BOUNDS_COLOR = RED;
+    cColor BOUNDS_COLOR = RED;
     cPlanc BOUNDS_THICKNESS = 5.0;
 
     static uint PULSE = 0;
@@ -126,9 +128,9 @@ void Room::render_bounds( Camera * camera )
 void Room::render_object_grid( Camera * camera ) const
 {
     cdec GRID_LINE_THICKNESS = 1.0;
-    const Color GRID_LINE_COLOR = WHITE.a( 0.25 );
-    const Color HAS_OBJECTS_COLOR = GREEN.a( 0.15 );
-    const Color HAS_TERRAIN_COLOR = YELLOW.a( 0.15 );
+    cColor GRID_LINE_COLOR = WHITE.a( 0.25 );
+    cColor HAS_OBJECTS_COLOR = GREEN.a( 0.15 );
+    cColor HAS_TERRAIN_COLOR = YELLOW.a( 0.15 );
 
     Grid cref grid = m_object_grid;
     Coordinate top = bounds( ).top( );
@@ -138,20 +140,20 @@ void Room::render_object_grid( Camera * camera ) const
 
     grid.traverse_const( [ & ] ( const Grid::Block & block )
     {
-        if( block.objects.size( ) || block.terrain_nodes.size( ) )
+        if( block.objects( ).size( ) || block.terrain_nodes( ).size( ) )
         {
             Polygon grid( {
-                Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y ) ),
-                Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x + 1 ) ), top.x( ) ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y ) ),
-                Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x + 1 ) ), top.x( ) ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y + 1 ) ), top.y( ) ) ),
-                Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y + 1 ) ), top.y( ) ) ) } );
+                Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x( ) ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y( ) ) ),
+                Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x( ) + 1 ) ), top.x( ) ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y( ) ) ),
+                Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x( ) + 1 ) ), top.x( ) ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y( ) + 1 ) ), top.y( ) ) ),
+                Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x( ) ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y( ) + 1 ) ), top.y( ) ) ) } );
 
-            if( block.objects.size( ) )
+            if( block.objects( ).size( ) )
             {
                 grid_drawing.draw( HAS_OBJECTS_COLOR, grid );
             }
 
-            if( block.terrain_nodes.size( ) )
+            if( block.terrain_nodes( ).size( ) )
             {
                 grid_drawing.draw( HAS_TERRAIN_COLOR, grid );
             }
@@ -178,7 +180,7 @@ void Room::render( )
 {
     Camera * camera = world( )->camera( );
     camera->clear_subjects( );
-
+    
     m_lighting->clear_light_sources( );
 
     auto capture_objects = [ & ] ( varray<Object *> cref objects, bool light_source )
@@ -189,24 +191,12 @@ void Room::render( )
 
             if( !object->z( ) || camera->in_view( object->bounding_box( ) + object->position( ), object->z( ) ) )
             {
-                if( light_source )
-                {
-                    m_lighting->add_light_sources( object->light_sources( ) );
-                }
+                if( light_source ) { m_lighting->add_light_sources( object->light_sources( ) ); }
 
                 camera->capture( object );
 
                 #if defined ( AXN_DEBUG )
-                if( Debug::active )
-                {
-                    if( object->draw_debug )
-                    {
-                        Drawing debug_overlay = object->debug_overlay( );
-                        debug_overlay.move( object->position( ) );
-
-                        camera->capture_debug( new Visible( debug_overlay ), true );
-                    }
-                }
+                if( Debug::active && object->draw_debug ) { camera->capture_debug( new Visible( object->debug_overlay( ).move( object->position( ) ) ), true ); }
                 #endif
             }
         }
@@ -224,20 +214,43 @@ void Room::render( )
     }
 
     #if defined ( AXN_DEBUG )
-    if( Debug::active && Settings::get( Settings::DEBUG_GRID ) )
-    {
-        render_object_grid( camera );
-    }
+    if( Debug::active && Settings::get( Settings::DEBUG_GRID ) ) { render_object_grid( camera ); }
     #endif
 
     render_bounds( camera );
-
-    camera->render( );
 }
 
 void Room::update( )
 {
     ++m_age;
+
+    m_players.remove_if( [ & ] ( Player * player ) { return ( !player || player->deleted( ) ); } );
+
+    auto remove_deleted_objects = [ & ] ( varray<Object *> & objects )
+    {
+        objects.remove_if( [ & ] ( Object * object )
+        {
+            if( !object )
+            {
+                return true;
+            }
+            else if( object->deleted( ) )
+            {
+                remove_object( object );
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        } );
+    };
+
+    remove_deleted_objects( m_objects );
+    remove_deleted_objects( m_foreground_objects );
+    remove_deleted_objects( m_background_objects );
+    
+    
 
     add_objects_from_queue( );
 
@@ -289,43 +302,12 @@ void Room::update( )
     }
 
     update_object( m_terrain );
-
-    m_players.remove_if( [ & ] ( Player * player )
-    {
-        return player->deleted( );
-    } );
-
-    auto remove_deleted_objects = [ & ] ( varray<Object *> & objects )
-    {
-        objects.remove_if( [ & ] ( Object * object )
-        {
-            if( !object )
-            {
-                return true;
-            }
-            else if( object->deleted( ) )
-            {
-                remove_object( object );
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        } );
-    };
-
-    remove_deleted_objects( m_objects );
-    remove_deleted_objects( m_foreground_objects );
-    remove_deleted_objects( m_background_objects );
 }
 
 void Room::update_object( Object * object )
 {
-    if( object )
-    {
-        object->update_object( );
-    }
+    Assert( !is_null( object ) );
+    object->update_object( );
 }
 
 const varray<Object *> & Room::objects( ) const
@@ -340,7 +322,7 @@ varray<Object *> Room::objects_in_range( FixedRectangle cref _range )
 
     m_object_grid.traverse( _range, [ & ] ( Grid::Block & block )
     {
-        for_each( object, block.objects )
+        for_each( object, block.objects( ) )
         {
             if( !objects_set.contains( object ) )
             {
@@ -360,7 +342,7 @@ varray<TerrainNode *> Room::terrain_in_range( FixedRectangle cref _range )
 
     m_object_grid.traverse( _range, [ & ] ( Grid::Block & block )
     {
-        for_each( node, block.terrain_nodes )
+        for_each( node, block.terrain_nodes( ) )
         {
             if( !terrain_set.contains( node ) )
             {
@@ -416,7 +398,7 @@ void Room::add_objects_from_queue( )
 
             if( object->interactive( ) )
             {
-                m_object_grid.add( object );
+                m_object_grid.insert( object );
             }
         }
 
@@ -501,6 +483,35 @@ Player * Room::player( cuint _player_number )
 Player * Room::player_main( )
 {
     return player( 0 );
+}
+
+oset<Room *> Room::connected_rooms( ) const
+{
+    oset<Room *> rooms;
+    
+    if( doors( ).size( ) )
+    {
+        queue<Room *> rooms_to_check;
+        
+        rooms_to_check.push( doors( ).begin( ).operator*( )->room( ) );
+        
+        while( rooms_to_check.size( ) )
+        {
+            Room * room = rooms_to_check.pop( );
+            
+            if( !rooms.contains( room ) )
+            {
+                rooms.insert( room );
+                
+                for_each( door, room->doors( ) )
+                {
+                    rooms_to_check.push( door->out( )->room( ) );
+                }
+            }
+        }
+    }
+    
+    return rooms;
 }
 
 void Room::wind( Vector cref _wind )
@@ -615,39 +626,39 @@ Span<uint> Room::Grid::y_range( FixedRectangle cref _r ) const
 
 void Room::Grid::traverse( FixedRectangle cref _range, function<void( Room::Grid::Block & )> f )
 {
-    Span<uint> xx = x_range( _range );
-    Span<uint> yy = y_range( _range );
+    Span<uint> x_span = x_range( _range );
+    Span<uint> y_span = y_range( _range );
 
-    for_range( x, xx.range( ) + 1 )
+    for_range( x, x_span.range( ) + 1 )
     {
-        for_range( y, yy.range( ) + 1 )
+        for_range( y, y_span.range( ) + 1 )
         {
-            f( block( x + xx.min( ), y + yy.min( ) ) );
+            f( block( x + x_span.min( ), y + y_span.min( ) ) );
         }
     }
 }
 
 void Room::Grid::traverse_const( FixedRectangle cref _range, function<void( const Room::Grid::Block & )> f ) const
 {
-    Span<uint> xx = x_range( _range );
-    Span<uint> yy = y_range( _range );
+    Span<uint> x_span = x_range( _range );
+    Span<uint> y_span = y_range( _range );
 
-    for_range( x, xx.range( ) + 1 )
+    for_range( x, x_span.range( ) + 1 )
     {
-        for_range( y, yy.range( ) + 1 )
+        for_range( y, y_span.range( ) + 1 )
         {
-            f( block_const( x + xx.min( ), y + yy.min( ) ) );
+            f( block_const( x + x_span.min( ), y + y_span.min( ) ) );
         }
     }
 }
 
-void Room::Grid::add( Object * object )
+void Room::Grid::insert( Object * object )
 {
     if( object->z( ) == 1.0 )
     {
         traverse( object->hit_box( ), [ & ] ( Grid::Block & block )
         {
-            block.objects.insert( object );
+            block.insert( object );
         } );
     }
 }
@@ -658,16 +669,16 @@ void Room::Grid::remove( Object * object )
     {
         traverse( object->hit_box( ), [ & ] ( Grid::Block & block )
         {
-            block.objects.remove( object );
+            block.remove( object );
         } );
     }
 }
 
-void Room::Grid::add( TerrainNode * terrain_node )
+void Room::Grid::insert( TerrainNode * terrain_node )
 {
     traverse( terrain_node->bounding_box( ), [ & ] ( Grid::Block & block )
     {
-        block.terrain_nodes.insert( terrain_node );
+        block.insert( terrain_node );
     } );
 }
 
@@ -675,7 +686,7 @@ void Room::Grid::remove( TerrainNode * terrain_node )
 {
     traverse( terrain_node->bounding_box( ), [ & ] ( Grid::Block & block )
     {
-        block.terrain_nodes.remove( terrain_node );
+        block.remove( terrain_node );
     } );
 }
 
@@ -683,7 +694,6 @@ void Room::Grid::clear( )
 {
     return traverse( [ & ] ( Grid::Block & block )
     {
-        block.objects.clear( );
-        block.terrain_nodes.clear( );
+        block.clear( );
     } );
 }

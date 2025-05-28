@@ -13,7 +13,7 @@ namespace axn
 namespace geometry
 {
 
-class Path : public Transformable
+axnclass( Path ) : public Transformable
 {
 
 private:
@@ -60,6 +60,25 @@ public:
     const varray<Line> & lines( ) const { return m_lines; }
     varray<Line> lines( ) { return m_lines; }
     varray<Coordinate> points( ) const { return_if( !line_count( ), { } ); varray<Coordinate> points; for_each( line, m_lines ) { points.insert_back( line.c1( ) ); } points.insert_back( m_lines.back( ).c2( ) ); return points; }
+    
+    //varray<Line> lines( ) const
+    //{
+    //    if( point_count( ) > 1 )
+    //    {
+    //        varray<Line> lines;
+    //        for_range( i, lines.size( ) - 1 )
+    //        {
+    //            lines.insert_back( Line( m_coordinates[ i ], m_coordinates[ i + 1 ] ) );
+    //        }
+    //
+    //        if( m_loop )
+    //        {
+    //            lines.insert_back( Line( m_coordinates.back( ), m_coordinates.front( ) ) );
+    //        }
+    //    }
+    //
+    //    return varray<Line>( );
+    //}
 
     bool has_length( ) const { for_each( line, m_lines ) { return_true_if( line.length( ) ); } return false; }
     Planc length( ) const { Planc length = 0; for_each( line, m_lines ) { length += line.length( ); } return length; }

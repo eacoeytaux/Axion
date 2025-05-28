@@ -26,7 +26,7 @@ const Coordinate WING_COORDINATE_BASE_1 = Coordinate( -6.0, 0.0 );
 const Coordinate WING_COORDINATE_BASE_2 = Coordinate( -27.0, -3.0 );
 cPlanc WING_TIP_X = -15.0;
 
-const Color BIRD_COLOR = BLACK;
+cColor BIRD_COLOR = BLACK;
 
 } // namespace
 

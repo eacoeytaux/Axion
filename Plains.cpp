@@ -7,10 +7,13 @@
 #include "DistantBird.hpp"
 #include "MountainRange.hpp"
 #include "Hills.hpp"
+#include "Spikes.hpp"
 #include "PineTree.hpp"
 #include "AspineTree.hpp"
 #include "Waterfall.hpp"
-#include "Stalagmite.hpp"
+#include "WaterDrop.hpp"
+#include "Stalite.hpp"
+#include "Boulder.hpp"
 #include "Bush.hpp"
 #include "CampFire.hpp"
 #include "Skull.hpp"
@@ -47,7 +50,7 @@ void Plains::create( )
     // add_object( new DistantBird( this, Coordinate( -666.0, 866.0 ) ) );
     // add_object( new DistantBird( this, Coordinate( -550.0, 900.0 ) ) );
 
-    add_object( new Waterfall( this, Coordinate( 0.0, 50.0 ), METER * 4.0, METER * 8.0, 0.95 ) );
+    // add_object( new Waterfall( this, Coordinate( 0.0, 50.0 ), METER * 4.0, METER * 8.0, 0.95 ) );
 
     varray<AspineTree *> aspines;
     
@@ -67,6 +70,8 @@ void Plains::create( )
     {
         add_object( aspine );
     }
+    
+    // add_object( new Boulder( this, Coordinate( -10.0, 10.0 ), 50.0 ) );
 
     add_object( new CampFire( this, Coordinate( 50.0, 20.0 ) ) );
 
@@ -84,22 +89,28 @@ void Plains::create( )
     // add_object( new Porkupine( this, Coordinate( 100, 30 ) ) );
     add_object( new Wisp( this, Coordinate( 200.0, 150.0 ) ) );
 
-    add_player( Coordinate( 0.0, 300.0 ) );
+    add_player( Coordinate( 400.0, 40.0 ) );
+    add_object( new WaterDrop( this, Coordinate( -50.0, 400.0 ) ) );
+    
+    add_object( new Spike( this, Coordinate( 725.0, -250.0 ) ) );
+    add_object( new Spike( this, Coordinate( 750.0, -250.0 ) ) );
+    add_object( new Spike( this, Coordinate( 775.0, -250.0 ) ) );
 }
 
 Terrain * Plains::generate_terrain( )
 {
-    varray<varray<Coordinate>> terrain_coordinates = { { // Coordinate( -1100.0, 1000.0 ),
-                                                         Coordinate( -1000.0, 0.0 ),
-                                                         Coordinate( 0.0, 10.0 ),
-                                                         // Coordinate( -800.0, 5.0 ),
-                                                         // Coordinate( -100.0, 15.0 ),
-                                                         // Coordinate( 100.0, 25.0 ),
-                                                         // Coordinate( 200.0, 100.0 ),
-                                                         // Coordinate( 350.0, 75.0 ),
-                                                         // Coordinate( 500.0, 25.0 ),
-                                                         // Coordinate( 800.0, 5.0 ),
-                                                         Coordinate( 1000.0, 0.0 ) } };
+    varray<varray<Coordinate>> terrain_coordinates = { {
+        Coordinate( -200.0, 0.0 ),
+        Coordinate( 200.0, 0.0 ),
+        Coordinate( 600.0, -50.0 ),
+        Coordinate( 700.0, -100.0 ),
+        Coordinate( 710.0, -250.0 ),
+        Coordinate( 790.0, -250.0 ),
+        Coordinate( 800.0, -100.0 ),
+        Coordinate( 900.0, -50.0 ),
+        Coordinate( 1200.0, 0.0 ),
+        Coordinate( 1600.0, 0.0 )
+    } };
 
     return new GrassTerrain( this, terrain_coordinates );
 }

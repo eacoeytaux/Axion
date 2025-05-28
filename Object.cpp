@@ -26,10 +26,11 @@ Object::~Object( )
 }
 
 Object::Object( Room * room ) : Matter( ORIGIN ), m_room( room ) { init( ); }
-
-Object::Object( Room * room, Coordinate cref _position, Vector cref _velocity ) : Matter( Vector( _velocity ).origin( _position ) ), m_room( room ) { init( ); }
-
-Object::Object( Room * room, Vector cref _position_velocity ) : Matter( _position_velocity ), m_room( room ) { init( ); }
+Object::Object( Room * room, const dec _z ) : Matter( ORIGIN ), m_room( room ) { z( _z ); init( ); }
+Object::Object( Room * room, Coordinate cref _position ) : Matter( _position ), m_room( room ) { init( ); }
+Object::Object( Room * room, Coordinate cref _position, const dec _z ) : Matter( _position ), m_room( room ) { z( _z ); init( ); }
+Object::Object( Room * room, Coordinate cref _position, Vector cref _velocity ) : Matter( _position ), m_room( room ) { velocity( _velocity ); init( ); }
+Object::Object( Room * room, Coordinate cref _position, Vector cref _velocity, const dec _z ) : Matter( _position ), m_room( room ) { z( _z ); velocity( _velocity ); init( ); }
 
 void Object::init( )
 {
@@ -122,14 +123,16 @@ void Object::update_object( )
     {
         return;
     }
-
-    update( );
-
+    
     if( marked_to_delete( ) )
     {
         mark_deleted( );
     }
-
+    else
+    {
+        update( );
+    }
+    
     m_last_world_age_update = room( )->age( );
     ++m_age;
 }
@@ -189,21 +192,23 @@ void Object::update_movement( )
     {
         update_velocity( );
         Vector velocity = Object::velocity( ) * remaining_percentage;
-        if( !velocity.has_magnitude( ) )
-        {
-            // break;
-        }
 
         Coordinate center = position( );
 
         Vector movement = Vector( center, center + velocity );
-
-        dec movement_percentage = 1.0;
+        movement *= check_movement( movement );
+        
+        if( !movement.has_magnitude( ) )
+        {
+            break;
+        }
 
         TerrainEdge * next_ground = m_ground;
+        
+        // todo move all this into check_movement
 
         // if objects decs through walls don't bother
-        if( terrain_boundaries( ) || !room( )->terrain( ) )
+        if( terrain_boundaries( ) && room( )->terrain( ) )
         {
             TerrainEdge * ground_left = nullptr;
             TerrainEdge * ground_right = nullptr;
@@ -251,22 +256,13 @@ void Object::update_movement( )
                         Coordinate intersection = movement_line.intersection( terrain_edge->line( ) + VectorY( half( space( ).bound_height( ) ) ) );
 
                         movement = Vector( center, intersection );
-
-                        if( velocity.magnitude( ) )
-                        {
-                            movement_percentage = movement.magnitude( ) / velocity.magnitude( );
-                        }
-                        else
-                        {
-                            movement_percentage = 1.0;
-                        }
                     }
                 }
             }
         }
 
         // check if object is moving to connecting edge
-        if( m_ground && next_ground == m_ground )
+        if( m_ground && ( next_ground == m_ground ) )
         {
             if( ( movement.dx( ) > 0.0 ) && ( center + movement ).x( ) > m_ground->line( ).upper_bound_x( ) )
             {
@@ -384,7 +380,8 @@ void Object::update_movement( )
         }
 
         move( movement );
-        ground( next_ground );
+        
+        if( ground( ) != next_ground ) { ground( next_ground ); }
 
         if( velocity.has_magnitude( ) )
         {
@@ -395,6 +392,11 @@ void Object::update_movement( )
             remaining_percentage = 0.0;
         }
     }
+}
+
+dec Object::check_movement( Vector cref _velocity )
+{
+    return 1.0;
 }
 
 void Object::move( Vector cref _movement )
@@ -437,7 +439,7 @@ void Object::position( Coordinate cref _position )
 
     if( interactive( ) )
     {
-        room( )->object_grid( ).add( this );
+        room( )->object_grid( ).insert( this );
     }
 }
 
@@ -484,7 +486,7 @@ dec Object::friction_resistance( ) const
         return m_ground->resistance( );
     }
 
-    return m_air_resistance_ratio;
+    return air_resistance_ratio( );
 }
 
 TerrainEdge * Object::ground( ) const { return m_ground; }
@@ -561,7 +563,7 @@ Drawing Object::debug_overlay( ) const
     cPlanc VELOCITY_ARROW_LENGTH = 10.0;
     cPlanc VELOCITY_MAGNITUDE_MINIMUM = 1.0;
     cPlanc VELOCITY_SCALE = 3.0;
-    const Color PHYSICS_COLOR = YELLOW;
+    cColor PHYSICS_COLOR = YELLOW;
 
     Drawing debug_overlay;
 

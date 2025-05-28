@@ -11,8 +11,8 @@ cPlanc SHELL_RADIUS = 10.0;
 cPlanc SLUG_THICKNESS = 5.0;
 cuint STRETCH_PERIOD = 10;
 
-const Color SLUG_COLOR = BLACK;
-const Color SHELL_COLOR = RED;
+cColor SLUG_COLOR = BLACK;
+cColor SHELL_COLOR = RED;
 
 } // namespace
 

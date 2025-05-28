@@ -53,8 +53,8 @@ void World::init( )
 
 void World::create( )
 {
-    // TODO camera width / height should be independent of screen size?
-    m_camera = new Camera( this, Engine::screen_width( ) * ( 1.0 - CAMERA_SIDE_BUFFER_RATIO ), Engine::screen_height( ) * ( 1.0 - CAMERA_SIDE_BUFFER_RATIO ) );
+    uint buffer = min( ( Engine::screen_width( ) * CAMERA_SIDE_BUFFER_RATIO ), ( Engine::screen_height( ) * CAMERA_SIDE_BUFFER_RATIO ) );
+    m_camera = new Camera( this, Engine::screen_width( ) - buffer, Engine::screen_height( ) - buffer );
 }
 
 void World::input( const list<Input *> & _inputs )

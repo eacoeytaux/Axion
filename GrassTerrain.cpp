@@ -10,7 +10,7 @@ cPlanc OUTLINE_THICKNESS = 3.0;
 cPlanc DEPTH_COLOR_LENGTH = 400.0;
 
 cPlanc GRASS_BASE = 5.0;
-const Angle GLASS_MAX_ANGLE = ( TAU / 9.0 );
+cAngle GLASS_MAX_ANGLE = ( TAU / 9.0 );
 const Span<Planc> GRASS_BASE_LENGTH = { 9.0, 15.0 };
 const Span<Planc> GRASS_TIP_LENGTH = { 8.0, 10.0 };
 const Span<dec> GRASS_TIP_SWAY_RATIO = { 0.2, 0.4 };
@@ -40,7 +40,7 @@ GrassTerrain::GrassTerrain( Room * room, const varray<varray<Coordinate>> & _ver
     {
         for_each( edge, edges )
         {
-            if( abs( edge->line( ).angle( ).radians( ) ) <= GLASS_MAX_ANGLE.radians( ) )
+            // if( abs( edge->line( ).angle( ).radians( ) ) <= GLASS_MAX_ANGLE.radians( ) )
             {
                 Coordinate v1 = edge->vertex1( )->position( );
                 Coordinate v2 = edge->vertex2( )->position( );
@@ -162,7 +162,7 @@ GrassTerrain::GrassTerrain( Room * room, const varray<varray<Coordinate>> & _ver
             }
 
             Coordinate base = vertex->position( );
-            Angle normal = vertex->normal( );
+            Angle normal = vertex->normal( ).flipped( );
 
             Planc tip_length = Random::rPlanc( GRASS_TIP_LENGTH );
             Vector offset = VectorA( Random::rAngle( ), tip_length * Random::rPlanc( GRASS_TIP_SWAY_RATIO ) );
@@ -215,7 +215,7 @@ GrassTerrain::GrassTerrain( Room * room, const varray<varray<Coordinate>> & _ver
     for_each( polygon, dirt_black ) draw( BLACK, polygon );
     for_each( polygon, dirt_colored ) draw( { Colors::DIRT_COLOR, Colors::DIRT_COLOR, BLACK, BLACK }, polygon );
 
-    for_each( polygon, dirt_colored ) add_bound( polygon );
+    for_each( polygon, dirt_colored ) bind( polygon );
 
     for_each( polygon, grass_back ) draw( Colors::PLANT_GREEN_2, Polygon::expand( polygon, OUTLINE_THICKNESS ) );
     for_each( polygon, grass_front ) draw( Colors::PLANT_GREEN_2, Polygon::expand( polygon, OUTLINE_THICKNESS ) );

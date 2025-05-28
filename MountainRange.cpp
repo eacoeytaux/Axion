@@ -12,15 +12,13 @@ const Span<Planc> MOUNTAIN_OFFSET = { 500, 1500 };
 
 } // namespace
 
-MountainRange::MountainRange( Room * room, cPlanc _base_bottom, cdec _z, Color cref _color ) : Object( room )
+MountainRange::MountainRange( Room * room, cPlanc _base_bottom, cdec _z, Color cref _color ) : Object( room, _z )
 {
     background( true );
 
     persist_render( true );
 
     stationary( true );
-
-    z( _z );
 
     Camera * camera = room->camera( );
     FixedRectangle bounds = room->bounds( );

@@ -1,7 +1,7 @@
 #ifndef Axion_hpp
 #define Axion_hpp
 
-#define VERSION "1.1"
+#define AXN_VERSION "0.0"
 
 #include "Namespaces.hpp"
 

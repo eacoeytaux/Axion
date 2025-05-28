@@ -15,7 +15,7 @@ public:
     {
         GRAPHICS_DETAIL_ALPHA,
         
-        #ifdef AXN_DEBUG
+        #if defined ( AXN_DEBUG )
         DEBUG_BACKGROUND,
         DEBUG_CAMERA,
         DEBUG_HEALTH,

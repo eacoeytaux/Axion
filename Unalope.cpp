@@ -54,10 +54,10 @@ const Polygon BODY = Polygon( {
     Coordinate( -5.0, -9.0 )
                               } ).scale( TEMP_SCALE_TODO );
 
-const Color FUR_COLOR = WHITE;
-const Color EAR_COLOR = FUR_COLOR;
-const Color INNER_EAR_COLOR = RED;
-const Color NOSE_COLOR = RED;
+cColor FUR_COLOR = WHITE;
+cColor EAR_COLOR = FUR_COLOR;
+cColor INNER_EAR_COLOR = RED;
+cColor NOSE_COLOR = RED;
 }
 
 Unalope::Unalope( Room * room, Coordinate cref _position ) : Enemy( room, _position, 10000.0 )

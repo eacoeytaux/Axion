@@ -36,10 +36,11 @@ namespace axn
 
 bool PAUSED = false;
 
+bool ANTI_ALIAS = true;
+
 SDL_Window * WINDOW = nullptr;
 uint WINDOW_WIDTH;
 uint WINDOW_HEIGHT;
-bool ANTI_ALIAS = true;
 
 cdec VOLUME_INCREMENT = 0.0625;
 Slider<dec> VOLUME;

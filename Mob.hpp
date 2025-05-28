@@ -53,7 +53,9 @@ public:
 
     virtual void heal( dec health ); // won't excede max health
     virtual void heal_full( );
+    
     virtual void hurt( Damage cref damage );
+    virtual void hurt_full( ) { hurt( health( ) ); }
 
     virtual void invincible_pause( uint invincible_duration ) { if( invincible_duration ) { m_invincible_timer.reset( max( invincible_duration, m_invincible_timer.remaining( ) ) ); } }
 
