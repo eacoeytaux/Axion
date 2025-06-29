@@ -13,7 +13,8 @@ class CampFire : public Fire
 public:
 
     CampFire( Room *, Coordinate cref position );
-    
+    // todo CampFire( Room *, Coordinate cref position, Planc cref flame_width );
+
 };
 
 } // namespace mtmercy

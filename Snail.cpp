@@ -31,7 +31,7 @@ void Snail::render( )
 
     if( ground( ) )
     {
-        angle = ground( )->vector( ).angle( );
+        angle = ground( )->normal( ) + RIGHT;
     }
 
     Coordinate tail = VectorA( angle, -SHELL_RADIUS );
@@ -46,7 +46,7 @@ void Snail::update( )
 {
     if( ground( ) )
     {
-        add_velocity( ground( )->vector( ).magnitude( SPEED ) );
+        add_velocity( VectorA( ground( )->normal( ) + RIGHT, SPEED ) );
     }
 
     Object::update( );

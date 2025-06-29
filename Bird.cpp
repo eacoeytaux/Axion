@@ -1,5 +1,5 @@
 #include "Bird.hpp"
-#include "World.hpp"
+
 #include "Player.hpp"
 
 using mtmercy::Bird;
@@ -26,7 +26,7 @@ cPlanc LIFT_DISTANCE = 16.0;
 Feather::Feather( Room * room, Coordinate cref _position ) : Object( room, _position )
 {
     m_color = Random::rColor( );
-    gravity_ratio( 0.025 );
+    gravity_scale( 0.025 );
 }
 
 void Feather::render( )
@@ -42,11 +42,11 @@ void Feather::render( )
     // draw( m_color, stem, FEATHER_STEM_THICKNESS );
 }
 
-Bird::Bird( Room * room, Coordinate cref _position ) : Mob( room, _position )
+Bird::Bird( Room * room, Coordinate cref _position ) : Mob( room, _position, BIRD_HEALTH )
 {
     no_gravity( );
+
     space( Polygon::rectangle( 32.0, 32.0 ) );
-    health( BIRD_HEALTH );
 }
 
 void Bird::render( )

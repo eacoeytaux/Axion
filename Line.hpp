@@ -23,7 +23,7 @@ private:
     Planc m_m = INFINITY;
     Planc m_b = P0;
 
-    Line & solve_mb( ) { /* Assert( c1.valid( ) && c2.valid( ) ); */ if( c1( ).x( ) == c2( ).x( ) ) { m_m = ( ( c1( ).y( ) <= c2( ).y( ) ) ? INFINITY_POS : INFINITY_NEG ); m_b = c1( ).x( ); } else { m_m = ( ( c2( ).y( ) - c1( ).y( ) ) / ( c2( ).x( ) - c1( ).x( ) ) ); m_b = ( c1( ).y( ) - ( m_m * c1( ).x( ) ) ); } rethis; }
+    Line & solve_mb( ) { /* Assert( c1.valid( ) && c2.valid( ) ); */ if( c1( ).x( ) == c2( ).x( ) ) { m_m = ( ( c1( ).y( ) <= c2( ).y( ) ) ? INFINITY : -INFINITY ); m_b = c1( ).x( ); } else { m_m = ( ( c2( ).y( ) - c1( ).y( ) ) / ( c2( ).x( ) - c1( ).x( ) ) ); m_b = ( c1( ).y( ) - ( m_m * c1( ).x( ) ) ); } rethis; }
 
 public:
 
@@ -60,10 +60,10 @@ public:
     Planc cross( Coordinate cref c ) const { return ( ( ( c.y( ) - c1( ).y( ) ) * ( c2( ).x( ) - c1( ).x( ) ) ) - ( ( c.x( ) - c1( ).x( ) ) * ( c2( ).y( ) - c1( ).y( ) ) ) ); }
 
     bool on( Coordinate cref c ) const { return equal( cross( c ), 0.0 ) && ( ( c1( ) != c2( ) ) || ( c == c1( ) ) ); }
-    bool above( Coordinate cref c, cbool inclusive = false ) const { return greater( inclusive, cross( c ), 0.0 ) && ( c1( ) != c2( ) ); }
-    bool below( Coordinate cref c, cbool inclusive = false ) const { return less( inclusive, cross( c ), 0.0 ) && ( c1( ) != c2( ) ); }
+    bool above( Coordinate cref c, bool inclusive = false ) const { return greater( inclusive, cross( c ), 0.0 ) && ( c1( ) != c2( ) ); }
+    bool below( Coordinate cref c, bool inclusive = false ) const { return less( inclusive, cross( c ), 0.0 ) && ( c1( ) != c2( ) ); }
 
-    bool in_bounds( Coordinate cref c, cbool inclusive = true ) const { return ( in_range( c.x( ), lower_bound_x( ), upper_bound_x( ), inclusive ) && in_range( c.y( ), lower_bound_y( ), upper_bound_y( ), inclusive ) ); }
+    bool in_bounds( Coordinate cref c, bool inclusive = true ) const { return ( in_range( c.x( ), lower_bound_x( ), upper_bound_x( ), inclusive ) && in_range( c.y( ), lower_bound_y( ), upper_bound_y( ), inclusive ) ); }
 
     bool parallel( Line cref l ) const { return ( ( ( m( ) == l.m( ) ) || ( is_inf( m( ) ) && is_inf( l.m( ) ) ) ) && ( ( c1( ) != c2( ) ) && ( l.c1( ) != l.c2( ) ) ) ); }
     bool colinear( Line cref l ) const { return ( ( *this == l ) || ( parallel( l ) && ( b( ) == l.b( ) ) ) ); }
@@ -189,7 +189,7 @@ public:
     Line & operator-=( Vector cref v ) { rethis = *this - v; }
 
     default_equal( Line );
-    
+
 };
 
 } // namespace geometry

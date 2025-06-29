@@ -1,7 +1,8 @@
 #ifndef Room_hpp
 #define Room_hpp
 
-#include "Engine.hpp"
+#include "World.hpp"
+#include "Terrain.hpp"
 
 namespace axn
 {
@@ -20,8 +21,6 @@ namespace reality
 class World;
 class Object;
 class Player;
-class Terrain;
-class TerrainNode;
 
 } // namespace reality
 
@@ -30,33 +29,33 @@ namespace reality
 
 class Room
 {
-    
+
 public:
-    
+
     class Door
     {
-        
+
     private:
-        
+
         Room * m_room;
-        
+
         Coordinate m_position;
-        
+
         bool m_locked;
-        
+
         Door * m_out;
-        
+
     public:
-        
-        Door( Room * room, xCoordinate position, bool locked = false ) : m_room( room ), m_position( position ), m_locked( locked ) { }
-        
+
+        Door( Room * room, Coordinate cref position, bool locked = false ) : m_room( room ), m_position( position ), m_locked( locked ) { }
+
         Room * room( ) const { return m_room; }
-        
+
         Door * out( ) { return m_out; }
-        
+
         virtual void lock( bool b ) { m_locked = b; }
         virtual bool locked( ) const { return m_locked; }
-        
+
     };
 
 public:
@@ -74,9 +73,13 @@ public:
 
     Camera * camera( );
 
+    const World * world( ) const { return m_world; }
     World * world( ) { return m_world; }
 
     FixedRectangle cref bounds( ) const;
+
+    virtual dec air_resistance( Coordinate cref position ) const;
+    virtual Vector gravity( Coordinate cref position ) const;
 
 private:
 
@@ -136,9 +139,9 @@ public:
             add_particle( particle );
         }
     }
-    
+
     const oset<Door *> & doors( ) const { return m_doors; }
-    
+
     oset<Room *> connected_rooms( ) const;
 
     // environment
@@ -155,7 +158,7 @@ public:
 
     varray<Object *> objects_in_range( FixedRectangle cref );
 
-    varray<TerrainNode *> terrain_in_range( FixedRectangle cref );
+    varray<Terrain::Node *> terrain_in_range( FixedRectangle cref );
 
 public: // todo protected
 
@@ -178,7 +181,7 @@ private:
 protected: // todo make private?
 
     World * m_world = nullptr;
-    
+
     oset<Door *> m_doors;
 
     uint m_age = 0;
@@ -204,54 +207,54 @@ public:
 
     class Grid
     {
-        
+
     public:
 
         struct Block
         {
-            
+
         public:
-            
+
             void init( uint x, uint y )
             {
                 #if defined ( AXN_DEBUG )
                 Assert( !m_init );
                 m_init = true;
                 #endif
-                
+
                 m_x = x;
                 m_y = y;
             }
-            
+
             uint x( ) const { return m_x; }
             uint y( ) const { return m_y; }
-            
+
             const uset<Object *> & objects( ) const { return m_objects; }
-            
+
             void insert( Object * object ) { m_objects.insert( object ); }
             void remove( Object * object ) { m_objects.remove( object ); }
-            
-            const uset<TerrainNode *> & terrain_nodes( ) const { return m_terrain_nodes; }
-            
-            void insert( TerrainNode * terrain ) { m_terrain_nodes.insert( terrain ); }
-            void remove( TerrainNode * terrain ) { m_terrain_nodes.remove( terrain ); }
-            
+
+            const uset<Terrain::Node *> & terrain_nodes( ) const { return m_terrain_nodes; }
+
+            void insert( Terrain::Node * terrain ) { m_terrain_nodes.insert( terrain ); }
+            void remove( Terrain::Node * terrain ) { m_terrain_nodes.remove( terrain ); }
+
             void clear( ) { m_objects.clear( ); m_terrain_nodes.clear( ); }
-            
+
             default_equal( Block );
-            
+
         private:
-        
+
             #if defined ( AXN_DEBUG )
             bool m_init = false;
             #endif
-            
+
             uint m_x = 0;
             uint m_y = 0;
 
             uset<Object *> m_objects;
-            
-            uset<TerrainNode *> m_terrain_nodes;
+
+            uset<Terrain::Node *> m_terrain_nodes;
         };
 
     public:
@@ -282,8 +285,8 @@ public:
         void insert( Object * object );
         void remove( Object * object );
 
-        void insert( TerrainNode * terrain_node );
-        void remove( TerrainNode * terrain_node );
+        void insert( Terrain::Node * terrain_node );
+        void remove( Terrain::Node * terrain_node );
 
         void clear( );
 

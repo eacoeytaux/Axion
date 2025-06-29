@@ -107,11 +107,11 @@ private:
 
     dec m_flame_alpha_shrink = 0.0;
 
-    Color m_flame_color = TRANSPARENT;
-    Color m_flame_inner_color = TRANSPARENT;
+    Color m_flame_color;
+    Color m_flame_inner_color;
 
     void set_light_source( );
-    
+
 };
 
 } // namespace mtmercy

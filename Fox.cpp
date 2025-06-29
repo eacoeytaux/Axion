@@ -6,14 +6,15 @@ namespace
 {
 
 cPlanc EYE_RADIUS = 1.0;
-cuint BLINK_DURATION = 2;
+cuint BLINK_DURATION = 8;
 const Span<uint> BLINK_WAIT = { 180, 240 };
 
 cColor EYE_COLOR = BLACK;
 cColor NOSE_COLOR = BLACK;
 cColor FUR_COLOR1 = Color::rgb( 0xFFA500 );
 cColor FUR_COLOR2 = WHITE;
-}
+
+} // namespace
 
 Fox::Fox( Room * room, Coordinate cref _position ) : Mob( room, _position )
 {

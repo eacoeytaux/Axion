@@ -1,9 +1,8 @@
 #include "Engine.hpp"
-#include "World.hpp"
 
 #include "OGL.hpp"
-
 #include "OS.hpp"
+
 // -------------------- //
 #if defined ( OS_WINDOWS )
 // -------------------- //
@@ -230,9 +229,7 @@ void Engine::volume_down_eng( )
 uint Engine::screen_width_eng( ) { return WINDOW_WIDTH; }
 uint Engine::screen_height_eng( ) { return WINDOW_HEIGHT; }
 
-Coordinate world_position_from_event( const SDL_Event & event, World * world ) { return world->camera( )->screen_to_world( Coordinate( event.motion.x, event.motion.y ) ); }
-
-void Engine::input_eng( list<Input *> & inputs, World * world )
+void Engine::input_eng( list<Input *> & inputs )
 {
     SDL_HapticRumblePlay( CONTROLLER_HAPTICS[ 0 ], 0.75, 500 );
 
@@ -268,7 +265,7 @@ void Engine::input_eng( list<Input *> & inputs, World * world )
             // mouse
             case SDL_MOUSEMOTION:
             {
-                inputs.insert_back( new MouseInput( MouseInput::NO_BUTTON, MouseInput::MOVE, world_position_from_event( event, world ) ) );
+                inputs.insert_back( new MouseInput( MouseInput::NO_BUTTON, MouseInput::MOVE, Vector( event.motion.x, event.motion.y ) ) );
                 break;
             }
             case SDL_MOUSEBUTTONDOWN:
@@ -277,12 +274,12 @@ void Engine::input_eng( list<Input *> & inputs, World * world )
                 {
                     case SDL_BUTTON_LEFT:
                     {
-                        inputs.insert_back( new MouseInput( MouseInput::LEFT_BUTTON, MouseInput::PRESSED, world_position_from_event( event, world ) ) );
+                        inputs.insert_back( new MouseInput( MouseInput::LEFT_BUTTON, MouseInput::PRESSED ) );
                         break;
                     }
                     case SDL_BUTTON_RIGHT:
                     {
-                        inputs.insert_back( new MouseInput( MouseInput::RIGHT_BUTTON, MouseInput::PRESSED, world_position_from_event( event, world ) ) );
+                        inputs.insert_back( new MouseInput( MouseInput::RIGHT_BUTTON, MouseInput::PRESSED ) );
                         break;
                     }
                 }
@@ -294,12 +291,12 @@ void Engine::input_eng( list<Input *> & inputs, World * world )
                 {
                     case SDL_BUTTON_LEFT:
                     {
-                        inputs.insert_back( new MouseInput( MouseInput::LEFT_BUTTON, MouseInput::RELEASED, world_position_from_event( event, world ) ) );
+                        inputs.insert_back( new MouseInput( MouseInput::LEFT_BUTTON, MouseInput::RELEASED ) );
                         break;
                     }
                     case SDL_BUTTON_RIGHT:
                     {
-                        inputs.insert_back( new MouseInput( MouseInput::RIGHT_BUTTON, MouseInput::RELEASED, world_position_from_event( event, world ) ) );
+                        inputs.insert_back( new MouseInput( MouseInput::RIGHT_BUTTON, MouseInput::RELEASED ) );
                         break;
                     }
                 }
@@ -307,7 +304,7 @@ void Engine::input_eng( list<Input *> & inputs, World * world )
             }
             case SDL_MOUSEWHEEL:
             {
-                inputs.insert_back( new MouseInput( MouseInput::SCROLL_BUTTON, MouseInput::MOVE, Coordinate( event.wheel.x, event.wheel.y ) ) );
+                inputs.insert_back( new MouseInput( MouseInput::SCROLL_BUTTON, MouseInput::MOVE, Vector( event.wheel.x, event.wheel.y ) ) );
                 break;
             }
 

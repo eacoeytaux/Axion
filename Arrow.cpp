@@ -1,5 +1,5 @@
 #include "Arrow.hpp"
-#include "World.hpp"
+
 #include "Mob.hpp"
 
 using mtmercy::Arrow;
@@ -18,22 +18,23 @@ cPlanc HEAD_WIDTH = 3.0;
 cPlanc HEAD_BUFFER = 1.0;
 cPlanc SHAFT_LENGTH = 30.0;
 cPlanc SHAFT_THICKNESS = 3.0;
+cPlanc FEATHER_HEIGHT = 8.0;
+cPlanc FEATHER_LENGTH = 12.0;
+cPlanc FEATHER_NOTCH_LENGTH = 4.0;
 
-const Polygon HEAD( { Coordinate( HEAD_BUFFER, 0.0 ),
-                      Coordinate( -HEAD_LENGTH_OUTER, -HEAD_WIDTH ),
-                      Coordinate( -HEAD_LENGTH_INNER, 0.0 ),
-                      Coordinate( -HEAD_LENGTH_OUTER, HEAD_WIDTH ) } );
+cPolygon HEAD( { Coordinate( HEAD_BUFFER, 0.0 ),
+                 Coordinate( -HEAD_LENGTH_OUTER, -HEAD_WIDTH ),
+                 Coordinate( -HEAD_LENGTH_INNER, 0.0 ),
+                 Coordinate( -HEAD_LENGTH_OUTER, HEAD_WIDTH ) } );
 
-const Polygon HEAD_BORDER = Polygon::expand( HEAD, 1.0 );
+cPolygon FEATHER( { Coordinate( 0.0, 0.0 ),
+                    Coordinate( -FEATHER_NOTCH_LENGTH, half( FEATHER_HEIGHT ) ),
+                    Coordinate( -FEATHER_LENGTH, half( FEATHER_HEIGHT ) ),
+                    Coordinate( -FEATHER_LENGTH + FEATHER_NOTCH_LENGTH, 0.0 ),
+                    Coordinate( -FEATHER_LENGTH, -half( FEATHER_HEIGHT ) ),
+                    Coordinate( -FEATHER_NOTCH_LENGTH, -half( FEATHER_HEIGHT ) ) } );
 
-const Polygon FEATHER( { Coordinate( 4.0, 0.0 ),
-                         Coordinate( 0.0, 4.0 ),
-                         Coordinate( -8.0, 4.0 ),
-                         Coordinate( -4.0, 0.0 ),
-                         Coordinate( -8.0, -4.0 ),
-                         Coordinate( 0.0, -4.0 ) } );
-
-cColor TIP_COLOR = GRAY_LIGHT;
+cColor TIP_COLOR = Color::rgb( GRAY_LIGHT );
 cColor SHAFT_COLOR = Color::rgb( 0x8B4513 );
 
 } // namespace
@@ -51,15 +52,13 @@ Arrow::Arrow( Room * room, Coordinate cref tip, Vector cref launch_speed, Color 
 
     solid( true );
 
-    gravity_ratio( 0.5 );
-    air_resistance_ratio( 0.001 );
+    gravity_scale( 0.5 );
+    no_air_resistance( );
 
     velocity( launch_speed );
 
     m_feather_color = _feather_color;
     angle( launch_speed.angle( ) );
-
-    track_position( 1 );
 }
 
 dec Arrow::fade_alpha( ) const
@@ -70,7 +69,7 @@ dec Arrow::fade_alpha( ) const
     }
     else
     {
-        return ( 1.0 - ( ( age( ) - (dec)LIFESPAN ) / (dec)FADESPAN ) );
+        return max( 0.0, ( 1.0 - ( ( age( ) - (dec)LIFESPAN ) / (dec)FADESPAN ) ) );
     }
 }
 
@@ -104,7 +103,7 @@ void Arrow::draw_shaft( )
 void Arrow::draw_feather( )
 {
     Polygon feather = FEATHER;
-    feather.move( Vector( -( SHAFT_LENGTH + HEAD_LENGTH_INNER ), 0.0 ) );
+    feather.move( VectorX( -( SHAFT_LENGTH + HEAD_LENGTH_INNER ) + FEATHER_NOTCH_LENGTH ) );
     feather.rotate( angle( ) );
 
     draw( m_feather_color.a( fade_alpha( ) ), feather );
@@ -145,9 +144,9 @@ void Arrow::angle( Angle cref _angle )
 
 dec Arrow::length( ) const { return SHAFT_LENGTH + HEAD_LENGTH_INNER; }
 
-void Arrow::ground( TerrainEdge * ground )
+void Arrow::ground( Terrain::Node * ground, Terrain::Bumper cref _bumper )
 {
-    Object::ground( ground );
+    Object::ground( ground, _bumper );
 
     if( ground )
     {
@@ -158,23 +157,25 @@ void Arrow::ground( TerrainEdge * ground )
 
 bool Arrow::collide( Object * object )
 {
-    Object::collide( object );
-
-    if( object->interactive( ) && !dynamic_cast<Arrow *>( object ) )
+    if( solid( ) )
     {
-        if( Mob * mob = dynamic_cast<Mob *>( object ) )
+        Object::collide( object );
+
+        if( object->interactive( ) && !dynamic_cast<Arrow *>( object ) )
         {
-            mob->hurt( Damage( DAMAGE ) );
+            if( Mob * mob = dynamic_cast<Mob *>( object ) )
+            {
+                mob->damage( Damage( DAMAGE ) );
+            }
+
+            object->add_velocity( velocity( ) );
+
+            subscribe_to_movement( object );
+            stationary( true );
+            solid( false );
+
+            return true;
         }
-        
-        object->add_velocity( velocity( ) );
-
-        subscribe_to_movement( object );
-        stationary( true );
-        //interactive( false );
-        solid( false );
-
-        return true;
     }
 
     return false;
@@ -184,5 +185,5 @@ void Arrow::react_to_movement( Object * object, Vector cref _v )
 {
     Object::react_to_movement( object, _v );
 
-    position( position( ) + _v );
+    move( _v );
 }

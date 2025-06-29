@@ -43,7 +43,7 @@ public:
         return ret;
     }
 
-    bool empty( ) const { return size( ); }
+    bool empty( ) const { return ( size( ) == 0 ); }
 
     uint size( ) const { return (uint)( std::vector<T>::size( ) ); }
 
@@ -211,7 +211,7 @@ public:
 
     virtual void reverse( ) { std::reverse( begin( ), end( ) ); }
 
-    virtual varray<T> reversed( ) { varray<T> v = *this; v.reverse( ); return v; }
+    virtual varray<T> reversed( ) const { varray<T> v = ( *this ); v.reverse( ); return v; }
 
     virtual void sort( std::function<bool( const T & t1, const T & t2 )> comparator, bool stable = false )
     {
@@ -225,6 +225,8 @@ public:
         }
     }
 
+    virtual varray<T> sorted( std::function<bool( const T & t1, const T & t2 )> comparator, bool stable = false ) const { varray<T> v = ( *this ); v.sort( comparator, stable ); return v; }
+
     auto begin( ) { return std::vector<T>::begin( ); }
     auto end( ) { return std::vector<T>::end( ); }
 
@@ -236,8 +238,8 @@ public:
     T & operator[]( uint index ) { return at( index ); }
     const T & operator[]( uint index ) const { return at( index ); }
 
-    varray operator+( const T & t ) const { varray v = *this; v.insert_back( t ); return v; }
-    varray operator+( const varray & v ) const { varray ret = *this; ret.insert_back( v ); return ret; }
+    varray operator+( const T & t ) const { varray v = ( *this ); v.insert_back( t ); return v; }
+    varray operator+( const varray & v ) const { varray ret = ( *this ); ret.insert_back( v ); return ret; }
 
     varray & operator+=( const T & t ) { insert_back( t ); return *this; }
     varray & operator+=( const varray & v ) { insert_back( v ); return *this; }
@@ -272,7 +274,7 @@ private:
 
 public:
 
-    bool empty( ) const { return size( ); }
+    bool empty( ) const { return ( size( ) == 0 ); }
 
     uint size( ) const { return (uint)( std::list<T>::size( ) ); }
 
@@ -335,9 +337,12 @@ public:
     virtual void clear( ) { std::list<T>::clear( ); }
 
     virtual void reverse( ) { std::list<T>::reverse( ); }
-    virtual list<T> reversed( ) { list<T> l = *this; l.reverse( ); return l; }
+
+    virtual list<T> reversed( ) const { list<T> l = ( *this ); l.reverse( ); return l; }
 
     virtual void sort( std::function<bool( const T & t1, const T & t2 )> comparator ) { std::list<T>::sort( comparator ); }
+
+    virtual list<T> sorted( std::function<bool( const T & t1, const T & t2 )> comparator ) const { list<T> l = ( *this ); l.sort( comparator ); return l; }
 
     virtual void remove_if( std::function<bool( const T & t )> checker ) { std::erase_if( *this, checker ); }
 
@@ -371,13 +376,16 @@ private:
 
 public:
 
-    bool empty( ) const { return size( ); }
+    bool empty( ) const { return ( size( ) == 0 ); }
 
     uint size( ) const { return (uint)( std::queue<T>::size( ) ); }
 
     void push( const T & t ) { std::queue<T>::push( t ); }
 
     T pop( ) { T t = front( ); std::queue<T>::pop( ); return t; }
+
+    T & front( ) { return std::queue<T>::front( ); }
+    T & back( ) { return std::queue<T>::back( ); }
 
     const T & front( ) const { return std::queue<T>::front( ); }
     const T & back( ) const { return std::queue<T>::back( ); }
@@ -397,7 +405,7 @@ private:
 
 public:
 
-    bool empty( ) const { return size( ); }
+    bool empty( ) const { return ( size( ) == 0 ); }
 
     uint size( ) const { return std::stack<T>::size( ); }
 
@@ -405,8 +413,9 @@ public:
 
     T pop( ) { T t = top( ); std::stack<T>::pop( ); return t; }
 
+    T & top( ) { return std::stack<T>::top( ); }
+
     const T & top( ) const { return std::stack<T>::top( ); }
-    const T & bottom( ) const { return std::stack<T>::bottom( ); }
 
     bool operator==( const stack<T> & s ) const { return ( *this == ( std::stack<T> )s ); }
     bool operator!=( const stack<T> & s ) const { return ( *this != ( std::stack<T> )s ); }
@@ -423,12 +432,12 @@ private:
 
 public:
 
-    bool empty( ) const { return size( ); }
+    bool empty( ) const { return ( size( ) == 0 ); }
 
     uint size( ) const { return std::set<Key, Compare>::size( ); }
 
     bool contains( const Key & k ) const { return ( std::set<Key, Compare>::find( k ) != std::set<Key, Compare>::end( ) ); }
-    
+
     virtual void insert( const Key & k ) { std::set<Key, Compare>::insert( k ); }
 
     virtual void clear( ) { std::set<Key, Compare>::clear( ); }
@@ -454,7 +463,7 @@ private:
 
 public:
 
-    bool empty( ) const { return size( ); }
+    bool empty( ) const { return ( size( ) == 0 ); }
 
     uint size( ) const { return (uint)( std::unordered_set<Key, Hash, Equal>::size( ) ); }
 
@@ -487,7 +496,7 @@ private:
 
 public:
 
-    bool empty( ) const { return size( ); }
+    bool empty( ) const { return ( size( ) == 0 ); }
 
     uint size( ) const { return (uint)( std::map<Key, Value, Hash, Equal>::size( ) ); }
 
@@ -518,7 +527,7 @@ private:
 
 public:
 
-    bool empty( ) const { return size( ); }
+    bool empty( ) const { return ( size( ) == 0 ); }
 
     uint size( ) const { return (uint)( std::unordered_map<Key, Value, Hash, Equal>::size( ) ); }
 

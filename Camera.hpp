@@ -30,76 +30,47 @@ public:
     class ScreenEffect;
 
     ~Camera( ) { clear_all( ); }
+
     Camera( World * world, Planc cref width = P0, Planc cref height = P0, dec zoom = 1.0 );
+
+    #if defined ( AXN_DEBUG )
+    bool draw_debug = false;
+    Drawing debug_overlay_drawing( ) const;
+    #endif
 
     uint age( ) const { return m_age; }
 
-    void update( );
-    void render( );
+    virtual void update( );
+    virtual void render( );
 
     void clear_all( );
     void clear_subjects( );
     void clear_screen_effects( );
     void clear_hud_elements( );
 
-    void capture( Visible * subject, bool should_delete = false );
-    void capture( varray<Visible *> & subjects, bool should_delete = false )
-    {
-        for_each( subject, subjects )
-        {
-            capture( subject, should_delete );
-        }
-    }
+    virtual void capture( Visible * subject, bool should_delete = false );
+    void capture( varray<Visible *> & subjects, bool should_delete = false ) { for_each( subject, subjects ) { capture( subject, should_delete ); } }
 
-    void add_screen_effect( ScreenEffect * effect, bool should_delete = false );
-    void add_screen_effects( varray<ScreenEffect *> & effects, bool should_delete = false )
-    {
-        for_each( effect, effects )
-        {
-            add_screen_effect( effect, should_delete );
-        }
-    }
+    virtual void add_screen_effect( ScreenEffect * effect, bool should_delete = false );
+    void add_screen_effects( varray<ScreenEffect *> & effects, bool should_delete = false ) { for_each( effect, effects ) { add_screen_effect( effect, should_delete ); } }
 
-    void remove_screen_effect( ScreenEffect * hud_element );
-    void remove_screen_effects( varray<ScreenEffect *> & effects )
-    {
-        for_each( effect, effects )
-        {
-            remove_screen_effect( effect );
-        }
-    }
+    virtual void remove_screen_effect( ScreenEffect * hud_element );
+    void remove_screen_effects( varray<ScreenEffect *> & effects ) { for_each( effect, effects ) { remove_screen_effect( effect ); } }
 
-    void add_hud_element( HeadUpDisplay * hud_element, bool should_delete = false );
-    void add_hud_elements( varray<HeadUpDisplay *> & hud_elements, bool should_delete = false )
-    {
-        for_each( hud_element, hud_elements )
-        {
-            add_hud_element( hud_element, should_delete );
-        }
-    }
+    virtual void add_hud_element( HeadUpDisplay * hud_element, bool should_delete = false );
+    void add_hud_elements( varray<HeadUpDisplay *> & hud_elements, bool should_delete = false ) { for_each( hud_element, hud_elements ) { add_hud_element( hud_element, should_delete ); } }
 
-    void remove_hud_element( HeadUpDisplay * hud_element );
-    void remove_hud_elements( varray<HeadUpDisplay *> & hud_elements )
-    {
-        for_each( hud_element, hud_elements )
-        {
-            remove_hud_element( hud_element );
-        }
-    }
+    virtual void remove_hud_element( HeadUpDisplay * hud_element );
+    void remove_hud_elements( varray<HeadUpDisplay *> & hud_elements ) { for_each( hud_element, hud_elements ) { remove_hud_element( hud_element ); } }
 
     #if defined ( AXN_DEBUG )
-    void capture_debug( Visible * subject, bool should_delete = false );
-    void capture_debug( varray<Visible *> & subjects, bool should_delete = false )
-    {
-        for_each( subject, subjects )
-        {
-            capture_debug( subject, should_delete );
-        }
-    }
+    virtual void capture_debug( Visible * subject, bool should_delete = false );
+    void capture_debug( varray<Visible *> & subjects, bool should_delete = false ) { for_each( subject, subjects ) { capture_debug( subject, should_delete ); } }
     #endif
 
     Planc width( ) const;
     void width( Planc cref );
+
     Planc height( ) const;
     void height( Planc cref );
 
@@ -135,30 +106,24 @@ public:
     void cursor_world_position( Coordinate cref );
     void cursor_world_position_reset( );
 
-private:
-
     Drawing cursor_drawing( ) const;
-    #if defined ( AXN_DEBUG )
-
-public:
-
-    bool draw_debug = false;
 
 private:
-
-    Drawing debug_overlay_drawing( ) const;
-    #endif
 
     World * m_world = nullptr;
+
     uint m_age = 0;
 
-    Planc m_width, m_height;
-    Coordinate m_center;
-    Coordinate m_target;
+    Planc m_width = P0;
+    Planc m_height = P0;
+
+    Coordinate m_center = ORIGIN;
+    Coordinate m_target = ORIGIN;
+
     dec m_zoom = 1.0;
     dec m_movement_ratio = 0.5;
 
-    Coordinate m_cursor_world_position;
+    Coordinate m_cursor_world_position = ORIGIN;
 
     varray<Visible *> m_subjects;
     varray<Visible *> m_owned_subjects; // subset of subjects that camera needs to delete
@@ -168,8 +133,9 @@ private:
 
     varray<HeadUpDisplay *> m_hud_elements;
     varray<HeadUpDisplay *> m_owned_hud_elements; // subset of hud elements that camera needs to delete
-    dec m_hud_offset_percentage;
-    bool m_show_hud;
+
+    dec m_hud_offset_percentage = 0.0;
+    bool m_show_hud = true;
 
     #if defined ( AXN_DEBUG )
     varray<Visible *> m_debug_subjects;
@@ -191,10 +157,12 @@ public:
 
     private:
 
-        dec m_center_x_percent;
-        dec m_center_y_percent;
-        dec m_width_percent;
-        dec m_height_percent;
+        dec m_center_x_percent = 0.0;
+        dec m_center_y_percent = 0.0;
+
+        dec m_width_percent = 0.0;
+        dec m_height_percent = 0.0;
+
     };
 
     class ScreenEffect : public Visible

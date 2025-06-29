@@ -37,8 +37,8 @@ Sky::Sky( Room * room ) : Object( room )
 
     needs_render_always( true );
 
-    gravity_ratio( 0.0 );
-    terrain_boundaries( false );
+    no_gravity( );
+    terrain_bound( false );
 
     z( 0.0 );
 

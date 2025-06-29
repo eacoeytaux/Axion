@@ -78,6 +78,8 @@ PlancOpsRight( dec );
 
 cPlanc P0 = Planc( 0.0 );
 
+cPlanc METER = ( 32.0 );
+
 } // namespace geometry
 } // namespace axn
 

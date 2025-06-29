@@ -11,6 +11,7 @@ cPlanc DEFAULT_ROPE_RETRACT_SPEED = 64.0;
 
 cPlanc HOOK_LENGTH = 38.0;
 cPlanc HOOK_THICKNESS = 5.0;
+cPlanc HOOK_HOLE_THICKNESS = HOOK_THICKNESS * 0.5;
 cPlanc HOOK_TIP_LENGTH = 2.5;
 cAngle HOOK_ANGLE = RIGHT;
 cColor HOOK_COLOR = Color::rgb( 0x9C9C9C );
@@ -22,7 +23,7 @@ cColor ROPE_ALT_COLOR = Color::rgb( 0xB9870F );
 } // namespace
 
 using mtmercy::Hook;
-Hook::Hook( Room * room, const Climber * owner ) : Object( room ), m_owner( owner )
+Hook::Hook( Room * room, Climber * owner ) : Object( room ), m_owner( owner )
 {
     #if defined ( AXN_DEBUG )
     draw_debug = true;
@@ -36,6 +37,7 @@ Hook::Hook( Room * room, const Climber * owner ) : Object( room ), m_owner( owne
     position( m_owner->position( ) );
 
     state( LOADED );
+
     m_rope_growth_speed = DEFAULT_ROPE_GROWTH_SPEED;
     m_rope_retract_speed = DEFAULT_ROPE_RETRACT_SPEED;
     m_max_rope_length = DEFAULT_ROPE_MAX_LENGTH;
@@ -59,30 +61,7 @@ void Hook::render( )
                                          tip + VectorA( hook_angle + RIGHT, HOOK_THICKNESS * half( HOOK_TIP_LENGTH ) ) - VectorA( hook_angle, HOOK_THICKNESS * HOOK_TIP_LENGTH ),
                                          tip + VectorA( hook_angle - RIGHT, HOOK_THICKNESS * half( HOOK_TIP_LENGTH ) ) - VectorA( hook_angle, HOOK_THICKNESS * HOOK_TIP_LENGTH ) ) );
 
-    Vector rope_vector = hook_base( ) - m_owner->position( );
-    Line rope( rope_vector );
-
-    // draw rope base
-    draw( ROPE_BASE_COLOR, rope, ROPE_WIDTH );
-
-    { // draw rope detail coils
-        Vector rope_chunk = VectorA( rope_vector.angle( ), ROPE_WIDTH );
-        for_range( i, ( half( rope_vector.magnitude( ) / rope_chunk.magnitude( ) ) ) )
-        {
-            Polygon rope_strip_rect = Polygon::rectangle( ROPE_WIDTH, ROPE_WIDTH, base - ( rope_chunk * ( i + 1 ) * 2 ), rope_chunk.angle( ) );
-            draw( ROPE_ALT_COLOR, rope_strip_rect );
-        }
-    }
-
-    #if defined ( AXN_DEBUG )
-    // if( Debug::active )
-    {
-        if( taut( ) )
-        {
-            draw( RED.a( 0.5 ), rope, ROPE_WIDTH );
-        }
-    }
-    #endif
+    // erase( Polygon::circle( HOOK_HOLE_THICKNESS, base ) );
 }
 
 void Hook::update( )
@@ -94,7 +73,7 @@ void Hook::update_velocity( )
 {
     if( state( ) == LOADED )
     {
-        ground( nullptr );
+        ground( nullptr, Terrain::Bumper( ) );
         no_gravity( );
         velocity( V0 );
         m_angle = m_owner->aim_angle( );
@@ -102,7 +81,7 @@ void Hook::update_velocity( )
     }
     else if( state( ) == LAUNCHING )
     {
-        gravity_ratio( 0.25 );
+        gravity_scale( 0.25 ); // todo
         m_rope_length = m_owner->position( ).distance_to( position( ) );
 
         if( Object::ground( ) )
@@ -110,7 +89,7 @@ void Hook::update_velocity( )
             state( HOOKED );
             velocity( V0 );
         }
-        else if( rope( ).magnitude( ) >= m_max_rope_length )
+        else if( rope( ).magnitude( ) >= max_rope_length( ) )
         {
             no_gravity( );
             state( HOOKED );
@@ -123,17 +102,15 @@ void Hook::update_velocity( )
     else if( state( ) == RETRACTING )
     {
         stationary( false );
-        ground( nullptr );
+        ground( nullptr, Terrain::Bumper( ) );
         velocity( VectorA( Angle( position( ), m_owner->position( ) ), m_rope_retract_speed ) );
+
         m_rope_length -= m_rope_retract_speed;
+
         if( m_rope_length <= HOOK_LENGTH )
         {
             state( LOADED );
         }
-    }
-    else if( state( ) == HOOKED )
-    {
-        m_rope_length = m_owner->position( ).distance_to( position( ) );
     }
 
     Object::update_velocity( );
@@ -151,9 +128,9 @@ void Hook::update_velocity( )
     }
 }
 
-void Hook::ground( TerrainEdge * ground )
+void Hook::ground( Terrain::Node * ground, Terrain::Bumper cref _bumper )
 {
-    Object::ground( ground );
+    Object::ground( ground, _bumper );
 }
 
 bool Hook::collide( Object * object )
@@ -168,7 +145,7 @@ bool Hook::collide( Object * object )
             {
                 if( Mob * mob = dynamic_cast<Mob *>( object ) )
                 {
-                    mob->hurt( Damage( 1000.0 ) ); // todo lol
+                    mob->damage( Damage( 1000.0 ) ); // todo lol
                 }
 
                 state( RETRACTING );
@@ -184,6 +161,28 @@ bool Hook::collide( Object * object )
 Planc Hook::max_rope_length( ) const
 {
     return m_max_rope_length;
+}
+
+Planc Hook::rope_length( ) const
+{
+    return m_rope_length;
+}
+
+void Hook::extend_rope( cPlanc _length )
+{
+    m_rope_length = min( m_rope_length + _length, max_rope_length( ) );
+}
+
+void Hook::shorten_rope( cPlanc _length )
+{
+    Planc rope_length_start = m_rope_length;
+
+    m_rope_length = max( m_rope_length - _length, P0 );
+
+    if( taut( ) )
+    {
+        m_owner->position( hook_base( ) + VectorA( rope( ).angle( ).flipped( ), rope_length( ) ) );
+    }
 }
 
 Coordinate Hook::hook_base( ) const
@@ -210,7 +209,7 @@ Vector Hook::rope( ) const
 
 bool Hook::taut( ) const
 {
-    return ( ( rope( ).magnitude( ) >= m_max_rope_length ) && !loaded( ) );
+    return ( hooked( ) && ( rope( ).magnitude( ) >= rope_length( ) ) );
 }
 
 bool Hook::hooked( ) const
@@ -287,6 +286,6 @@ void Hook::retract( )
 
 void Hook::reload( )
 {
-    ground( nullptr );
+    ground( nullptr, Terrain::Bumper( ) );
     state( LOADED );
 }

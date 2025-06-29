@@ -20,6 +20,9 @@
 
 #define rethis return *this
 
+#define break_if( b ) \
+    if( b ) { break; }
+
 #define return_if( b, ret ) \
     if( b ) { return ret; }
 
@@ -34,7 +37,7 @@
     for( uint do_counter = 0; do_counter < x; ++do_counter )
 
 #define for_range( i, range ) \
-    for( uint i = 0; i < range; ++i )
+    for( uint i = 0; i < (uint)range; ++i )
 
 #define for_each( x, container ) \
     for( auto & x: container )
@@ -87,8 +90,32 @@
 
 namespace axn
 {
+
+namespace math // todo this should encompass more functions
+{
+
+// -- constants --
+
+cdec PI = ( 3.141592653589793236926 );
+cdec TAU = ( 6.28318530717958647692 );
+cdec RIGHT = ( 1.570796326794896618 );
+
+cdec EULER = ( 2.718281828459045235 );
+
+} // namespace math
+
 namespace utility
 {
+
+enum Direction
+{
+    NO_DIRECTION,
+    DIRECTION_UP,
+    DIRECTION_DOWN,
+    DIRECTION_LEFT,
+    DIRECTION_RIGHT,
+    DIRECTIONS
+};
 
 inline void nothing( ) { }
 
@@ -97,7 +124,7 @@ typeT inline void safe_delete( T *& t ) { if( t && dynamic_cast<T *>( t ) ) { de
 
 // -- dec util functions --
 
-cdec DEFAULT_EPSILON = 0.0001;
+cdec DEFAULT_EPSILON = ( 0.0001 );
 
 inline bool equal( cdec x, cdec y, cdec e = DEFAULT_EPSILON ) { return ( abs( x - y ) < e ); }
 inline bool greater( cdec x, cdec y, cdec e = DEFAULT_EPSILON ) { return ( ( x - e ) > y ); }
@@ -107,7 +134,7 @@ inline bool less( cdec x, cdec y, cdec e = DEFAULT_EPSILON ) { return ( ( x + e 
 inline bool less( bool eq, cdec x, cdec y, cdec e = DEFAULT_EPSILON ) { return ( ( ( x + e ) < y ) || ( eq && equal( x, y, e ) ) ); }
 inline bool less_or_equal( cdec x, cdec y, cdec e = DEFAULT_EPSILON ) { return less( true, x, y, e ); }
 
-inline bool is_inf( cdec d ) { return ( d == INFINITY_POS ) || ( d == INFINITY_NEG ); }
+inline bool is_inf( cdec d ) { return ( d == INFINITY ) || ( d == -INFINITY ); }
 inline bool is_nan( cdec d ) { return ( ::isnan( d ) ); }
 inline bool is_num( cdec d ) { return ( !is_nan( d ) && !is_inf( d ) ); }
 inline bool is_int( cdec d ) { return ( equal( d, ::rint( d ) ) ); }
@@ -158,6 +185,8 @@ typeT inline T cref max( const varray<T> & v )
     return v[ max_i ];
 }
 
+typeT inline T cref minmax( T cref tmin, T cref t, T cref tmax ) { return min( max( t, tmin ), tmax ); }
+
 inline dec pythagorean( cdec a, cdec b ) { return ( ( a && b ) ? ( sqrt( square( a ) + square( b ) ) ) : abs( a + b ) ); }
 
 inline uint fibonacci( cuint n ) { uint f[ 3 ] = { 1, 0, 1 }; do_count( n ) { f[ 0 ] = f[ 1 ] + f[ 2 ]; f[ 2 ] = f[ 1 ]; f[ 1 ] = f[ 0 ]; } return f[ 0 ]; }
@@ -202,32 +231,54 @@ inline uint curve_point_count( dec length ) { return max<uint>( 4, min<uint>( 60
 
 // -- util classes --
 
-class Countdown
+classT Min
 {
 
 private:
 
-    uint m_countdown_top = 0;
-    uint m_countdown_remaining = 0;
+    bool m_set = false;
+
+    T m_min = T( );
 
 public:
 
-    Countdown( ) { }
-    Countdown( cuint countdown ) { reset( countdown ); }
+    Min( ) { }
 
-    uint remaining( ) const { return m_countdown_remaining; }
-    uint duration( ) const { return m_countdown_top; }
+    Min( T cref t ) { update( t ); }
 
-    void duration( uint countdown ) { m_countdown_top = countdown; }
+    operator T( ) const { return m_min; }
 
-    bool tick( ) { return ( !m_countdown_remaining || !m_countdown_remaining-- ); } // returns true is countdown is finished
-    void complete( ) { m_countdown_remaining = 0; }
+    void reset( ) { m_min = T( ); m_set = false; }
+    void update( T cref t ) { m_min = ( m_set ? ::min( m_min, t ) : t ); m_set = true; }
+    void update( varray<T> cref v ) { for_each( t, v ) { update( t ); } }
 
-    void reset( cuint countdown ) { duration( countdown ); reset( ); }
-    void reset( ) { m_countdown_remaining = m_countdown_top; }
+    default_equal( Min );
 
-    default_equal( Countdown );
-    
+};
+
+classT Max
+{
+
+private:
+
+    bool m_set = false;
+
+    T m_max = T( );
+
+public:
+
+    Max( ) { }
+
+    Max( T cref t ) { update( t ); }
+
+    operator T( ) const { return m_max; }
+
+    void reset( ) { m_max = T( ); m_set = false; }
+    void update( T cref t ) { m_max = ( m_set ? ::max( m_max, t ) : t ); m_set = true; }
+    void update( varray<T> cref v ) { for_each( t, v ) { update( t ); } }
+
+    default_equal( Max );
+
 };
 
 classT Span
@@ -235,8 +286,8 @@ classT Span
 
 private:
 
-    T m_min = T( 0.0 );
-    T m_max = T( 0.0 );
+    T m_min = T( );
+    T m_max = T( );
 
 public:
 
@@ -263,7 +314,7 @@ public:
     }
 
     default_equal( Span );
-    
+
 };
 
 classT Slider
@@ -271,22 +322,22 @@ classT Slider
 
 private:
 
-    T m_value = T( 0.0 );
+    T m_value = T( );
 
-    T m_bound_min = T( 0.0 );
-    T m_bound_max = T( 1.0 );
+    T m_bound_min = T( );
+    T m_bound_max = T( );
 
 public:
 
     Slider( ) { }
 
-    Slider( T cref bound ) : m_bound_min( 0.0 ), m_bound_max( bound ), m_value( bound ) { }
+    Slider( T cref bound ) : m_bound_min( T( ) ), m_bound_max( bound ), m_value( bound ) { }
     Slider( T cref bound1, T cref bound2 ) : m_bound_min( ( bound1 < bound2 ) ? bound1 : bound2 ), m_bound_max( ( bound1 < bound2 ) ? bound2 : bound1 ), m_value( bound1 ) { }
 
     T cref value( ) const { return m_value; }
     void value( T cref value, bool set_new_bounds = false )
     {
-        Assert( ( set_new_bounds || ( ( value >= min( ) ) && ( value <= max( ) ) ) ), "value must be in range" );
+        // todo Assert( ( set_new_bounds || ( ( value >= min( ) ) && ( value <= max( ) ) ) ), "value must be in range" );
 
         m_value = value;
 
@@ -318,7 +369,35 @@ public:
     void delta( T cref delta, bool set_new_bounds = false ) { value( m_value + delta, set_new_bounds ); }
 
     default_equal( Slider );
-    
+
+};
+
+class Countdown
+{
+
+private:
+
+    uint m_countdown_top = 0;
+    uint m_countdown_remaining = 0;
+
+public:
+
+    Countdown( ) { }
+    Countdown( cuint countdown ) { reset( countdown ); }
+
+    uint remaining( ) const { return m_countdown_remaining; }
+    uint duration( ) const { return m_countdown_top; }
+
+    void duration( uint countdown ) { m_countdown_top = countdown; }
+
+    bool tick( ) { return ( !m_countdown_remaining || !m_countdown_remaining-- ); } // returns true is countdown is finished
+    void complete( ) { m_countdown_remaining = 0; }
+
+    void reset( cuint countdown ) { duration( countdown ); reset( ); }
+    void reset( ) { m_countdown_remaining = m_countdown_top; }
+
+    default_equal( Countdown );
+
 };
 
 // -- range util functions --
@@ -350,11 +429,11 @@ public:
     Identifiable( ) { static uint total_ids = 0; m_id = ++total_ids; Assert( !is_zero( m_id ) ); }
 
     uint id( ) const { return m_id; }
-    
+
     operator uint( ) const { return id( ); }
 
     default_equal( Identifiable );
-    
+
 };
 
 } // namespace utility

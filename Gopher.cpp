@@ -6,7 +6,8 @@ using mtmercy::DirtBall;
 namespace
 {
 
-cdec GRAVITY_RATIO = 0.125;
+cdec BALL_GRAVITY = 0.125;
+cPlanc BALL_WIDTH = 5.0;
 
 cPlanc SIGHT_RANGE = METER * 10.0;
 cPlanc ALERT_RANGE = SIGHT_RANGE * 0.75;
@@ -39,7 +40,7 @@ cAngle EAR_ANGLE_BACK = RIGHT * 0.5;
 cPlanc EYE_SPACING_UP = NOSE_RADIUS * 1.25;
 cPlanc EYE_SPACING_SIDE = NOSE_RADIUS * 1.75;
 cPlanc EYE_RADIUS = 1.0;
-cuint BLINK_DURATION = 4;
+cuint BLINK_DURATION = 8;
 const Span<uint> BLINK_WAIT = { 360, 480 };
 
 cColor EYE_COLOR = BLACK;
@@ -47,7 +48,8 @@ cColor TEETH_COLOR = WHITE;
 cColor NOSE_COLOR = Color::rgb( 0x654321 );
 cColor FUR_COLOR1 = Color::rgb( 0xA0522D );
 cColor FUR_COLOR2 = Color::rgb( 0xF4A460 );
-}
+
+} // namespace
 
 Gopher::Gopher( Room * room, Coordinate cref _position ) : Enemy( room, _position, 10000.0 )
 {
@@ -75,7 +77,7 @@ void Gopher::update( )
 
             if( !m_reload_timer.remaining( ) )
             {
-                room( )->add_object( new DirtBall( room( ), 5.0, position( ), VectorA( Angle( position( ), target( )->position( ) ), 5.0 ) ) );
+                room( )->add_object( new DirtBall( room( ), BALL_WIDTH, position( ), VectorA( Angle( position( ), target( )->position( ) ), 5.0 ) ) );
                 m_reload_timer.reset( RELOAD_TIME );
             }
         }
@@ -134,8 +136,8 @@ DirtBall::DirtBall( Room * room, Planc cref _radius, Coordinate cref _position, 
     solid( true );
     interactive( true );
 
-    gravity_ratio( GRAVITY_RATIO );
-    terrain_boundaries( false );
+    gravity_scale( BALL_GRAVITY );
+    terrain_bound( false );
 
     velocity( _velocity );
 

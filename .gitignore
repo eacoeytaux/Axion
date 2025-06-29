@@ -1,5 +1,9 @@
 # -- ALL --
 
+# folders
+bin/*
+tmp/*
+
 # compiled object files
 *.o
 *.obj

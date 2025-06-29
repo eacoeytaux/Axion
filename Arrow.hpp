@@ -7,7 +7,7 @@
 namespace mtmercy
 {
 
-class Arrow : public Object
+class Arrow : public Object // TODO make projectile
 {
 
 private:
@@ -30,7 +30,7 @@ public:
 
 protected:
 
-    virtual void ground( TerrainEdge * ) override;
+    virtual void ground( Terrain::Node * node, Terrain::Bumper cref bumper ) override;
     virtual void react_to_movement( Object *, Vector cref ) override;
     virtual bool collide( Object * ) override;
 
@@ -46,7 +46,7 @@ private:
     Angle m_angle;
     Color m_feather_color;
     Object * m_stuck_object;
-    
+
 };
 
 } // namespace mtmercy

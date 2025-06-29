@@ -2,18 +2,18 @@
 #define Dust_hpp
 
 #include "MountMerciless.hpp"
-#include "Object.hpp"
+#include "Hazard.hpp"
 
 namespace mtmercy
 {
 
-class Thorns : public Object
+class Thorns : public Hazard
 {
-    
+
 public:
-    
+
     Thorns( Room *, const Coordinate &, const Coordinate & );
-    
+
     bool collide( Object * ) override;
 
 };

@@ -19,41 +19,54 @@ axnclass( Arc )
 
 private:
 
-    Angle m_start;
-    Angle m_end;
-    Planc m_radius;
-    Coordinate m_center;
+    Planc m_radius = P0;
+
+    Coordinate m_center = ORIGIN;
+
+    Angle m_start = A0;
+    Angle m_end = A0;
+
+    bool m_ccw = true;
 
     Arc( ) { }
 
-    Arc( Coordinate cref center, Planc cref radius, Angle cref start, Angle cref end ) :
-        m_center( center ), m_radius( radius ), m_start( start ), m_end( end )
-    { Assert( center.valid( ) ); }
+    Arc( Planc cref radius, Coordinate cref center, Angle cref start, Angle cref end, bool ccw ) :
+        m_radius( radius ),
+        m_center( center ),
+        m_start( start ),
+        m_end( end ),
+        m_ccw( ccw )
+    {
+        // Assert( center.valid( ) );
+    }
 
 public:
 
-    static Arc cw( Coordinate cref center, Planc cref radius, Angle cref start, Angle cref end ) { return Arc( center, radius, end, start ); }
-    static Arc ccw( Coordinate cref center, Planc cref radius, Angle cref start, Angle cref end ) { return Arc( center, radius, start, end ); }
+    static Arc ccw( Planc cref radius, Coordinate cref center, Angle cref start, Angle cref end ) { return Arc( radius, center, start, end, true ); }
+    static Arc cw( Planc cref radius, Coordinate cref center, Angle cref start, Angle cref end ) { return Arc( radius, center, end, start, false ); }
 
-    static Arc cw( Planc cref radius, Angle cref start, Angle cref end ) { return Arc( ORIGIN, radius, end, start ); }
-    static Arc ccw( Planc cref radius, Angle cref start, Angle cref end ) { return Arc( ORIGIN, radius, start, end ); }
-    
+    static Arc ccw( Planc cref radius, Angle cref start, Angle cref end ) { return Arc( radius, ORIGIN, start, end, true ); }
+    static Arc cw( Planc cref radius, Angle cref start, Angle cref end ) { return Arc( radius, ORIGIN, end, start, false ); }
+
+    static Arc semi_ccw( Planc cref radius, Coordinate cref center, Angle cref start = A0 ) { return Arc( radius, center, start, start + PI, true ); }
+    static Arc semi_cw( Planc cref radius, Coordinate cref center, Angle cref start = A0 ) { return Arc( radius, center, start - PI, start, false ); }
+
+    static Arc semi_ccw( Planc cref radius, Angle cref start = A0 ) { return Arc( radius, ORIGIN, start, start + PI, true ); }
+    static Arc semi_cw( Planc cref radius, Angle cref start = A0 ) { return Arc( radius, ORIGIN, start - PI, start, false ); }
+
     Planc radius( ) const { return m_radius; }
-    
+
     const Coordinate & center( ) const { return m_center; }
-    
+
     Angle start( ) const { return m_start; }
     Angle end( ) const { return m_end; }
 
-    Path path( ) { return path( curve_point_count( half( radius( ) * TAU ) ) ); }
+    Path path( ) { return path( curve_point_count( half( radius( ) * TAU ) ) ); } // todo should point count be scaled by d_angle?
     Path path( uint line_count )
     {
-        Angle start_angle = start( );
-        Angle end_angle = end( );
+        Angle start_angle = start( ).truncated( );
+        Angle end_angle = end( ).truncated( );
 
-        start_angle.truncate( true );
-        end_angle.truncate( true );
-        
         return_if( ( start_angle == end_angle ), Path( ) );
 
         Angle d_angle;
@@ -81,9 +94,9 @@ public:
         Coordinate end_coordinate = center( ) + VectorA( end_angle, radius( ) );
         lines.insert_back( Line( start_coordinate, end_coordinate ) );
 
-        return lines;
+        return ( m_ccw ? lines : lines.reversed( ) );
     }
-    
+
 };
 
 } // namespace geometry

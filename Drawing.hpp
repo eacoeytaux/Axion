@@ -11,6 +11,7 @@ namespace graphics
 
 class Drawing : public Transformable
 {
+
     friend class Camera; // be friendly to the camera and smile
 
 public:
@@ -18,6 +19,8 @@ public:
     Drawing( ) { }
 
     Drawing( Coordinate cref center ) { Drawing::center( center ); }
+
+    virtual Drawing & transform( Transform cref t ) override;
 
     transform_functions( Drawing );
 
@@ -66,9 +69,9 @@ public:
     #endif
 
     Drawing & erase( Polygon cref );
+    Drawing & crop( Polygon cref );
 
-    Drawing & bind( Polygon cref );
-    Drawing & clear_bounds( );
+    Drawing & clear_bounds( ); // todo this should go away because erase and crop only affect before it
 
     Drawing & filter_function( const function<void( Color & )> & filter_function ) { m_filter_function = filter_function; m_filter_function_set = true; rethis; }
     Drawing & clear_filter_function( ) { m_filter_function_set = false; rethis; }
@@ -91,6 +94,8 @@ public:
 
         m_colored_polygons.clear( !reserve_mem );
 
+        m_nodes.clear( !reserve_mem );
+
         m_bounding_box.width( 0.0 );
         m_bounding_box.height( 0.0 );
         m_bounding_box.center( ORIGIN );
@@ -103,10 +108,11 @@ public:
     bool operator==( Drawing cref ) const { return false; }
     bool operator!=( Drawing cref ) const { return true; }
 
-private:
+public:
 
     struct ColoredPolygon
     {
+
         Polygon polygon;
         varray<Color> colors;
         dec thickness = FILLED;
@@ -119,10 +125,38 @@ private:
         bool reset = false;
 
         default_equal( ColoredPolygon );
+
     };
 
-    mutable varray<ColoredPolygon> m_colored_polygons;
     const varray<ColoredPolygon> & colored_polygons( bool transformed = true ) const;
+
+    struct Node
+    {
+
+        Transform transform = IDENTITY_TRANSFORM; // first thing applied
+
+        varray<ColoredPolygon> crop_shapes; // non-ordered
+        varray<ColoredPolygon> hole_shapes; // non-ordered
+
+        varray<ColoredPolygon> colored_shapes; // LIFO
+
+        varray<varray<Node>> drawings; // LIFO
+
+        default_equal( Node );
+
+    };
+
+    varray<Node> nodes( ) const;
+
+protected:
+
+    Node & back_node( bool add_new = false );
+
+private:
+
+    mutable varray<Node> m_nodes;
+
+    mutable varray<ColoredPolygon> m_colored_polygons;
 
     mutable Coordinate m_center = ORIGIN;
 

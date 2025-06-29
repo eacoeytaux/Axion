@@ -4,6 +4,7 @@
 #include "Planc.hpp"
 #include "Coordinate.hpp"
 #include "Angle.hpp"
+#include "Cycle.hpp"
 #include "Vector.hpp"
 #include "Transform.hpp"
 #include "Line.hpp"

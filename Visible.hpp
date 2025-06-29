@@ -20,8 +20,6 @@ public:
     dec z( ) const { return m_z; }
     void z( dec z ) { m_z = z; }
 
-    void layer_position( queue<uint> layer_position ) { m_layer_position = layer_position; }
-
     virtual void render( )
     {
         m_ever_rendered = true;
@@ -39,19 +37,24 @@ public:
     const varray<LightSource> & light_sources( ) const { return m_light_sources; }
     void clear_light_sources( ) { m_light_sources.clear( ); }
 
+    void layer_position( queue<uint> layer_position ) { m_layer_position = layer_position; }
     queue<uint> layer_position( ) const { return m_layer_position; }
 
-    static bool sort( const Visible * cref v1, const Visible * cref v2 )
+    virtual bool layer_above( const Visible * v ) const { return false; }
+    bool layer_position_above( const Visible * v ) const
     {
-        if( v1->z( ) != v2->z( ) )
+        // TODO sort of queue<int> should happen as its own function
+
+        if( z( ) != v->z( ) )
         {
             // sorting doesn't matter if objects aren't on the same z plane
-            return ( v1->z( ) < v2->z( ) );
+            return ( z( ) < v->z( ) );
         }
         else
         {
-            queue<uint> s1 = v1->layer_position( );
-            queue<uint> s2 = v2->layer_position( );
+            queue<uint> s1 = layer_position( );
+
+            queue<uint> s2 = v->layer_position( );
 
             while( s1.size( ) || s2.size( ) )
             {
@@ -59,9 +62,17 @@ public:
                 {
                     if( s1.front( ) == s2.front( ) )
                     {
-                        // top levels are equal, keep looking
-                        s1.pop( );
-                        s2.pop( );
+                        if( ( s1.size( ) == s2.size( ) ) && ( s1.size( ) == 1 ) )
+                        {
+                            return ( layer_above( v ) );
+                        }
+                        else
+                        {
+                            // top levels are equal, keep looking
+
+                            s1.pop( );
+                            s2.pop( );
+                        }
                     }
                     else
                     {
@@ -77,10 +88,13 @@ public:
                     return false;
                 }
             }
+
         }
 
         return false;
     }
+
+    static bool sort( const Visible * cref v1, const Visible * cref v2 ) { return ( v1->layer_position_above( v2 ) ); }
 
 protected:
 
@@ -114,7 +128,7 @@ private:
     bool m_needs_render_always = false;
     bool m_persist_render = false;
     bool m_ever_rendered = false;
-    
+
 };
 
 } // namespace graphics

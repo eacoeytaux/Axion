@@ -14,21 +14,25 @@ class Hook : public Object
 
 public:
 
-    Hook( Room *, const Climber * );
+    Hook( Room *, Climber * );
 
     void render( ) override;
 
     void update( ) override;
     void update_velocity( ) override;
-    void ground( TerrainEdge * ground ) override;
-    
+    void ground( Terrain::Node * node, Terrain::Bumper cref bumper ) override;
+
     Planc max_rope_length( ) const;
-    
+    Planc rope_length( ) const;
+
+    void extend_rope( Planc length );
+    void shorten_rope( Planc length );
+
     Coordinate hook_base( ) const;
     Coordinate hook_tip( ) const;
-    
+
     Vector rope( ) const;
-    
+
     bool taut( ) const;
     bool hooked( ) const;
     bool loaded( ) const;
@@ -45,7 +49,7 @@ protected:
 
 private:
 
-    const Climber * m_owner;
+    Climber * m_owner;
 
     Angle m_angle;
     Planc m_rope_length;
@@ -57,7 +61,7 @@ private:
            HOOKED,
            LAUNCHING,
            RETRACTING );
-    
+
 };
 
 } // namespace mtmercy

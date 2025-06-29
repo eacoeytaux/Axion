@@ -2,6 +2,7 @@
 #define Debug_hpp
 
 #include "OS.hpp"
+
 // -------------------- //
 #if defined ( OS_WINDOWS )
 // -------------------- //
@@ -23,8 +24,6 @@
 // -------------------- //
 #endif
 
-#define AXN_DEBUG
-
 #if defined ( AXN_DEBUG )
 #define breakpoint Debug::breakpointf( );
 namespace axn
@@ -38,6 +37,7 @@ public:
     static bool active;
     static bool breakpointf( ) { return true; }
 
+    static bool shifty; // if shift key is held
 };
 
 } // namespace axn

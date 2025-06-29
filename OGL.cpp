@@ -1,20 +1,22 @@
 #include "OGL.hpp"
 
 #include "OS.hpp"
+
+// -------------------- //
 #if defined( OS_WINDOWS )
-// ---------------- //
+// -------------------- //
 #include <GLFW/glfw3.h>
-// ---------------- //
+// -------------------- //
 #elif defined( OS_APPLE )
-// ---------------- //
+// -------------------- //
 #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
-// ---------------- //
+// -------------------- //
 #elif defined( OS_LINUX )
-// ---------------- //
-//                  //
-// ---------------- //
+// -------------------- //
+// #include <opengl.h>  //
+// -------------------- //
 #endif
 
 namespace axn
@@ -341,13 +343,13 @@ error ogl::transform( Transform cref _transform )
     return error_check( );
 }
 
-error ogl::translate( cdec _x, cdec _y )
+error ogl::translate( cPlanc _x, cPlanc _y )
 {
     glTranslated( _x, _y, 0.0 );
     return error_check( );
 }
 
-error ogl::scale( cdec _x, cdec _y )
+error ogl::scale( cPlanc _x, cPlanc _y )
 {
     glScaled( _x, _y, 1.0 );
     return error_check( );
@@ -481,7 +483,7 @@ error ogl::blend_clear( )
 
 error ogl::enable_anti_alias( )
 {
-    #ifndef OS_WINDOWS
+    #if !defined( OS_WINDOWS )
     enable( GL_MULTISAMPLE );
     #endif
 
@@ -499,7 +501,7 @@ error ogl::enable_anti_alias( )
 
 error ogl::disable_anti_alias( )
 {
-    #ifndef OS_WINDOWS
+    #if !defined( OS_WINDOWS )
     disable( GL_MULTISAMPLE );
     #endif
 

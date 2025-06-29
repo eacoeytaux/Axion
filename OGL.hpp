@@ -46,12 +46,12 @@ public:
 
     static error transform( Transform cref );
 
-    static error translate( dec x, dec y );
+    static error translate( Planc x, Planc y );
     static error translate( Coordinate cref c ) { return translate( c.x( ), c.y( ) ); }
     static error translate( Vector cref v ) { return translate( v.dx( ), v.dy( ) ); }
 
-    static error scale( dec s ) { return scale( s, s ); }
-    static error scale( dec x, dec y );
+    static error scale( Planc s ) { return scale( s, s ); }
+    static error scale( Planc x, Planc y );
 
 private:
 
@@ -171,7 +171,7 @@ private:
 public:
 
     static error error_check( );
-    
+
 };
 
 } // namespace axn

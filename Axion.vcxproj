@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="DebugRelease|Win32">
-      <Configuration>DebugRelease</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugRelease|x64">
-      <Configuration>DebugRelease</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseD|Win32">
+      <Configuration>ReleaseD</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseD|x64">
+      <Configuration>ReleaseD</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -30,6 +30,7 @@
     <ClCompile Include="Arrow.cpp" />
     <ClCompile Include="AspineTree.cpp" />
     <ClCompile Include="Bird.cpp" />
+    <ClCompile Include="Boulder.cpp" />
     <ClCompile Include="Bush.cpp" />
     <ClCompile Include="Butterfly.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -37,7 +38,6 @@
     <ClCompile Include="Climber.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="Cloud.cpp" />
-    <ClCompile Include="Damage.cpp" />
     <ClCompile Include="DistantBird.cpp" />
     <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="Dust.cpp" />
@@ -47,7 +47,7 @@
     <ClCompile Include="Fire.cpp" />
     <ClCompile Include="Fox.cpp" />
     <ClCompile Include="Gopher.cpp" />
-    <ClCompile Include="GrassTerrain.cpp" />
+    <ClCompile Include="PlainsTerrain.cpp" />
     <ClCompile Include="Hills.cpp" />
     <ClCompile Include="Hook.cpp" />
     <ClCompile Include="Lighting.cpp" />
@@ -60,18 +60,22 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="OGL.cpp" />
     <ClCompile Include="PineTree.cpp" />
-    <ClCompile Include="Plains.cpp" />
+    <ClCompile Include="Stalite.cpp" />
+    <ClCompile Include="Thorns.cpp" />
+    <ClCompile Include="TrainingGrounds.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Porkupine.cpp" />
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="Sign.cpp" />
     <ClCompile Include="Skull.cpp" />
     <ClCompile Include="Sky.cpp" />
     <ClCompile Include="Snail.cpp" />
     <ClCompile Include="SoundClip.cpp" />
     <ClCompile Include="Speaker.cpp" />
+    <ClCompile Include="Spikes.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Unalope.cpp" />
     <ClCompile Include="WaterDrop.cpp" />
@@ -89,6 +93,7 @@
     <ClInclude Include="AXN.hpp" />
     <ClInclude Include="Bezier.hpp" />
     <ClInclude Include="Bird.hpp" />
+    <ClInclude Include="Boulder.hpp" />
     <ClInclude Include="Bush.hpp" />
     <ClInclude Include="Butterfly.hpp" />
     <ClInclude Include="Camera.hpp" />
@@ -98,8 +103,8 @@
     <ClInclude Include="Cloud.hpp" />
     <ClInclude Include="Color.hpp" />
     <ClInclude Include="ColorPalette.hpp" />
-    <ClInclude Include="Constants.hpp" />
     <ClInclude Include="Coordinate.hpp" />
+    <ClInclude Include="Cycle.hpp" />
     <ClInclude Include="Damage.hpp" />
     <ClInclude Include="Debug.hpp" />
     <ClInclude Include="DistantBird.hpp" />
@@ -114,7 +119,7 @@
     <ClInclude Include="Geometry.hpp" />
     <ClInclude Include="Gopher.hpp" />
     <ClInclude Include="Graphics.hpp" />
-    <ClInclude Include="GrassTerrain.hpp" />
+    <ClInclude Include="PlainsTerrain.hpp" />
     <ClInclude Include="Hills.hpp" />
     <ClInclude Include="Hook.hpp" />
     <ClInclude Include="Joint.hpp" />
@@ -133,7 +138,9 @@
     <ClInclude Include="Path.hpp" />
     <ClInclude Include="Physics.hpp" />
     <ClInclude Include="PineTree.hpp" />
-    <ClInclude Include="Plains.hpp" />
+    <ClInclude Include="Stalite.hpp" />
+    <ClInclude Include="Thorns.hpp" />
+    <ClInclude Include="TrainingGrounds.hpp" />
     <ClInclude Include="Planc.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="Polygon.hpp" />
@@ -142,16 +149,19 @@
     <ClInclude Include="Random.hpp" />
     <ClInclude Include="Room.hpp" />
     <ClInclude Include="Settings.hpp" />
+    <ClInclude Include="Sign.hpp" />
     <ClInclude Include="Skull.hpp" />
     <ClInclude Include="Sky.hpp" />
     <ClInclude Include="Snail.hpp" />
     <ClInclude Include="SoundClip.hpp" />
     <ClInclude Include="Speaker.hpp" />
+    <ClInclude Include="Spikes.hpp" />
     <ClInclude Include="STD.hpp" />
     <ClInclude Include="STDc.hpp" />
     <ClInclude Include="STDptr.hpp" />
     <ClInclude Include="Terrain.hpp" />
     <ClInclude Include="Transform.hpp" />
+    <ClInclude Include="Hazard.hpp" />
     <ClInclude Include="Triangle.hpp" />
     <ClInclude Include="Unalope.hpp" />
     <ClInclude Include="Utility.hpp" />
@@ -177,6 +187,12 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -184,17 +200,11 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseD|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -204,7 +214,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseD|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
@@ -219,36 +229,42 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseD|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseD|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)\libs\win\sdl2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\lib\win\sdl2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)\libs\win\sdl2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\lib\win\sdl2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'">
-    <IncludePath>$(ProjectDir)\libs\win\sdl2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseD|x64'">
+    <IncludePath>$(ProjectDir)\lib\win\sdl2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -263,6 +279,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -282,9 +299,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseD|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -293,7 +311,6 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>Default</LanguageStandard_C>
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
@@ -302,24 +319,26 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>AXN_DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\lib\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\libs\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\lib\win\glfw\lib-vc2013;$(ProjectDir)\lib\win\glfw\lib-vc2015;$(ProjectDir)\lib\win\glfw\lib-vc2017;$(ProjectDir)\lib\win\glfw\lib-vc2019;$(ProjectDir)\lib\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -330,7 +349,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\lib\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -341,20 +360,20 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\libs\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\lib\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <Profile>false</Profile>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseD|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>AXN_DEBUG;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\lib\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>Default</LanguageStandard_C>
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
@@ -364,7 +383,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\libs\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\lib\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <Profile>false</Profile>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

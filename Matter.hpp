@@ -13,7 +13,7 @@ class Matter
 
 private:
 
-    dec m_mass = 0.0;
+    Planc m_mass = 1.0;
 
     Coordinate m_position = ORIGIN;
 
@@ -29,26 +29,31 @@ public:
 
     Matter( Coordinate cref position ) : m_position( position ) { }
 
-    dec mass( ) const { return m_mass; }
-    void mass( cdec _mass ) { m_mass = _mass; }
+    Planc mass( ) const { return ( m_mass ); }
+    void mass( Planc cref mass ) { m_mass = mass; Assert( is_pos( mass ) ); }
 
-    Coordinate position( ) const { return m_position; }
-    void position( Coordinate cref _position ) { move( Vector( m_position, _position ) ); }
-    
-    Vector velocity( ) const { return m_velocity; }
-    void velocity( Vector cref _velocity ) { m_velocity = _velocity; }
+    Coordinate position( ) const { return ( m_position ); }
+    void position( Coordinate cref position ) { move( Vector( m_position, position ) ); }
 
-    Polygon space( ) const { return m_space + Vector( position( ) ); }
-    void space( Polygon cref _space ) { m_space = _space; }
+    Polygon space( ) const { return ( m_space ); }
+    void space( Polygon cref space ) { m_space = space; }
 
-    void add_velocity( Vector cref _velocity ) { m_velocity += _velocity; }
-    void add_force( Vector cref _force ) { m_velocity += ( _force * mass( ) ); }
+    bool moving( ) const { return ( velocity( ).has_magnitude( ) ); }
 
-    void move( Vector cref _distance ) { m_position += _distance; }
+    void move( Vector cref distance ) { m_position += distance; }
 
-    bool solid( ) const { return m_solid; }
-    void solid( cbool _solid ) { m_solid = _solid; }
-    
+    Vector velocity( ) const { return ( m_velocity ); }
+    void velocity( Vector cref velocity ) { m_velocity = velocity; }
+
+    void add_velocity( Vector cref velocity ) { m_velocity += velocity; }
+
+    Vector force( ) const { return ( velocity( ) * mass( ) ); }
+
+    void add_force( Vector cref force ) { add_velocity( force / mass( ) ); }
+
+    bool solid( ) const { return ( m_solid ); }
+    void solid( cbool solid ) { m_solid = solid; }
+
 };
 
 } // namespace physics

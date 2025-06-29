@@ -8,11 +8,11 @@ namespace
 cuint PLAYER_HEALTH_START = 100;
 }
 
-Player::Player( Room * room, Coordinate cref _position ) : Mob( room, _position, PLAYER_HEALTH_START )
+Player::Player( cuint _player_number, Room * room, Coordinate cref _position ) : Mob( room, _position, PLAYER_HEALTH_START ), m_player_number( _player_number )
 {
-    god( false );
+    god( true );
 
-    terrain_boundaries( true );
+    terrain_bound( true );
 }
 
 void Player::render( )
@@ -55,28 +55,15 @@ void Player::update_movement( )
 
 void Player::die( )
 {
-    if( god( ) )
-    {
-        return;
-    }
-
-    // if( alive( ) )
-    // {
-    //     static SoundClip death_cry( "WilhelmScream.wav" );
-    //     death_cry.play( );
-    // }
+    // static SoundClip death_cry( "WilhelmScream.wav" );
+    // death_cry.play( );
 
     Mob::die( );
 }
 
-void Player::hurt( Damage cref _damage )
+bool Player::damages( Damage cref _damage ) const
 {
-    if( god( ) )
-    {
-        return;
-    }
-
-    Mob::hurt( _damage );
+    return ( !god( ) && Mob::damages( _damage ) );
 }
 
 void Player::out_of_bounds( )
@@ -88,26 +75,29 @@ void Player::out_of_bounds( )
 
 void Player::god( cbool _god )
 {
-    if( _god == m_god )
-    {
-        return;
-    }
+    return_if( _god == m_god );
 
     m_god = _god;
 
     if( m_god )
     {
+        if( dead( ) )
+        {
+            revive( );
+        }
+
         invincible_always( true );   // god is invincible
         heal_full( );                // god is never wounded
         no_gravity( );               // god is not pulled on by gravity
-        terrain_boundaries( false ); // god is not affected by boundaries
+        terrain_bound( false );      // god is not affected by boundaries
+        stationary( false );         // god moves at its own whim
         velocity( V0 );              // god brings all to a halt
     }
     else
     {
         invincible_always( false );
         normal_gravity( );
-        terrain_boundaries( true );
+        terrain_bound( true );
     }
 
     needs_render( true );

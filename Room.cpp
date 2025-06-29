@@ -60,11 +60,11 @@ void Room::init( )
 void Room::create( FixedRectangle cref _bounds )
 {
     bounds( _bounds );
-    
+
     m_doors.clear( );
 
     m_terrain = generate_terrain( );
-    world( )->assign_layer_position( m_terrain );
+    // world( )->assign_layer_position( m_terrain );
 
     m_lighting = new Lighting( );
 }
@@ -133,8 +133,8 @@ void Room::render_object_grid( Camera * camera ) const
     cColor HAS_TERRAIN_COLOR = YELLOW.a( 0.15 );
 
     Grid cref grid = m_object_grid;
-    Coordinate top = bounds( ).top( );
-    Coordinate bottom = bounds( ).bottom( );
+    Coordinate upper = bounds( ).upper( );
+    Coordinate lower = bounds( ).lower( );
 
     Drawing grid_drawing;
 
@@ -143,10 +143,10 @@ void Room::render_object_grid( Camera * camera ) const
         if( block.objects( ).size( ) || block.terrain_nodes( ).size( ) )
         {
             Polygon grid( {
-                Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x( ) ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y( ) ) ),
-                Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x( ) + 1 ) ), top.x( ) ), bottom.y( ) + ( GRID_BLOCK_SIZE * block.y( ) ) ),
-                Coordinate( min( bottom.x( ) + ( GRID_BLOCK_SIZE * ( block.x( ) + 1 ) ), top.x( ) ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y( ) + 1 ) ), top.y( ) ) ),
-                Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * block.x( ) ), min( bottom.y( ) + ( GRID_BLOCK_SIZE * ( block.y( ) + 1 ) ), top.y( ) ) ) } );
+                Coordinate( lower.x( ) + ( GRID_BLOCK_SIZE * block.x( ) ), lower.y( ) + ( GRID_BLOCK_SIZE * block.y( ) ) ),
+                Coordinate( min( lower.x( ) + ( GRID_BLOCK_SIZE * ( block.x( ) + 1 ) ), upper.x( ) ), lower.y( ) + ( GRID_BLOCK_SIZE * block.y( ) ) ),
+                Coordinate( min( lower.x( ) + ( GRID_BLOCK_SIZE * ( block.x( ) + 1 ) ), upper.x( ) ), min( lower.y( ) + ( GRID_BLOCK_SIZE * ( block.y( ) + 1 ) ), upper.y( ) ) ),
+                Coordinate( lower.x( ) + ( GRID_BLOCK_SIZE * block.x( ) ), min( lower.y( ) + ( GRID_BLOCK_SIZE * ( block.y( ) + 1 ) ), upper.y( ) ) ) } );
 
             if( block.objects( ).size( ) )
             {
@@ -162,12 +162,12 @@ void Room::render_object_grid( Camera * camera ) const
 
     for_range( x, grid.x_range( ).range( ) - 1 )
     {
-        grid_drawing.draw( GRID_LINE_COLOR, Line( Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * ( x + 1 ) ), bottom.y( ) ), Coordinate( bottom.x( ) + ( GRID_BLOCK_SIZE * ( x + 1 ) ), top.y( ) ) ), GRID_LINE_THICKNESS, true );
+        grid_drawing.draw( GRID_LINE_COLOR, Line( Coordinate( lower.x( ) + ( GRID_BLOCK_SIZE * ( x + 1 ) ), lower.y( ) ), Coordinate( lower.x( ) + ( GRID_BLOCK_SIZE * ( x + 1 ) ), upper.y( ) ) ), GRID_LINE_THICKNESS, true );
     }
 
     for_range( y, grid.y_range( ).range( ) - 1 )
     {
-        grid_drawing.draw( GRID_LINE_COLOR, Line( Coordinate( bottom.x( ), bottom.y( ) + ( GRID_BLOCK_SIZE * ( y + 1 ) ) ), Coordinate( top.x( ), bottom.y( ) + ( GRID_BLOCK_SIZE * ( y + 1 ) ) ) ), GRID_LINE_THICKNESS, true );
+        grid_drawing.draw( GRID_LINE_COLOR, Line( Coordinate( lower.x( ), lower.y( ) + ( GRID_BLOCK_SIZE * ( y + 1 ) ) ), Coordinate( upper.x( ), lower.y( ) + ( GRID_BLOCK_SIZE * ( y + 1 ) ) ) ), GRID_LINE_THICKNESS, true );
     }
 
     grid_drawing.draw( GRID_LINE_COLOR, bounds( ), GRID_LINE_THICKNESS, true );
@@ -180,10 +180,21 @@ void Room::render( )
 {
     Camera * camera = world( )->camera( );
     camera->clear_subjects( );
-    
+
     m_lighting->clear_light_sources( );
 
-    auto capture_objects = [ & ] ( varray<Object *> cref objects, bool light_source )
+    auto render_terrain = [ & ] ( )
+    {
+        #if defined ( AXN_DEBUG )
+        if( Debug::active ) { camera->capture_debug( new Visible( m_terrain->debug_overlay( ) ), true ); }
+        if( Settings::get( Settings::DEBUG_SHOW_TERRAIN ) )
+            #endif
+        {
+            camera->capture( m_terrain );
+        }
+    };
+
+    auto render_objects = [ & ] ( varray<Object *> cref objects, bool light_source )
     {
         for_each( object, objects )
         {
@@ -202,15 +213,16 @@ void Room::render( )
         }
     };
 
-    capture_objects( { m_terrain }, false );
-    capture_objects( m_objects, true );
+    render_terrain( );
+
+    render_objects( m_objects, true );
 
     #if defined ( AXN_DEBUG )
-    if( Settings::get( Settings::DEBUG_BACKGROUND ) )
+    if( Settings::get( Settings::DEBUG_SHOW_BACKGROUND ) )
         #endif
     {
-        capture_objects( m_background_objects, false );
-        capture_objects( m_foreground_objects, false );
+        render_objects( m_background_objects, false );
+        render_objects( m_foreground_objects, false );
     }
 
     #if defined ( AXN_DEBUG )
@@ -249,8 +261,6 @@ void Room::update( )
     remove_deleted_objects( m_objects );
     remove_deleted_objects( m_foreground_objects );
     remove_deleted_objects( m_background_objects );
-    
-    
 
     add_objects_from_queue( );
 
@@ -291,7 +301,7 @@ void Room::update( )
     update_objects( m_objects );
 
     #if defined ( AXN_DEBUG )
-    if( Settings::get( Settings::DEBUG_BACKGROUND ) )
+    if( Settings::get( Settings::DEBUG_SHOW_BACKGROUND ) )
         #endif
     {
         m_foreground_objects.sort( object_sort, true );
@@ -301,7 +311,7 @@ void Room::update( )
         update_objects( m_background_objects );
     }
 
-    update_object( m_terrain );
+    // TODO update_object( m_terrain );
 }
 
 void Room::update_object( Object * object )
@@ -335,10 +345,10 @@ varray<Object *> Room::objects_in_range( FixedRectangle cref _range )
     return objects;
 }
 
-varray<TerrainNode *> Room::terrain_in_range( FixedRectangle cref _range )
+varray<Terrain::Node *> Room::terrain_in_range( FixedRectangle cref _range )
 {
-    uset<TerrainNode *> terrain_set;
-    varray<TerrainNode *> terrain;
+    uset<Terrain::Node *> terrain_set;
+    varray<Terrain::Node *> terrain;
 
     m_object_grid.traverse( _range, [ & ] ( Grid::Block & block )
     {
@@ -488,21 +498,21 @@ Player * Room::player_main( )
 oset<Room *> Room::connected_rooms( ) const
 {
     oset<Room *> rooms;
-    
+
     if( doors( ).size( ) )
     {
         queue<Room *> rooms_to_check;
-        
+
         rooms_to_check.push( doors( ).begin( ).operator*( )->room( ) );
-        
+
         while( rooms_to_check.size( ) )
         {
             Room * room = rooms_to_check.pop( );
-            
+
             if( !rooms.contains( room ) )
             {
                 rooms.insert( room );
-                
+
                 for_each( door, room->doors( ) )
                 {
                     rooms_to_check.push( door->out( )->room( ) );
@@ -510,8 +520,18 @@ oset<Room *> Room::connected_rooms( ) const
             }
         }
     }
-    
+
     return rooms;
+}
+
+Vector Room::gravity( Coordinate cref _position ) const
+{
+    return ( world( )->gravity( ) );
+}
+
+dec Room::air_resistance( Coordinate cref _position ) const
+{
+    return ( world( )->air_resistance( ) );
 }
 
 void Room::wind( Vector cref _wind )
@@ -588,7 +608,7 @@ const Room::Grid::Block & Room::Grid::block_const( cuint _x, cuint _y ) const
 
 uint Room::Grid::x( Planc cref _x ) const
 {
-    Planc x_translated = _x - m_bounds.bottom( ).x( );
+    Planc x_translated = _x - m_bounds.lower( ).x( );
 
     if( x_translated >= 0.0 )
     {
@@ -602,7 +622,7 @@ uint Room::Grid::x( Planc cref _x ) const
 
 uint Room::Grid::y( Planc cref _y ) const
 {
-    Planc y_translated = _y - m_bounds.bottom( ).y( );
+    Planc y_translated = _y - m_bounds.lower( ).y( );
 
     if( y_translated >= 0.0 )
     {
@@ -616,12 +636,12 @@ uint Room::Grid::y( Planc cref _y ) const
 
 Span<uint> Room::Grid::x_range( FixedRectangle cref _r ) const
 {
-    return Span<uint>( x( _r.bottom( ).x( ) ), x( _r.top( ).x( ) ) );
+    return Span<uint>( x( _r.lower( ).x( ) ), x( _r.upper( ).x( ) ) );
 }
 
 Span<uint> Room::Grid::y_range( FixedRectangle cref _r ) const
 {
-    return Span<uint>( y( _r.bottom( ).y( ) ), y( _r.top( ).y( ) ) );
+    return Span<uint>( y( _r.lower( ).y( ) ), y( _r.upper( ).y( ) ) );
 }
 
 void Room::Grid::traverse( FixedRectangle cref _range, function<void( Room::Grid::Block & )> f )
@@ -656,7 +676,7 @@ void Room::Grid::insert( Object * object )
 {
     if( object->z( ) == 1.0 )
     {
-        traverse( object->hit_box( ), [ & ] ( Grid::Block & block )
+        traverse( object->hitboxes_bounds( ), [ & ] ( Grid::Block & block )
         {
             block.insert( object );
         } );
@@ -667,14 +687,14 @@ void Room::Grid::remove( Object * object )
 {
     if( object->z( ) == 1.0 )
     {
-        traverse( object->hit_box( ), [ & ] ( Grid::Block & block )
+        traverse( object->hitboxes_bounds( ), [ & ] ( Grid::Block & block )
         {
             block.remove( object );
         } );
     }
 }
 
-void Room::Grid::insert( TerrainNode * terrain_node )
+void Room::Grid::insert( Terrain::Node * terrain_node )
 {
     traverse( terrain_node->bounding_box( ), [ & ] ( Grid::Block & block )
     {
@@ -682,7 +702,7 @@ void Room::Grid::insert( TerrainNode * terrain_node )
     } );
 }
 
-void Room::Grid::remove( TerrainNode * terrain_node )
+void Room::Grid::remove( Terrain::Node * terrain_node )
 {
     traverse( terrain_node->bounding_box( ), [ & ] ( Grid::Block & block )
     {

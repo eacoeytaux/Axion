@@ -100,8 +100,8 @@ public:
     Planc determinant( ) const
     {
         return ( m_matrix[ 0 ][ 0 ] * ( ( m_matrix[ 1 ][ 1 ] * m_matrix[ 2 ][ 2 ] ) - ( m_matrix[ 1 ][ 2 ] * m_matrix[ 2 ][ 1 ] ) ) ) -
-               ( m_matrix[ 0 ][ 1 ] * ( ( m_matrix[ 1 ][ 0 ] * m_matrix[ 2 ][ 2 ] ) - ( m_matrix[ 1 ][ 2 ] * m_matrix[ 2 ][ 0 ] ) ) ) +
-               ( m_matrix[ 0 ][ 2 ] * ( ( m_matrix[ 1 ][ 0 ] * m_matrix[ 2 ][ 1 ] ) - ( m_matrix[ 1 ][ 1 ] * m_matrix[ 2 ][ 0 ] ) ) );
+            ( m_matrix[ 0 ][ 1 ] * ( ( m_matrix[ 1 ][ 0 ] * m_matrix[ 2 ][ 2 ] ) - ( m_matrix[ 1 ][ 2 ] * m_matrix[ 2 ][ 0 ] ) ) ) +
+            ( m_matrix[ 0 ][ 2 ] * ( ( m_matrix[ 1 ][ 0 ] * m_matrix[ 2 ][ 1 ] ) - ( m_matrix[ 1 ][ 1 ] * m_matrix[ 2 ][ 0 ] ) ) );
     }
 
     Transform translation_only( ) const { return Transform( 1.0, 0.0, translation_x( ), 0.0, 1.0, translation_y( ), 0.0, 0.0, 1.0 ); }
@@ -136,31 +136,14 @@ public:
                           0.0, 0.0, 1.0 );
     }
 
-    static Transform scale( Planc cref s )
-    {
-        return Transform( s, 0.0, 0.0,
-                          0.0, s, 0.0,
-                          0.0, 0.0, 1.0 );
-    }
-
-    static Transform scale( Planc cref s, Coordinate cref origin )
+    static Transform scale( Planc cref s, Coordinate cref origin = ORIGIN )
     {
         return Transform( s, 0.0, origin.x( ) - ( s * square( origin.x( ) ) ),
                           0.0, s, origin.y( ) - ( s * square( origin.y( ) ) ),
                           0.0, 0.0, 1.0 );
     }
 
-    static Transform rotate( Angle cref a )
-    {
-        Planc s = a.sin( );
-        Planc c = a.cos( );
-
-        return Transform( c, -s, 0.0,
-                          s, c, 0.0,
-                          0.0, 0.0, 1.0 );
-    }
-
-    static Transform rotate( Angle cref a, Coordinate cref origin )
+    static Transform rotate( Angle cref a, Coordinate cref origin = ORIGIN )
     {
         Planc s = a.sin( );
         Planc c = a.cos( );
@@ -185,7 +168,7 @@ public:
         if( v.origin( ).x( ) || v.origin( ).y( ) )
         {
             Angle a = v.angle( );
-            
+
             Planc s = ( a * 2.0 ).sin( );
             Planc c = ( a * 2.0 ).cos( );
 
@@ -400,7 +383,7 @@ private:
         m_matrix[ 2 ][ 1 ] = p8;
         m_matrix[ 2 ][ 2 ] = p9;
     }
-    
+
 };
 
 const Transform ZERO_TRANSFORM = Transform( false );
@@ -447,10 +430,8 @@ public:
 
     Transformable & move( Vector cref v ) { return transform( Transform::move( v ) ); }
     Transformable & stretch( Vector cref v ) { return transform( Transform::stretch( v ) ); }
-    Transformable & scale( dec scale ) { return transform( Transform::scale( scale ) ); }
-    Transformable & scale( dec scale, Coordinate cref origin ) { return transform( Transform::scale( scale, origin ) ); }
-    Transformable & rotate( Angle cref angle ) { return transform( Transform::rotate( angle ) ); }
-    Transformable & rotate( Angle cref angle, Coordinate cref origin ) { return transform( Transform::rotate( angle, origin ) ); }
+    Transformable & scale( dec scale, Coordinate cref origin = ORIGIN ) { return transform( Transform::scale( scale, origin ) ); }
+    Transformable & rotate( Angle cref angle, Coordinate cref origin = ORIGIN ) { return transform( Transform::rotate( angle, origin ) ); }
     Transformable & mirror( Vector cref axis ) { return transform( Transform::reflect( axis ) ); }
     Transformable & mirror_x( ) { return mirror( XHAT ); }
     Transformable & mirror_y( ) { return mirror( YHAT ); }
@@ -461,7 +442,7 @@ protected:
 
     virtual Transformable cref dirty( ) const { m_dirty = true; rethis; }
     virtual Transformable cref clean( ) const { m_dirty = false; rethis; }
-    
+
 };
 
 inline Coordinate & Coordinate::transform( Transform cref t ) { rethis = t.apply( *this ); }
@@ -471,11 +452,9 @@ inline Coordinate & Coordinate::transform( Transform cref t ) { rethis = t.apply
 
 #define transform_functions( Class ) \
     Class & move( Vector cref v ) { Transformable::move( v ); rethis; } \
-    Class & scale( dec scale ) { Transformable::scale( scale ); rethis; } \
-    Class & scale( dec scale, Coordinate cref origin ) { Transformable::scale( scale, origin ); rethis; } \
+    Class & scale( Planc cref scale, Coordinate cref origin = ORIGIN ) { Transformable::scale( scale, origin ); rethis; } \
     Class & stretch( Vector cref v ) { Transformable::stretch( v ); rethis; } \
-    Class & rotate( Angle cref angle ) { Transformable::rotate( angle ); rethis; } \
-    Class & rotate( Angle cref angle, Coordinate cref origin ) { Transformable::rotate( angle, origin ); rethis; } \
+    Class & rotate( Angle cref angle, Coordinate cref origin = ORIGIN ) { Transformable::rotate( angle, origin ); rethis; } \
     Class & mirror( Vector cref axis ) { Transformable::mirror( axis ); rethis; } \
     Class & mirror_x( ) { Transformable::mirror_x( ); rethis; } \
     Class & mirror_y( ) { Transformable::mirror_y( ); rethis; }

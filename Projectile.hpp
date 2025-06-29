@@ -4,7 +4,7 @@
 #include "MountMerciless.hpp"
 #include "Object.hpp"
 
-namespace mtmercy
+namespace axn
 {
 
 class Projectile : public Object
@@ -28,14 +28,14 @@ protected:
 
     virtual bool collide( Object * ) override;
     virtual void react_to_movement( Object *, Vector cref ) override;
-    virtual void ground( TerrainEdge * ) override;
+    virtual void ground( Terrain::Node * node, Terrain::Bumper cref bumper ) override;
 
 private:
 
     bool m_active = true;
     Damage m_damage;
     Object * m_stuck_object;
-    
+
 };
 
 } // namespace mtmercy

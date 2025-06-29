@@ -2,7 +2,7 @@
 #include "World.hpp"
 #include "Mob.hpp"
 
-using mtmercy::Projectile;
+using axn::Projectile;
 
 Projectile::Projectile( Room * room, Coordinate cref _position ) : Object( room, _position )
 {
@@ -14,18 +14,19 @@ Projectile::Projectile( Room * room, Coordinate cref _position ) : Object( room,
 
     solid( true );
 
-    gravity_ratio( 0.5 );
-    air_resistance_ratio( 0.001 );
+    // todo
+    gravity_scale( 0.5 );
+    air_resistance( 0.001 );
 
-    track_position( 1 );
+    // track_position( 1 );
 }
 
 void Projectile::render( ) { Object::render( ); }
 void Projectile::update( ) { Object::update( ); }
 
-void Projectile::ground( TerrainEdge * ground )
+void Projectile::ground( Terrain::Node * ground, Terrain::Bumper cref _bumper )
 {
-    Object::ground( ground );
+    Object::ground( ground, _bumper );
 
     if( ground )
     {
@@ -41,7 +42,7 @@ bool Projectile::collide( Object * object )
     {
         if( Mob * mob = dynamic_cast<Mob *>( object ) )
         {
-            mob->hurt( damage( ) );
+            mob->damage( damage( ) );
         }
 
         subscribe_to_movement( object );
@@ -58,7 +59,7 @@ void Projectile::react_to_movement( Object * object, Vector cref _v )
 {
     Object::react_to_movement( object, _v );
 
-    position( position( ) + _v );
+    move( _v );
 }
 
 void Projectile::deactivate( )

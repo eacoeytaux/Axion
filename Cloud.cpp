@@ -34,7 +34,7 @@ Cloud::Cloud( Room * room ) : Object( room )
 
     z( 0.1 );
     no_gravity( );
-    terrain_boundaries( false );
+    terrain_bound( false );
 
     // set location
 

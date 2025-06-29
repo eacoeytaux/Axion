@@ -10,21 +10,20 @@ namespace geometry
 
 enum Quadrant
 {
-    No_Quadrant = -1, // origin or axes
+    NO_QUADRANT, // origin or axes
     Q1 = 0,
     Q2 = 1,
     Q3 = 2,
     Q4 = 3,
-    Quadrants
+    QUADRANTS
 };
 
 enum Axis
 {
-    No_Axis = -1, // origin or quadrant
-    X_Axis = 0,
-    Y_Axis = 1,
-    Origin = 2,
-    Axes
+    NO_AXIS, // origin or quadrant
+    X_AXIS,
+    Y_AXIS,
+    AXES
 };
 
 class Angle;
@@ -40,7 +39,7 @@ private:
     Planc m_y = P0;
 
 public:
-    
+
     Coordinate( ) { }
 
     Coordinate( Planc cref x, Planc cref y ) : m_x( x ), m_y( y ) { }
@@ -52,7 +51,7 @@ public:
 
     Coordinate & x( Planc cref x ) { m_x = x; rethis; }
     Coordinate & y( Planc cref y ) { m_y = y; rethis; }
-    
+
     bool valid( ) const { return ( is_num( x( ) ) && is_num( y( ) ) ); }
 
     Planc distance_to_origin( ) const { return pythagorean( x( ), y( ) ); }
@@ -62,17 +61,16 @@ public:
     bool closer_than( Coordinate cref c1, Coordinate cref c2 ) const { return ( ( ( abs( x( ) - c1.x( ) ) + abs( y( ) - c1.y( ) ) ) < ( abs( x( ) - c2.x( ) ) + abs( y( ) - c2.y( ) ) ) ) || ( distance_to( c1 ) < distance_to( c2 ) ) ); }
     bool further_than( Coordinate cref c1, Coordinate cref c2 ) const { return ( ( ( abs( x( ) - c1.x( ) ) + abs( y( ) - c1.y( ) ) ) > ( abs( x( ) - c2.x( ) ) + abs( y( ) - c2.y( ) ) ) ) || ( distance_to( c1 ) > distance_to( c2 ) ) ); }
 
-    Quadrant quadrant( ) const { return ( !x( ) || !y( ) ) ? No_Quadrant : ( is_pos( x( ) ) ? ( is_pos( y( ) ) ? Q1 : Q4 ) : ( is_pos( y( ) ) ? Q2 : Q3 ) ); }
+    Quadrant quadrant( ) const { return ( !x( ) || !y( ) ) ? NO_QUADRANT : ( is_pos( x( ) ) ? ( is_pos( y( ) ) ? Q1 : Q4 ) : ( is_pos( y( ) ) ? Q2 : Q3 ) ); }
     bool in_quadrant( Quadrant q ) const { return ( quadrant( ) == q ); }
 
-    Axis axis( ) const { return ( x( ) ? ( y( ) ? No_Axis : X_Axis ) : ( y( ) ? Y_Axis : No_Axis ) ); }
+    Axis axis( ) const { return ( x( ) ? ( y( ) ? NO_AXIS : X_AXIS ) : ( y( ) ? Y_AXIS : NO_AXIS ) ); }
     bool on_axis( Axis a ) const { return ( axis( ) == a ); }
 
     Coordinate & transform( Transform cref );
 
     Coordinate & move( Planc cref dx, Planc cref dy );
-    Coordinate & rotate( Angle cref angle );
-    Coordinate & rotate( Angle cref angle, Coordinate cref origin );
+    Coordinate & rotate( Angle cref angle, Coordinate cref origin = Coordinate( 0.0, 0.0 ) );
     Coordinate & mirror( Vector cref axis );
     Coordinate & mirror_x( );
     Coordinate & mirror_y( );
@@ -91,12 +89,19 @@ public:
     Coordinate & operator+=( Vector cref );
     Coordinate & operator-=( Vector cref );
 
+    bool operator<=( Coordinate cref c ) const { return ( ( x( ) <= c.x( ) ) || ( y( ) <= c.y( ) ) ); }
+    bool operator>=( Coordinate cref c ) const { return ( ( x( ) >= c.x( ) ) || ( y( ) >= c.y( ) ) ); }
+    bool operator<( Coordinate cref c ) const { return ( ( x( ) < c.x( ) ) || ( y( ) < c.y( ) ) ); }
+    bool operator>( Coordinate cref c ) const { return ( ( x( ) > c.x( ) ) || ( y( ) > c.y( ) ) ); }
+
     default_equal( Coordinate );
-    
+
 };
 
+typedef varray<Coordinate> Coordinates; // todo make use of
+
 const Coordinate ORIGIN( 0.0, 0.0 );
-const Coordinate INVALID_COORDINATE( INFINITY_NEG, INFINITY_NEG );
+const Coordinate INVALID_COORDINATE( INFINITY, INFINITY );
 
 inline Coordinate CoordinateX( Planc cref x ) { return Coordinate( x, P0 ); }
 inline Coordinate CoordinateY( Planc cref y ) { return Coordinate( P0, y ); }

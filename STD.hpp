@@ -26,6 +26,11 @@ typedef const int cint;
 typedef const uint cuint;
 typedef const dec cdec;
 
+typedef const bool & xbool;
+typedef const int & xint;
+typedef const uint & xuint;
+typedef const dec & xdec;
+
 #define use_std( s ) using std::s;
 
 #define use_std_dec( s )  \
@@ -72,17 +77,6 @@ use_std_dec( asin );
 use_std_dec( acos );
 use_std_dec( atan );
 use_std_dec2( atan2 );
-
-// -- constants --
-
-cdec TAU = 6.283185307179586476925;
-cdec PI = 3.141592653589793236926;
-cdec RIGHT = 1.570796326794896618463;
-
-cdec EULER = 2.7182818284590452;
-
-cdec INFINITY_POS = INFINITY;
-cdec INFINITY_NEG = -INFINITY;
 
 } // namespace axn
 

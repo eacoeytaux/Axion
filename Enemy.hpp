@@ -15,7 +15,7 @@ public:
 
     Enemy( Room * room, Coordinate cref position, dec health = 1.0 ) : Mob( room, position, health ) { }
 
-protected:
+protected: // todo should this be the case for all objects?
 
     #if defined ( AXN_DEBUG )
     virtual Drawing debug_overlay( ) const override;

@@ -36,26 +36,26 @@ WaterDrop::WaterDrop( Room * room, Coordinate cref _position, Vector cref _upwar
 void WaterDrop::render( )
 {
     Object::render( );
-    
+
     draw( m_color, Polygon::equilateral( m_splashed ? DROP_SMALL_EDGE_COUNT : DROP_LARGE_EDGE_COUNT, m_radius ) );
 }
 
-void WaterDrop::ground( TerrainEdge * edge )
+void WaterDrop::ground( Terrain::Node * ground, Terrain::Bumper cref _bumper )
 {
     if( is_pos( age( ) ) )
     {
-        Object::ground( edge );
-        
-        if( edge )
+        Object::ground( ground, _bumper );
+
+        if( ground )
         {
             mark_deleted( );
-            
+
             if( !m_splashed )
             {
                 bool flipped = Random::rbool( );
                 for_range( i, Random::rint( SPLASH_DROP_COUNT ) )
                 {
-                    room( )->add_object( new WaterDrop( room( ), position( ), VectorA( edge->normal( ) + negate( negate( Random::rAngle( SPLASH_OFFSET ), ( i % 2 ) ), flipped ), velocity( ).magnitude( ) * Random::rPlanc( SPLASH_DAMPEN ) ) ) );
+                    room( )->add_object( new WaterDrop( room( ), position( ), VectorA( ground->normal( ) + negate( negate( Random::rAngle( SPLASH_OFFSET ), ( i % 2 ) ), flipped ), velocity( ).magnitude( ) * Random::rPlanc( SPLASH_DAMPEN ) ) ) );
                 }
             }
         }

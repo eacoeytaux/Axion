@@ -1,10 +1,25 @@
 #include "Drawing.hpp"
 
+varray<Drawing::Node> Drawing::nodes( ) const
+{
+    return ( m_nodes );
+}
+
+Drawing::Node & Drawing::back_node( cbool _add_new )
+{
+    if( _add_new || m_nodes.empty( ) )
+    {
+        m_nodes.insert_back( );
+    }
+
+    return ( m_nodes.back( ) );
+}
+
 const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( cbool _transformed ) const
 {
-    if( _transformed && !transform( ).is_identity( ) )
+    if( _transformed && ( !Transformable::transform( ).is_identity( ) ) )
     {
-        const Transform _t = transform( );
+        const Transform _t = Transformable::transform( );
 
         FixedRectangle transformed_bounding_box;
 
@@ -12,7 +27,7 @@ const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( cbool _transf
         {
             colored_polygon.polygon.transform( _t );
 
-            transformed_bounding_box.union_with( FixedRectangle::bounds( colored_polygon.polygon, false ) );
+            transformed_bounding_box.union_with( colored_polygon.polygon.bounds( false ) );
         }
 
         m_bounding_box = transformed_bounding_box;
@@ -23,22 +38,34 @@ const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( cbool _transf
     return m_colored_polygons;
 }
 
-Drawing & Drawing::erase( Polygon cref _polygon )
+Drawing & Drawing::transform( Transform cref _transform )
 {
-    ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
-    colored_polygon.polygon = _polygon;
-    colored_polygon.colors = { TRANSPARENT };
-    colored_polygon.hole = true;
+    back_node( ).transform.chain( _transform );
 
     rethis;
 }
 
-Drawing & Drawing::bind( Polygon cref _polygon )
+Drawing & Drawing::erase( Polygon cref _polygon )
+{
+    ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
+
+    colored_polygon.polygon = _polygon;
+    colored_polygon.colors = { TRANSPARENT };
+    colored_polygon.hole = true;
+
+    back_node( !back_node( ).transform.is_identity( ) ).hole_shapes.insert_back( colored_polygon );
+
+    rethis;
+}
+
+Drawing & Drawing::crop( Polygon cref _polygon )
 {
     ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
     colored_polygon.polygon = _polygon;
     colored_polygon.colors = { TRANSPARENT };
     colored_polygon.fill = true;
+
+    back_node( !back_node( ).transform.is_identity( ) ).crop_shapes.insert_back( colored_polygon );
 
     rethis;
 }
@@ -73,17 +100,23 @@ Drawing & Drawing::draw( Drawing cref _drawing )
 
             if( !filtered_colored_polygon.reset )
             {
-                m_bounding_box.union_with( FixedRectangle::bounds( filtered_colored_polygon.polygon, false ) );
+                m_bounding_box.union_with( filtered_colored_polygon.polygon.bounds( false ) );
             }
         }
     }
     else
     {
         m_colored_polygons.insert_back( _drawing.colored_polygons( ) );
+
         m_bounding_box.union_with( _drawing.bounding_box( ) );
 
-        m_opaque = m_opaque && _drawing.opaque( );
+        m_opaque = ( m_opaque && _drawing.opaque( ) );
     }
+
+
+    varray<Drawing::Node> drawing_nodes = _drawing.nodes( );
+    Drawing::Node & back = back_node( !back_node( ).transform.is_identity( ) || back_node( ).crop_shapes.size( ) || back_node( ).hole_shapes.size( ) );
+    back.drawings.insert_back( drawing_nodes );
 
     rethis;
 }
@@ -101,6 +134,8 @@ Drawing & Drawing::draw( Drawing cref _drawing, Color cref _color )
 
     m_opaque = m_opaque && _color.opaque( );
 
+    back_node( !back_node( ).transform.is_identity( ) || back_node( ).crop_shapes.size( ) || back_node( ).hole_shapes.size( ) ).drawings.insert_back( _drawing.nodes( ) );
+
     rethis;
 }
 
@@ -110,7 +145,7 @@ Drawing & Drawing::draw( const varray<Color> & _colors,
                          cbool _preserve_thickness,
                          cbool _extend_lines )
 {
-    Assert( _thickness >= 0.0 );
+    Assert( !is_neg( _thickness ) );
     Assert( _colors.size( ) );
 
     ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
@@ -135,7 +170,9 @@ Drawing & Drawing::draw( const varray<Color> & _colors,
         }
     }
 
-    m_bounding_box.union_with( FixedRectangle::bounds( colored_polygon.polygon, false ) );
+    m_bounding_box.union_with( colored_polygon.polygon.bounds( false ) );
+
+    back_node( !back_node( ).transform.is_identity( ) || back_node( ).crop_shapes.size( ) || back_node( ).hole_shapes.size( ) || back_node( ).drawings.size( ) ).colored_shapes.insert_back( colored_polygon );
 
     rethis;
 }
@@ -156,7 +193,7 @@ Drawing & Drawing::draw( Color cref _color1,
                          cbool _preserve_thickness,
                          cbool _extend_lines )
 {
-    return draw( { _color1, _color2 }, Polygon( { _line.c1( ), _line.c2( ) } ), _thickness, _preserve_thickness, _extend_lines );
+    return draw( { _color1, _color2 }, Polygon( varray<Coordinate>( { _line.c1( ), _line.c2( ) } ) ), _thickness, _preserve_thickness, _extend_lines );
 }
 
 Drawing & Drawing::draw( Color cref _color,
@@ -192,6 +229,7 @@ Drawing & Drawing::draw( Color cref _color,
     draw( _color, Line( _vector.origin( ), _vector.destination( ) ), _thickness, _preserve_thickness );
     draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) + ( half( RIGHT ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
     draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) - ( half( RIGHT ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
+
     rethis;
 }
 #endif

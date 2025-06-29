@@ -11,7 +11,7 @@ namespace axn
 
 enum MessageType
 {
-    INFO_LOG = 0,
+    INFO_LOG,
     WARNING_LOG,
     ERROR_LOG,
     DEBUG_LOG,

@@ -9,6 +9,7 @@
 #include "Line.hpp"
 #include "Path.hpp"
 #include "Triangle.hpp"
+#include "FixedRectangle.hpp"
 
 namespace axn
 {
@@ -26,11 +27,11 @@ private:
     // stores in 3s
     mutable varray<varray<uint>> m_triangle_indices;
 
-    mutable Planc m_lower_bound_x = P0;
-    mutable Planc m_lower_bound_y = P0;
-    mutable Planc m_upper_bound_x = P0;
-    mutable Planc m_upper_bound_y = P0;
     mutable bool m_bounds_dirty = false;
+    mutable Min<Planc> m_lower_bound_x;
+    mutable Min<Planc> m_lower_bound_y;
+    mutable Max<Planc> m_upper_bound_x;
+    mutable Max<Planc> m_upper_bound_y;
 
     bool m_convex = true;
 
@@ -47,20 +48,25 @@ public:
 
         if( coordinate_count )
         {
-            m_lower_bound_x = INFINITY_POS;
-            m_lower_bound_y = INFINITY_POS;
-            m_upper_bound_x = INFINITY_NEG;
-            m_upper_bound_y = INFINITY_NEG;
+            m_lower_bound_x.reset( );
+            m_lower_bound_y.reset( );
+
+            m_upper_bound_x.reset( );
+            m_upper_bound_y.reset( );
 
             if( coordinate_count <= 3 )
             {
                 for_range( i, coordinate_count )
                 {
-                    Assert( m_coordinates[ i ].valid( ) );
-                    m_lower_bound_x = min( m_lower_bound_x, m_coordinates[ i ].x( ) );
-                    m_lower_bound_y = min( m_lower_bound_y, m_coordinates[ i ].y( ) );
-                    m_upper_bound_x = max( m_upper_bound_x, m_coordinates[ i ].x( ) );
-                    m_upper_bound_y = max( m_upper_bound_y, m_coordinates[ i ].y( ) );
+                    Coordinate cref coordinate = m_coordinates[ i ];
+
+                    // Assert( coordinate.valid( ) );
+
+                    m_lower_bound_x.update( coordinate.x( ) );
+                    m_lower_bound_y.update( coordinate.y( ) );
+
+                    m_upper_bound_x.update( coordinate.x( ) );
+                    m_upper_bound_y.update( coordinate.y( ) );
                 }
 
                 if( coordinate_count == 3 )
@@ -86,7 +92,7 @@ public:
                 for_range( i, coordinate_count )
                 {
                     Coordinate cref coordinate = m_coordinates[ i ];
-                    Assert( coordinate.valid( ) );
+                    // Assert( coordinate.valid( ) );
 
                     if( i && ( coordinate == m_coordinates[ i - 1 ] ) )
                     {
@@ -95,10 +101,11 @@ public:
                     }
                     else
                     {
-                        m_lower_bound_x = min( m_lower_bound_x, coordinate.x( ) );
-                        m_lower_bound_y = min( m_lower_bound_y, coordinate.y( ) );
-                        m_upper_bound_x = max( m_upper_bound_x, coordinate.x( ) );
-                        m_upper_bound_y = max( m_upper_bound_y, coordinate.y( ) );
+                        m_lower_bound_x.update( coordinate.x( ) );
+                        m_lower_bound_y.update( coordinate.y( ) );
+
+                        m_upper_bound_x.update( coordinate.x( ) );
+                        m_upper_bound_y.update( coordinate.y( ) );
 
                         Coordinate cref prev_coordinate = m_coordinates[ ( i + coordinate_count - 1 ) % coordinate_count ];
                         edge_curve += (dec)( ( coordinate.x( ) - prev_coordinate.x( ) ) * ( coordinate.y( ) + prev_coordinate.y( ) ) );
@@ -136,7 +143,19 @@ public:
         m_coordinates_raw = m_coordinates;
     }
 
+    Polygon( FixedRectangle cref rect )
+    {
+        *this = Polygon( rect.coordinates( ) );
+    }
+
     static Polygon triangle( Coordinate cref c1, Coordinate cref c2, Coordinate cref c3 ) { return Polygon( { c1, c2, c3 } ); }
+    static Polygon isosceles( Coordinate cref tip, Coordinate cref base_mid, Planc cref base_length )
+    {
+        Angle a( base_mid, tip );
+        Coordinate b1 = base_mid + VectorA( a + RIGHT, half( base_length ) );
+        Coordinate b2 = base_mid + VectorA( a - RIGHT, half( base_length ) );
+        return Polygon( { tip, b1, b2 } );
+    }
 
     static Polygon rectangle( Planc cref width, Planc cref height, Angle cref rotation ) { return rectangle( width, height ).rotate( rotation ); }
     static Polygon rectangle( Planc cref width, Planc cref height, Coordinate cref center ) { return rectangle( width, height ).move( center ); }
@@ -168,7 +187,7 @@ public:
         {
             varray<Coordinate> coordinates( side_count );
 
-            Angle start_angle = Angle( RIGHT, true ); // start at the top + rotation
+            Angle start_angle( RIGHT ); // start at the top
             Angle delta_angle( TAU / (dec)side_count );
             for_each( offset, coordinates )
             {
@@ -184,102 +203,11 @@ public:
 
     static Polygon circle( Planc cref radius = 1.0, Coordinate cref center = ORIGIN ) { return Polygon::equilateral( curve_point_count( half( radius * TAU ) ), radius, center ); }
 
-    static Polygon convex_hull( varray<Coordinate> cref coordinates )
-    {
-        cuint coordinate_count = coordinates.size( );
+    Coordinates cref coordinates( bool transformed = true ) const { if( !transformed ) { return m_coordinates_raw; } else { apply_transform( ); return m_coordinates; } }
 
-        if( coordinate_count )
-        {
-            if( coordinate_count <= 3 )
-            {
-                return Polygon( coordinates );
-            }
-            else
-            {
-                // using Graham Scan
+    Path perimeter( bool transformed = true ) const { return Path( coordinates( transformed ), true ); }
 
-                // find coordinate with minimum y value (if tied, also minimum x value)
-                uint min_i = 0;
-
-                for_range( i, coordinates.size( ) - 1 )
-                {
-                    if( ( coordinates[ i + 1 ].y( ) < coordinates[ min_i ].y( ) ) || ( ( coordinates[ i + 1 ].y( ) == coordinates[ min_i ].y( ) ) && ( coordinates[ i + 1 ].x( ) < coordinates[ min_i ].x( ) ) ) )
-                    {
-                        min_i = i + 1;
-                    }
-                }
-
-                // sort coordinates by angle to min
-                struct AngleToMin { AngleToMin( Coordinate cref c ) : min( c ) { } Coordinate min; bool operator( )( Coordinate cref c1, Coordinate cref c2 ) { Planc c = cross( min, c1, c2 ); return ( ( c > 0.0 ) || ( !c && min.closer_than( c1, c2 ) ) ); } };
-
-                varray<Coordinate> sorted_coordinates = coordinates;
-                sorted_coordinates.remove_index( min_i );
-                sorted_coordinates.sort( AngleToMin( coordinates[ min_i ] ) );
-
-                varray<Coordinate> convex_hull = { coordinates[ min_i ], sorted_coordinates[ 0 ], sorted_coordinates[ 1 ] };
-
-                for_range( i, sorted_coordinates.size( ) - 2 )
-                {
-                    // remove hull coordinates until current coordinate is part of hull
-                    while( ( convex_hull.size( ) > 1 ) && ( cross( convex_hull[ convex_hull.size( ) - 2 ], convex_hull[ convex_hull.size( ) - 1 ], sorted_coordinates[ i + 2 ] ) <= 0.0 ) )
-                    {
-                        convex_hull.remove_back( );
-                    }
-
-                    // add to hull
-                    convex_hull.insert_back( sorted_coordinates[ i + 2 ] );
-                }
-
-                return Polygon( convex_hull );
-            }
-        }
-
-        return Polygon( );
-    }
-
-    static Polygon expand( Polygon cref polygon, Planc cref expansion )
-    {
-        return_if( !expansion, polygon );
-
-        const varray<Coordinate> _coordinates = polygon.coordinates( );
-        cuint _coordinate_count = _coordinates.size( );
-
-        varray<Coordinate> new_coordinates( _coordinate_count );
-
-        for_range( i, _coordinate_count )
-        {
-            uint coordinate_prev_index = i ? ( i - 1 ) : ( _coordinate_count - 1 );
-            uint coordinate_next_index = ( i + 1 ) % _coordinate_count;
-
-            Line line_prev = Line( _coordinates[ coordinate_prev_index ], _coordinates[ i ] );
-            Line line_next = Line( _coordinates[ i ], _coordinates[ coordinate_next_index ] );
-
-            Vector vector_prev( line_prev.c1( ), line_prev.c2( ) );
-            Vector vector_next( line_next.c1( ), line_next.c2( ) );
-
-            vector_prev.rotate( -RIGHT );
-            vector_next.rotate( -RIGHT );
-
-            vector_prev.magnitude( expansion );
-            vector_next.magnitude( expansion );
-
-            line_prev += vector_prev;
-            line_next += vector_next;
-
-            new_coordinates[ i ] = line_prev.intersection( line_next );
-        }
-
-        return Polygon( new_coordinates );
-    }
-
-    virtual Polygon cref dirty( ) const override { Transformable::dirty( ); m_bounds_dirty = true; rethis; }
-    virtual Polygon cref clean( ) const override { Transformable::clean( ); m_bounds_dirty = false; rethis; }
-
-    transform_functions( Polygon );
-
-    varray<Coordinate> cref coordinates( bool transformed = true ) const { if( !transformed ) { return m_coordinates_raw; } else { apply_transform( ); return m_coordinates; } }
-
-    const varray<varray<uint>> & triangle_indices( ) const
+    varray<varray<uint>> cref triangle_indices( ) const
     {
         if( !m_triangle_indices.size( ) && ( m_coordinates_raw.size( ) >= 3 ) )
         {
@@ -382,14 +310,6 @@ public:
         }
     }
 
-    Planc lower_bound_x( bool tight = false ) const { apply_bounds_transform( tight ); return m_lower_bound_x; }
-    Planc lower_bound_y( bool tight = false ) const { apply_bounds_transform( tight ); return m_lower_bound_y; }
-    Planc upper_bound_x( bool tight = false ) const { apply_bounds_transform( tight ); return m_upper_bound_x; }
-    Planc upper_bound_y( bool tight = false ) const { apply_bounds_transform( tight ); return m_upper_bound_y; }
-
-    Planc bound_width( bool tight = false ) const { return upper_bound_x( tight ) - lower_bound_x( tight ); }
-    Planc bound_height( bool tight = false ) const { return upper_bound_y( tight ) - lower_bound_y( tight ); }
-
     Coordinate centroid( ) const
     {
         Coordinate centroid;
@@ -415,37 +335,56 @@ public:
         }
     }
 
-    bool contains( Coordinate cref coordinate, cbool inclusive = true ) const
+    bool contains( Coordinate cref coordinate, bool inclusive = true ) const
     {
         Coordinate c = apply_cumulative_transform_inverse( coordinate );
 
-        uint intersection_count = 0;
-
-        for_each( line, Path( m_coordinates_raw, true ).lines( ) )
+        if( convex( ) )
         {
-            if( Line( c, Coordinate( c.x( ), line.lower_bound_y( ) - 1.0 ) ).intersects( line ) )
+            for_each( line, perimeter( false ).lines( ) )
             {
-                if( intersection_count && convex( ) )
+                if( inclusive )
+                {
+                    if( line.on( c ) )
+                    {
+                        return true;
+                    }
+                }
+
+                if( line.above( c ) )
                 {
                     return false;
                 }
-
-                ++intersection_count;
             }
+
+            return true;
+        }
+        else
+        {
+            uint intersection_count = 0;
+
+            for_each( line, perimeter( false ).lines( ) )
+            {
+                if( Line( c, Coordinate( c.x( ), line.lower_bound_y( ) - 1.0 ) ).intersects( line ) )
+                {
+                    ++intersection_count;
+                }
+            }
+
+            return is_odd( intersection_count );
         }
 
-        return is_odd( intersection_count ) && !is_zero( intersection_count );
+        return false;
     }
 
-    bool intersects( Line cref line ) const
+    bool intersects( Line cref line, bool inclusive = true ) const
     {
         Line line_transformed = line;
         line_transformed.transform( cumulative_transform_inverse( ) );
 
-        Path perimeter = Path( m_coordinates_raw, true );
-        for_each( line, perimeter.lines( ) )
+        for_each( line, perimeter( false ).lines( ) )
         {
-            if( line.intersects( line_transformed ) )
+            if( line.intersects( line_transformed, inclusive ) ) // todo this could be a false negative with inclusive = false
             {
                 return true;
             }
@@ -482,8 +421,7 @@ public:
         Line line_transformed = line;
         line_transformed.transform( cumulative_transform_inverse( ) );
 
-        Path perimeter = Path( m_coordinates_raw, true );
-        for_each( line, perimeter.lines( ) )
+        for_each( line, perimeter( false ).lines( ) )
         {
             if( line.intersects( line_transformed ) )
             {
@@ -522,24 +460,152 @@ public:
 
     }
 
+    Planc lower_bound_x( bool tight = false ) const { apply_bounds_transform( tight ); return m_lower_bound_x; }
+    Planc lower_bound_y( bool tight = false ) const { apply_bounds_transform( tight ); return m_lower_bound_y; }
+    Planc upper_bound_x( bool tight = false ) const { apply_bounds_transform( tight ); return m_upper_bound_x; }
+    Planc upper_bound_y( bool tight = false ) const { apply_bounds_transform( tight ); return m_upper_bound_y; }
+
+    Planc bound_width( bool tight = false ) const { return upper_bound_x( tight ) - lower_bound_x( tight ); }
+    Planc bound_height( bool tight = false ) const { return upper_bound_y( tight ) - lower_bound_y( tight ); }
+
+    FixedRectangle bounds( bool tight = false ) const
+    {
+        Coordinate top( upper_bound_x( tight ), upper_bound_y( tight ) );
+        Coordinate bottom( lower_bound_x( tight ), lower_bound_y( tight ) );
+
+        return FixedRectangle( abs( top.x( ) - bottom.x( ) ), abs( top.y( ) - bottom.y( ) ), midpoint( bottom, top ) );
+    }
+
+    Polygon convex_hull( ) const
+    {
+        if( convex( ) )
+        {
+            return *this;
+        }
+        else
+        {
+            varray<Coordinate> _coordinates = coordinates( true );
+            cuint _coordinate_count = _coordinates.size( );
+
+            if( _coordinate_count )
+            {
+
+                // using Graham Scan
+
+                // find coordinate with minimum y value (if tied, also minimum x value)
+                uint min_i = 0;
+
+                for_range( i, _coordinate_count - 1 )
+                {
+                    if( ( _coordinates[ i + 1 ].y( ) < _coordinates[ min_i ].y( ) ) || ( ( _coordinates[ i + 1 ].y( ) == _coordinates[ min_i ].y( ) ) && ( _coordinates[ i + 1 ].x( ) < _coordinates[ min_i ].x( ) ) ) )
+                    {
+                        min_i = i + 1;
+                    }
+                }
+
+                // sort coordinates by angle to min
+                struct AngleToMin { AngleToMin( Coordinate cref c ) : min( c ) { } Coordinate min; bool operator( )( Coordinate cref c1, Coordinate cref c2 ) { Planc c = cross( min, c1, c2 ); return ( ( c > 0.0 ) || ( !c && min.closer_than( c1, c2 ) ) ); } };
+
+                varray<Coordinate> sorted_coordinates = _coordinates;
+
+                sorted_coordinates.remove_index( min_i );
+                sorted_coordinates.sort( AngleToMin( _coordinates[ min_i ] ) );
+
+                varray<Coordinate> convex_hull = { _coordinates[ min_i ], sorted_coordinates[ 0 ], sorted_coordinates[ 1 ] };
+
+                for_range( i, sorted_coordinates.size( ) - 2 )
+                {
+                    // remove hull coordinates until current coordinate is part of hull
+                    while( ( convex_hull.size( ) > 1 ) && ( cross( convex_hull[ convex_hull.size( ) - 2 ], convex_hull[ convex_hull.size( ) - 1 ], sorted_coordinates[ i + 2 ] ) <= 0.0 ) )
+                    {
+                        convex_hull.remove_back( );
+                    }
+
+                    // add to hull
+                    convex_hull.insert_back( sorted_coordinates[ i + 2 ] );
+                }
+
+                return Polygon( convex_hull );
+            }
+        }
+
+        return Polygon( );
+    }
+
+    Polygon & invert( ) { *this = inverted( ); }
+    Polygon inverted( ) const
+    {
+        varray<Coordinate> inverted_coordinates = coordinates( true );
+
+        for_range( i, inverted_coordinates.size( ) ) { inverted_coordinates[ i ] = -inverted_coordinates[ i ]; }
+
+        return Polygon( inverted_coordinates );
+    }
+
+    Polygon & expand( Planc cref expansion ) { *this = expanded( expansion ); }
+    Polygon expanded( Planc cref expansion ) const
+    {
+        Assert( !is_neg( expansion ) );
+
+        return_if( !expansion, *this );
+
+        const varray<Coordinate> _coordinates = coordinates( true );
+        cuint _coordinate_count = _coordinates.size( );
+
+        varray<Coordinate> new_coordinates( _coordinate_count );
+
+        for_range( i, _coordinate_count )
+        {
+            uint coordinate_prev_index = i ? ( i - 1 ) : ( _coordinate_count - 1 );
+            uint coordinate_next_index = ( i + 1 ) % _coordinate_count;
+
+            Line line_prev = Line( _coordinates[ coordinate_prev_index ], _coordinates[ i ] );
+            Line line_next = Line( _coordinates[ i ], _coordinates[ coordinate_next_index ] );
+
+            Vector vector_prev( line_prev.c1( ), line_prev.c2( ) );
+            Vector vector_next( line_next.c1( ), line_next.c2( ) );
+
+            vector_prev.rotate( -RIGHT );
+            vector_next.rotate( -RIGHT );
+
+            vector_prev.magnitude( expansion );
+            vector_next.magnitude( expansion );
+
+            line_prev += vector_prev;
+            line_next += vector_next;
+
+            new_coordinates[ i ] = line_prev.intersection( line_next );
+        }
+
+        return Polygon( new_coordinates );
+    }
+
+    transform_functions( Polygon );
+
     Polygon operator+( Vector cref v ) const { return Polygon( *this ).move( v ); }
     Polygon operator-( Vector cref v ) const { return Polygon( *this ).move( -v ); }
 
     Polygon & operator+=( Vector cref v ) { return move( v ); }
     Polygon & operator-=( Vector cref v ) { return move( -v ); }
 
+    Polygon operator*( Planc cref s ) const { return Polygon( *this ).scale( s ); }
+    Polygon operator/( Planc cref s ) const { return Polygon( *this ).scale( inverse( s ) ); }
+
+    Polygon & operator*=( Planc cref s ) { return scale( s ); }
+    Polygon & operator/=( Planc cref s ) { return scale( inverse( s ) ); }
+
     default_equal( Polygon );
 
 private:
+
+    Polygon cref dirty( ) const override { Transformable::dirty( ); m_bounds_dirty = true; rethis; }
+    Polygon cref clean( ) const override { Transformable::clean( ); m_bounds_dirty = false; rethis; }
 
     void apply_transform( ) const
     {
         if( is_dirty( ) )
         {
-            m_lower_bound_x = INFINITY_POS;
-            m_lower_bound_y = INFINITY_POS;
-            m_upper_bound_x = INFINITY_NEG;
-            m_upper_bound_y = INFINITY_NEG;
+            // TODO reset bounds
 
             Transform cref t = cumulative_transform( );
 
@@ -547,10 +613,11 @@ private:
             {
                 m_coordinates[ i ] = t.apply( m_coordinates_raw[ i ] );
 
-                m_lower_bound_x = min( m_lower_bound_x, m_coordinates[ i ].x( ) );
-                m_lower_bound_y = min( m_lower_bound_y, m_coordinates[ i ].y( ) );
-                m_upper_bound_x = max( m_upper_bound_x, m_coordinates[ i ].x( ) );
-                m_upper_bound_y = max( m_upper_bound_y, m_coordinates[ i ].y( ) );
+                m_lower_bound_x.update( m_coordinates[ i ].x( ) );
+                m_lower_bound_y.update( m_coordinates[ i ].y( ) );
+
+                m_upper_bound_x.update( m_coordinates[ i ].x( ) );
+                m_upper_bound_y.update( m_coordinates[ i ].y( ) );
             }
 
             clean( );
@@ -567,10 +634,10 @@ private:
         {
             Transform cref t = transform( );
 
-            Coordinate c1 = t.apply( Coordinate( m_lower_bound_x, m_lower_bound_y ) );
-            Coordinate c2 = t.apply( Coordinate( m_upper_bound_x, m_lower_bound_y ) );
-            Coordinate c3 = t.apply( Coordinate( m_lower_bound_x, m_upper_bound_y ) );
-            Coordinate c4 = t.apply( Coordinate( m_upper_bound_x, m_upper_bound_y ) );
+            Coordinate c1 = Coordinate( m_lower_bound_x, m_lower_bound_y ).transform( t );
+            Coordinate c2 = Coordinate( m_upper_bound_x, m_lower_bound_y ).transform( t );
+            Coordinate c3 = Coordinate( m_lower_bound_x, m_upper_bound_y ).transform( t );
+            Coordinate c4 = Coordinate( m_upper_bound_x, m_upper_bound_y ).transform( t );
 
             m_lower_bound_x = min<Planc>( { c1.x( ), c2.x( ), c3.x( ), c4.x( ) } );
             m_lower_bound_y = min<Planc>( { c1.y( ), c2.y( ), c3.y( ), c4.y( ) } );
@@ -580,7 +647,7 @@ private:
             m_bounds_dirty = false;
         }
     }
-    
+
 };
 
 } // namespace geometry

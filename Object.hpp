@@ -6,6 +6,10 @@
 #include "Audio.hpp"
 
 #include "World.hpp"
+#include "Room.hpp"
+
+#include "Terrain.hpp"
+
 #include "Damage.hpp"
 
 namespace axn
@@ -13,18 +17,26 @@ namespace axn
 namespace reality
 {
 
-class TerrainVertex;
-class TerrainEdge;
+class Hitbox : public Polygon
+{
+
+public:
+
+    Hitbox( ) { }
+
+    Hitbox( Polygon cref hitbox ) : Polygon( hitbox ) { Assert( hitbox.convex( ) ); }
+
+};
 
 class Object : public Identifiable, public Visible, public Matter
 {
 
-    #if defined ( AXN_DEBUG )
 private:
 
+    #if defined ( AXN_DEBUG )
     static uint total_objects;
     #endif
-    
+
 public:
 
     virtual ~Object( );
@@ -60,8 +72,12 @@ public:
 
     #if defined ( AXN_DEBUG )
     bool draw_debug = false;
+    Color draw_debug_color = YELLOW;
     virtual Drawing debug_overlay( ) const;
     #endif
+
+    bool foreground( ) const;
+    bool background( ) const;
 
 protected:
 
@@ -71,73 +87,64 @@ public:
 
     void update_object( );
 
-    // todo make setters protected?
-
-    virtual bool keep( ) const { return false; }
-
-    bool deleted( ) const { return m_deleted; }
-    virtual void mark_deleted( ) { m_deleted = true; }
-
     bool marked_to_delete( ) const { return m_marked_to_delete; }
-    virtual void mark_to_delete( ) { m_marked_to_delete = true; }
+    bool deleted( ) const { return m_deleted; }
+
+    void position( Coordinate cref ); // todo not protected?
 
     Coordinate position( ) const;
-    void position( Coordinate cref );
-
-    virtual Planc width( ) const;
-    virtual Planc height( ) const;
-
-    bool foreground( ) const;
-    void foreground( bool );
-
-    bool background( ) const;
-    void background( bool );
-
-    bool interactive( ) const;
-    void interactive( bool );
-
-    bool stationary( ) const;
-    void stationary( bool );
-
-    dec gravity_ratio( ) const;
-    void gravity_ratio( dec );
-    void normal_gravity( ) { return gravity_ratio( 1.0 ); }
-    void no_gravity( ) { return gravity_ratio( 0.0 ); }
-    bool has_gravity( ) const { return gravity_ratio( ); }
-
-    virtual dec air_resistance_ratio( ) const;
-    void air_resistance_ratio( dec );
-
-    bool terrain_boundaries( ) const;
-    void terrain_boundaries( bool );
-
-    TerrainEdge * ground( ) const;
-
-    bool passing_terrain( ) const { return m_passing_terrain; }
-    void passing_terrain( bool b ) { m_passing_terrain = b; }
-
-    virtual FixedRectangle hit_box( ) const;
-
-    void track_position( uint count );
-    Coordinate last_position( uint past = 0 );
+    Coordinate last_position( uint past = 0 ) const;
 
     void subscribe_to_movement( Object * );
     void unsubscribe_to_movement( Object * );
 
-    virtual bool operator==( Object cref other ) const { return id( ) == other.id( ); }
-    default_non_equal( Object );
+    virtual Planc width( ) const;
+    virtual Planc height( ) const;
+
+    bool interactive( ) const;
+    bool stationary( ) const;
+
+    Terrain::Node * ground( ) const;
+    Terrain::Bumper ground_bumper( ) const;
+
+    bool has_gravity( ) const { return gravity( ).has_magnitude( ); }
+
+    virtual Vector gravity( ) const;
+
+    virtual dec air_resistance( ) const;
+
+    virtual dec friction_resistance( ) const;
+
+    bool passing_terrain( ) const { return m_passing_terrain; }
+
+    bool terrain_bound( ) const;
+
+    virtual Hitbox hitbox( ) const; // todo remove in favor of hitboxes
+
+    virtual varray<Hitbox> hitboxes( ) const;
+    virtual FixedRectangle hitboxes_bounds( bool include_terrain = true ) const;
+
+    virtual Hitbox terrain_hitbox( ) const;
 
 protected:
-    
+
+    void interactive( bool );
+    void stationary( bool );
+
+    virtual void mark_to_delete( ) { m_marked_to_delete = true; }
+    virtual void mark_deleted( ) { m_deleted = true; }
+
+    virtual void out_of_bounds( );
+
+    void track_position( uint count );
+
     virtual void update_velocity( );
     virtual void update_movement( );
-    
+
     // returns 0 if should not move, 1 if no interruption, and (0,1) for interruption
     virtual dec check_movement( Vector cref velocity );
 
     virtual void move( Vector cref );
-    virtual void ground( TerrainEdge * ground );
-    virtual void out_of_bounds( );
 
     virtual void react_to_movement( Object * object, Vector cref );
 
@@ -146,7 +153,26 @@ protected:
 
     virtual bool collide( Object * object );
 
-    virtual dec friction_resistance( ) const;
+    virtual bool sticks( Terrain::Node * node ); // todo
+    virtual void ground( Terrain::Node * node, Terrain::Bumper cref bumper );
+
+    void gravity( Vector cref g ) { m_gravity_change = g; }
+
+    void gravity_scale( Planc cref g ) { m_gravity_change.magnitude( g ); }
+    void gravity_angle( Angle cref g ) { m_gravity_change.rotate_to( g ); }
+
+    void normal_gravity( ) { gravity( VectorA( A0, 1.0 ) ); }
+    void no_gravity( ) { gravity( V0 ); }
+
+    void air_resistance( dec );
+    void no_air_resistance( ) { air_resistance( 0.0 ); }
+
+    void passing_terrain( bool b ) { m_passing_terrain = b; }
+
+    void terrain_bound( bool );
+
+    void foreground( bool );
+    void background( bool );
 
 private:
 
@@ -164,22 +190,28 @@ private:
     Planc m_visible_width = P0;
     Planc m_visible_height = P0;
 
-    TerrainEdge * m_ground = nullptr;
+    Terrain::Node * m_ground = nullptr;
+    Terrain::Bumper m_ground_bumper;
     bool m_passing_terrain = false;
 
-    dec m_gravity_ratio = 1.0;
-    dec m_air_resistance_ratio = AIR_RESISTANCE;
+    // rotation is change, magnitude is scale
+    Vector m_gravity_change = VectorA( A0, 1.0 );
+
+    dec m_air_resistance = 1.0;
 
     bool m_interactive = false;
     bool m_stationary = false;
-    bool m_terrain_boundaries = true;
+    bool m_terrain_bound = true;
 
     uint m_last_position_count = 0;
-    uint m_last_position_index = 0;
-    varray<Coordinate> m_last_positions;
+    queue<varray<Coordinate>> m_last_positions;
 
     uset<Object *> m_movement_subscribers;
     uset<Object *> m_movement_subscriptions;
+
+public:
+
+    virtual bool operator==( Object cref other ) const { return id( ) == other.id( ); }
 
 };
 

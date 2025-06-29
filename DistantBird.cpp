@@ -9,11 +9,11 @@ namespace
 cdec GRAIVTY_RATIO = 0.5;
 cPlanc X_SPEED = 2.0;
 
-cPlanc WING_HEIGHT_SPAN = 18.0;
-cuint WING_CYCLE = 4;
+cuint WING_OFFSET_CYCLE = 4;
+cPlanc WING_OFFSET_HEIGHT = 18.0;
 
-cPlanc FLIGHT_HEIGHT_SPAN = 16.0;
-cuint FLIGHT_HEIGHT_CYCLE = 17;
+cuint FLIGHT_OFFSET_CYCLE = 17;
+cPlanc FLIGHT_OFFSET_SPAN = 16.0;
 
 const Polygon BIRD_BODY = Polygon( { Coordinate( 0.0, 0.0 ),
                                      Coordinate( -3.0, 3.0 ),
@@ -37,22 +37,24 @@ DistantBird::DistantBird( Room * room, Coordinate cref _position ) : Object( roo
     needs_render_always( true );
 
     z( GRAIVTY_RATIO );
+
     no_gravity( );
-    air_resistance_ratio( 0.0 );
-    terrain_boundaries( false );
+    no_air_resistance( );
+
+    terrain_bound( false );
 
     velocity( VectorX( X_SPEED ) );
 
-    m_wing_cycle_offset = Random::rdec( WING_CYCLE ) * TAU;
-    m_flight_cycle_offset = Random::rdec( FLIGHT_HEIGHT_CYCLE ) * half( PI );
+    m_wing_offset = Cycle( WING_OFFSET_CYCLE, WING_OFFSET_HEIGHT, Random::rAngle( ) );
+    m_flight_offset = Cycle( FLIGHT_OFFSET_CYCLE, FLIGHT_OFFSET_SPAN, Random::rAngle( RIGHT ) );
 }
 
 void DistantBird::render( )
 {
     Object::render( );
 
-    Planc wing_y = WING_HEIGHT_SPAN * sin( (dec)( age( ) + m_wing_cycle_offset ) / (dec)WING_CYCLE );
-    Planc flight_y = FLIGHT_HEIGHT_SPAN * sin( (dec)( age( ) + m_flight_cycle_offset ) / (dec)FLIGHT_HEIGHT_CYCLE );
+    Planc wing_y = m_wing_offset.at( age( ) );
+    Planc flight_y = m_flight_offset.at( age( ) );
 
     Polygon bird_body = BIRD_BODY;
     Polygon bird_wing = Polygon( { WING_COORDINATE_BASE_1, WING_COORDINATE_BASE_2, Coordinate( WING_TIP_X, wing_y ) } );

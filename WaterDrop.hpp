@@ -16,15 +16,15 @@ public:
     WaterDrop( Room *, Coordinate cref position, Vector cref upward, dec z = 1.0 );
 
     virtual void render( ) override;
-    
-    virtual void ground( TerrainEdge * ) override;
-    
+
+    virtual void ground( Terrain::Node * node, Terrain::Bumper cref bumper ) override;
+
 private:
-    
+
     bool m_splashed;
     Planc m_radius;
     Color m_color;
-    
+
 };
 
 } // namespace mtmercy

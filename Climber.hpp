@@ -14,13 +14,14 @@ class Climber : public Player
 public:
 
     virtual ~Climber( );
-    Climber( Room * room, Coordinate cref position );
 
-    virtual void render( ) override;
+    Climber( uint player_number, Room * room, Coordinate cref position );
 
     #if defined ( AXN_DEBUG )
     virtual Drawing debug_overlay( ) const override;
     #endif
+
+    virtual void render( ) override;
 
     void update( ) override;
     void input( Input * ) override;
@@ -28,7 +29,7 @@ public:
 
     Hook cref hook( ) const { return m_hook; }
 
-    void hurt( Damage cref damage ) override;
+    void die( ) override;
 
     Planc light_sight( ) const override;
 
@@ -47,10 +48,10 @@ public:
 
 protected:
 
-    virtual dec air_resistance_ratio( ) const override;
-    
+    virtual dec air_resistance( ) const override;
+
     void update_velocity( ) override;
-    
+
     virtual dec check_movement( Vector cref velocity ) override;
 
     void movement_stop( );
@@ -61,17 +62,17 @@ protected:
     void looking_down( bool );
 
     void jump( bool );
-    void ground( TerrainEdge * ) override;
+    void ground( Terrain::Node * node, Terrain::Bumper cref bumper ) override;
 
     void aim( Angle cref );
     void aim_shake( Angle cref );
 
     void launch_hook( );
     void launch_arrow( );
-    
+
     void release_hook( );
     void release_arrow( );
-    
+
     void release_bow( );
 
     // all of these are offsets from position
@@ -80,7 +81,14 @@ protected:
     Coordinate face_center( ) const;
 
     Coordinate shoulder( bool front ) const;
+    Coordinate elbow( bool front ) const;
     Coordinate hand( bool front ) const;
+
+    Coordinate hand_to_crossbow_offset( bool front ) const;
+
+    Planc arm_width( bool front ) const;
+    Planc arm_length_upper( bool front ) const;
+    Planc arm_length_lower( bool front ) const;
 
     Coordinate hip( bool front ) const;
     Coordinate foot( bool front ) const;
@@ -92,15 +100,21 @@ protected:
     void draw_arm( bool front );
     void draw_hand( bool front );
 
+    void draw_arm_front( ) { draw_arm( true ); }
+    void draw_arm_back( ) { draw_arm( false ); }
+
     void draw_legs( );
 
-    void draw_crossbow( );
+    void draw_rope( );
+    void draw_hook( );
     void draw_arrow( );
+    void draw_crossbow( );
 
     enum ColorPiece
     {
         SKIN,
         HAIR,
+        HAIR_SHAVED,
         EYE,
         UNDERSHIRT,
         JACKET,
@@ -128,22 +142,31 @@ private:
 
     Planc m_movement_speed_ground = P0;
     Planc m_movement_speed_air = P0;
+
     bool m_moving_right = false;
     bool m_moving_left = false;
     bool m_looking_up = false;
     bool m_looking_down = false;
+
     bool m_jumping = false;
     dec m_jump_degradation = 0.0;
     Countdown m_jumping_timer;
     Countdown m_jump_reset_timer;
 
+    RagDollLimb m_dead_face;
+    RagDollLimb m_dead_arm_front;
+    RagDollLimb m_dead_arm_back;
+
     bool m_aiming = true;
     Angle m_aim_angle = A0;
+    Angle m_dead_aim_angle = A0;
     Angle m_aim_shake_angle = A0;
+
     bool m_launching_hook = false;
     bool m_launching_arrow = false;
     bool m_slashing = false;
-    Countdown m_reload_timer;
+    Countdown m_hook_reload_timer;
+    Countdown m_arrow_reload_timer;
     Color m_arrow_feather_color;
 
     Countdown m_dust_timer;

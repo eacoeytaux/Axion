@@ -16,11 +16,13 @@ class Assert
 private:
 
     bool m_passed = true;
+
     string m_message = "";
 
 public:
 
     operator bool( ) const { return m_passed; }
+
     operator string( ) const { return m_message; }
 
 private:
@@ -28,6 +30,7 @@ private:
     void fail( const char * message = "" )
     {
         m_passed = false;
+
         m_message = string( message );
 
         if( strlen( message ) )

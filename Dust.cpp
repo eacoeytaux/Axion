@@ -19,7 +19,7 @@ Dust::Dust( Room * room, Coordinate cref _position, Vector cref _velocity, Color
 {
     needs_render_always( true );
 
-    terrain_boundaries( false );
+    terrain_bound( false );
     no_gravity( );
 
     position( _position );
@@ -38,7 +38,7 @@ void Dust::update( )
     m_radius += RADIUS_INCREASE_RATE;
     m_rotation += m_rotation_speed;
     m_alpha -= ALPHA_DECREASE_RATE;
-    if( m_alpha <= 0.0 )
+    if( !is_pos( m_alpha ) )
     {
         mark_to_delete( );
     }
@@ -50,7 +50,7 @@ void Dust::render( )
 {
     Object::render( );
 
-    if( m_alpha >= 0.0 )
+    if( is_pos( m_alpha ) )
     {
         Polygon poly = Polygon::equilateral( m_sides, m_radius );
         poly.rotate( m_rotation );

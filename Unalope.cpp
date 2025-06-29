@@ -22,27 +22,23 @@ const Polygon HEAD = Polygon( {
     Coordinate( 3.0, 12.0 ),
     Coordinate( 9.0, 8.0 ),
     Coordinate( 12.0, 0.0 ),
-    Coordinate( 3.0, -8.0 )
-                              } ).scale( TEMP_SCALE_TODO );
+    Coordinate( 3.0, -8.0 ) } ).scale( TEMP_SCALE_TODO );
 
 const Polygon NOSE = Polygon( {
     Coordinate( -3.0, -4.0 ),
     Coordinate( 0.0, -6.4 ),
-    Coordinate( 3.0, -4.0 )
-                              } ).scale( TEMP_SCALE_TODO );
+    Coordinate( 3.0, -4.0 ) } ).scale( TEMP_SCALE_TODO );
 
 const Polygon EAR = Polygon( {
     Coordinate( -6.0, 6.0 ),
     Coordinate( -16.0, 24.0 ),
     Coordinate( -9.0, 48.0 ),
-    Coordinate( -3.0, 12.0 )
-                             } ).scale( TEMP_SCALE_TODO );
+    Coordinate( -3.0, 12.0 ) } ).scale( TEMP_SCALE_TODO );
 
 const Polygon INNER_EAR = Polygon( {
     Coordinate( -8.0, 14.0 ),
     Coordinate( -13.0, 24.0 ),
-    Coordinate( -10.5, 32.0 )
-                                   } ).scale( TEMP_SCALE_TODO );
+    Coordinate( -10.5, 32.0 ) } ).scale( TEMP_SCALE_TODO );
 
 const Polygon EAR_MIRRORED = Polygon( EAR ).mirror_y( );
 const Polygon INNER_EAR_MIRRORED = Polygon( INNER_EAR ).mirror_y( );
@@ -51,14 +47,14 @@ const Polygon BODY = Polygon( {
     Coordinate( 0.0, 0.0 ),
     Coordinate( -9.0, -6.0 ),
     Coordinate( -10.0, -9.0 ),
-    Coordinate( -5.0, -9.0 )
-                              } ).scale( TEMP_SCALE_TODO );
+    Coordinate( -5.0, -9.0 ) } ).scale( TEMP_SCALE_TODO );
 
 cColor FUR_COLOR = WHITE;
 cColor EAR_COLOR = FUR_COLOR;
 cColor INNER_EAR_COLOR = RED;
 cColor NOSE_COLOR = RED;
-}
+
+} // namespace
 
 Unalope::Unalope( Room * room, Coordinate cref _position ) : Enemy( room, _position, 10000.0 )
 {

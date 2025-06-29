@@ -143,6 +143,8 @@ void Fire::extinguish( )
 
         if( m_flame_base_enabled )
         {
+            // todo make base shrink in size instead of just stop
+
             m_flame_base_enabled = false;
             m_flames.insert_back( m_flame_base );
 

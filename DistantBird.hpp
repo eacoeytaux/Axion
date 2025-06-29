@@ -18,9 +18,9 @@ public:
 
 private:
 
-    uint m_wing_cycle_offset;
-    uint m_flight_cycle_offset;
-    
+    Cycle m_wing_offset;
+    Cycle m_flight_offset;
+
 };
 
 } // namespace mtmercy

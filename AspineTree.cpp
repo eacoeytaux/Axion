@@ -1,5 +1,4 @@
 #include "AspineTree.hpp"
-#include "World.hpp"
 
 using mtmercy::AspineTree;
 
@@ -30,20 +29,16 @@ const Planc LEAF_OFFSET_2 = 2.0;
 const Planc LEAF_TIP_LENGTH = 7.5;
 const Planc LEAF_CROSS_LENGTH = 7.5;
 const Planc LEAF_BASE_LENGTH = 3.0;
-<<<<<<< HEAD
-const Span<uint> LEAF_COUNTDOWN = { 100, 300 };
-=======
 const Span<dec> LEAF_SCALE = { 0.8, 1.1 };
 
-const dec LEAF_GRAVITY_RATIO = 0.1;
-const dec LEAF_SWAY_RATE = 0.25;
+const dec LEAF_GRAVITY = 0.025;
+const dec LEAF_SWAY_RATE = 0.5;
 const dec LEAF_SWAY_SCALE = 5.0;
-const dec LEAF_SPIN_RATE = 0.3;
-const dec LEAF_ROTATE_RATE = 0.25;
+const dec LEAF_SPIN_RATE = 2.0;
+const dec LEAF_ROTATE_RATE = 1.0;
 
-const Span<uint> LEAF_COUNTDOWN = { 25, 150 };
->>>>>>> 35d051c77d37b2c3e51cc4d35991f3f459e9832a
 const Span<dec> LEAF_FALL_DISTANCE = { 0.1, 0.9 };
+const Span<uint> LEAF_COUNTDOWN = { 50, 300 };
 
 cColor TRUNK_COLOR = WHITE;
 cColor TRUNK_MARK_COLOR = BLACK;
@@ -60,10 +55,10 @@ Drawing draw_trunk( Color cref leaf_color, cbool _draw_leaves, Planc cref _lengt
 {
     Drawing tree_drawing;
 
-    Vector trunk = Vector( 0, _length );
+    Vector trunk = VectorY( _length );
     Coordinate top = trunk.destination( );
-    CoordinateX base_left( -half( _base_width ) );
-    CoordinateX base_right( half( _base_width ) );
+    Coordinate base_left = CoordinateX( -half( _base_width ) );
+    Coordinate base_right = CoordinateX( half( _base_width ) );
 
     dec branch_height = Random::rdec( BRANCH_BASE_HEIGHT_RATIO );
 
@@ -165,7 +160,7 @@ Drawing draw_trunk( Color cref leaf_color, cbool _draw_leaves, Planc cref _lengt
         branch_height += branch_remaining * Random::rdec( BRANCH_BASE_HEIGHT_RATIO );
     }
 
-    tree_drawing.bind( trunk_polygon );
+    tree_drawing.crop( trunk_polygon );
 
     branch_height = 0.0;
     while( branch_height < 1.0 )
@@ -233,13 +228,9 @@ AspineTree::Leaf::Leaf( Room * room, Color cref color, Coordinate cref _center, 
 
     needs_render_always( true );
 
-    gravity_ratio( LEAF_GRAVITY_RATIO );
-<<<<<<< HEAD
+    gravity_scale( LEAF_GRAVITY );
 
-=======
-    
     m_scale = Random::rdec( LEAF_SCALE );
->>>>>>> 35d051c77d37b2c3e51cc4d35991f3f459e9832a
     m_offset = Random::rAngle( );
 }
 
@@ -247,31 +238,21 @@ void AspineTree::Leaf::render( )
 {
     Object::render( );
 
-<<<<<<< HEAD
     Planc offset_x = sin( age( ) * 0.05 ) * 5.0;
     Planc cross_length = LEAF_CROSS_LENGTH * sin( age( ) * 0.05 );
 
     Polygon leaf( { CoordinateY( LEAF_TIP_LENGTH ), CoordinateX( -half( cross_length ) ), CoordinateY( -LEAF_BASE_LENGTH ), CoordinateX( half( cross_length ) ) } );
 
     leaf.rotate( Angle( age( ) * 0.05 ) + m_offset );
-=======
-    Planc offset_x = sin( age( ) * LEAF_SWAY_RATE ) * LEAF_SWAY_SCALE;
-    Planc cross_length = LEAF_CROSS_LENGTH * sin( age( ) * LEAF_SPIN_RATE );
-
-    Polygon leaf( { CoordinateY( LEAF_TIP_LENGTH ), CoordinateX( -half( cross_length ) ), CoordinateY( -LEAF_BASE_LENGTH ), CoordinateX( half( cross_length ) ) } );
-        
-    leaf.scale( m_scale );
-    leaf.rotate( Angle( age( ) * LEAF_ROTATE_RATE ) + m_offset );
->>>>>>> 35d051c77d37b2c3e51cc4d35991f3f459e9832a
 
     draw( m_color, leaf + VectorX( offset_x ) );
 }
 
-void AspineTree::Leaf::ground( TerrainEdge * terrain )
+void AspineTree::Leaf::ground( Terrain::Node * ground, Terrain::Bumper cref _bumper )
 {
-    Object::ground( terrain );
+    Object::ground( ground, _bumper );
 
-    if( terrain )
+    if( ground )
     {
         mark_to_delete( );
     }

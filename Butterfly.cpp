@@ -25,8 +25,8 @@ void Butterfly::render( )
 
     Drawing wings;
 
-    Path path1 = Arc::ccw( WING_RADIUS, 0.0, PI ).path( );
-    Path path2 = Arc::ccw( WING_RADIUS * UNDER_WING_RATIO, 0.0, PI ).path( );
+    Path path1 = Arc::semi_ccw( WING_RADIUS ).path( );
+    Path path2 = Arc::semi_ccw( WING_RADIUS * UNDER_WING_RATIO ).path( );
 
     Polygon wing1 = Polygon( path1.points( ) );
     wing1.stretch( Vector( 0.0, 2.0 ) );

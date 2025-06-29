@@ -27,7 +27,7 @@ public:
 
     Triangle( ) { }
 
-    Triangle( xCoordinate c1, xCoordinate c2, xCoordinate c3 ) : m_c1( c1 ), m_c2( c2 ), m_c3( c3 ) { Assert( c1.valid( ) && c2.valid( ) && c3.valid( ) );}
+    Triangle( Coordinate cref c1, Coordinate cref c2, Coordinate cref c3 ) : m_c1( c1 ), m_c2( c2 ), m_c3( c3 ) { /* Assert( c1.valid( ) && c2.valid( ) && c3.valid( ) ); */ }
 
     Coordinate cref c1( ) const { return m_c1; }
     Coordinate cref c2( ) const { return m_c2; }
@@ -59,7 +59,7 @@ public:
                            ( ( s1 * c1( ).y( ) ) + ( s2 * c2( ).y( ) ) + ( s3 * c3( ).y( ) ) ) ) / ( s1 + s2 + s3 );
     }
 
-    bool contains( xCoordinate c, bool inclusive = true ) const
+    bool contains( Coordinate cref c, bool inclusive = true ) const
     {
         dec a = 0.5 / half( ( c1( ).x( ) * ( c2( ).y( ) - c3( ).y( ) ) ) + ( c1( ).y( ) * ( c3( ).x( ) - c2( ).x( ) ) ) + ( c2( ).x( ) * c3( ).y( ) ) + ( c3( ).x( ) * -c2( ).y( ) ) );
 
@@ -105,7 +105,7 @@ public:
     Triangle & operator-=( Vector cref v ) { rethis = *this - v; }
 
     default_equal( Triangle );
-    
+
 };
 
 } // namespace geometry

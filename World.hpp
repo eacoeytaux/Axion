@@ -2,23 +2,31 @@
 #define World_hpp
 
 #include "Engine.hpp"
-#include "Room.hpp"
+#include "Physics.hpp"
 
 namespace axn
 {
 
 namespace graphics
 {
+
 class Camera;
 
 } // namespace graphics
 
 namespace reality
 {
+
+class Room;
 class Object;
 class Player;
 
 } // namespace reality
+
+class Entity : public Identifiable
+{
+
+};
 
 class Event
 {
@@ -47,6 +55,8 @@ protected:
 
 public:
 
+    virtual void assign_layer_position( Object * object );
+
     virtual ~World( );
 
     virtual void init( );
@@ -57,13 +67,14 @@ public:
 
     virtual void input( const list<Input *> & inputs = { } );
 
-    uint age( ) const;
+    uint age( ) const { return m_age; }
 
-    Camera * camera( );
+    Camera * camera( ) { return m_camera; }
 
     Room * current_room( ) { return m_current_room; }
 
-    virtual void assign_layer_position( Object * object );
+    virtual dec air_resistance( ) const { return 0.0; }
+    virtual Vector gravity( ) const { return V0; }
 
 protected:
 
@@ -71,11 +82,12 @@ protected:
     virtual void destroy( );
     virtual void reset( );
 
-protected: // todo make private?
+protected: // todo make private
 
     uint m_age = 0;
 
     Camera * m_camera = nullptr;
+
     Room * m_current_room = nullptr;
 
 };

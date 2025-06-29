@@ -9,6 +9,7 @@ dec ControllerJoystickInput::DEAD_ZONE = 0.25;
 #if defined ( AXN_DEBUG )
 // define debug global statics here
 bool Debug::active = false;
+bool Debug::shifty = false;
 
 bool b_step = false;
 void Engine::step( ) { b_step = true; }
@@ -64,9 +65,10 @@ error Engine::run( World * world, const string _app_name )
         {
             uint start_ticks = current_ticks_eng( );
 
-            input_eng( inputs, world );
-            world->input( inputs );
             clear_inputs( );
+            input_eng( inputs );
+
+            world->input( inputs );
 
             if( !paused( ) )
             {

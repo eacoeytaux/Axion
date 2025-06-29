@@ -49,8 +49,8 @@ Hills::Hills( Room * room, cPlanc _base_bottom, cdec _z ) : Object( room, _z )
                                   Coordinate( end_x, bottom ),
                                   Coordinate( end_x, _base_bottom ) } ) );
 
-    Polygon tree( { Coordinate( 0.0, TREE_HEIGHT ), Coordinate( -half( TREE_BASE ), 0.0 ), Coordinate( half( TREE_BASE ), 0.0 ) } );
-    Polygon hill = Polygon::circle( HILL_RADIUS, Coordinate( 0.0, _base_bottom ) ).stretch( VectorX( HILL_SCALE_X ) );
+    Polygon tree( { CoordinateY( TREE_HEIGHT ), CoordinateX( -half( TREE_BASE ) ), CoordinateX( half( TREE_BASE ) ) } );
+    Polygon hill = Polygon::circle( HILL_RADIUS, CoordinateY( _base_bottom ) ).stretch( VectorX( HILL_SCALE_X ) );
 
     varray<Vector> centers = { };
 

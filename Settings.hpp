@@ -14,12 +14,14 @@ public:
     enum Option
     {
         GRAPHICS_DETAIL_ALPHA,
-        
+
         #if defined ( AXN_DEBUG )
-        DEBUG_BACKGROUND,
+        DEBUG_SHOW_BACKGROUND,
+        DEBUG_SHOW_TERRAIN,
         DEBUG_CAMERA,
         DEBUG_HEALTH,
         DEBUG_PHYSICS,
+        DEBUG_PHYSICS_TERRAIN,
         DEBUG_GRID,
         #endif
     };
@@ -33,7 +35,7 @@ public:
 private:
 
     static uset<Option> settings;
-    
+
 };
 
 } // namespace axn

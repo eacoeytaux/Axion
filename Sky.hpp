@@ -20,13 +20,15 @@ public:
 private:
 
     bool m_has_clouds;
+
     varray<Cloud *> m_clouds;
 
     Countdown m_cloud_timer;
+
     Color m_top_color;
     Color m_mid_color;
     Color m_bottom_color;
-    
+
 };
 
 } // namespace mtmercy

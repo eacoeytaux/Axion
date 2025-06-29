@@ -67,11 +67,13 @@ public:
 private:
 
     static void init_eng( string app_name );
+
     static void close_eng( );
 
-    static void input_eng( list<Input *> &, World * );
     static void update_eng( );
     static void render_eng( );
+
+    static void input_eng( list<Input *> & );
 
     static bool paused_eng( );
     static void pause_eng( bool );
@@ -81,9 +83,11 @@ private:
     static uint current_ticks_eng( );
     static void wait_eng( uint ms );
 
-    // graphics
+    // -- graphics --
+
     static uint screen_width_eng( );
     static uint screen_height_eng( );
+
     // static void screen_resize_eng( uint width, uint height );
 
     static bool show_cursor_eng( );
@@ -92,7 +96,8 @@ private:
     static bool anti_alias_eng( );
     static void anti_alias_eng( bool );
 
-    // audio
+    // -- audio --
+
     static dec volume_eng( );
     static void volume_up_eng( );
     static void volume_down_eng( );
@@ -108,8 +113,9 @@ struct KeyInput : public Input
     {
         NO_DYNAMIC,
         PRESSED,
-        HELD,
         RELEASED,
+        HELD,
+        DYNAMICS
     };
 
     KeyInput( Key k, Dynamic d ) : key( k + ( ( ( k >= 'A' ) && ( k <= 'Z' ) ) ? ( 'A' - 'a' ) : 0 ) ), dynamic( d ) { }
@@ -127,22 +133,24 @@ struct MouseInput : public Input
         LEFT_BUTTON,
         RIGHT_BUTTON,
         SCROLL_BUTTON,
+        BUTTONS
     };
 
     enum Dynamic
     {
         NO_DYNAMIC,
         PRESSED,
-        HELD,
         RELEASED,
+        HELD,
         MOVE,
+        DYNAMICS
     };
 
-    MouseInput( Button b, Dynamic d, Coordinate cref p ) : button( b ), dynamic( d ), position( p ) { }
+    MouseInput( Button b, Dynamic d, Vector cref v = V0 ) : button( b ), dynamic( d ), movement( v ) { }
 
     const Button button;
     const Dynamic dynamic;
-    const Coordinate position;
+    const Vector movement;
 
 };
 
@@ -173,15 +181,17 @@ struct ControllerButtonInput : public ControllerInput
         START_BUTTON,
         START_OPPOSITE_BUTTON,
         TOUCHPAD_BUTTON,
+        BUTTONS
     };
 
     enum Dynamic
     {
         NO_DYNAMIC,
         PRESSED,
-        HELD,
         RELEASED,
+        HELD,
         MOVE,
+        DYNAMICS
     };
 
     ControllerButtonInput( Button b, Dynamic d ) : button( b ), dynamic( d ) { }
@@ -196,15 +206,16 @@ struct ControllerJoystickInput : public ControllerInput
     static dec DEAD_ZONE;
 
     static bool in_dead_zone( cdec d ) { return ( d < DEAD_ZONE ); }
-    static bool in_dead_zone( Vector cref v ) { return !v.has_magnitude( ) || in_dead_zone( abs( v.magnitude( ) ) ); }
+    static bool in_dead_zone( Vector cref v ) { return ( !v.has_magnitude( ) || in_dead_zone( v.magnitude( ) ) ); }
 
     enum Joystick
     {
         NO_JOYSTICK,
         RIGHT_JOYSTICK,
         LEFT_JOYSTICK,
+        JOYSTICKS
     };
-    
+
     typedef const Joystick cJoystick;
 
     ControllerJoystickInput( Joystick j ) : joystick( j ), dead_zone( true ) { }

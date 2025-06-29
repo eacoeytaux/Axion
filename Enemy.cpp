@@ -3,20 +3,23 @@
 
 void Enemy::update( )
 {
-    for_each( player, room( )->players( ) )
+    if( alive( ) )
     {
-        if( target( ) == player )
+        for_each( player, room( )->players( ) )
         {
-            if( !target_locked( ) && !in_sight_range( player ) )
+            if( target( ) == player )
             {
-                clear_target( );
+                if( !target_locked( ) && !in_sight_range( player ) )
+                {
+                    clear_target( );
+                }
             }
-        }
-        else if( in_alert_range( player ) )
-        {
-            if( !has_target( ) || overrides_target( player ) )
+            else if( in_alert_range( player ) )
             {
-                set_target( player );
+                if( !has_target( ) || overrides_target( player ) )
+                {
+                    set_target( player );
+                }
             }
         }
     }
@@ -26,7 +29,7 @@ void Enemy::update( )
 
 bool Enemy::overrides_target( const Object * target ) const
 {
-    return ( !target_locked( ) && position( ).closer_than( m_target->position( ), target->position( ) ) );
+    return ( alive( ) && !target_locked( ) && position( ).closer_than( m_target->position( ), target->position( ) ) );
 }
 
 void Enemy::sight_range( Planc cref _range )
@@ -43,7 +46,7 @@ void Enemy::sight_range( Planc cref _range )
 
 bool Enemy::in_sight_range( const Player * player ) const
 {
-    return ( !sight_range( ) || position( ).in_distance_range( player->position( ), sight_range( ) ) );
+    return ( alive( ) && !sight_range( ) || position( ).in_distance_range( player->position( ), sight_range( ) ) );
 }
 
 void Enemy::alert_range( Planc cref _range )
@@ -60,7 +63,7 @@ void Enemy::alert_range( Planc cref _range )
 
 bool Enemy::in_alert_range( const Player * player ) const
 {
-    return ( !alert_range( ) || position( ).in_distance_range( player->position( ), alert_range( ) ) );
+    return ( alive( ) && !alert_range( ) || position( ).in_distance_range( player->position( ), alert_range( ) ) );
 }
 
 #if defined ( AXN_DEBUG )
@@ -77,22 +80,25 @@ Drawing Enemy::debug_overlay( ) const
 
     if( Settings::get( Settings::DEBUG_PHYSICS ) )
     {
-        if( alert_range( ) )
+        if( alive( ) )
         {
-            if( has_target( ) )
+            if( alert_range( ) )
             {
-                debug_overlay.draw( SIGHT_LINE_COLOR, Line( ORIGIN, target( )->position( ) - position( ) ), SIGHT_LINE_THICKNESS, true );
-                
-                if( sight_range( ) )
+                if( has_target( ) )
                 {
-                    debug_overlay.draw( SIGHT_LINE_COLOR.a( ALPHA_INNER ), Polygon::circle( sight_range( ) ) );
-                    debug_overlay.draw( SIGHT_LINE_COLOR, Polygon::circle( sight_range( ) ), ALERT_LINE_THICKNESS, true );
+                    debug_overlay.draw( SIGHT_LINE_COLOR, Line( ORIGIN, target( )->position( ) - position( ) ), SIGHT_LINE_THICKNESS, true );
+
+                    if( sight_range( ) )
+                    {
+                        debug_overlay.draw( SIGHT_LINE_COLOR.a( ALPHA_INNER ), Polygon::circle( sight_range( ) ) );
+                        debug_overlay.draw( SIGHT_LINE_COLOR, Polygon::circle( sight_range( ) ), ALERT_LINE_THICKNESS, true );
+                    }
                 }
-            }
-            else
-            {
-                debug_overlay.draw( ALERT_LINE_COLOR.a( ALPHA_INNER ), Polygon::circle( alert_range( ) ) );
-                debug_overlay.draw( ALERT_LINE_COLOR, Polygon::circle( alert_range( ) ), ALERT_LINE_THICKNESS, true );
+                else
+                {
+                    debug_overlay.draw( ALERT_LINE_COLOR.a( ALPHA_INNER ), Polygon::circle( alert_range( ) ) );
+                    debug_overlay.draw( ALERT_LINE_COLOR, Polygon::circle( alert_range( ) ), ALERT_LINE_THICKNESS, true );
+                }
             }
         }
     }

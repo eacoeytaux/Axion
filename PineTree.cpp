@@ -36,7 +36,7 @@ PineTree::PineTree( Room * room, Coordinate cref _root, cdec _z ) : Object( room
     background( true );
 
     needs_render_always( true );
-    
+
     dec shrink_ratio = LEAVES_SHRINK_RATIO;
 
     Drawing & trunk = m_leave_bunches_and_trunk.insert_back( );
@@ -85,7 +85,7 @@ PineTree::PineTree( Room * room, Coordinate cref _root, cdec _z ) : Object( room
 
         Drawing & leaves = m_leave_bunches_and_trunk.insert_back( );
 
-        Polygon leaf_border = Polygon::expand( Polygon( leaf_bunch ), LEAVES_BORDER_WIDTH );
+        Polygon leaf_border = leaf_bunch.expanded( LEAVES_BORDER_WIDTH );
         leaves.draw( LEAVES_BORDER_COLOR, leaf_border );
         leaves.draw( LEAVES_COLOR, leaf_bunch );
 

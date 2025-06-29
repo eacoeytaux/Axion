@@ -69,6 +69,9 @@ public:
                             (dec)( ( rgb & 0x0000FF ) >> 0 ) / 255.0, a );
     }
 
+    static Color rgb( Color cref color ) { return Color::rgba( color.a( 1.0 ) ); }
+    static Color rgba( Color cref color ) { return Color::rgba( color.r( ), color.g( ), color.b( ), color.a( ) ); }
+
     static Color cmyk( dec c, dec m, dec y, dec k ) { return Color::cmyka( c, m, y, k, 1.0 ); }
     static Color cmyka( dec c, dec m, dec y, dec k, dec a )
     {
@@ -84,6 +87,9 @@ public:
         dec b = ( 1.0 - y ) * k;
         return Color::rgba( r, g, b, a );
     }
+
+    static Color cmyk( Color cref color ) { return Color::cmyka( color.a( 1.0 ) ); }
+    static Color cmyka( Color cref color ) { return Color::cmyka( color.c( ), color.m( ), color.y( ), color.k( ), color.a( ) ); }
 
     static Color hsv( dec h, dec s, dec v ) { return Color::hsva( h, s, v, 1.0 ); }
     static Color hsva( dec h, dec s, dec v, dec a )
@@ -139,6 +145,9 @@ public:
         return Color::rgba( r, g, b, a );
     }
 
+    static Color hsv( Color cref color ) { return Color::hsva( color.a( 1.0 ) ); }
+    static Color hsva( Color cref color ) { return Color::hsva( color.h( ), color.sv( ), color.v( ), color.a( ) ); }
+
     static Color hsl( dec h, dec s, dec l ) { return Color::hsla( h, s, l, 1.0 ); }
     static Color hsla( dec h, dec s, dec l, dec a )
     {
@@ -192,6 +201,9 @@ public:
 
         return Color::rgba( r, g, b, a );
     }
+
+    static Color hsl( Color cref color ) { return Color::hsla( color.a( 1.0 ) ); }
+    static Color hsla( Color cref color ) { return Color::hsla( color.h( ), color.sl( ), color.l( ), color.a( ) ); }
 
     dec r( ) const { return m_r; }
     Color r( dec r ) const { return Color::rgba( r, g( ), b( ), a( ) ); }
@@ -286,7 +298,7 @@ private:
 
     dec max_rgb( ) const { return max<dec>( { m_r, m_g, m_b } ); }
     dec min_rgb( ) const { return min<dec>( { m_r, m_g, m_b } ); }
-    
+
 };
 
 cColor TRANSPARENT = Color::rgba( 1.0, 1.0, 1.0, 0.0 );
@@ -369,7 +381,7 @@ private:
     Color m_color_start;
     Color m_color_end;
     dec m_slide;
-    
+
 };
 
 } // namespace graphics

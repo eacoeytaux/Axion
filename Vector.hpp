@@ -27,7 +27,7 @@ public:
     Vector( Planc cref dx, Planc cref dy ) : m_dx( dx ), m_dy( dy ) { }
     Vector( Planc cref dx, Planc cref dy, Coordinate cref origin ) : m_dx( dx ), m_dy( dy ), m_origin( origin ) { }
 
-    Vector( Coordinate cref c ) : m_dx( c.x( ) ), m_dy( c.y( ) ), m_origin( ORIGIN ) { }
+    Vector( Coordinate cref c ) : m_dx( c.x( ) ), m_dy( c.y( ) ) { }
 
     Vector( Coordinate cref start, Coordinate cref end ) : m_dx( end.x( ) - start.x( ) ), m_dy( end.y( ) - start.y( ) ), m_origin( start ) { }
 
@@ -43,18 +43,19 @@ public:
     Coordinate destination( ) const { return Coordinate( origin( ).x( ) + dx( ), origin( ).y( ) + dy( ) ); }
     Vector & destination( Coordinate c ) { dx( c.x( ) - origin( ).x( ) ); dy( c.y( ) - origin( ).y( ) ); rethis; }
 
-    bool has_magnitude( ) const { return ( dx( ) || dy( ) ); }
     Planc magnitude( ) const { return origin( ).distance_to( destination( ) ); }
+    Vector & magnitude( Planc cref m ) { cdec d = ( m / magnitude( ) ); dx( d * dx( ) ), dy( d * dy( ) );  rethis; }
 
-    Vector & magnitude( Planc cref m ) { Angle a = angle( ); dx( a.cos( ) * m ); dy( a.sin( ) * m ); rethis; }
+    bool has_magnitude( ) const { return ( dx( ) || dy( ) ); }
 
-    Vector & extend( Planc cref p ) { return magnitude( magnitude( ) + p ); }
-
+    Vector normalized( ) { cPlanc m = magnitude( ); return Vector( dx( ) / m, dy( ) / m ); }
     Vector & normalize( ) { return magnitude( 1.0 ); }
 
     Angle angle( ) const { return Angle( m_dx, m_dy ); }
-    Vector & rotate( Angle cref a ) { return rotate_to_angle( angle( ) + a ); }
-    Vector & rotate_to_angle( Angle cref a ) { if( angle( ) != a ) { Planc _magnitude = magnitude( ); dx( _magnitude * a.cos( ) ); dy( _magnitude * a.sin( ) ); } rethis; }
+    Vector & rotate( Angle cref a ) { return rotate_to( angle( ) + a ); }
+    Vector & rotate_to( Angle cref a ) { if( angle( ) != a ) { cPlanc m = magnitude( ); dx( m * a.cos( ) ); dy( m * a.sin( ) ); } rethis; }
+
+    Vector & extend( Planc cref p ) { return magnitude( magnitude( ) + p ); }
 
     Vector & flatten( Angle cref a ) { rotate( -a ); dy( 0.0 ); rotate( a ); rethis; }
 
@@ -75,7 +76,7 @@ public:
     Vector & operator/=( cdec scale ) { dx( dx( ) / scale ); dy( dy( ) / scale ); rethis; }
 
     default_equal( Vector );
-    
+
 };
 
 cVector V0( 0.0, 0.0 );
@@ -97,7 +98,6 @@ inline Vector VectorA( Angle cref a, Planc cref magnitude, Coordinate cref origi
 inline Coordinate::Coordinate( Vector cref v ) { *this = v.destination( ); }
 
 inline Coordinate & Coordinate::move( Planc cref x, Planc cref y ) { Coordinate::x( Coordinate::x( ) + x ); Coordinate::y( Coordinate::y( ) + y ); rethis; }
-inline Coordinate & Coordinate::rotate( Angle cref a ) { rethis = Vector( *this ).rotate( a ).destination( ); }
 inline Coordinate & Coordinate::rotate( Angle cref a, Coordinate cref c ) { rethis = Vector( c, *this ).rotate( a ).destination( ); }
 inline Coordinate & Coordinate::mirror_x( ) { return mirror( XHAT ); }
 inline Coordinate & Coordinate::mirror_y( ) { return mirror( YHAT ); }

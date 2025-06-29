@@ -16,7 +16,8 @@ cAngle QUILL_FAR = ( TAU / 2.0 );
 cAngle QUILL_CLOSE = ( TAU / 10.0 );
 
 cColor QUILL_COLOR = YELLOW;
-}
+
+} // namespace
 
 Porkupine::Porkupine( Room * room, Coordinate cref _position ) : Enemy( room, _position )
 {

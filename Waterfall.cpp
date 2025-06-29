@@ -56,7 +56,7 @@ void Waterfall::render( )
     draw( WATER_COLOR, bounds );
     draw( { FOAM_COLOR.a( 0.0 ), FOAM_COLOR.a( 0.0 ), FOAM_COLOR.a( FOAM_COLOR_TOP_ALPHA ), FOAM_COLOR.a( FOAM_COLOR_TOP_ALPHA ) }, bounds );
 
-    bind( bounds );
+    crop( bounds );
     for_each( ripple, m_ripples ) { draw( FOAM_COLOR.a( ripple.alpha ), ripple.polygon + VectorY( ripple.height ) ); }
     clear_bounds( );
 
@@ -83,7 +83,7 @@ void Waterfall::update( )
             while( ( center_x - radius ) < half( width( ) ) )
             {
                 Coordinate c( center_x, RIPPLE_TIP_HEIGHT * abs( center_x / half( width( ) ) ) );
-                Arc arc = Arc::ccw( c, radius, PI, 0.0 );
+                Arc arc = Arc::semi_ccw( radius, c, PI );
 
                 if( ripple_path.lines( ).size( ) )
                 {
@@ -105,7 +105,7 @@ void Waterfall::update( )
 
         for_each( ripple, m_ripples )
         {
-            ripple.height += ( GRAVITY * RIPPLE_GRAVITY_RATIO ).dy( );
+            ripple.height += ( gravity( ) * RIPPLE_GRAVITY_RATIO ).dy( );
             ripple.alpha = min( ripple.alpha + RIPPLE_ALPHA_GROWTH, 1.0 );
         }
         m_ripples.remove_if( [ ] ( Ripple cref ripple )
@@ -139,7 +139,7 @@ void Waterfall::update( )
         for_each( foam, m_foam )
         {
             foam.radius -= FOAM_RADIUS_SHRINK;
-            foam.movement += GRAVITY * FOAM_GRAVITY_RATIO;
+            foam.movement += gravity( ) * FOAM_GRAVITY_RATIO;
             foam.position += foam.movement;
             foam.alpha -= FOAM_ALPHA_SHRINK;
         }

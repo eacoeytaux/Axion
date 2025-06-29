@@ -34,13 +34,20 @@ void World::destroy( )
 
 void World::reset( )
 {
+    dec zoom = ( !is_null( m_camera ) ? m_camera->zoom( ) : 1.0 );
+
     destroy( );
     init( );
+
+    m_camera->zoom( zoom );
 }
 
 void World::init( )
 {
     m_age = 0;
+
+    uint buffer = min( ( Engine::screen_width( ) * CAMERA_SIDE_BUFFER_RATIO ), ( Engine::screen_height( ) * CAMERA_SIDE_BUFFER_RATIO ) );
+    m_camera = new Camera( this, Engine::screen_width( ) - buffer, Engine::screen_height( ) - buffer );
 
     create( );
 
@@ -53,8 +60,7 @@ void World::init( )
 
 void World::create( )
 {
-    uint buffer = min( ( Engine::screen_width( ) * CAMERA_SIDE_BUFFER_RATIO ), ( Engine::screen_height( ) * CAMERA_SIDE_BUFFER_RATIO ) );
-    m_camera = new Camera( this, Engine::screen_width( ) - buffer, Engine::screen_height( ) - buffer );
+
 }
 
 void World::input( const list<Input *> & _inputs )
@@ -67,156 +73,275 @@ void World::input( const list<Input *> & _inputs )
             KeyInput::Dynamic dynamic = key_input->dynamic;
 
             bool pressed = ( dynamic == KeyInput::PRESSED );
-            // bool held = ( dynamic == KeyInput::HELD );
-            // bool down = ( pressed || held );
+            bool released = ( dynamic == KeyInput::RELEASED );
+            bool held = ( dynamic == KeyInput::HELD );
+            bool down = ( pressed || held );
 
             if( pressed )
             {
-                switch( key )
-                {
-                    default:
-                    {
-                        break;
-                    }
+                // Log( INFO_LOG, "pressed key ............ ( %c ) [ %i ]", key, (int)key );
+            }
+            else if( released )
+            {
+                // Log( INFO_LOG, "released key ........... ( %c ) [ %i ]", key, (int)key );
+            }
 
-                    case 27:
-                    { // esc key
+            switch( key )
+            {
+                default:
+                {
+                    break;
+                }
+
+                case 27:
+                { // esc key
+                    if( pressed )
+                    {
                         Engine::quit( );
                         return;
                     }
 
-                    case '\\':
+                    break;
+                }
+
+                case '\\':
+                {
+                    if( down )
                     {
                         Engine::sync_controllers( );
-                        break;
-                    };
+                    }
 
-                    case 'p':
+                    break;
+                };
+
+                case 'p':
+                {
+                    if( pressed )
                     {
                         Engine::pause( !Engine::paused( ) );
-                        break;
-                    };
+                    }
 
-                    case ';':
+                    break;
+                };
+
+                case ';':
+                {
+                    if( pressed )
                     {
                         reset( );
-                        break;
                     }
 
-                    case 9:
-                    { // tab
+                    break;
+                }
+
+                case 9:
+                { // tab
+                    if( pressed )
+                    {
                         m_camera->show_hud( !m_camera->show_hud( ) );
-                        break;
                     }
 
-                    #if defined ( AXN_DEBUG )
-                    case '`':
+                    break;
+                }
+
+                #if defined ( AXN_DEBUG )
+                case '`':
+                {
+                    if( pressed )
                     {
                         Debug::active = !Debug::active;
-                        break;
                     }
 
-                    case '\'':
+                    break;
+                }
+
+                case -27: // rshift
+                case -31: // lshift
+                {
+                    if( pressed )
+                    {
+                        Debug::shifty = true;
+                    }
+                    else if( released )
+                    {
+                        Debug::shifty = false;
+                    }
+
+                    break;
+                }
+
+                case '\'':
+                {
+                    if( down )
                     {
                         Engine::step( );
-                        break;
-                    };
+                    }
 
-                    case '.':
+                    break;
+                };
+
+                case '.':
+                {
+                    if( down )
                     {
                         m_camera->zoom( m_camera->zoom( ) / CAMERA_ZOOM_RATIO );
-                        break;
                     }
-                    case ',':
+
+                    break;
+                }
+                case ',':
+                {
+                    if( down )
                     {
                         m_camera->zoom( m_camera->zoom( ) * CAMERA_ZOOM_RATIO );
-                        break;
                     }
-                    case '/':
+
+                    break;
+                }
+                case '/':
+                {
+                    if( pressed )
                     {
                         m_camera->zoom( 1.0 );
-                        break;
-                    };
+                    }
 
-                    case '=':
+                    break;
+                };
+
+                case '=':
+                {
+                    if( down )
                     {
                         Engine::volume_up( );
-                        break;
                     }
-                    case '-':
+
+                    break;
+                }
+                case '-':
+                {
+                    if( down )
                     {
                         Engine::volume_down( );
-                        break;
                     }
-                    case '0':
+
+                    break;
+                }
+                case '0':
+                {
+                    if( pressed )
                     {
                         Engine::mute( !Engine::muted( ) );
-                        break;
                     }
 
-                    case 'l':
+                    break;
+                }
+
+                case 'l':
+                {
+                    if( pressed )
                     {
                         m_current_room->lighting_active( !m_current_room->lighting_active( ) );
-                        break;
                     }
 
-                    case 'h':
-                    {
-                        Settings::flip( Settings::DEBUG_HEALTH );
-                        break;
-                    }
+                    break;
+                }
 
-                    case '1':
+                case 'o':
+                {
+                    if( pressed )
                     {
                         Settings::flip( Settings::DEBUG_CAMERA );
-                        break;
                     }
 
-                    case '2':
+                    break;
+                }
+
+                case '1':
+                {
+                    if( pressed )
+                    {
+                        Settings::flip( Settings::DEBUG_PHYSICS_TERRAIN );
+                    }
+
+                    break;
+                }
+
+                case '2':
+                {
+                    if( pressed )
                     {
                         Settings::flip( Settings::DEBUG_PHYSICS );
-                        break;
                     }
 
-                    case '3':
+                    break;
+                }
+
+                case '3':
+                {
+                    if( pressed )
+                    {
+                        Settings::flip( Settings::DEBUG_HEALTH );
+                    }
+
+                    break;
+                }
+
+                case '4':
+                {
+                    if( pressed )
                     {
                         Settings::flip( Settings::DEBUG_GRID );
-                        break;
                     }
 
-                    case '9':
-                    {
-                        Settings::flip( Settings::DEBUG_BACKGROUND );
-                        break;
-                    }
-
-                    #endif
+                    break;
                 }
+
+                case '8':
+                {
+                    if( pressed )
+                    {
+                        Settings::flip( Settings::DEBUG_SHOW_TERRAIN );
+                    }
+
+                    break;
+                }
+
+                case '9':
+                {
+                    if( pressed )
+                    {
+                        Settings::flip( Settings::DEBUG_SHOW_BACKGROUND );
+                    }
+
+                    break;
+                }
+
+                #endif
             }
         }
 
         if( MouseInput * mouse_input = dynamic_cast<MouseInput *>( input ) )
         {
-            Coordinate position = mouse_input->position;
+            Vector movement = mouse_input->movement;
             MouseInput::Dynamic dynamic = mouse_input->dynamic;
             MouseInput::Button button = mouse_input->button;
 
             if( dynamic == MouseInput::MOVE )
             {
-                if( button == MouseInput::SCROLL_BUTTON )
+                if( button == MouseInput::NO_BUTTON )
                 {
-                    if( is_pos( position.y( ) ) )
+                    m_camera->cursor_world_position( m_camera->screen_to_world( movement ) );
+                }
+                else if( button == MouseInput::SCROLL_BUTTON )
+                {
+                    if( is_pos( movement.dy( ) ) )
                     {
                         m_camera->zoom( m_camera->zoom( ) / CAMERA_ZOOM_RATIO );
                     }
-                    else if( is_neg( position.y( ) ) )
+                    else if( is_neg( movement.dy( ) ) )
                     {
                         m_camera->zoom( m_camera->zoom( ) * CAMERA_ZOOM_RATIO );
                     }
-                }
-                else
-                {
-                    m_camera->cursor_world_position( position );
                 }
             }
         }
@@ -308,14 +433,4 @@ void World::update( )
 void World::assign_layer_position( Object * object )
 {
     object->layer_position( queue<uint>( ) );
-}
-
-uint World::age( ) const
-{
-    return m_age;
-}
-
-Camera * World::camera( )
-{
-    return m_camera;
 }
