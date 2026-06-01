@@ -1,6 +1,6 @@
 #include "MountMerciless.hpp"
 
-int main( int argc, char * argv[] )
+int main( int argc, char * argv[ ] )
 {
-    return Engine::run( new mtmercy::MountMerciless( ), "Mount Merciless" );
+    return Engine::run( new mtmercy::MtMerciless( ), "Mount Merciless" );
 }

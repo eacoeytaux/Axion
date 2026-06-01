@@ -1,16 +1,36 @@
 #include "Drawing.hpp"
-#include "Color.hpp"
 
-Drawing::Drawing( const Coordinate & _center ) { center( _center ); }
-
-const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( ) const
+varray<Drawing::Node> Drawing::nodes( ) const
 {
-    if( !transform( ).identity( ) )
+    return ( m_nodes );
+}
+
+Drawing::Node & Drawing::back_node( cbool _add_new )
+{
+    if( _add_new || m_nodes.empty( ) )
     {
+        m_nodes.insert_back( );
+    }
+
+    return ( m_nodes.back( ) );
+}
+
+const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( cbool _transformed ) const
+{
+    if( _transformed && ( !Transformable::transform( ).is_identity( ) ) )
+    {
+        const Transform _t = Transformable::transform( );
+
+        FixedRectangle transformed_bounding_box;
+
         for_each( colored_polygon, m_colored_polygons )
         {
-            colored_polygon.polygon.transform( transform( ) );
+            colored_polygon.polygon.transform( _t );
+
+            transformed_bounding_box.union_with( colored_polygon.polygon.bounds( false ) );
         }
+
+        m_bounding_box = transformed_bounding_box;
 
         const_clear_transform( );
     }
@@ -18,119 +38,114 @@ const varray<Drawing::ColoredPolygon> & Drawing::colored_polygons( ) const
     return m_colored_polygons;
 }
 
-varray<Drawing::ColoredPolygon> Drawing::colored_polygons_border( ) const
+Drawing & Drawing::transform( Transform cref _transform )
 {
-    varray<ColoredPolygon> colored_polygons_border;
+    back_node( ).transform.chain( _transform );
 
-    if( has_border( ) )
+    rethis;
+}
+
+Drawing & Drawing::erase( Polygon cref _polygon )
+{
+    ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
+
+    colored_polygon.polygon = _polygon;
+    colored_polygon.colors = { TRANSPARENT };
+    colored_polygon.hole = true;
+
+    back_node( !back_node( ).transform.is_identity( ) ).hole_shapes.insert_back( colored_polygon );
+
+    rethis;
+}
+
+Drawing & Drawing::crop( Polygon cref _polygon )
+{
+    ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
+    colored_polygon.polygon = _polygon;
+    colored_polygon.colors = { TRANSPARENT };
+    colored_polygon.fill = true;
+
+    back_node( !back_node( ).transform.is_identity( ) ).crop_shapes.insert_back( colored_polygon );
+
+    rethis;
+}
+
+Drawing & Drawing::clear_bounds( )
+{
+    ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
+    colored_polygon.reset = true;
+
+    rethis;
+}
+
+Drawing & Drawing::draw( Drawing cref _drawing )
+{
+    if( m_filter_function_set )
     {
-        for_each( colored_polygon, colored_polygons( ) )
+        for_each( colored_polygon, _drawing.colored_polygons( ) )
         {
-            ColoredPolygon border = colored_polygon;
-            border.polygon = Polygon::expand( border.polygon, border_width( ) );
+            ColoredPolygon filtered_colored_polygon = colored_polygon;
+            for_range( i, filtered_colored_polygon.colors.size( ) )
+            {
+                m_filter_function( filtered_colored_polygon.colors[ i ] );
 
-            border.colors.clear( );
-            border.colors.reserve( border.polygon.sides( ) );
-            for_range( i, border.polygon.sides( ) ) border.colors.insert_back( border_color( ) );
+                if( !filtered_colored_polygon.colors[ i ].opaque( ) )
+                {
+                    filtered_colored_polygon.opaque = false;
+                    m_opaque = false;
+                }
+            }
 
-            colored_polygons_border.insert_back( border );
+            m_colored_polygons.insert_back( filtered_colored_polygon );
+
+            if( !filtered_colored_polygon.reset )
+            {
+                m_bounding_box.union_with( filtered_colored_polygon.polygon.bounds( false ) );
+            }
         }
-    }
-
-    return colored_polygons_border;
-}
-
-uint Drawing::polygon_count( ) const { return colored_polygons( ).size( ); }
-
-void Drawing::reserve( const uint _reserve_size ) { m_colored_polygons.reserve( _reserve_size ); }
-
-void Drawing::reserve_more( const uint _reserve_size ) { m_colored_polygons.reserve_more( _reserve_size ); }
-
-void Drawing::clear( const bool _reserve_mem )
-{
-    Transformable::clear_transform( );
-    
-    uint mem_size = ( _reserve_mem ? m_colored_polygons.size( ) : ZERO );
-    
-    m_override_color_set = false;
-    m_colored_polygons.clear( );
-    if( _reserve_mem && mem_size )
-    {
-        m_colored_polygons.reserve( mem_size * TWO );
-    }
-}
-
-Coordinate Drawing::center( ) const { return m_center; }
-
-Drawing & Drawing::center( const Coordinate & _center )
-{
-    Vector d = _center - m_center;
-    if( d.has_magnitude( ) )
-    {
-        m_center = _center;
-        // TODO why doesn't move( d ) work?
-        // for_each( colored_polygon, m_colored_polygons )
-        // {
-            // colored_polygon.polygon.move( d );
-        // }
-    }
-
-    return *this;
-}
-
-Drawing & Drawing::override_color( const Color & _color )
-{
-    m_override_color = _color;
-    
-    if ( !m_override_color_set )
-    {
-        for_each( colored_polygon, m_colored_polygons )
-        {
-            colored_polygon.colors = { m_override_color };
-        }
-    }
-    
-    m_override_color_set = true;
-    
-    return *this;
-}
-
-Drawing & Drawing::draw( const Drawing & _drawing )
-{
-    // if (_drawing.has_border( ) )
-    // {
-    //     m_colored_polygons.insert_back( _drawing.colored_polygons_border( ) );
-    // }
-    
-    if( m_override_color_set )
-    {
-        draw( _drawing, m_override_color );
     }
     else
     {
         m_colored_polygons.insert_back( _drawing.colored_polygons( ) );
+
+        m_bounding_box.union_with( _drawing.bounding_box( ) );
+
+        m_opaque = ( m_opaque && _drawing.opaque( ) );
     }
-    
-    return *this;
+
+
+    varray<Drawing::Node> drawing_nodes = _drawing.nodes( );
+    Drawing::Node & back = back_node( !back_node( ).transform.is_identity( ) || back_node( ).crop_shapes.size( ) || back_node( ).hole_shapes.size( ) );
+    back.drawings.insert_back( drawing_nodes );
+
+    rethis;
 }
 
-Drawing & Drawing::draw( const Drawing & _drawing, const Color & _color )
+Drawing & Drawing::draw( Drawing cref _drawing, Color cref _color )
 {
     for_each( colored_polygon, _drawing.colored_polygons( ) )
     {
-        m_colored_polygons.insert_back( colored_polygon ).colors = { _color };
+        m_colored_polygons.insert_back( colored_polygon );
+        m_colored_polygons.back( ).colors = { _color };
+        m_colored_polygons.back( ).opaque = _color.opaque( );
     }
 
-    return *this;
+    m_bounding_box.union_with( _drawing.bounding_box( ) );
+
+    m_opaque = m_opaque && _color.opaque( );
+
+    back_node( !back_node( ).transform.is_identity( ) || back_node( ).crop_shapes.size( ) || back_node( ).hole_shapes.size( ) ).drawings.insert_back( _drawing.nodes( ) );
+
+    rethis;
 }
 
 Drawing & Drawing::draw( const varray<Color> & _colors,
-                         const Polygon & _polygon,
-                         const dec _thickness,
-                         const bool _preserve_thickness,
-                         const bool _extend_lines )
+                         Polygon cref _polygon,
+                         cdec _thickness,
+                         cbool _preserve_thickness,
+                         cbool _extend_lines )
 {
-    Assert( _thickness >= ZERO );
+    Assert( !is_neg( _thickness ) );
     Assert( _colors.size( ) );
 
     ColoredPolygon & colored_polygon = m_colored_polygons.insert_back( );
@@ -138,70 +153,83 @@ Drawing & Drawing::draw( const varray<Color> & _colors,
     colored_polygon.thickness = _thickness;
     colored_polygon.preserve_thickness = _preserve_thickness;
     colored_polygon.extend_lines = _extend_lines;
-    
-    if( m_override_color_set )
+
+    colored_polygon.colors = _colors;
+
+    colored_polygon.opaque = true;
+    for_range( i, colored_polygon.colors.size( ) )
     {
-        colored_polygon.colors = { m_override_color };
-        colored_polygon.opaque = m_override_color.opaque( );
-    }
-    else
-    {
-        colored_polygon.colors = _colors;
-        
-        colored_polygon.opaque = true;
-        for_each( color, _colors )
+        if( m_filter_function_set )
         {
-            if( color.a( ) != ONE )
-            {
-                colored_polygon.opaque = false;
-                break;
-            }
+            m_filter_function( colored_polygon.colors[ i ] );
+        }
+
+        if( !colored_polygon.colors[ i ].opaque( ) )
+        {
+            colored_polygon.opaque = false;
         }
     }
 
-    return *this;
+    m_bounding_box.union_with( colored_polygon.polygon.bounds( false ) );
+
+    back_node( !back_node( ).transform.is_identity( ) || back_node( ).crop_shapes.size( ) || back_node( ).hole_shapes.size( ) || back_node( ).drawings.size( ) ).colored_shapes.insert_back( colored_polygon );
+
+    rethis;
 }
 
-Drawing & Drawing::draw( const Color & _color,
-                         const Polygon & _polygon,
-                         const dec _thickness,
-                         const bool _preserve_thickness,
-                         const bool _extend_lines )
+Drawing & Drawing::draw( Color cref _color,
+                         Polygon cref _polygon,
+                         cdec _thickness,
+                         cbool _preserve_thickness,
+                         cbool _extend_lines )
 {
-    return draw( varray<Color>( _polygon.sides( ), _color ), _polygon, _thickness, _preserve_thickness, _extend_lines );
+    return draw( varray<Color>( max<uint>( 1, _polygon.sides( ) ), _color ), _polygon, _thickness, _preserve_thickness, _extend_lines );
 }
 
-Drawing & Drawing::draw( const Color & _color1,
-                         const Color & _color2,
-                         const Line & _line,
-                         const dec _thickness,
-                         const bool _preserve_thickness,
-                         const bool _extend_lines )
+Drawing & Drawing::draw( Color cref _color1,
+                         Color cref _color2,
+                         Line cref _line,
+                         cdec _thickness,
+                         cbool _preserve_thickness,
+                         cbool _extend_lines )
 {
-    return draw( { _color1, _color2 }, Polygon( { _line.c1( ), _line.c2( ) } ), _thickness, _preserve_thickness, _extend_lines );
+    return draw( { _color1, _color2 }, Polygon( varray<Coordinate>( { _line.c1( ), _line.c2( ) } ) ), _thickness, _preserve_thickness, _extend_lines );
 }
 
-Drawing & Drawing::draw( const Color & _color,
-                         const Line & _line,
-                         const dec _thickness,
-                         const bool _preserve_thickness,
-                         const bool _extend_lines )
+Drawing & Drawing::draw( Color cref _color,
+                         Line cref _line,
+                         cdec _thickness,
+                         cbool _preserve_thickness,
+                         cbool _extend_lines )
 {
     return draw( _color, _color, _line, _thickness, _preserve_thickness, _extend_lines );
 }
 
-#ifdef AXN_DEBUG
-Drawing & Drawing::draw( const Color & _color,
-                         const Vector & _vector,
-                         const dec _arrow_head_length,
-                         const dec _thickness,
-                         const bool _preserve_thickness )
+Drawing & Drawing::draw( Color cref _color,
+                         Path cref _path,
+                         cdec const _thickness,
+                         cbool _preserve_thickness,
+                         cbool _extend_lines )
+{
+    for_each( line, _path.lines( ) )
+    {
+        draw( _color, line, _thickness, _preserve_thickness, _extend_lines );
+    }
+
+    rethis;
+}
+
+#if defined ( AXN_DEBUG )
+Drawing & Drawing::draw( Color cref _color,
+                         Vector cref _vector,
+                         cdec _arrow_head_length,
+                         cdec _thickness,
+                         cbool _preserve_thickness )
 {
     draw( _color, Line( _vector.origin( ), _vector.destination( ) ), _thickness, _preserve_thickness );
-    draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) + ( half( RIGHT_ANGLE ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
-    draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) - ( half( RIGHT_ANGLE ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
-    return *this;
+    draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) + ( half( RIGHT ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
+    draw( _color, Line( _vector.destination( ), _vector.destination( ) - VectorA( _vector.angle( ) - ( half( RIGHT ) ), _arrow_head_length ) ), _thickness, _preserve_thickness, true );
+
+    rethis;
 }
 #endif
-
-bool Drawing::translucent( ) const { return m_translucent; }

@@ -1,5 +1,5 @@
 #include "Bird.hpp"
-#include "World.hpp"
+
 #include "Player.hpp"
 
 using mtmercy::Bird;
@@ -7,24 +7,26 @@ using mtmercy::Feather;
 
 namespace
 {
-const uint BIRD_HEALTH = 1;
 
-const Planc FEATHER_LENGTH = 15.0;
-const Planc FEATHER_BASE_LENGTH = 5.0;
-const Planc FEATHER_STEM_LENGTH = 3.0;
-const Planc FEATHER_STEM_THICKNESS = 2.0;
+cuint BIRD_HEALTH = 1;
 
-const Planc SPEED = 3.0;
-const Planc ROTATIONAL_SPEED = 2.0;
-const Planc ROTATIONAL_RADIUS = 160.0;
-const Planc LIFT_SPEED = 1.0;
-const Planc LIFT_DISTANCE = 16.0;
+cPlanc FEATHER_LENGTH = 15.0;
+cPlanc FEATHER_BASE_LENGTH = 5.0;
+cPlanc FEATHER_STEM_LENGTH = 3.0;
+cPlanc FEATHER_STEM_THICKNESS = 2.0;
+
+cPlanc SPEED = 1.5;
+cPlanc ROTATIONAL_SPEED = 1.0;
+cPlanc ROTATIONAL_RADIUS = 160.0;
+cPlanc LIFT_SPEED = 0.5;
+cPlanc LIFT_DISTANCE = 16.0;
+
 } // namespace
 
-Feather::Feather( World * world, const Coordinate & _position ) : Object( world, _position )
+Feather::Feather( Room * room, Coordinate cref _position ) : Object( room, _position )
 {
     m_color = Random::rColor( );
-    gravity_ratio( 0.05 );
+    gravity_scale( 0.025 );
 }
 
 void Feather::render( )
@@ -40,20 +42,20 @@ void Feather::render( )
     // draw( m_color, stem, FEATHER_STEM_THICKNESS );
 }
 
-Bird::Bird( World * world, const Coordinate & _position ) : Mob( world, _position )
+Bird::Bird( Room * room, Coordinate cref _position ) : Mob( room, _position, BIRD_HEALTH )
 {
     no_gravity( );
-    space( Rectangle( 32.0, 32.0 ) );
-    health( BIRD_HEALTH );
+
+    space( Polygon::rectangle( 32.0, 32.0 ) );
 }
 
 void Bird::render( )
 {
     Mob::render( );
 
-    const Color COLOR = RED;
+    cColor COLOR = RED;
 
-    Polygon wing = Polygon( { Coordinate( 0.0, 0.0 ), Coordinate( -24.0, sin( world( )->age( ) / 16.0 ) * 16.0 ), Coordinate( 16.0, 0.0 ) } );
+    Polygon wing = Polygon( { Coordinate( 0.0, 0.0 ), Coordinate( -24.0, sin( room( )->age( ) / 16.0 ) * 16.0 ), Coordinate( 16.0, 0.0 ) } );
     if( velocity( ).dx( ) < 0.0 )
         wing.mirror_y( );
 
@@ -63,12 +65,12 @@ void Bird::render( )
 
 void Bird::update( )
 {
-    if( alive( ) && world( )->player( ) )
+    if( alive( ) && room( )->player( ) )
     {
-        Coordinate target = world( )->player( )->position( );
+        Coordinate target = room( )->player( )->position( );
         target += VectorY( 270.0 );
-        target += Vector( sin( (dec)( ( (Planc)( world( )->age( ) ) * ROTATIONAL_SPEED / ROTATIONAL_RADIUS ) * ROTATIONAL_RADIUS ) ), 0.0 );
-        target += VectorY( -sin( (dec)( ( ( (Planc)( world( )->age( ) ) - ( LIFT_DISTANCE / 2.0 ) ) * LIFT_SPEED / LIFT_DISTANCE ) * LIFT_DISTANCE ) ) );
+        target += Vector( sin( (dec)( ( (Planc)( room( )->age( ) ) * ROTATIONAL_SPEED / ROTATIONAL_RADIUS ) * ROTATIONAL_RADIUS ) ), 0.0 );
+        target += VectorY( -sin( (dec)( ( ( (Planc)( room( )->age( ) ) - ( LIFT_DISTANCE / 2.0 ) ) * LIFT_SPEED / LIFT_DISTANCE ) * LIFT_DISTANCE ) ) );
         Vector movement = Vector( position( ), target );
         if( movement.dx( ) > 0.0 )
             movement.dx( min( SPEED, movement.dx( ) ) );

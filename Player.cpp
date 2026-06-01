@@ -4,14 +4,15 @@
 
 namespace
 {
-const uint PLAYER_HEALTH_START = 100;
+
+cuint PLAYER_HEALTH_START = 100;
 }
 
-Player::Player( World * world, const Coordinate & _position ) : Mob( world, _position, PLAYER_HEALTH_START )
+Player::Player( cuint _player_number, Room * room, Coordinate cref _position ) : Mob( room, _position, PLAYER_HEALTH_START ), m_player_number( _player_number )
 {
-    terrain_boundaries( true );
+    god( true );
 
-    god( false );
+    terrain_bound( true );
 }
 
 void Player::render( )
@@ -20,16 +21,16 @@ void Player::render( )
 
     if( god( ) )
     {
-        const Planc GLOW_RADIUS = height( );
-        const Planc GLOW_RADIUS_RATIO1 = 1.35;
-        const Planc GLOW_RADIUS_RATIO2 = 1.75;
-        const Planc GLOW_RADIUS_RATIO3 = 2.0;
-        const Color GLOW_COLOR = Color( WHITE, 0.125 );
+        cPlanc GLOW_RADIUS = height( );
+        cPlanc GLOW_RADIUS_RATIO1 = 1.35;
+        cPlanc GLOW_RADIUS_RATIO2 = 1.75;
+        cPlanc GLOW_RADIUS_RATIO3 = 2.0;
+        cColor GLOW_COLOR = Color( WHITE, 0.125 );
 
         Drawing god_drawing;
-        god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * GLOW_RADIUS_RATIO1 ) );
-        god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * GLOW_RADIUS_RATIO2 ) );
-        god_drawing.draw( GLOW_COLOR, Circle( GLOW_RADIUS * GLOW_RADIUS_RATIO3 ) );
+        god_drawing.draw( GLOW_COLOR, Polygon::circle( GLOW_RADIUS * GLOW_RADIUS_RATIO1 ) );
+        god_drawing.draw( GLOW_COLOR, Polygon::circle( GLOW_RADIUS * GLOW_RADIUS_RATIO2 ) );
+        god_drawing.draw( GLOW_COLOR, Polygon::circle( GLOW_RADIUS * GLOW_RADIUS_RATIO3 ) );
         draw( god_drawing );
     }
 }
@@ -54,59 +55,49 @@ void Player::update_movement( )
 
 void Player::die( )
 {
-    if( god( ) )
-    {
-        return;
-    }
-
-    // if( alive( ) )
-    // {
-    //     static SoundClip death_cry( "WilhelmScream.wav" );
-    //     death_cry.play( );
-    // }
+    // static SoundClip death_cry( "WilhelmScream.wav" );
+    // death_cry.play( );
 
     Mob::die( );
 }
 
-void Player::hurt( dec _health )
+bool Player::damages( Damage cref _damage ) const
 {
-    if( god( ) )
-    {
-        return;
-    }
-
-    Mob::hurt( _health );
+    return ( !god( ) && Mob::damages( _damage ) );
 }
 
 void Player::out_of_bounds( )
 {
-#ifndef AXN_DEBUG
+    #ifndef AXN_DEBUG
     Object::out_of_bounds( );
-#endif
+    #endif
 }
 
-void Player::god( const bool _god )
+void Player::god( cbool _god )
 {
-    if( _god == m_god )
-    {
-        return;
-    }
+    return_if( _god == m_god );
 
     m_god = _god;
 
     if( m_god )
     {
+        if( dead( ) )
+        {
+            revive( );
+        }
+
         invincible_always( true );   // god is invincible
         heal_full( );                // god is never wounded
         no_gravity( );               // god is not pulled on by gravity
-        terrain_boundaries( false ); // god is not affected by boundaries
-        velocity( ZERO_VECTOR );     // god brings all to a halt
+        terrain_bound( false );      // god is not affected by boundaries
+        stationary( false );         // god moves at its own whim
+        velocity( V0 );              // god brings all to a halt
     }
     else
     {
         invincible_always( false );
         normal_gravity( );
-        terrain_boundaries( true );
+        terrain_bound( true );
     }
 
     needs_render( true );

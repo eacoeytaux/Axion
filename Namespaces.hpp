@@ -4,35 +4,12 @@
 namespace axn
 {
 
-namespace utility
-{
-
-}
-
-namespace geometry
-{
-
-}
-
-namespace graphics
-{
-
-}
-
-namespace audio
-{
-
-}
-
-namespace physics
-{
-
-}
-
-namespace reality
-{
-
-}
+namespace utility { }
+namespace geometry { }
+namespace graphics { }
+namespace audio { }
+namespace physics { }
+namespace reality { }
 
 } // namespace axn
 

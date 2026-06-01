@@ -5,35 +5,40 @@
 namespace
 {
 // crossbox / hook
-const Planc DEFAULT_ROPE_MAX_LENGTH = METER * 50.0;
-const Planc DEFAULT_ROPE_GROWTH_SPEED = 33.0;
-const Planc DEFAULT_ROPE_RETRACT_SPEED = 44.0;
+cPlanc DEFAULT_ROPE_MAX_LENGTH = METER * 10.0;
+cPlanc DEFAULT_ROPE_GROWTH_SPEED = 33.0;
+cPlanc DEFAULT_ROPE_RETRACT_SPEED = 64.0;
 
-const Planc HOOK_LENGTH = 38.0;
-const Planc HOOK_THICKNESS = 5.0;
-const Planc HOOK_TIP_LENGTH = 2.5;
-const Angle HOOK_ANGLE = RIGHT_ANGLE;
-const Color HOOK_COLOR = Color::rgb( 0x9C9C9C );
+cPlanc HOOK_LENGTH = 38.0;
+cPlanc HOOK_THICKNESS = 5.0;
+cPlanc HOOK_HOLE_THICKNESS = HOOK_THICKNESS * 0.5;
+cPlanc HOOK_TIP_LENGTH = 2.5;
+cAngle HOOK_ANGLE = RIGHT;
+cColor HOOK_COLOR = Color::rgb( 0x9C9C9C );
 
-const Planc ROPE_WIDTH = 4.0;
-const Color ROPE_BASE_COLOR = Color::rgb( 0xDAA420 );
-const Color ROPE_ALT_COLOR = Color::rgb( 0xB9870F );
+cPlanc ROPE_WIDTH = 4.0;
+cColor ROPE_BASE_COLOR = Color::rgb( 0xDAA420 );
+cColor ROPE_ALT_COLOR = Color::rgb( 0xB9870F );
+
 } // namespace
 
 using mtmercy::Hook;
-Hook::Hook( World * world, const Climber * owner ) : Object( world ), m_owner( owner )
+Hook::Hook( Room * room, Climber * owner ) : Object( room ), m_owner( owner )
 {
-#ifdef AXN_DEBUG
+    #if defined ( AXN_DEBUG )
     draw_debug = true;
-#endif
-    
+    #endif
+
     Assert( m_owner, "owner cannot be null" );
 
     solid( true );
+    interactive( true );
 
     position( m_owner->position( ) );
 
     state( LOADED );
+
+    m_rope_growth_speed = DEFAULT_ROPE_GROWTH_SPEED;
     m_rope_retract_speed = DEFAULT_ROPE_RETRACT_SPEED;
     m_max_rope_length = DEFAULT_ROPE_MAX_LENGTH;
 }
@@ -50,25 +55,13 @@ void Hook::render( )
 
     Angle hook_angle( base, tip );
 
-    draw( HOOK_COLOR, Circle( HOOK_THICKNESS, base ) );
     draw( HOOK_COLOR, Line( rod.origin( ), rod ), HOOK_THICKNESS );
-    draw( HOOK_COLOR, Triangle( tip,
-                                tip + VectorA( hook_angle + RIGHT_ANGLE, HOOK_THICKNESS * HOOK_TIP_LENGTH.half( ) ) - VectorA( hook_angle, HOOK_THICKNESS * HOOK_TIP_LENGTH ),
-                                tip + VectorA( hook_angle - RIGHT_ANGLE, HOOK_THICKNESS * HOOK_TIP_LENGTH.half( ) ) - VectorA( hook_angle, HOOK_THICKNESS * HOOK_TIP_LENGTH ) ) );
+    draw( HOOK_COLOR, Polygon::circle( HOOK_THICKNESS, base ) );
+    draw( HOOK_COLOR, Polygon::triangle( tip,
+                                         tip + VectorA( hook_angle + RIGHT, HOOK_THICKNESS * half( HOOK_TIP_LENGTH ) ) - VectorA( hook_angle, HOOK_THICKNESS * HOOK_TIP_LENGTH ),
+                                         tip + VectorA( hook_angle - RIGHT, HOOK_THICKNESS * half( HOOK_TIP_LENGTH ) ) - VectorA( hook_angle, HOOK_THICKNESS * HOOK_TIP_LENGTH ) ) );
 
-    Vector rope_vector = hook_base( ) - m_owner->position( );
-
-    // draw rope base
-    draw( ROPE_BASE_COLOR, Line( rope_vector.origin( ), rope_vector ), ROPE_WIDTH );
-
-    { // draw rope detail coils
-        Vector rope_chunk = VectorA( rope_vector.angle( ), ROPE_WIDTH );
-        for_range( i, (uint)half( rope_vector.magnitude( ) / rope_chunk.magnitude( ) ) )
-        {
-            Polygon rope_strip_rect = Rectangle( ROPE_WIDTH, ROPE_WIDTH, base - ( rope_chunk * ( i + 1 ) * 2 ), rope_chunk.angle( ) );
-            draw( ROPE_ALT_COLOR, rope_strip_rect );
-        }
-    }
+    // erase( Polygon::circle( HOOK_HOLE_THICKNESS, base ) );
 }
 
 void Hook::update( )
@@ -80,40 +73,43 @@ void Hook::update_velocity( )
 {
     if( state( ) == LOADED )
     {
-        ground( nullptr );
+        ground( nullptr, Terrain::Bumper( ) );
         no_gravity( );
-        velocity( ZERO_VECTOR );
+        velocity( V0 );
         m_angle = m_owner->aim_angle( );
         position( m_owner->position( ) + VectorA( m_angle, HOOK_LENGTH ) );
     }
-    else
+    else if( state( ) == LAUNCHING )
     {
-        gravity_ratio( 0.5 );
-        if( state( ) == FIRING )
-        {
-            m_rope_length = m_owner->position( ).distance_to( position( ) );
+        gravity_scale( 0.25 ); // todo
+        m_rope_length = m_owner->position( ).distance_to( position( ) );
 
-            if( Object::ground( ) )
-            {
-                state( HOOKED );
-                velocity( ZERO_VECTOR );
-            }
-            else if( m_rope_length > m_max_rope_length )
-            {
-                state( RETRACTING );
-                // TODO adjust for overshot with remaining percentage
-            }
-        }
-        else if( state( ) == RETRACTING )
+        if( Object::ground( ) )
         {
-            stationary( false );
-            ground( nullptr );
-            velocity( VectorA( Angle( position( ), m_owner->position( ) ), m_rope_retract_speed ) );
-            m_rope_length -= m_rope_retract_speed;
-            if( m_rope_length <= HOOK_LENGTH )
-            {
-                state( LOADED );
-            }
+            state( HOOKED );
+            velocity( V0 );
+        }
+        else if( rope( ).magnitude( ) >= max_rope_length( ) )
+        {
+            no_gravity( );
+            state( HOOKED );
+            velocity( V0 );
+
+            // state( RETRACTING );
+            // TODO adjust for overshot with remaining percentage
+        }
+    }
+    else if( state( ) == RETRACTING )
+    {
+        stationary( false );
+        ground( nullptr, Terrain::Bumper( ) );
+        velocity( VectorA( Angle( position( ), m_owner->position( ) ), m_rope_retract_speed ) );
+
+        m_rope_length -= m_rope_retract_speed;
+
+        if( m_rope_length <= HOOK_LENGTH )
+        {
+            state( LOADED );
         }
     }
 
@@ -121,7 +117,7 @@ void Hook::update_velocity( )
 
     if( !Object::ground( ) )
     {
-        if( state( ) == FIRING )
+        if( state( ) == LAUNCHING )
         {
             m_angle = velocity( ).angle( );
         }
@@ -132,14 +128,61 @@ void Hook::update_velocity( )
     }
 }
 
-void Hook::ground( TerrainEdge * ground )
+void Hook::ground( Terrain::Node * ground, Terrain::Bumper cref _bumper )
 {
-    Object::ground( ground );
+    Object::ground( ground, _bumper );
 }
 
-Coordinate Hook::hook_tip( ) const
+bool Hook::collide( Object * object )
 {
-    return position( );
+    if( state( ) != LOADED )
+    {
+        Object::collide( object );
+
+        if( state( ) == LAUNCHING )
+        {
+            if( object->interactive( ) && !dynamic_cast<Hook *>( object ) )
+            {
+                if( Mob * mob = dynamic_cast<Mob *>( object ) )
+                {
+                    mob->damage( Damage( 1000.0 ) ); // todo lol
+                }
+
+                state( RETRACTING );
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+Planc Hook::max_rope_length( ) const
+{
+    return m_max_rope_length;
+}
+
+Planc Hook::rope_length( ) const
+{
+    return m_rope_length;
+}
+
+void Hook::extend_rope( cPlanc _length )
+{
+    m_rope_length = min( m_rope_length + _length, max_rope_length( ) );
+}
+
+void Hook::shorten_rope( cPlanc _length )
+{
+    Planc rope_length_start = m_rope_length;
+
+    m_rope_length = max( m_rope_length - _length, P0 );
+
+    if( taut( ) )
+    {
+        m_owner->position( hook_base( ) + VectorA( rope( ).angle( ).flipped( ), rope_length( ) ) );
+    }
 }
 
 Coordinate Hook::hook_base( ) const
@@ -154,25 +197,60 @@ Coordinate Hook::hook_base( ) const
     }
 }
 
-void Hook::fire( const Vector & _launch_speed )
+Coordinate Hook::hook_tip( ) const
+{
+    return position( );
+}
+
+Vector Hook::rope( ) const
+{
+    return Vector( m_owner->position( ), hook_base( ) );
+}
+
+bool Hook::taut( ) const
+{
+    return ( hooked( ) && ( rope( ).magnitude( ) >= rope_length( ) ) );
+}
+
+bool Hook::hooked( ) const
+{
+    return ( m_state == HOOKED );
+}
+
+bool Hook::loaded( ) const
+{
+    return ( m_state == LOADED );
+}
+
+bool Hook::launching( ) const
+{
+    return ( m_state == LOADED );
+}
+
+bool Hook::retracting( ) const
+{
+    return ( m_state == RETRACTING );
+}
+
+void Hook::launch( Vector cref _launch_speed )
 {
     switch( state( ) )
     {
-        case LOADED :
+        case LOADED:
         {
             velocity( _launch_speed );
-            state( FIRING );
+            state( LAUNCHING );
             // static SoundClip twang( "twang.wav" );
             // twang.play( );
             break;
         }
-        case FIRING :
-        case HOOKED :
-        case RETRACTING :
+        case LAUNCHING:
+        case HOOKED:
+        case RETRACTING:
         {
             break;
         }
-        default :
+        default:
         {
             // Assert( "invalid_state" );
             break;
@@ -184,21 +262,21 @@ void Hook::retract( )
 {
     switch( state( ) )
     {
-        case LOADED :
+        case LOADED:
         {
             break;
         }
-        case FIRING :
-        case HOOKED :
+        case LAUNCHING:
+        case HOOKED:
         {
             state( RETRACTING );
             break;
         }
-        case RETRACTING :
+        case RETRACTING:
         {
             break;
         }
-        default :
+        default:
         {
             // Assert( "invalid_state" );
             break;
@@ -206,8 +284,8 @@ void Hook::retract( )
     }
 }
 
-void Hook::load( )
+void Hook::reload( )
 {
-    ground( nullptr );
+    ground( nullptr, Terrain::Bumper( ) );
     state( LOADED );
 }

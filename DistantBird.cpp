@@ -5,57 +5,69 @@ using mtmercy::DistantBird;
 
 namespace
 {
-const Planc SCALE = 3.0;
 
-const Planc X_SPEED = 2.0;
+cdec GRAIVTY_RATIO = 0.5;
+cPlanc X_SPEED = 2.0;
 
-const Planc WING_HEIGHT_SPAN = 6.0;
-const uint WING_CYCLE = 4;
+cuint WING_OFFSET_CYCLE = 4;
+cPlanc WING_OFFSET_HEIGHT = 18.0;
 
-const Planc FLIGHT_HEIGHT_SPAN = 16.0;
-const uint FLIGHT_HEIGHT_CYCLE = 17;
+cuint FLIGHT_OFFSET_CYCLE = 17;
+cPlanc FLIGHT_OFFSET_SPAN = 16.0;
 
-const Color BIRD_COLOR = BLACK;
+const Polygon BIRD_BODY = Polygon( { Coordinate( 0.0, 0.0 ),
+                                     Coordinate( -3.0, 3.0 ),
+                                     Coordinate( -12.0, 3.0 ),
+                                     Coordinate( -36.0, -3.0 ),
+                                     Coordinate( -12.0, -3.0 ),
+                                     Coordinate( -6.0, 0.0 ) } );
+
+const Coordinate WING_COORDINATE_BASE_1 = Coordinate( -6.0, 0.0 );
+const Coordinate WING_COORDINATE_BASE_2 = Coordinate( -27.0, -3.0 );
+cPlanc WING_TIP_X = -15.0;
+
+cColor BIRD_COLOR = BLACK;
+
 } // namespace
 
-DistantBird::DistantBird( World * world, const Coordinate & _position ) : Object( world, _position )
+DistantBird::DistantBird( Room * room, Coordinate cref _position ) : Object( room, _position )
 {
     background( true );
-    
+
     needs_render_always( true );
 
-    z( 0.5 );
+    z( GRAIVTY_RATIO );
+
     no_gravity( );
-    terrain_boundaries( false );
+    no_air_resistance( );
+
+    terrain_bound( false );
 
     velocity( VectorX( X_SPEED ) );
 
-    m_wing_cycle_offset = Random::rdec( WING_CYCLE ) * TAU;
-    m_flight_cycle_offset = Random::rdec( FLIGHT_HEIGHT_CYCLE ) * half( PI );
+    m_wing_offset = Cycle( WING_OFFSET_CYCLE, WING_OFFSET_HEIGHT, Random::rAngle( ) );
+    m_flight_offset = Cycle( FLIGHT_OFFSET_CYCLE, FLIGHT_OFFSET_SPAN, Random::rAngle( RIGHT ) );
 }
 
 void DistantBird::render( )
 {
     Object::render( );
 
-    Planc wing_y = WING_HEIGHT_SPAN * sin( (dec)( age( ) + m_wing_cycle_offset ) / (dec)WING_CYCLE );
-    Planc flight_y = FLIGHT_HEIGHT_SPAN * sin( (dec)( age( ) + m_flight_cycle_offset ) / (dec)FLIGHT_HEIGHT_CYCLE );
+    Planc wing_y = m_wing_offset.at( age( ) );
+    Planc flight_y = m_flight_offset.at( age( ) );
 
-    Polygon bird_polygon = Polygon( { Coordinate( 0.0, 0.0 ), Coordinate( -1.0, 1.0 ), Coordinate( -4.0, 1.0 ), Coordinate( -12.0, -1.0 ), Coordinate( -4.0, -1.0 ), Coordinate( -2.0, 0.0 ) } );
-    Polygon bird_wing = Polygon( { Coordinate( -2.0, 0.0 ), Coordinate( -9.0, -1.0 ), Coordinate( -5.0, wing_y ) } );
+    Polygon bird_body = BIRD_BODY;
+    Polygon bird_wing = Polygon( { WING_COORDINATE_BASE_1, WING_COORDINATE_BASE_2, Coordinate( WING_TIP_X, wing_y ) } );
 
-    bird_polygon.scale( SCALE );
-    bird_wing.scale( SCALE );
-
-    bird_polygon.move( VectorY( flight_y ) );
+    bird_body.move( VectorY( flight_y ) );
     bird_wing.move( VectorY( flight_y ) );
 
-    if( velocity( ).dx( ) < 0.0 )
+    if( is_neg( velocity( ).dx( ) ) )
     {
-        bird_polygon.mirror_y( );
+        bird_body.mirror_y( );
         bird_wing.mirror_y( );
     }
 
-    draw( BIRD_COLOR, bird_polygon );
+    draw( BIRD_COLOR, bird_body );
     draw( BIRD_COLOR, bird_wing );
 }

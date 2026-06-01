@@ -1,5 +1,10 @@
 #include "Terrain.hpp"
 
+#include "Room.hpp"
+#include "Object.hpp"
+
+#include "Player.hpp" // todo this is temp
+
 Terrain::~Terrain( )
 {
     for_each( edges, m_edges )
@@ -21,50 +26,54 @@ Terrain::~Terrain( )
     m_vertices.clear( );
 }
 
-Terrain::Terrain( World * world, const varray<varray<Coordinate>> & _vertices ) : Object( world )
+Terrain::Terrain( Room * room, const varray<varray<Coordinate>> & _vertices ) : m_room( room )
 {
-#ifdef AXN_DEBUG
-    draw_debug = true;
-#endif
-
-    no_gravity( );
-
     bool first = true;
     for_each( vertices, _vertices )
     {
-        make( vertices, !first );
+        make( vertices, first ? DIRECTION_DOWN : NO_DIRECTION );
         first = false;
     }
 }
 
-void Terrain::make( const varray<Coordinate> & _positions, const bool _loop )
+void Terrain::make( varray<Coordinate> cref _positions, Direction _bound_direction )
 {
     if( _positions.size( ) <= 1 )
     {
         return;
     }
 
-    m_vertices.insert_back( varray<TerrainVertex *>( ) );
-    m_edges.insert_back( varray<TerrainEdge *>( ) );
+    bool loop = ( _bound_direction == NO_DIRECTION );
 
-    TerrainVertex * first = nullptr;
-    TerrainVertex * last = nullptr;
-    TerrainVertex * previous = nullptr;
+    varray<Terrain::Vertex *> & new_vertices = m_vertices.insert_back( varray<Terrain::Vertex *>( ) );
+    varray<Terrain::Edge *> & new_edges = m_edges.insert_back( varray<Terrain::Edge *>( ) );
+
+    Terrain::Vertex * first = nullptr;
+    Terrain::Vertex * last = nullptr;
+    Terrain::Vertex * previous = nullptr;
+
     for_range( i, _positions.size( ) )
     {
-        const Coordinate & coordinate = _positions[ i ];
-        TerrainVertex * vertex = new TerrainVertex( coordinate );
-        m_vertices.back( ).insert_back( vertex );
+        Coordinate cref coordinate = _positions[ i ];
+        Terrain::Vertex * vertex = new Terrain::Vertex( this, coordinate );
+
+        new_vertices.insert_back( vertex );
+
+        room( )->object_grid( ).insert( vertex );
 
         if( i )
         {
-            Assert( (bool)previous );
-            m_edges.back( ).insert_back( new TerrainEdge( previous, vertex ) );
+            Assert( !is_null( previous ) );
+            Terrain::Edge * edge = new Terrain::Edge( this, previous, vertex );
+
+            new_edges.insert_back( edge );
+
+            room( )->object_grid( ).insert( edge );
         }
 
         previous = vertex;
 
-        if( _loop )
+        if( loop )
         {
             if( !i )
             {
@@ -77,42 +86,72 @@ void Terrain::make( const varray<Coordinate> & _positions, const bool _loop )
         }
     }
 
-    if( _loop )
+    if( loop )
     {
         if( first && last )
         {
-            m_edges.back( ).insert_back( new TerrainEdge( last, first ) );
+            Terrain::Edge * edge = new Terrain::Edge( this, last, first );
+
+            new_edges.insert_back( edge );
+
+            room( )->object_grid( ).insert( edge );
         }
+
+        m_terrain.insert_back( Polygon( _positions ) );
     }
-}
-
-const varray<varray<TerrainVertex *>> & Terrain::vertices( ) const { return m_vertices; }
-
-const varray<varray<TerrainEdge *>> & Terrain::edges( ) const { return m_edges; }
-
-varray<TerrainEdge *> Terrain::edges( const FixedRectangle & _rect ) const
-{
-    varray<TerrainEdge *> matches_edges;
-
-    for_each( edges, m_edges )
+    else
     {
-        for_each( edge, edges )
+        Coordinate c1 = _positions.back( );
+        Coordinate c2 = _positions.front( );
+
+        if( room( ) )
         {
-            // TODO
-            // if( _rect.intersects( edge->line( ) ) )
+            FixedRectangle bounds = room( )->bounds( );
+
+            // TODO these need to extend if terrain bounds go beyond room bounds
+
+            if( _bound_direction == DIRECTION_UP )
             {
-                matches_edges.insert_back( edge );
+                c1 = bounds.top_left( );
+                c2 = bounds.top_right( );
             }
+            else if( _bound_direction == DIRECTION_DOWN )
+            {
+                c1 = bounds.bottom_right( );
+                c2 = bounds.bottom_left( );
+            }
+            else if( _bound_direction == DIRECTION_LEFT )
+            {
+                c1 = bounds.top_left( );
+                c2 = bounds.bottom_left( );
+            }
+            else if( _bound_direction == DIRECTION_RIGHT )
+            {
+                c1 = bounds.bottom_right( );
+                c2 = bounds.top_right( );
+            }
+
+            m_terrain.insert_back( Polygon( _positions + c1 + c2 ) );
         }
     }
-
-    return matches_edges;
 }
 
-void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( const Coordinate &, const TerrainEdge * )> & f ) const
+const varray<varray<Terrain::Vertex *>> & Terrain::vertices( ) const { return m_vertices; }
+
+const varray<varray<Terrain::Edge *>> & Terrain::edges( ) const { return m_edges; }
+
+const varray<Polygon> & Terrain::terrain( ) const { return m_terrain; }
+
+void Terrain::crop_terrain( ) { for_each( polygon, terrain( ) ) { crop( polygon ); } }
+void Terrain::fill_terrain( Color cref _color ) { for_each( polygon, terrain( ) ) { draw( _color, polygon ); } }
+
+uint Terrain::type( const Terrain::Node * t ) const { return ( m_terrain_type_map.contains( t ) ? m_terrain_type_map.at( t ) : 0 ); }
+
+void Terrain::typeset( const Terrain::Node * t, uint type ) { m_terrain_type_map[ t ] = type; }
+
+void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( Coordinate cref, const Terrain::Edge * )> & f ) const
 {
-    if( !( edges( ).size( ) ) )
-        return;
+    return_if( !( edges( ).size( ) ) );
 
     for_each( edges, edges( ) )
     {
@@ -121,7 +160,7 @@ void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( 
             continue;
         }
 
-        TerrainEdge * edge = edges.front( );
+        Terrain::Edge * edge = edges.front( );
         Planc x = edge->vertex1( )->position( ).x( ) + Random::rPlanc( _distance_x.range( ) );
 
         while( edge )
@@ -138,21 +177,67 @@ void Terrain::traverse_x( const Span<Planc> & _distance_x, const function<void( 
             }
         }
     }
+
 };
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 Drawing Terrain::debug_overlay( ) const
 {
-    const Planc GROUND_WIDTH = 1.5;
-    const Color COLOR = CYAN;
+    cPlanc GROUND_WIDTH = 1.5;
+    cPlanc GROUND_VERTEX_WIDTH = 2.5;
+    cPlanc NORMAL_LENGTH = 10.0;
 
     Drawing debug_overlay;
 
-    for_each( edges, edges( ) )
+    if( Settings::get( Settings::DEBUG_PHYSICS_TERRAIN ) )
     {
-        for_each( edge, edges )
+
+        // TODO delete
+        Polygon hitbox = room( )->player( )->terrain_hitbox( );
+
+
+        cdec _zoom = room( )->camera( )->zoom( );
+
+        auto draw_normal = [ & ] ( Coordinate cref base, Angle cref normal, bool left, bool right )
         {
-            debug_overlay.draw( COLOR, edge->line( ), GROUND_WIDTH );
+            Planc length = ( NORMAL_LENGTH / _zoom );
+            Coordinate end = base + VectorA( normal.flipped( ), length );
+            Vector offset = VectorA( normal + RIGHT, half( half( length ) ) );
+
+            debug_overlay.draw( draw_debug_color, Line( base, end ), GROUND_WIDTH, true );
+
+            if( left ) { debug_overlay.draw( draw_debug_color, Line( end, end + offset ), GROUND_WIDTH, true ); }
+            if( right ) { debug_overlay.draw( draw_debug_color, Line( end, end - offset ), GROUND_WIDTH, true ); }
+        };
+
+        for_each( edges, edges( ) )
+        {
+            for_each( edge, edges )
+            {
+                //debug_overlay.draw( draw_debug_color, edge->line( ), GROUND_WIDTH, true );
+                //draw_normal( midpoint( edge->vertex1( )->position( ), edge->vertex2( )->position( ) ), edge->normal( ), true, true );
+
+                varray<Line> bumper_lines = edge->bumpers( hitbox ).path( ).lines( );
+                for_each( bumper, bumper_lines )
+                {
+                    debug_overlay.draw( draw_debug_color, bumper, GROUND_WIDTH, true );
+                }
+            }
+        }
+
+        for_each( vertices, vertices( ) )
+        {
+            for_each( vertex, vertices )
+            {
+                //debug_overlay.draw( draw_debug_color, Polygon::circle( GROUND_VERTEX_WIDTH / _zoom, vertex->position( ) ), FILLED, true );
+                //draw_normal( vertex->position( ), vertex->normal( ), !is_null( vertex->edge1( ) ), !is_null( vertex->edge2( ) ) );
+
+                varray<Line> bumper_lines = vertex->bumpers( hitbox ).path( ).lines( );
+                for_each( bumper, bumper_lines )
+                {
+                    debug_overlay.draw( draw_debug_color, bumper, GROUND_WIDTH, true );
+                }
+            }
         }
     }
 
@@ -160,32 +245,21 @@ Drawing Terrain::debug_overlay( ) const
 }
 #endif
 
-TerrainVertex::TerrainVertex( const Coordinate & _position ) { m_position = _position; }
+Terrain::Vertex::Vertex( const Terrain * parent, Coordinate cref _position ) : Terrain::Node( parent ) { m_position = _position; }
 
-Coordinate TerrainVertex::position( ) const { return m_position; }
+Coordinate cref Terrain::Vertex::position( ) const { return m_position; }
 
-TerrainEdge * TerrainVertex::edge1( ) const { return m_e1; }
-TerrainEdge * TerrainVertex::edge2( ) const { return m_e2; }
+Terrain::Edge * Terrain::Vertex::edge1( ) const { return m_e1; }
+Terrain::Edge * Terrain::Vertex::edge2( ) const { return m_e2; }
 
-void TerrainVertex::edge1( TerrainEdge * e1 )
-{
-    Assert( !(bool)m_e1, "Edge 1 has already been set" );
+void Terrain::Vertex::edge1( Terrain::Edge * e1 ) { Assert( is_null( m_e1 ), "edge 1 has already been set" ); m_e1 = e1; }
+void Terrain::Vertex::edge2( Terrain::Edge * e2 ) { Assert( is_null( m_e2 ), "edge 2 has already been set" ); m_e2 = e2; }
 
-    m_e1 = e1;
-}
-
-void TerrainVertex::edge2( TerrainEdge * e2 )
-{
-    Assert( !(bool)m_e2, "Edge 2 has already been set" );
-
-    m_e2 = e2;
-}
-
-Angle TerrainVertex::normal( ) const
+Angle Terrain::Vertex::normal( ) const
 {
     if( m_e1 && m_e2 )
     {
-        return ( m_e1->normal( ) + m_e2->normal( ) ).half( ).flipped( );
+        return half( m_e1->normal( ) + m_e2->normal( ) );
     }
     else if( m_e1 )
     {
@@ -196,42 +270,155 @@ Angle TerrainVertex::normal( ) const
         return m_e2->normal( );
     }
 
-    return Angle( RIGHT_ANGLE );
+    return Angle( RIGHT ); // default to up
 }
 
-dec TerrainVertex::resistance( ) const { return m_resistance; }
+FixedRectangle Terrain::Vertex::bounding_box( ) const { return FixedRectangle( 0.0, 0.0, position( ) ); }
 
-TerrainEdge::TerrainEdge( TerrainVertex * _v1, TerrainVertex * _v2, const dec _resistance ) : m_v1( _v1 ), m_v2( _v2 ), m_resistance( _resistance )
+Terrain::Bumper Terrain::Vertex::bumpers( Polygon cref _polygon ) const
 {
-    Assert( (bool)m_v1 );
-    Assert( (bool)m_v2 );
+    if( _polygon.sides( ) )
+    {
+        if( edge1( ) && edge2( ) )
+        {
+            varray<Coordinate> bumpers;
+
+            Line e1 = edge1( )->line( ).flipped( );
+            Line e2 = edge2( )->line( ).flipped( );
+            Angle angle1 = e1.angle( ).truncate( );
+            Angle angle2 = e2.angle( ).truncate( );
+
+            uint min_i = 0;
+            Angle min_angle;
+
+            uint max_i = 0;
+            Angle max_angle;
+
+            uint max_below_i1 = 0;
+            Angle max_below_angle1;
+
+            uint max_below_i2 = 0;
+            Angle max_below_angle2;
+
+            Polygon polygon = _polygon.inverted( );
+            varray<Line> perimeter = polygon.perimeter( ).lines( );
+            varray<Coordinate> coordinates = polygon.coordinates( );
+
+            for_range( i, perimeter.size( ) )
+            {
+                Line line = perimeter[ i ];
+                Angle line_angle = line.angle( ).truncate( );
+
+                if( !i || ( line_angle < min_angle ) )
+                {
+                    min_angle = line_angle;
+                    min_i = i;
+                }
+
+                if( !i || ( line_angle > max_angle ) )
+                {
+                    max_angle = line_angle;
+                    max_i = i;
+                }
+
+                if( ( line_angle <= angle1 ) && ( line_angle > max_below_angle1 ) )
+                {
+                    max_below_angle1 = line_angle;
+                    max_below_i1 = i;
+                }
+
+                if( ( line_angle <= angle2 ) && ( line_angle > max_below_angle2 ) )
+                {
+                    max_below_angle2 = line_angle;
+                    max_below_i2 = i;
+                }
+            }
+
+            uint index1 = ( ( angle1 < min_angle ) ? max_i : max_below_i1 );
+            uint index2 = ( ( angle2 < min_angle ) ? max_i : max_below_i2 );
+
+            uint min_index = min( index1, index2 );
+            uint max_index = max( index1, index2 );
+
+            for_range( index, ( max_index - min_index ) + 1 )
+            {
+                bumpers.insert_back( perimeter[ ( index + min_index ) ].c2( ) + position( ) );
+            }
+
+            return Terrain::Bumper( this, Path( bumpers ) );
+        }
+    }
+
+    return Terrain::Bumper( this, Path( varray<Coordinate>( { position( ) } ) ) );
+}
+
+Terrain::Edge::Edge( const Terrain * parent, Terrain::Vertex * _v1, Terrain::Vertex * _v2, cbool _passable ) : Terrain::Node( parent ),
+m_v1( _v1 ),
+m_v2( _v2 )
+{
+    Assert( !is_null( m_v1 ) && !is_null( m_v2 ) );
 
     m_v1->edge2( this );
     m_v2->edge1( this );
 }
 
-TerrainEdge::TerrainEdge( const TerrainEdge & _edge )
+Line Terrain::Edge::line( ) const { return Line( m_v1->position( ), m_v2->position( ) ); }
+
+Vector Terrain::Edge::vector( ) const { return Vector( m_v1->position( ), m_v2->position( ) ); }
+
+Terrain::Vertex * Terrain::Edge::vertex1( ) const { return m_v1; }
+Terrain::Vertex * Terrain::Edge::vertex2( ) const { return m_v2; }
+
+Angle Terrain::Edge::normal( ) const { return vector( ).angle( ) + RIGHT; }
+
+FixedRectangle Terrain::Edge::bounding_box( ) const { return FixedRectangle( m_v1->position( ), m_v2->position( ) ); }
+
+Terrain::Bumper Terrain::Edge::bumpers( Polygon cref _polygon ) const
 {
-    m_v1 = _edge.vertex1( );
-    m_v2 = _edge.vertex2( );
+    if( _polygon.sides( ) )
+    {
+        Line edge = line( ).flipped( );
+        Angle edge_angle = edge.angle( ).truncate( );
+
+        uint min_i = 0;
+        Angle min_angle;
+
+        uint max_i = 0;
+        Angle max_angle;
+
+        uint max_below_i = 0;
+        Angle max_below_angle;
+
+        Polygon polygon = _polygon.inverted( );
+        varray<Line> perimeter = polygon.perimeter( ).lines( );
+        varray<Coordinate> coordinates = polygon.coordinates( );
+
+        for_range( i, perimeter.size( ) )
+        {
+            Line line = perimeter[ i ];
+            Angle line_angle = line.angle( ).truncate( );
+
+            if( !i || ( line_angle < min_angle ) )
+            {
+                min_angle = line_angle;
+                min_i = i;
+            }
+
+            if( !i || ( line_angle > max_angle ) )
+            {
+                max_angle = line_angle;
+                max_i = i;
+            }
+
+            if( ( line_angle < edge_angle ) && ( line_angle > max_below_angle ) )
+            {
+                max_below_angle = line_angle;
+                max_below_i = i;
+            }
+        }
+
+        return Terrain::Bumper( this, Path( edge + perimeter[ ( ( edge_angle < min_angle ) ? max_i : max_below_i ) ].c2( ) ) );
+    }
+
+    return Terrain::Bumper( this, Path( line( ) ) );
 }
-
-Line TerrainEdge::line( ) const
-{
-    return Line( m_v1->position( ), m_v2->position( ) );
-}
-
-Vector TerrainEdge::vector( ) const
-{
-    return Vector( m_v1->position( ), m_v2->position( ) );
-}
-
-TerrainVertex * TerrainEdge::vertex1( ) const { return m_v1; }
-TerrainVertex * TerrainEdge::vertex2( ) const { return m_v2; }
-
-Angle TerrainEdge::normal( ) const
-{
-    return vector( ).angle( ) + RIGHT_ANGLE;
-}
-
-dec TerrainEdge::resistance( ) const { return m_resistance; }

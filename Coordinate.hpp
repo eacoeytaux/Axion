@@ -10,93 +10,108 @@ namespace geometry
 
 enum Quadrant
 {
-    No_Quadrant = -1, // origin or axes
+    NO_QUADRANT, // origin or axes
     Q1 = 0,
     Q2 = 1,
     Q3 = 2,
     Q4 = 3,
-    Quadrants
+    QUADRANTS
 };
 
 enum Axis
 {
-    No_Axis = -1, // origin or quadrant
-    X_Axis = 0,
-    Y_Axis = 1,
-    Origin = 2,
-    Axes
+    NO_AXIS, // origin or quadrant
+    X_AXIS,
+    Y_AXIS,
+    AXES
 };
 
 class Angle;
 class Vector;
-class Line;
+class Transform;
 
-class Coordinate
+axnclass( Coordinate )
 {
+
+private:
+
+    Planc m_x = P0;
+    Planc m_y = P0;
+
 public:
-    virtual ~Coordinate( ) { }
 
-    Coordinate( );
-    Coordinate( const Planc & x, const Planc & y );
-    Coordinate( const Vector & v );
+    Coordinate( ) { }
 
-    Planc x( ) const;
-    Coordinate & x( const Planc & x );
-    Planc y( ) const;
-    Coordinate & y( const Planc & y );
-    Coordinate & xy( const Planc & x, const Planc & y );
-    
-    Planc distance_to_origin( ) const { return distance_to( Coordinate( ) ); }
-    Planc distance_to( const Coordinate & coordinate ) const;
-    bool in_distance_range( const Coordinate & coordinate, Planc distance, bool inclusive = true ) const;
+    Coordinate( Planc cref x, Planc cref y ) : m_x( x ), m_y( y ) { }
 
-    Coordinate & move( const Planc &, const Planc & );
-    Coordinate & move( const Coordinate & );
-    Coordinate & rotate( const Angle & angle, const Coordinate & origin = Coordinate( 0, 0 ) );
-    Coordinate & mirror( const Vector & axis );
-    Coordinate & mirror( const Line & axis );
+    Coordinate( Vector cref );
+
+    Planc cref x( ) const { return m_x; }
+    Planc cref y( ) const { return m_y; }
+
+    Coordinate & x( Planc cref x ) { m_x = x; rethis; }
+    Coordinate & y( Planc cref y ) { m_y = y; rethis; }
+
+    bool valid( ) const { return ( is_num( x( ) ) && is_num( y( ) ) ); }
+
+    Planc distance_to_origin( ) const { return pythagorean( x( ), y( ) ); }
+    Planc distance_to( Coordinate cref c ) const { return pythagorean( x( ) - c.x( ), y( ) - c.y( ) ); }
+    bool in_distance_range( Coordinate cref c, Planc cref distance, bool inclusive = true ) const { return in_range( distance_to( c ), distance, inclusive ); }
+
+    bool closer_than( Coordinate cref c1, Coordinate cref c2 ) const { return ( ( ( abs( x( ) - c1.x( ) ) + abs( y( ) - c1.y( ) ) ) < ( abs( x( ) - c2.x( ) ) + abs( y( ) - c2.y( ) ) ) ) || ( distance_to( c1 ) < distance_to( c2 ) ) ); }
+    bool further_than( Coordinate cref c1, Coordinate cref c2 ) const { return ( ( ( abs( x( ) - c1.x( ) ) + abs( y( ) - c1.y( ) ) ) > ( abs( x( ) - c2.x( ) ) + abs( y( ) - c2.y( ) ) ) ) || ( distance_to( c1 ) > distance_to( c2 ) ) ); }
+
+    Quadrant quadrant( ) const { return ( !x( ) || !y( ) ) ? NO_QUADRANT : ( is_pos( x( ) ) ? ( is_pos( y( ) ) ? Q1 : Q4 ) : ( is_pos( y( ) ) ? Q2 : Q3 ) ); }
+    bool in_quadrant( Quadrant q ) const { return ( quadrant( ) == q ); }
+
+    Axis axis( ) const { return ( x( ) ? ( y( ) ? NO_AXIS : X_AXIS ) : ( y( ) ? Y_AXIS : NO_AXIS ) ); }
+    bool on_axis( Axis a ) const { return ( axis( ) == a ); }
+
+    Coordinate & transform( Transform cref );
+
+    Coordinate & move( Planc cref dx, Planc cref dy );
+    Coordinate & rotate( Angle cref angle, Coordinate cref origin = Coordinate( 0.0, 0.0 ) );
+    Coordinate & mirror( Vector cref axis );
     Coordinate & mirror_x( );
     Coordinate & mirror_y( );
 
-    Quadrant quadrant( ) const;
-    Axis axis( ) const;
+    Coordinate operator-( ) const { return Coordinate( -x( ), -y( ) ); }
 
-    bool in_quadrant( const Quadrant & quadrant ) const;
-    bool on_axis( const Axis & axis ) const;
+    Coordinate operator*( dec d ) const { return Coordinate( x( ) * d, y( ) * d ); }
+    Coordinate operator/( dec d ) const { return Coordinate( x( ) / d, y( ) / d ); }
 
-    Coordinate operator+( const Vector & vector ) const;
-    Coordinate operator-( const Vector & vector ) const;
+    Coordinate & operator*=( dec d ) { x( x( ) * d ); y( y( ) * d ); rethis; }
+    Coordinate & operator/=( dec d ) { x( x( ) / d ); y( y( ) / d ); rethis; }
 
-    Coordinate & operator+=( const Vector & vector );
-    Coordinate & operator-=( const Vector & vector );
+    Coordinate operator+( Vector cref ) const;
+    Coordinate operator-( Vector cref v ) const;
+
+    Coordinate & operator+=( Vector cref );
+    Coordinate & operator-=( Vector cref );
+
+    bool operator<=( Coordinate cref c ) const { return ( ( x( ) <= c.x( ) ) || ( y( ) <= c.y( ) ) ); }
+    bool operator>=( Coordinate cref c ) const { return ( ( x( ) >= c.x( ) ) || ( y( ) >= c.y( ) ) ); }
+    bool operator<( Coordinate cref c ) const { return ( ( x( ) < c.x( ) ) || ( y( ) < c.y( ) ) ); }
+    bool operator>( Coordinate cref c ) const { return ( ( x( ) > c.x( ) ) || ( y( ) > c.y( ) ) ); }
 
     default_equal( Coordinate );
 
-private:
-    Planc m_x = ZERO;
-    Planc m_y = ZERO;
 };
 
-inline Planc distance( const Coordinate & c1, const Coordinate & c2 )
-{
-    return c1.distance_to( c2 );
-}
+typedef varray<Coordinate> Coordinates; // todo make use of
 
-inline bool in_distance_range( const Coordinate & c1, const Coordinate & c2, const Planc & distance, bool inclusive = true )
-{
-    return c1.in_distance_range( c2, distance, inclusive );
-}
+const Coordinate ORIGIN( 0.0, 0.0 );
+const Coordinate INVALID_COORDINATE( INFINITY, INFINITY );
 
-inline Coordinate midpoint( const Coordinate & c1, const Coordinate & c2 )
-{
-    Planc dx = c2.x( ) - c1.x( );
-    Planc dy = c2.y( ) - c1.y( );
-    return Coordinate( c1.x( ) + half( dx ), c1.y( ) + half( dy ) );
-}
+inline Coordinate CoordinateX( Planc cref x ) { return Coordinate( x, P0 ); }
+inline Coordinate CoordinateY( Planc cref y ) { return Coordinate( P0, y ); }
 
-const Coordinate ORIGIN( ZERO, ZERO );
-const Coordinate COORDINATE_INFINITY_POSITIVE( INFINITY_POSITIVE, INFINITY_POSITIVE );
-const Coordinate COORDINATE_INFINITY_NEGATIVE( INFINITY_NEGATIVE, INFINITY_NEGATIVE );
+inline Coordinate midpoint( Coordinate cref c1, Coordinate cref c2 ) { return Coordinate( c1.x( ) + half( c2.x( ) - c1.x( ) ), c1.y( ) + half( c2.y( ) - c1.y( ) ) ); }
+
+inline Planc distance( Coordinate cref c1, Coordinate cref c2 ) { return c1.distance_to( c2 ); }
+inline bool in_distance_range( Coordinate cref c1, Coordinate cref c2, Planc cref distance, bool inclusive = true ) { return c1.in_distance_range( c2, distance, inclusive ); }
+
+inline Planc cross( Coordinate cref c1, Coordinate cref c2, Coordinate cref c3 ) { return ( ( ( c3.y( ) - c1.y( ) ) * ( c2.x( ) - c1.x( ) ) ) - ( ( c3.x( ) - c1.x( ) ) * ( c2.y( ) - c1.y( ) ) ) ); }
 
 } // namespace geometry
 } // namespace axn

@@ -4,18 +4,21 @@
 #include "OS.hpp"
 #include "STD.hpp"
 
-#include "Assert.hpp"
-
 namespace axn
 {
 
 template <class T>
 class ptr : public std::shared_ptr<T *>
 {
+    
+private:
+    
     using std::shared_ptr<T>::shared_ptr;
 
 public:
+
     operator bool( ) const { return ( std::shared_ptr<T *>::get( ) != nullptr ); }
+    
 };
 
 template <class T>
@@ -25,7 +28,7 @@ ptr<T> make_ptr( T * t )
 }
 
 template <class T, class U>
-ptr<T> is_pointer( const ptr<U> & u ) noexcept
+ptr<T> is_ptr( const ptr<U> & u ) noexcept
 {
     return std::dynamic_pointer_cast<T *>( u );
 }

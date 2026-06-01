@@ -1,6 +1,7 @@
 #ifndef DistantBird_hpp
 #define DistantBird_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy
@@ -8,15 +9,18 @@ namespace mtmercy
 
 class DistantBird : public Object
 {
+
 public:
-    virtual ~DistantBird( ) { }
-    DistantBird( World *, const Coordinate & position );
+
+    DistantBird( Room *, Coordinate cref position );
 
     virtual void render( ) override;
 
 private:
-    uint m_wing_cycle_offset;
-    uint m_flight_cycle_offset;
+
+    Cycle m_wing_offset;
+    Cycle m_flight_offset;
+
 };
 
 } // namespace mtmercy

@@ -10,23 +10,26 @@ namespace mtmercy
 
 class Climber : public Player
 {
+
 public:
+
     virtual ~Climber( );
-    Climber( World * world, const Coordinate & position );
+
+    Climber( uint player_number, Room * room, Coordinate cref position );
+
+    #if defined ( AXN_DEBUG )
+    virtual Drawing debug_overlay( ) const override;
+    #endif
 
     virtual void render( ) override;
-    
-#ifdef AXN_DEBUG
-    virtual Drawing debug_overlay( ) const override;
-#endif
 
     void update( ) override;
     void input( Input * ) override;
     void clear_input( ) override;
-    
-    const Hook & hook( ) const { return m_hook; }
-    
-    void hurt( dec health ) override;
+
+    Hook cref hook( ) const { return m_hook; }
+
+    void die( ) override;
 
     Planc light_sight( ) const override;
 
@@ -44,7 +47,14 @@ public:
     Angle aim_shake_range( ) const;
 
 protected:
+
+    virtual dec air_resistance( ) const override;
+
     void update_velocity( ) override;
+
+    virtual dec check_movement( Vector cref velocity ) override;
+
+    void movement_stop( );
 
     void moving_right( bool );
     void moving_left( bool );
@@ -52,50 +62,59 @@ protected:
     void looking_down( bool );
 
     void jump( bool );
-    void ground( TerrainEdge * ) override;
+    void ground( Terrain::Node * node, Terrain::Bumper cref bumper ) override;
 
-    void aim( const Angle & );
-    void aim_shake( const Angle & );
+    void aim( Angle cref );
+    void aim_shake( Angle cref );
 
-    void fire_hook( );
-    void fire_arrow( );
+    void launch_hook( );
+    void launch_arrow( );
+
+    void release_hook( );
+    void release_arrow( );
+
     void release_bow( );
 
     // all of these are offsets from position
+
     Coordinate head_center( ) const;
     Coordinate face_center( ) const;
-    Coordinate front_shoulder( ) const;
-    Coordinate back_shoulder( ) const;
-    Coordinate front_hand( ) const;
-    Coordinate back_hand( ) const;
-    Coordinate front_hip( ) const;
-    Coordinate back_hip( ) const;
-    Coordinate front_foot( ) const;
-    Coordinate back_foot( ) const;
 
-    Coordinate left_shoulder( ) const;
-    Coordinate right_shoulder( ) const;
-    Coordinate left_hand( ) const;
-    Coordinate right_hand( ) const;
-    Coordinate left_hip( ) const;
-    Coordinate right_hip( ) const;
-    Coordinate left_foot( ) const;
-    Coordinate right_foot( ) const;
+    Coordinate shoulder( bool front ) const;
+    Coordinate elbow( bool front ) const;
+    Coordinate hand( bool front ) const;
+
+    Coordinate hand_to_crossbow_offset( bool front ) const;
+
+    Planc arm_width( bool front ) const;
+    Planc arm_length_upper( bool front ) const;
+    Planc arm_length_lower( bool front ) const;
+
+    Coordinate hip( bool front ) const;
+    Coordinate foot( bool front ) const;
 
     void draw_head( );
+
     void draw_torso( );
+
+    void draw_arm( bool front );
+    void draw_hand( bool front );
+
+    void draw_arm_front( ) { draw_arm( true ); }
+    void draw_arm_back( ) { draw_arm( false ); }
+
     void draw_legs( );
-    void draw_front_arm( );
-    void draw_back_arm( );
-    void draw_front_hand( );
-    void draw_back_hand( );
-    void draw_crossbow( );
+
+    void draw_rope( );
+    void draw_hook( );
     void draw_arrow( );
-    
+    void draw_crossbow( );
+
     enum ColorPiece
     {
         SKIN,
         HAIR,
+        HAIR_SHAVED,
         EYE,
         UNDERSHIRT,
         JACKET,
@@ -106,76 +125,96 @@ protected:
         BOOT_SOLE,
         BOOT_LACE,
     };
-    
+
     Color color( ColorPiece ) const;
     Color eye_color( ) const override { return color( EYE ); }
 
 private:
+
     enum Skin
     {
         NO_SKIN = 0,
         MOHAWK,
     } m_skin;
     Skin skin( ) const;
-    
+
     Hook m_hook;
 
-    Planc m_movement_speed = 0.0;
+    Planc m_movement_speed_ground = P0;
+    Planc m_movement_speed_air = P0;
+
     bool m_moving_right = false;
     bool m_moving_left = false;
     bool m_looking_up = false;
     bool m_looking_down = false;
+
     bool m_jumping = false;
     dec m_jump_degradation = 0.0;
-    Counter m_jumping_timer;
-    Counter m_jump_reset_timer;
+    Countdown m_jumping_timer;
+    Countdown m_jump_reset_timer;
+
+    RagDollLimb m_dead_face;
+    RagDollLimb m_dead_arm_front;
+    RagDollLimb m_dead_arm_back;
 
     bool m_aiming = true;
-    Angle m_aim_angle = 0.0;
-    Angle m_aim_shake_angle = 0.0;
-    bool m_firing_hook = false;
-    bool m_firing_arrow = false;
+    Angle m_aim_angle = A0;
+    Angle m_dead_aim_angle = A0;
+    Angle m_aim_shake_angle = A0;
+
+    bool m_launching_hook = false;
+    bool m_launching_arrow = false;
     bool m_slashing = false;
-    Counter m_reload_timer;
+    Countdown m_hook_reload_timer;
+    Countdown m_arrow_reload_timer;
     Color m_arrow_feather_color;
 
-    Counter m_dust_timer;
+    Countdown m_dust_timer;
 
 public:
+
     class HealthBar : public Camera::HeadUpDisplay
     {
     public:
+
         HealthBar( Climber * climber );
 
         void render( Camera * ) override;
 
     private:
+
         Climber * m_climber = nullptr;
     };
 
-    const HealthBar & healthbar( ) const { return m_healthbar; }
-    void healthbar( const HealthBar & healthbar ) { m_healthbar = healthbar; }
+    HealthBar cref healthbar( ) const { return m_healthbar; }
+    void healthbar( HealthBar cref healthbar ) { m_healthbar = healthbar; }
 
 private:
+
     HealthBar m_healthbar;
 
 public:
+
     class LowHealthAlertEffect : public Camera::ScreenEffect
     {
     public:
+
         LowHealthAlertEffect( Climber * climber );
 
         void render( Camera * ) override;
 
     private:
+
         Climber * m_climber = nullptr;
     };
 
-    const LowHealthAlertEffect & low_health_effect( ) const { return m_low_health_effect; }
-    void low_health_effect( const LowHealthAlertEffect & low_health_effect ) { m_low_health_effect = low_health_effect; }
+    LowHealthAlertEffect cref low_health_effect( ) const { return m_low_health_effect; }
+    void low_health_effect( LowHealthAlertEffect cref low_health_effect ) { m_low_health_effect = low_health_effect; }
 
 private:
+
     LowHealthAlertEffect m_low_health_effect;
+
 };
 
 } // namespace mtmercy

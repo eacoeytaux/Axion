@@ -11,14 +11,14 @@ namespace graphics
 
 class LightSource
 {
+
 public:
-    virtual ~LightSource( ) { }
 
     LightSource( ) { }
-    LightSource( const Coordinate & source, const Planc & distance );
+    LightSource( Coordinate cref source, Planc cref distance );
 
-    const Coordinate & position( ) const;
-    void position( const Coordinate & );
+    Coordinate cref position( ) const;
+    void position( Coordinate cref );
 
     Planc radius( ) const;
     void radius( dec );
@@ -26,17 +26,19 @@ public:
     // dec flicker( ) const;
     // void flicker( dec );
 
-    // const Color & tint( ) const;
-    // void tint( const Color & );
+    // Color cref tint( ) const;
+    // void tint( Color cref );
 
     default_equal( LightSource );
 
 private:
+
     Coordinate m_position;
     Planc m_radius;
 
     // dec m_flicker;
     // color m_tint;
+    
 };
 
 } // namespace graphics

@@ -2,39 +2,44 @@
 #define Debug_hpp
 
 #include "OS.hpp"
+
 // -------------------- //
-#if defined( OS_WINDOWS )
+#if defined ( OS_WINDOWS )
 // -------------------- //
-#ifdef _DEBUG
+#if defined ( _DEBUG )
 #define AXN_DEBUG
 #endif
 // -------------------- //
-#elif defined( OS_APPLE )
+#elif defined ( OS_APPLE )
 // -------------------- //
-#ifdef DEBUG
+#if defined ( DEBUG )
 #define AXN_DEBUG
 #endif
 // -------------------- //
-#elif defined( OS_LINUX )
+#elif defined ( OS_LINUX )
 // -------------------- //
-#ifdef DEBUG
+#if defined ( DEBUG )
 #define AXN_DEBUG
 #endif
 // -------------------- //
 #endif
 
-#define AXN_DEBUG
-
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 #define breakpoint Debug::breakpointf( );
 namespace axn
 {
+
 class Debug
 {
+
 public:
+
     static bool active;
     static bool breakpointf( ) { return true; }
+
+    static bool shifty; // if shift key is held
 };
+
 } // namespace axn
 #else
 #define breakpoint

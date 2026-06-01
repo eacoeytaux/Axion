@@ -1,29 +1,37 @@
 #ifndef Arrow_hpp
 #define Arrow_hpp
 
-#include "Object.hpp"
+#include "MountMerciless.hpp"
+#include "Projectile.hpp"
 
 namespace mtmercy
 {
 
-class Arrow : public Object
+class Arrow : public Object // TODO make projectile
 {
+
+private:
+
+    Arrow( Room *, Coordinate cref tip, Vector cref launch_speed, Color cref feather_color );
+
 public:
-    virtual ~Arrow( ) { }
-    Arrow( World *, const Coordinate & tip, const Vector & launch_speed, const Color & feather_color );
+
+    static Arrow tip( Room *, Coordinate cref tip, Vector cref launch_speed, Color cref feather_color );
+    static Arrow base( Room *, Coordinate cref base, Vector cref launch_speed, Color cref feather_color );
 
     virtual void render( ) override;
 
     virtual void update( ) override;
 
     Angle angle( ) const;
-    void angle( const Angle & );
+    void angle( Angle cref );
 
     dec length( ) const;
-    
+
 protected:
-    virtual void ground( TerrainEdge * ) override;
-    virtual void react_to_movement( Object *, const Vector & ) override;
+
+    virtual void ground( Terrain::Node * node, Terrain::Bumper cref bumper ) override;
+    virtual void react_to_movement( Object *, Vector cref ) override;
     virtual bool collide( Object * ) override;
 
     virtual void draw_head( );
@@ -33,10 +41,12 @@ protected:
     dec fade_alpha( ) const;
 
 private:
-    dec m_damage;
+
+    Damage m_damage;
     Angle m_angle;
     Color m_feather_color;
     Object * m_stuck_object;
+
 };
 
 } // namespace mtmercy

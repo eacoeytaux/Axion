@@ -1,6 +1,7 @@
 #ifndef Cloud_hpp
 #define Cloud_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy
@@ -8,7 +9,9 @@ namespace mtmercy
 
 class Cloud : public Object
 {
+
 private:
+
     struct Puff
     {
         Planc radius;
@@ -18,16 +21,19 @@ private:
     };
 
 public:
-    virtual ~Cloud( ) { }
-    Cloud( World * );
+
+    Cloud( Room * );
 
     void render( ) override;
     void update( ) override;
 
 private:
+
     Drawing m_cloud_drawing;
+
     static Planc max_dx( );
     static Planc max_dy( );
+    
 };
 
 } // namespace mtmercy

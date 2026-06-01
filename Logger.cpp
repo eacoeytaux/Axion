@@ -1,6 +1,6 @@
 #include "Logger.hpp"
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -18,20 +18,12 @@ FILE * log_file = nullptr;
 
 bool Logger::printing_to_console( ) { return b_using_console; }
 
-error Logger::print_to_console( const bool b )
-{
-    b_using_console = b;
-    return no_error;
-}
+error Logger::print_to_console( cbool b ) { b_using_console = b; return no_error; }
 
 bool Logger::paused( ) { return b_paused; }
-error Logger::pause( bool p )
-{
-    b_paused = p;
-    return no_error;
-}
+error Logger::pause( bool p ) { b_paused = p; return no_error; }
 
-error Logger::init( const bool _file )
+error Logger::init( cbool _file )
 {
     b_initialized = b_paused = false;
 
@@ -39,13 +31,13 @@ error Logger::init( const bool _file )
     {
         Clock clock;
 
-#if defined( OS_WINDOWS )
-        fopen_s( &log_file, ( LOG_DIRECTORY + clock.timestamp( '.' ) + "." + clock.datestamp( '.' ) + ".log" ).c_str( ), "w + " );
-#elif defined( OS_APPLE )
-        log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( '.' ) + "." + clock.datestamp( '.' ) + ".log" ).c_str( ), "w+" );
-#elif defined( OS_LINUX )
-        log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( '.' ) + "." + clock.datestamp( '.' ) + ".log" ).c_str( ), "w+" );
-#endif
+        #if defined ( OS_WINDOWS )
+        fopen_s( &log_file, ( LOG_DIRECTORY + clock.timestamp( ) + "." + clock.datestamp( ) + ".log" ).c_str( ), "w + " );
+        #elif defined ( OS_APPLE )
+        log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( ) + "." + clock.datestamp( ) + ".log" ).c_str( ), "w+" );
+        #elif defined ( OS_LINUX )
+        log_file = fopen( ( LOG_DIRECTORY + clock.timestamp( ) + "." + clock.datestamp( ) + ".log" ).c_str( ), "w+" );
+        #endif
 
         if( !( b_using_file = log_file ) )
         {
@@ -54,7 +46,7 @@ error Logger::init( const bool _file )
     }
 
     b_initialized = true;
-    log_message( INFO_LOG, "starting ............... ( v%s )\n", VERSION );
+    log_message( INFO_LOG, "starting ............... ( v%s )\n", AXN_VERSION );
     return no_error;
 }
 
@@ -76,31 +68,31 @@ error Logger::log_message( MessageType _type, const char * _entry, ... )
         char * type_str;
         switch( _type )
         {
-            case INFO_LOG :
+            case INFO_LOG:
             {
                 type = true;
                 type_str = (char *)"INFO";
                 break;
             }
-            case WARNING_LOG :
+            case WARNING_LOG:
             {
                 type = true;
                 type_str = (char *)"WARNING";
                 break;
             }
-            case ERROR_LOG :
+            case ERROR_LOG:
             {
                 type = true;
                 type_str = (char *)"ERROR";
                 break;
             }
-            case DEBUG_LOG :
+            case DEBUG_LOG:
             {
                 type = true;
                 type_str = (char *)"DEBUG";
                 break;
             }
-            default :
+            default:
             {
                 type = false;
                 type_str = (char *)"";
@@ -117,11 +109,11 @@ error Logger::log_message( MessageType _type, const char * _entry, ... )
 
         if( b_using_file )
         {
-            return_error( fprintf( log_file, "[%s] ", current.timestamp( ).c_str( ) ) );
+            return_error( fprintf( log_file, "[ %s ] ", current.timestamp( ).c_str( ) ) );
 
             if( type )
             {
-                return_error( fprintf( log_file, "[%s] ", type_str ) );
+                return_error( fprintf( log_file, "[ %s ] ", type_str ) );
             }
 
             return_error( vfprintf( log_file, _entry, va_args ) );
@@ -135,7 +127,7 @@ error Logger::log_message( MessageType _type, const char * _entry, ... )
     catch( exception e )
     {
         cout << e.what( ) << endl;
-        return error_todo;
+        return error_system;
     }
 
     return no_error;
@@ -145,14 +137,14 @@ error Logger::close( )
 {
     if( b_initialized )
     {
-        log_message( INFO_LOG, "complete ...............\n" );
+        log_message( INFO_LOG, "complete ............... :)\n" );
     }
 
     b_initialized = false;
 
     if( log_file )
     {
-        return fclose( log_file ) ? error_todo : no_error;
+        return fclose( log_file ) ? error_system : no_error;
     }
     else
     {

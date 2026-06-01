@@ -2,7 +2,6 @@
 #define Physics_hpp
 
 #include "Geometry.hpp"
-#include "Constants.hpp"
 #include "Matter.hpp"
 #include "Joint.hpp"
 

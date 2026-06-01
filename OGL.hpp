@@ -8,25 +8,30 @@ namespace axn
 
 class ogl
 {
+
 private:
+
     ogl( ) { }
 
 public:
+
     static error init( );
     static error close( );
 
 private:
+
     static error clear( int gl_bits );
 
 public:
+
     static error clear( );
 
-    static error clear_color( );
-    static error clear_depth( );
-    static error clear_stencil( );
+    static error clear_color( dec r, dec g, dec b );
+    static error clear_color( ) { return ogl::clear_color( 0.0, 0.0, 0.0 ); }
 
-    static error clear_screen( ) { return ogl::clear_screen( ZERO, ZERO, ZERO ); }
-    static error clear_screen( dec r, dec g, dec b );
+    static error clear_depth( );
+
+    static error clear_stencil( );
 
     static error load_identity( );
 
@@ -39,20 +44,23 @@ public:
     static error matrix_modelview_mode( bool load_identity = true );
     static error matrix_projection_mode( bool load_identity = true );
 
-    static error transform( const Transform & );
+    static error transform( Transform cref );
 
-    static error translate( dec x, dec y );
-    static error translate( const Coordinate & c ) { return translate( c.x( ), c.y( ) ); }
-    static error translate( const Vector & v ) { return translate( v.dx( ), v.dy( ) ); }
+    static error translate( Planc x, Planc y );
+    static error translate( Coordinate cref c ) { return translate( c.x( ), c.y( ) ); }
+    static error translate( Vector cref v ) { return translate( v.dx( ), v.dy( ) ); }
 
-    static error scale( dec x, dec y );
-    static error scale( dec s ) { return scale( s, s ); }
+    static error scale( Planc s ) { return scale( s, s ); }
+    static error scale( Planc x, Planc y );
 
 private:
+
     static error begin( int gl_enum );
 
 public:
+
     static error end( );
+
     static error begin_points( );
     static error begin_lines( );
     static error begin_lines_strip( );
@@ -85,24 +93,56 @@ public:
     static error color( dec r, dec g, dec b, dec a = 1.0 );
 
     static error blend_normal( );
-    static error blend_func( );
+    static error blend_clear( );
 
     static error enable_anti_alias( );
     static error disable_anti_alias( );
 
 private:
+
     static error depth_func( int gl_enum );
 
 public:
+
     static error depth_always( );
     static error depth_never( );
     static error depth_equal( );
     static error depth_not_equal( );
-    static error depth_greater( bool equal );
-    static error depth_less( bool equal );
+    static error depth_equal_greater( );
+    static error depth_greater( );
+    static error depth_equal_less( );
+    static error depth_less( );
+
+    static error depth_mask( bool );
+    static bool depth_mask( );
 
 private:
+
+    static error stencil_func( int gl_enum );
+
+public:
+
+    static error stencil_always( );
+    static error stencil_never( );
+    static error stencil_equal( );
+    static error stencil_not_equal( );
+    static error stencil_equal_greater( );
+    static error stencil_greater( );
+    static error stencil_equal_less( );
+    static error stencil_less( );
+
+    static error stencil_mask( bool );
+    static bool stencil_mask( );
+
+    static error stencil_add( );
+    static error stencil_remove( );
+
+private:
+
     static error m_error;
+    static int m_error_code;
+    static bool m_disable_error_check;
+
     static bool m_initialized;
     static bool m_initializing;
 
@@ -110,6 +150,9 @@ private:
     static uint m_matrix_stack_count;
 
     static bool m_started_sequence;
+
+    static bool m_depth_mask;
+    static bool m_stencil_mask;
 
     static error reset( );
 
@@ -126,8 +169,9 @@ private:
     static bool disabled( int gl_enum );
 
 public:
-    static error check_errors( );
-    static error set_error( error );
+
+    static error error_check( );
+
 };
 
 } // namespace axn

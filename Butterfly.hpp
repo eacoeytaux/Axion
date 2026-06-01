@@ -1,6 +1,7 @@
 #ifndef Butterfly_hpp
 #define Butterfly_hpp
 
+#include "MountMerciless.hpp"
 #include "Mob.hpp"
 
 namespace mtmercy
@@ -8,13 +9,15 @@ namespace mtmercy
 
 class Butterfly : public Mob
 {
+
 public:
-    virtual ~Butterfly( ) { }
-    Butterfly( World *, const Coordinate & position );
+
+    Butterfly( Room *, Coordinate cref position );
 
     virtual void render( ) override;
 
 private:
+
 };
 
 } // namespace mtmercy

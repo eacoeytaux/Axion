@@ -1,5 +1,9 @@
 # -- ALL --
 
+# folders
+bin/*
+tmp/*
+
 # compiled object files
 *.o
 *.obj
@@ -16,11 +20,12 @@
 *.app
 
 # -- WINDOWS --
-/.vs/
-/x32/
-/x64/
+.vs/
+x32/
+x64/
 
 # -- OSX --
 xcuserdata/
+xcdebugger/
 
 # -- LINUX --

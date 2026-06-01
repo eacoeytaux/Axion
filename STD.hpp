@@ -7,6 +7,8 @@
 #include <memory>
 #include <chrono>
 #include <functional>
+#include <algorithm>
+#include <random>
 #include <queue>
 #include <stack>
 #include <list>
@@ -19,15 +21,25 @@
 typedef double dec;
 typedef unsigned int uint;
 
+typedef const bool cbool;
+typedef const int cint;
+typedef const uint cuint;
+typedef const dec cdec;
+
+typedef const bool & xbool;
+typedef const int & xint;
+typedef const uint & xuint;
+typedef const dec & xdec;
+
 #define use_std( s ) using std::s;
 
 #define use_std_dec( s )  \
     template <typename T> \
-    T s( const T & t ) { return std::s( (dec)t ); }
+    dec s( const T & t ) { return std::s( (dec)t ); }
 
 #define use_std_dec2( s ) \
     template <typename T> \
-    T s( const T & t1, const T & t2 ) { return std::s( (dec)t1, (dec)t2 ); }
+    dec s( const T & t1, const T & t2 ) { return std::s( (dec)t1, (dec)t2 ); }
 
 namespace axn
 {
@@ -38,11 +50,14 @@ use_std( endl );
 use_std( exception );
 use_std( runtime_error );
 
+use_std( array );
 use_std( function );
 
 use_std( string );
 
 use_std( chrono::system_clock );
+
+typedef std::default_random_engine rng_engine;
 
 // -- math std --
 
@@ -62,32 +77,6 @@ use_std_dec( asin );
 use_std_dec( acos );
 use_std_dec( atan );
 use_std_dec2( atan2 );
-
-// -- constants --
-
-const dec ZERO = 0.0;
-const dec HALF = 0.5;
-const dec ONE = 1.0;
-const dec TWO = 2.0;
-const dec THREE = 3.0;
-const dec FOUR = 4.0;
-const dec FIVE = 5.0;
-const dec SIX = 6.0;
-const dec SEVEN = 7.0;
-const dec EIGTH = 8.0;
-const dec NINE = 9.0;
-const dec TEN = 10.0;
-
-const dec TAU = 6.283185307179586476925;
-const dec PI = 3.141592653589793236926;
-const dec RIGHT_ANGLE = 1.570796326794896618463;
-const dec RIGHT_ANGLE_0 = RIGHT_ANGLE * ZERO;
-const dec RIGHT_ANGLE_1 = RIGHT_ANGLE * ONE;
-const dec RIGHT_ANGLE_2 = RIGHT_ANGLE * TWO;
-const dec RIGHT_ANGLE_3 = RIGHT_ANGLE * THREE;
-
-const dec INFINITY_POSITIVE = INFINITY;
-const dec INFINITY_NEGATIVE = -INFINITY;
 
 } // namespace axn
 

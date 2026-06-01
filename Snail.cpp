@@ -5,20 +5,22 @@ using mtmercy::Snail;
 
 namespace
 {
-const Planc SPEED = 0.05;
-const Planc SHELL_RADIUS = 10.0;
-const Planc SLUG_THICKNESS = 5.0;
-const uint STRETCH_PERIOD = 5;
 
-const Color SLUG_COLOR = BLACK;
-const Color SHELL_COLOR = RED;
+cPlanc SPEED = 0.025;
+cPlanc SHELL_RADIUS = 10.0;
+cPlanc SLUG_THICKNESS = 5.0;
+cuint STRETCH_PERIOD = 10;
+
+cColor SLUG_COLOR = BLACK;
+cColor SHELL_COLOR = RED;
+
 } // namespace
 
-Snail::Snail( World * world, const Coordinate & _position ) : Mob( world, _position )
+Snail::Snail( Room * room, Coordinate cref _position ) : Mob( room, _position )
 {
     needs_render_always( true );
 
-    // space( Square( SHELL_RADIUS * 2 ) );
+    space( Polygon::square( SHELL_RADIUS * 2 ) );
 }
 
 void Snail::render( )
@@ -29,14 +31,14 @@ void Snail::render( )
 
     if( ground( ) )
     {
-        angle = ground( )->vector( ).angle( );
+        angle = ground( )->normal( ) + RIGHT;
     }
 
     Coordinate tail = VectorA( angle, -SHELL_RADIUS );
     Coordinate head = VectorA( angle, SHELL_RADIUS + ( half( SLUG_THICKNESS ) * sin( (dec)age( ) / STRETCH_PERIOD ) ) );
-    Coordinate head_top = head + VectorA( angle, SLUG_THICKNESS ) + VectorA( angle + RIGHT_ANGLE, SLUG_THICKNESS );
+    Coordinate head_top = head + VectorA( angle, SLUG_THICKNESS ) + VectorA( angle + RIGHT, SLUG_THICKNESS );
 
-    draw( SHELL_COLOR, Circle( SHELL_RADIUS, VectorA( angle + RIGHT_ANGLE, SHELL_RADIUS ) ) );
+    draw( SHELL_COLOR, Polygon::circle( SHELL_RADIUS, VectorA( angle + RIGHT, SHELL_RADIUS ) ) );
     draw( SLUG_COLOR, Polygon( { head, head_top, tail } ) );
 }
 
@@ -44,7 +46,7 @@ void Snail::update( )
 {
     if( ground( ) )
     {
-        add_velocity( ground( )->vector( ).magnitude( SPEED ) );
+        add_velocity( VectorA( ground( )->normal( ) + RIGHT, SPEED ) );
     }
 
     Object::update( );

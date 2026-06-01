@@ -3,38 +3,42 @@
 
 void Enemy::update( )
 {
-    for_each( player, world( )->players( ) )
+    if( alive( ) )
     {
-        if( target( ) == player )
+        for_each( player, room( )->players( ) )
         {
-            if( !target_locked( ) && !in_sight_range( player ) )
+            if( target( ) == player )
             {
-                clear_target( );
+                if( !target_locked( ) && !in_sight_range( player ) )
+                {
+                    clear_target( );
+                }
             }
-        }
-        else if( in_alert_range( player ) )
-        {
-            if( !has_target( ) || overrides_target( player ) )
+            else if( in_alert_range( player ) )
             {
-                set_target( player );
+                if( !has_target( ) || overrides_target( player ) )
+                {
+                    set_target( player );
+                }
             }
         }
     }
-    
+
     Mob::update( );
 }
 
-bool Enemy::overrides_target( const Player * player ) const
+bool Enemy::overrides_target( const Object * target ) const
 {
-    return !target_locked( ) && position( ).distance_to( m_target->position( ) ) > position( ).distance_to( player->position( ) );
+    return ( alive( ) && !target_locked( ) && position( ).closer_than( m_target->position( ), target->position( ) ) );
 }
 
-void Enemy::sight_range( const Planc & _range )
+void Enemy::sight_range( Planc cref _range )
 {
-    Assert( !is_negative( _range ) );
+    Assert( is_pos( _range ) );
+
     m_sight_range = _range;
-    
-    if ( !alert_range( ) || ( alert_range( ) > sight_range( ) ) )
+
+    if( !alert_range( ) || ( alert_range( ) > sight_range( ) ) )
     {
         alert_range( sight_range( ) );
     }
@@ -42,15 +46,16 @@ void Enemy::sight_range( const Planc & _range )
 
 bool Enemy::in_sight_range( const Player * player ) const
 {
-    return !sight_range( ) || position( ).in_distance_range( player->position( ), sight_range( ) );
+    return ( alive( ) && !sight_range( ) || position( ).in_distance_range( player->position( ), sight_range( ) ) );
 }
 
-void Enemy::alert_range( const Planc & _range )
+void Enemy::alert_range( Planc cref _range )
 {
-    Assert( !is_negative( _range ) );
+    Assert( is_pos( _range ) );
+
     m_alert_range = _range;
-    
-    if ( sight_range( ) && ( sight_range( ) < alert_range( ) ) )
+
+    if( sight_range( ) && ( sight_range( ) < alert_range( ) ) )
     {
         sight_range( alert_range( ) );
     }
@@ -58,32 +63,44 @@ void Enemy::alert_range( const Planc & _range )
 
 bool Enemy::in_alert_range( const Player * player ) const
 {
-    return !alert_range( ) || position( ).in_distance_range( player->position( ), alert_range( ) );
+    return ( alive( ) && !alert_range( ) || position( ).in_distance_range( player->position( ), alert_range( ) ) );
 }
 
-#ifdef AXN_DEBUG
+#if defined ( AXN_DEBUG )
 Drawing Enemy::debug_overlay( ) const
 {
+    cPlanc SIGHT_LINE_THICKNESS = 0.8;
+    cPlanc ALERT_LINE_THICKNESS = SIGHT_LINE_THICKNESS;
+    cdec ALPHA = 0.75;
+    cdec ALPHA_INNER = ALPHA * 0.1;
+    cColor SIGHT_LINE_COLOR = GREEN.a( ALPHA );
+    cColor ALERT_LINE_COLOR = RED.a( ALPHA );
+
     Drawing debug_overlay;
-    
-    const Planc SIGHT_LINE_THICKNESS = 0.8;
-    const Planc ALERT_LINE_THICKNESS = SIGHT_LINE_THICKNESS;
-    const dec ALPHA = 0.75;
-    const Color SIGHT_LINE_COLOR = GREEN.a( ALPHA );
-    const Color ALERT_LINE_COLOR = RED.a( ALPHA );
-    
-    if( has_target( ) )
+
+    if( Settings::get( Settings::DEBUG_PHYSICS ) )
     {
-        debug_overlay.draw( SIGHT_LINE_COLOR, Line( ORIGIN, target( )->position( ) - position( ) ), SIGHT_LINE_THICKNESS, true );
-        
-        if( sight_range( ) )
+        if( alive( ) )
         {
-            debug_overlay.draw( SIGHT_LINE_COLOR, Circle( sight_range( ) ), SIGHT_LINE_THICKNESS, true );
+            if( alert_range( ) )
+            {
+                if( has_target( ) )
+                {
+                    debug_overlay.draw( SIGHT_LINE_COLOR, Line( ORIGIN, target( )->position( ) - position( ) ), SIGHT_LINE_THICKNESS, true );
+
+                    if( sight_range( ) )
+                    {
+                        debug_overlay.draw( SIGHT_LINE_COLOR.a( ALPHA_INNER ), Polygon::circle( sight_range( ) ) );
+                        debug_overlay.draw( SIGHT_LINE_COLOR, Polygon::circle( sight_range( ) ), ALERT_LINE_THICKNESS, true );
+                    }
+                }
+                else
+                {
+                    debug_overlay.draw( ALERT_LINE_COLOR.a( ALPHA_INNER ), Polygon::circle( alert_range( ) ) );
+                    debug_overlay.draw( ALERT_LINE_COLOR, Polygon::circle( alert_range( ) ), ALERT_LINE_THICKNESS, true );
+                }
+            }
         }
-    }
-    else if( alert_range( ) )
-    {
-        debug_overlay.draw( ALERT_LINE_COLOR, Circle( alert_range( ) ), ALERT_LINE_THICKNESS, true );
     }
 
     debug_overlay.draw( Mob::debug_overlay( ) );

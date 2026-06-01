@@ -1,6 +1,7 @@
 #ifndef MountainRange_hpp
 #define MountainRange_hpp
 
+#include "MountMerciless.hpp"
 #include "Object.hpp"
 
 namespace mtmercy
@@ -8,9 +9,11 @@ namespace mtmercy
 
 class MountainRange : public Object
 {
+
 public:
-    virtual ~MountainRange( ) { }
-    MountainRange( World *, Planc base_bottom, dec z, const Color & color );
+
+    MountainRange( Room *, Planc base_bottom, dec z, Color cref color );
+    
 };
 
 } // namespace mtmercy

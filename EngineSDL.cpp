@@ -1,18 +1,17 @@
 #include "Engine.hpp"
-#include "World.hpp"
 
 #include "OGL.hpp"
-
 #include "OS.hpp"
+
 // -------------------- //
-#if defined( OS_WINDOWS )
+#if defined ( OS_WINDOWS )
 // -------------------- //
 #include <SDL.h>
 #include <SDL_opengl.h>
 // #include <SDL_ttf.h>
 // #include <SDL_mixer.h>
 // -------------------- //
-#elif defined( OS_APPLE )
+#elif defined ( OS_APPLE )
 // -------------------- //
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wquoted-include-in-framework-header"
@@ -22,7 +21,7 @@
 // #include <SDL2_mixer/SDL_mixer.h>
 #pragma GCC diagnostic pop
 // -------------------- //
-#elif defined( OS_LINUX )
+#elif defined ( OS_LINUX )
 // -------------------- //
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -36,21 +35,23 @@ namespace axn
 
 bool PAUSED = false;
 
+bool ANTI_ALIAS = true;
+
 SDL_Window * WINDOW = nullptr;
 uint WINDOW_WIDTH;
 uint WINDOW_HEIGHT;
-bool ANTI_ALIAS = true;
 
-const dec VOLUME_INCREMENT = 0.0625;
-Slider<dec> VOLUME = { ZERO, ONE };
+cdec VOLUME_INCREMENT = 0.0625;
+Slider<dec> VOLUME;
 bool MUTED = true;
 
-const uint MAX_CONTROLLERS = 4;
+cuint MAX_CONTROLLERS = 4;
 SDL_Joystick * CONTROLLERS[ MAX_CONTROLLERS ];
+SDL_Haptic * CONTROLLER_HAPTICS[ MAX_CONTROLLERS ];
 
 char * SDL_GetErrorStr( )
 {
-    const uint SDL_ErrorMsgBufferSize = 256;
+    cuint SDL_ErrorMsgBufferSize = 256;
     char SDL_ErrorMsgStr[ SDL_ErrorMsgBufferSize ];
     return SDL_GetErrorMsg( SDL_ErrorMsgStr, SDL_ErrorMsgBufferSize );
 }
@@ -74,6 +75,9 @@ void Engine::init_eng( const string _app_name )
     assert_check = !SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
     Assert( assert_check, "SDL GL Attributes failed: ", SDL_GetErrorStr( ) );
 
+    assert_check = !SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 1 );
+    Assert( assert_check, "SDL GL Attributes failed: ", SDL_GetErrorStr( ) );
+
     assert_check = WINDOW = SDL_CreateWindow(
         _app_name.c_str( ),
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 0, 0,
@@ -84,6 +88,14 @@ void Engine::init_eng( const string _app_name )
     SDL_GetDesktopDisplayMode( 0, &display_mode );
     WINDOW_WIDTH = display_mode.w;
     WINDOW_HEIGHT = display_mode.h;
+
+    #if defined ( AXN_DEBUG )
+    #if defined ( OS_WINDOWS )
+    SDL_SetWindowFullscreen( WINDOW, 0 );
+    SDL_SetWindowSize( WINDOW, WINDOW_WIDTH, WINDOW_HEIGHT );
+    SDL_SetWindowPosition( WINDOW, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED );
+    #endif
+    #endif
 
     assert_check = SDL_GL_CreateContext( WINDOW );
     Assert( assert_check, "SDL window context creation failed: ", SDL_GetErrorStr( ) );
@@ -105,14 +117,32 @@ void Engine::init_eng( const string _app_name )
 
     assert_check = SDL_JoystickEventState( SDL_ENABLE );
     Assert( assert_check, "SDL controller initialization failed: ", SDL_GetErrorStr( ) );
-    for_range( i, MAX_CONTROLLERS ) CONTROLLERS[ i ] = SDL_JoystickOpen( i );
+    for_range( i, MAX_CONTROLLERS )
+    {
+        if( ( CONTROLLERS[ i ] = SDL_JoystickOpen( i ) ) )
+        {
+            if( SDL_JoystickIsHaptic( CONTROLLERS[ i ] ) )
+            {
+                if( ( CONTROLLER_HAPTICS[ i ] = SDL_HapticOpenFromJoystick( CONTROLLERS[ i ] ) ) )
+                {
+                    assert_check = SDL_HapticRumbleInit( CONTROLLER_HAPTICS[ i ] );
+                    Assert( assert_check, "SDL controller haptic initialization failed: ", SDL_GetErrorStr( ) );
+                }
+            }
+        }
+    }
 
     show_cursor_eng( false );
 }
 
 void Engine::close_eng( )
 {
-    for_range( i, MAX_CONTROLLERS ) SDL_JoystickClose( CONTROLLERS[ i ] );
+    for_range( i, MAX_CONTROLLERS )
+    {
+        SDL_JoystickClose( CONTROLLERS[ i ] );
+        SDL_HapticClose( CONTROLLER_HAPTICS[ i ] );
+    }
+
     SDL_DestroyWindow( WINDOW );
     SDL_CloseAudio( );
     SDL_Quit( );
@@ -121,7 +151,7 @@ void Engine::close_eng( )
 void Engine::render_eng( )
 {
     SDL_GL_SwapWindow( WINDOW );
-    ogl::clear_screen( );
+    ogl::clear( );
 }
 
 bool Engine::paused_eng( ) { return PAUSED; }
@@ -132,12 +162,23 @@ void Engine::sync_controllers_eng( )
     for_range( i, MAX_CONTROLLERS )
     {
         SDL_JoystickClose( CONTROLLERS[ i ] );
-        CONTROLLERS[ i ] = SDL_JoystickOpen( i );
+        SDL_HapticClose( CONTROLLER_HAPTICS[ i ] );
+
+        if( ( CONTROLLERS[ i ] = SDL_JoystickOpen( i ) ) )
+        {
+            if( SDL_JoystickIsHaptic( CONTROLLERS[ i ] ) )
+            {
+                if( ( CONTROLLER_HAPTICS[ i ] = SDL_HapticOpenFromJoystick( CONTROLLERS[ i ] ) ) )
+                {
+                    SDL_HapticRumbleInit( CONTROLLER_HAPTICS[ i ] );
+                }
+            }
+        }
     }
 }
 
 uint Engine::current_ticks_eng( ) { return SDL_GetTicks( ); }
-void Engine::wait_eng( const uint _ms )
+void Engine::wait_eng( cuint _ms )
 {
     if( _ms )
     {
@@ -188,15 +229,21 @@ void Engine::volume_down_eng( )
 uint Engine::screen_width_eng( ) { return WINDOW_WIDTH; }
 uint Engine::screen_height_eng( ) { return WINDOW_HEIGHT; }
 
-Coordinate world_position_from_event( const SDL_Event & event, World * world ) { return world->camera( )->screen_to_world( Coordinate( event.motion.x, event.motion.y ) ); }
-
-void Engine::input_eng( varray<Input *> & inputs, World * world )
+void Engine::input_eng( list<Input *> & inputs )
 {
-    static int joystick_x_axis_right = 0;
-    static int joystick_y_axis_right = 0;
+    SDL_HapticRumblePlay( CONTROLLER_HAPTICS[ 0 ], 0.75, 500 );
 
-    static int joystick_x_axis_right_new = 0;
-    static int joystick_y_axis_right_new = 0;
+    static dec joystick_x_axis_left = 0;
+    static dec joystick_y_axis_left = 0;
+
+    static dec joystick_x_axis_left_new = 0;
+    static dec joystick_y_axis_left_new = 0;
+
+    static dec joystick_x_axis_right = 0;
+    static dec joystick_y_axis_right = 0;
+
+    static dec joystick_x_axis_right_new = 0;
+    static dec joystick_y_axis_right_new = 0;
 
     static SDL_Event event;
     while( SDL_PollEvent( &event ) )
@@ -204,147 +251,147 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
         switch( event.type )
         {
             // keyboard
-            case SDL_KEYDOWN :
+            case SDL_KEYDOWN:
             {
                 inputs.insert_back( new KeyInput( (char)event.key.keysym.sym, KeyInput::PRESSED ) );
                 break;
             }
-            case SDL_KEYUP :
+            case SDL_KEYUP:
             {
                 inputs.insert_back( new KeyInput( (char)event.key.keysym.sym, KeyInput::RELEASED ) );
                 break;
             }
 
             // mouse
-            case SDL_MOUSEMOTION :
+            case SDL_MOUSEMOTION:
             {
-                inputs.insert_back( new MouseInput( MouseInput::NO_BUTTON, MouseInput::MOVE, world_position_from_event( event, world ) ) );
+                inputs.insert_back( new MouseInput( MouseInput::NO_BUTTON, MouseInput::MOVE, Vector( event.motion.x, event.motion.y ) ) );
                 break;
             }
-            case SDL_MOUSEBUTTONDOWN :
+            case SDL_MOUSEBUTTONDOWN:
             {
                 switch( event.button.button )
                 {
-                    case SDL_BUTTON_LEFT :
+                    case SDL_BUTTON_LEFT:
                     {
-                        inputs.insert_back( new MouseInput( MouseInput::LEFT_BUTTON, MouseInput::PRESSED, world_position_from_event( event, world ) ) );
+                        inputs.insert_back( new MouseInput( MouseInput::LEFT_BUTTON, MouseInput::PRESSED ) );
                         break;
                     }
-                    case SDL_BUTTON_RIGHT :
+                    case SDL_BUTTON_RIGHT:
                     {
-                        inputs.insert_back( new MouseInput( MouseInput::RIGHT_BUTTON, MouseInput::PRESSED, world_position_from_event( event, world ) ) );
+                        inputs.insert_back( new MouseInput( MouseInput::RIGHT_BUTTON, MouseInput::PRESSED ) );
                         break;
                     }
                 }
                 break;
             }
-            case SDL_MOUSEBUTTONUP :
+            case SDL_MOUSEBUTTONUP:
             {
                 switch( event.button.button )
                 {
-                    case SDL_BUTTON_LEFT :
+                    case SDL_BUTTON_LEFT:
                     {
-                        inputs.insert_back( new MouseInput( MouseInput::LEFT_BUTTON, MouseInput::RELEASED, world_position_from_event( event, world ) ) );
+                        inputs.insert_back( new MouseInput( MouseInput::LEFT_BUTTON, MouseInput::RELEASED ) );
                         break;
                     }
-                    case SDL_BUTTON_RIGHT :
+                    case SDL_BUTTON_RIGHT:
                     {
-                        inputs.insert_back( new MouseInput( MouseInput::RIGHT_BUTTON, MouseInput::RELEASED, world_position_from_event( event, world ) ) );
+                        inputs.insert_back( new MouseInput( MouseInput::RIGHT_BUTTON, MouseInput::RELEASED ) );
                         break;
                     }
                 }
                 break;
             }
-            case SDL_MOUSEWHEEL :
+            case SDL_MOUSEWHEEL:
             {
-                inputs.insert_back( new MouseInput( MouseInput::SCROLL_BUTTON, MouseInput::MOVE, Coordinate( event.wheel.x, event.wheel.y ) ) );
+                inputs.insert_back( new MouseInput( MouseInput::SCROLL_BUTTON, MouseInput::MOVE, Vector( event.wheel.x, event.wheel.y ) ) );
                 break;
             }
 
             // PS4 dualshock
-            case SDL_JOYBUTTONUP :
-            case SDL_JOYBUTTONDOWN :
+            case SDL_JOYBUTTONUP:
+            case SDL_JOYBUTTONDOWN:
             {
                 ControllerButtonInput::Dynamic dynamic = ( event.type == SDL_JOYBUTTONUP ) ? ControllerButtonInput::RELEASED : ControllerButtonInput::PRESSED;
 
                 switch( event.jbutton.button )
                 {
-                    case 0 :
+                    case 0:
                     { // X
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::RIGHT_DOWN_BUTTON, dynamic ) );
                         break;
                     }
-                    case 1 :
+                    case 1:
                     { // CIRCLE
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::RIGHT_LEFT_BUTTON, dynamic ) );
                         break;
                     }
-                    case 2 :
+                    case 2:
                     { // SQUARE
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::RIGHT_RIGHT_BUTTON, dynamic ) );
                         break;
                     }
-                    case 3 :
+                    case 3:
                     { // TRIANGLE
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::RIGHT_UP_BUTTON, dynamic ) );
                         break;
                     }
-                    case 7 :
+                    case 7:
                     { // L3
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::L3_BUTTON, dynamic ) );
                         break;
                     }
-                    case 8 :
+                    case 8:
                     { // R3
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::R3_BUTTON, dynamic ) );
                         break;
                     }
-                    case 9 :
+                    case 9:
                     { // L1
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::L1_BUTTON, dynamic ) );
                         break;
                     }
-                    case 10 :
+                    case 10:
                     { // R1
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::R1_BUTTON, dynamic ) );
                         break;
                     }
-                    case 11 :
+                    case 11:
                     { // D-UP
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::LEFT_UP_BUTTON, dynamic ) );
                         break;
                     }
-                    case 12 :
+                    case 12:
                     { // D-DOWN
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::LEFT_DOWN_BUTTON, dynamic ) );
                         break;
                     }
-                    case 13 :
+                    case 13:
                     { // D-LEFT
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::LEFT_LEFT_BUTTON, dynamic ) );
                         break;
                     }
-                    case 14 :
+                    case 14:
                     { // D-RIGHT
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::LEFT_RIGHT_BUTTON, dynamic ) );
                         break;
                     }
-                    case 5 :
+                    case 5:
                     { // HOME
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::HOME_BUTTON, dynamic ) );
                         break;
                     }
-                    case 6 :
+                    case 6:
                     { // OPTIONS
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::START_BUTTON, dynamic ) );
                         break;
                     }
-                    case 4 :
+                    case 4:
                     { // SHARE
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::START_OPPOSITE_BUTTON, dynamic ) );
                         break;
                     }
-                    case 15 :
+                    case 15:
                     { // TOUCH PAD
                         inputs.insert_back( new ControllerButtonInput( ControllerButtonInput::TOUCHPAD_BUTTON, dynamic ) );
                         break;
@@ -352,8 +399,10 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
                 }
                 break;
             }
-            case SDL_JOYAXISMOTION :
+            case SDL_JOYAXISMOTION:
             {
+                cint MAX_AXIS_VALUE = 32767;
+
                 // L2 and R2
                 if( ( event.jaxis.axis == 4 ) || ( event.jaxis.axis == 5 ) )
                 {
@@ -369,60 +418,31 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
                 }
                 else
                 {
+                    dec axis_value = (dec)event.jaxis.value / (dec)MAX_AXIS_VALUE;
+
                     // left joystick
                     if( ( event.jaxis.axis == 0 ) || ( event.jaxis.axis == 1 ) )
                     {
                         if( event.jaxis.axis == 0 )
                         {
-                            if( event.jaxis.value > 6400 )
-                            {
-                                inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::LEFT_JOYSTICK, X_HAT ) );
-                                break;
-                            }
-                            else if( event.jaxis.value < -6400 )
-                            {
-                                inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::LEFT_JOYSTICK, -X_HAT ) );
-                                break;
-                            }
-                            else
-                            {
-                                inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::LEFT_JOYSTICK, ZERO_VECTOR ) );
-                                break;
-                            }
+                            joystick_x_axis_left_new = axis_value;
                         }
                         else if( event.jaxis.axis == 1 )
                         {
-                            if( event.jaxis.value > 6400 )
-                            {
-                                inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::LEFT_JOYSTICK, -Y_HAT ) );
-                                break;
-                            }
-                            else if( event.jaxis.value < -6400 )
-                            {
-                                inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::LEFT_JOYSTICK, Y_HAT ) );
-                                break;
-                            }
-                            else
-                            {
-                                inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::LEFT_JOYSTICK, ZERO_VECTOR ) );
-                                break;
-                            }
+                            joystick_y_axis_left_new = -axis_value;
                         }
                     }
 
                     // right joystick
                     if( ( event.jaxis.axis == 2 ) || ( event.jaxis.axis == 3 ) )
                     {
-                        if( abs( event.jaxis.value ) > 3200 )
+                        if( event.jaxis.axis == 2 )
                         {
-                            if( event.jaxis.axis == 2 )
-                            {
-                                joystick_x_axis_right_new = event.jaxis.value;
-                            }
-                            else if( event.jaxis.axis == 3 )
-                            {
-                                joystick_y_axis_right_new = -event.jaxis.value;
-                            }
+                            joystick_x_axis_right_new = axis_value;
+                        }
+                        else if( event.jaxis.axis == 3 )
+                        {
+                            joystick_y_axis_right_new = -axis_value;
                         }
                     }
                 }
@@ -430,11 +450,11 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
             }
 
             // exit
-            case SDL_WINDOWEVENT :
+            case SDL_WINDOWEVENT:
             {
                 switch( event.window.event )
                 {
-                    case SDL_WINDOWEVENT_CLOSE :
+                    case SDL_WINDOWEVENT_CLOSE:
                     {
                         quit( );
                         break;
@@ -442,7 +462,7 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
                 }
                 break;
             }
-            case SDL_QUIT :
+            case SDL_QUIT:
             {
                 quit( );
                 break;
@@ -450,13 +470,44 @@ void Engine::input_eng( varray<Input *> & inputs, World * world )
         }
     }
 
+    if( ( joystick_x_axis_left != joystick_x_axis_left_new ) ||
+        ( joystick_y_axis_left != joystick_y_axis_left_new ) )
+    {
+        Vector v1( joystick_x_axis_left, joystick_y_axis_left );
+
+        joystick_x_axis_left = joystick_x_axis_left_new;
+        joystick_y_axis_left = joystick_y_axis_left_new;
+
+        Vector v2( joystick_x_axis_left, joystick_y_axis_left );
+
+        if( !ControllerJoystickInput::in_dead_zone( v2 ) )
+        {
+            inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::LEFT_JOYSTICK, v2 ) );
+        }
+        else if( !ControllerJoystickInput::in_dead_zone( v1 ) )
+        {
+            inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::LEFT_JOYSTICK ) );
+        }
+    }
+
     if( ( joystick_x_axis_right != joystick_x_axis_right_new ) ||
         ( joystick_y_axis_right != joystick_y_axis_right_new ) )
     {
+        Vector v1( joystick_x_axis_right, joystick_y_axis_right );
+
         joystick_x_axis_right = joystick_x_axis_right_new;
         joystick_y_axis_right = joystick_y_axis_right_new;
 
-        inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::RIGHT_JOYSTICK, VectorA( Angle( atan2( (dec)joystick_y_axis_right, (dec)joystick_x_axis_right ) ) ) ) );
+        Vector v2( joystick_x_axis_right, joystick_y_axis_right );
+
+        if( !ControllerJoystickInput::in_dead_zone( v2 ) )
+        {
+            inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::RIGHT_JOYSTICK, v2 ) );
+        }
+        else if( !ControllerJoystickInput::in_dead_zone( v1 ) )
+        {
+            inputs.insert_back( new ControllerJoystickInput( ControllerJoystickInput::RIGHT_JOYSTICK ) );
+        }
     }
 }
 
