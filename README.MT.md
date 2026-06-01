@@ -1,0 +1,52 @@
+# Mount Merciless
+## controls
+### gameplay
+---
+- `a` move left (double tap to dash)
+- `d` move right (double tap to dash)
+- `w` move up
+- `s` move down
+- `space` jump
+- `left click` shoot arrow
+- `right click` shoot grapple
+---
+- `left joystick` move
+- `right joystick` aim
+---
+- `esc` quit
+- `p` pause
+- `;` restart (+shift for new seed)
+- `.` zoom in
+- `,` zoom out
+- `/` zoom reset
+- `z` zoom lock
+- `=` volume up
+- `-` volume down
+- `m` volume off
+- `tab` toggle HUD
+- `\\` sync controllers
+- `c` toggle cinematic
+---
+### debug
+---
+- ` toggle debug mode
+- `'` step (while paused)
+---
+- `g` toggle god
+- `h` heal self
+- `k` kill self
+---
+- `l` toggle lights
+- `b` toggle grayscale
+- `o` toggle camera overlay
+- `1` toggle terrain overlay
+- `2` toggle object overlay
+- `3` toggle health overlay
+- `4` toggle damage overlay
+- `5` toggle object grid
+- `6` tobble image bounding box
+- `7` toggle show terrain
+- `8` toggle show foreground
+- `9` toggle show background (+shift)
+- `0` toggle show objects
+---
