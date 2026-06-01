@@ -105,6 +105,61 @@ public:
 
 classT vvarray : public varray<varray<T1>>{ };
 
+
+// fixed array
+templated( uint N, typename T1 )
+class carray : private std::array<T1, N>
+{
+
+private:
+
+    using std::array<T1, N>::array;
+
+public:
+
+    T1 ref at( uint in_index ) { assert_index( in_index, false ); return( std::array<T1, N>::at( in_index ) ); }
+    T1 cref at( uint in_index ) const { assert_index( in_index, false ); return( std::array<T1, N>::at( in_index ) ); }
+
+    T1 ref front( ) { return( at( 0 ) ); }
+    T1 cref front( ) const { return( at( 0 ) ); }
+
+    T1 ref back( ) { return( at( size( ) - 1 ) ); }
+    T1 cref back( ) const { return( at( size( ) - 1 ) ); }
+    uint size( ) const { return( uint( std::array<T1, N>::size( ) ) ); }
+
+    bool empty( ) const { return( std::array<T1, N>::empty( ) ); }
+
+    bool contains( T1 cref in_elem ) const { for_range( i, size( ) ) { return_true_if( at( i ) == in_elem ); } return( false ); }
+
+    uint count( T1 cref in_elem ) const { uint count = 0; for_range( i, size( ) ) { if( at( i ) == in_elem ) { count++; } } return( count ); }
+
+    varray<uint> find_indices( T1 cref in_elem, uint in_max_count = 0 ) const { varray<uint> indices; for_range( i, size( ) ) { if( at( i ) == ( in_elem ) ) { indices.insert_back( i ); break_if( in_max_count && ( indices.size( ) == in_max_count ) ); } } return( indices ); }
+
+    uint find_index_first( T1 cref in_elem ) const { for_range( i, size( ) ) { return_if( ( at( i ) == in_elem ), i ); } return( size( ) ); }
+    uint find_index_last( T1 cref in_elem ) const { for_range( i, size( ) ) { return_if( ( at( size( ) - i - 1 ) == in_elem ), i ); } return( size( ) ); }
+
+    auto begin( ) { return( std::array<T1, N>::begin( ) ); }
+    auto end( ) { return( std::array<T1, N>::end( ) ); }
+
+    auto begin( ) const { return( std::array<T1, N>::begin( ) ); }
+    auto end( ) const { return( std::array<T1, N>::end( ) ); }
+
+    carray ref reverse( ) { std::reverse( begin( ), end( ) ); rethis; }
+    carray reversed( ) const { carray<N, T1> ret = ( *this ); ret.reverse( ); return( ret ); }
+
+    carray ref sort( std::function<bool( T1 cref in_x1, T1 cref in_x2 )> cref comparator, bool in_stable = false ) { if( in_stable ) { std::stable_sort( begin( ), end( ), comparator ); } else { std::sort( begin( ), end( ), comparator ); } rethis; }
+    carray sorted( std::function<bool( T1 cref in_x1, T1 cref in_x2 )> cref comparator, bool in_stable = false ) const { carray<N, T1> ret = ( *this ); ret.sort( comparator, in_stable ); return( ret ); }
+
+    bool valid_index( uint in_index ) const { return( in_index < size( ) ); }
+    bool assert_index( uint in_index ) const { Assert( valid_index( in_index ), "index ( %ui ) out of range, size: %ui", in_index, size( ) ); return( valid_index( in_index ) ); }
+
+    T1 ref operator[ ]( uint in_index ) { return( at( in_index ) ); }
+    T1 cref operator[ ]( uint in_index ) const { return( at( in_index ) ); }
+
+    default_equal( carray<N, T1> );
+
+};
+
 classT queue : private std::queue<T1>
 {
 

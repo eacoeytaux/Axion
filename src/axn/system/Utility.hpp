@@ -215,7 +215,7 @@ public:
 
     T1 range( ) const { return( T1( max( ) - min( ) ) ); }
 
-    template <typename T2>
+    templated( typename T2 )
     Span ref operator=( varray<T2> cref in_varray )
     {
         Assert( is_one( in_varray.size( ) ) || ( in_varray.size( ) == 2 ), "varray must have exactly 1 or 2 elements" );

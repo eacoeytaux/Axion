@@ -74,15 +74,17 @@
 #define namespace namespace
 
 #define template template
-#define templated template<>
+#define templated( ... ) template <__VA_ARGS__>
 
-#define typeT template <typename T1>
-#define classT template <typename T1> class
-#define structT template <typename T1> struct
+#define templateD( D ) templated( uint D ) // dimensional
 
-#define typeT2 template <typename T1, typename T2>
-#define classT2 template <typename T1, typename T2> class
-#define structT2 template <typename T1, typename T2> struct
+#define typeT templated( typename T1 )
+#define classT templated( typename T1 ) class
+#define structT templated( typename T1 ) struct
+
+#define typeT2 templated( typename T1, typename T2 )
+#define classT2 templated( typename T1, typename T2 ) class
+#define structT2 templated( typename T1, typename T2 ) struct
 
 #define use_std( x ) using std::x
 
