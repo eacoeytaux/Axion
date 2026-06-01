@@ -76,8 +76,6 @@
 #define template template
 #define templated( ... ) template <__VA_ARGS__>
 
-#define templateD( D ) templated( uint D ) // dimensional
-
 #define typeT templated( typename T1 )
 #define classT templated( typename T1 ) class
 #define structT templated( typename T1 ) struct

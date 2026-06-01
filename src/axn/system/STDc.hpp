@@ -81,6 +81,8 @@ public:
     auto begin( ) const { return( std::vector<T1>::begin( ) ); }
     auto end( ) const { return( std::vector<T1>::end( ) ); }
 
+    varray ref fill( T1 cref in_elem ) { for_range( i, size( ) ) { at( i ) = in_elem; } rethis; }
+
     varray ref reverse( ) { std::reverse( begin( ), end( ) ); rethis; }
     varray reversed( ) const { varray<T1> ret = ( *this ); ret.reverse( ); return( ret ); }
 
@@ -125,6 +127,7 @@ public:
 
     T1 ref back( ) { return( at( size( ) - 1 ) ); }
     T1 cref back( ) const { return( at( size( ) - 1 ) ); }
+
     uint size( ) const { return( uint( std::array<T1, N>::size( ) ) ); }
 
     bool empty( ) const { return( std::array<T1, N>::empty( ) ); }
@@ -143,6 +146,8 @@ public:
 
     auto begin( ) const { return( std::array<T1, N>::begin( ) ); }
     auto end( ) const { return( std::array<T1, N>::end( ) ); }
+
+    carray ref fill( T1 cref in_elem ) { for_range( i, size( ) ) { at( i ) = in_elem; } rethis; }
 
     carray ref reverse( ) { std::reverse( begin( ), end( ) ); rethis; }
     carray reversed( ) const { carray<N, T1> ret = ( *this ); ret.reverse( ); return( ret ); }
