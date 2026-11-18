@@ -12,6 +12,9 @@
 ---
 - `left joystick` move
 - `right joystick` aim
+- `l1` / `cross` jump
+- `r1` / `square` shoot arrow
+- `r2` / `circle` shoot grapple
 ---
 - `esc` quit
 - `p` pause
