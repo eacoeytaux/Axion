@@ -1804,6 +1804,7 @@ void Climber::input( ptr<Input> in_input )
         else
         {
             // TODO these shouldn't be hardcoded
+
             if( pressed )
             {
                 if( button == MouseInput::LEFT_BUTTON )
@@ -1843,6 +1844,8 @@ void Climber::input( ptr<Input> in_input )
                 {
                     break;
                 }
+
+                // TODO these shouldn't be hardcoded
 
                 b_case( ControllerButtonInput::L1_BUTTON ) : a_case( ControllerButtonInput::RIGHT_DOWN_BUTTON ) :
                 {
