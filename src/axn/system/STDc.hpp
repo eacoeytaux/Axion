@@ -178,7 +178,7 @@ public:
 
     T1 pop( ) { T1 x = front( ); std::queue<T1>::pop( ); return( x ); }
 
-    T1 ref push( T1 cref in_elem = T1( ) ) { std::queue<T1>::push( in_elem ); return( front( ) ); }
+    T1 ref push( T1 cref in_elem = T1( ) ) { std::queue<T1>::push( in_elem ); return( back( ) ); } // the element just added
 
     T1 ref front( ) { return( std::queue<T1>::front( ) ); }
     T1 cref front( ) const { return( std::queue<T1>::front( ) ); }

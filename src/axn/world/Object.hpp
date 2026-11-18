@@ -103,7 +103,7 @@ public:
     Point position( ) const;
 
     Point last_position( uint in_past = 0 ) const;
-    queue<Point> last_positions( uint in_past = 0 ) const;
+    queue<Point> last_positions( uint in_past ) const; // no default, last_positions( ) is the whole history
     queue<queue<Point>> cref last_positions( ) const;
 
     void subscribe_to_movement( ptr<Object> in_object );
@@ -127,6 +127,7 @@ public:
 
     ptr<Terrain::Node> ground( ) const;
     Terrain::Bumper ground_bumper( ) const;
+    Line ground_bumper_line( ) const; // the bumper line the object is standing on, only meaningful when grounded
 
     bool has_gravity( ) const { return( gravity( ).has_magnitude( ) ); }
 
@@ -243,11 +244,12 @@ public:
 
 };
 
-#define STATE( ... )                                                             \
-    public: enum state_enum { INVALID_STATE = 0, __VA_ARGS__ };                  \
-    private: state_enum m_state = INVALID_STATE;                                 \
-    public: state_enum state( ) const { return( m_state ); }                     \
-    protected: virtual void state( state_enum in_state ) { m_state = in_state; } \
+// changing state requests a redraw, objects usually look different in each state
+#define STATE( ... )                                                                                                         \
+    public: enum state_enum { INVALID_STATE = 0, __VA_ARGS__ };                                                              \
+    private: state_enum m_state = INVALID_STATE;                                                                             \
+    public: state_enum state( ) const { return( m_state ); }                                                                 \
+    protected: virtual void state( state_enum in_state ) { if( m_state != in_state ) { m_state = in_state; needs_render( true ); } } \
      macro_end
 
 } // namespace reality

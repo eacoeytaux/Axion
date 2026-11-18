@@ -32,6 +32,9 @@
     <ClCompile Include="src\axn\graphics\Camera.cpp" />
     <ClCompile Include="src\axn\graphics\Drawing.cpp" />
     <ClCompile Include="src\axn\graphics\Lighting.cpp" />
+    <ClCompile Include="src\axn\Precompiled.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\axn\system\Assert.cpp" />
     <ClCompile Include="src\axn\system\Clock.cpp" />
     <ClCompile Include="src\axn\system\Engine.cpp" />
@@ -96,6 +99,7 @@
     <ClInclude Include="src\axn\audio\SoundClip.hpp" />
     <ClInclude Include="src\axn\audio\Speaker.hpp" />
     <ClInclude Include="src\axn\AXN.hpp" />
+    <ClInclude Include="src\axn\Precompiled.hpp" />
     <ClInclude Include="src\axn\geometry\Angle.hpp" />
     <ClInclude Include="src\axn\geometry\Curve.hpp" />
     <ClInclude Include="src\axn\geometry\Circle.hpp" />
@@ -141,6 +145,8 @@
     <ClInclude Include="src\axn\tests\Catch.hpp" />
     <ClInclude Include="src\axn\tests\Tests.hpp" />
     <ClInclude Include="src\axn\tests\TestsGeometry.hpp" />
+    <ClInclude Include="src\axn\tests\TestsMovement.hpp" />
+    <ClInclude Include="src\axn\tests\TestsTerrain.hpp" />
     <ClInclude Include="src\axn\tests\TestsUtil.hpp" />
     <ClInclude Include="src\axn\world\Damage.hpp" />
     <ClInclude Include="src\axn\world\Door.hpp" />
@@ -286,7 +292,7 @@
     <LibraryPath>$(ProjectDir)\lib\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(USERPROFILE)\AxionBuild\tmp\$(Platform)\$(Configuration)\</IntDir>
     <ClangTidyChecks>
     </ClangTidyChecks>
     <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
@@ -296,7 +302,7 @@
     <LibraryPath>$(ProjectDir)\lib\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(USERPROFILE)\AxionBuild\tmp\$(Platform)\$(Configuration)\</IntDir>
     <ClangTidyChecks>
     </ClangTidyChecks>
     <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
@@ -306,14 +312,14 @@
     <LibraryPath>$(ProjectDir)\lib\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(USERPROFILE)\AxionBuild\tmp\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReDebug|x64'">
     <IncludePath>$(ProjectDir)\src;$(ProjectDir)\lib\win\sdl2\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\lib\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(USERPROFILE)\AxionBuild\tmp\$(Platform)\$(Configuration)\</IntDir>
     <ClangTidyChecks>
     </ClangTidyChecks>
     <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
@@ -347,7 +353,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <Profile>true</Profile>
+      <Profile>false</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -430,7 +436,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)\lib\win\glfw\lib-vc2013;$(ProjectDir)\lib\win\glfw\lib-vc2015;$(ProjectDir)\lib\win\glfw\lib-vc2017;$(ProjectDir)\lib\win\glfw\lib-vc2019;$(ProjectDir)\lib\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <Profile>true</Profile>
+      <Profile>false</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -496,7 +502,6 @@
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PreprocessToFile>false</PreprocessToFile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -507,6 +512,14 @@
       <AdditionalLibraryDirectories>$(ProjectDir)\lib\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <Profile>false</Profile>
     </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>axn/Precompiled.hpp</PrecompiledHeaderFile>
+      <ForcedIncludeFiles>axn/Precompiled.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

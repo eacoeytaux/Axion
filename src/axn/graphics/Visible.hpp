@@ -25,6 +25,7 @@ public:
     virtual void render( )
     {
         m_ever_rendered = true;
+        m_needs_render = m_needs_render_always;
 
         if( !persist_render( ) )
         {
@@ -120,7 +121,7 @@ protected:
 
 private:
 
-    dec m_z = 1.0; // 1 = player plane, 1- = background, 1+ = foreground
+    dec m_z = 1.0; // 1 = player plane, <1 = background, >1 = foreground
     LayerOrder m_layer_order;
 
     varray<LightSource> m_light_sources;

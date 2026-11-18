@@ -14,6 +14,8 @@ Fox::Fox( ptr<Room> in_room, Point cref in_position ) : Enemy( in_room, in_posit
     space( Polygon::rectangle( 32.0, 32.0 ) );
 
     eye_info( EYE_RADIUS, BLINK_DURATION, BLINK_WAIT, EYE_COLOR );
+
+    needs_render_always( true ); // the neck bobs every frame
 }
 
 void Fox::render( )

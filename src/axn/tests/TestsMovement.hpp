@@ -1,0 +1,411 @@
+#include "axn/tests/Tests.hpp"
+
+#include "axn/world/Room.hpp"
+#include "axn/world/Object.hpp"
+#include "axn/world/Terrain.hpp"
+
+// Polygon is written as geometry::Polygon because windows.h (pulled in by Catch) declares a Polygon function
+
+namespace axn
+{
+
+// simulates an object walking over real terrain using the same update_movement the game uses
+
+class TestTerrain : public Terrain
+{
+
+public:
+
+    TestTerrain( ptr<Room> in_room, vvarray<Point> cref in_vertices ) : Terrain( in_room, in_vertices ) { }
+
+};
+
+class TestRoom : public Room
+{
+
+private:
+
+    varray<Point> m_ground;
+
+public:
+
+    TestRoom( varray<Point> cref in_ground ) : Room( nullptr ), m_ground( in_ground ) { }
+
+    virtual Vector gravity( ) const override { return( VectorY( -0.625 ) ); } // same as MtMerciless
+    virtual Vector gravity( Point cref in_position ) const override { return( gravity( ) ); }
+
+    virtual dec air_resistance( ) const override { return( 0.025 ); }
+    virtual dec air_resistance( Point cref in_position ) const override { return( air_resistance( ) ); }
+
+    virtual void create( ) override { Room::create( FixedRectangle( Point( -2000.0, -2000.0 ), Point( 4000.0, 4000.0 ) ) ); }
+
+    // height of the ground surface at in_x
+    Planc ground_y( Planc cref in_x ) const
+    {
+        for_range( i, m_ground.size( ) - 1 )
+        {
+            Point cref pt1 = m_ground[ i ];
+            Point cref pt2 = m_ground[ i + 1 ];
+
+            if( ( in_x >= pt1.x( ) ) && ( in_x <= pt2.x( ) ) && ( pt1.x( ) != pt2.x( ) ) )
+            {
+                return( pt1.y( ) + ( ( pt2.y( ) - pt1.y( ) ) * ( ( in_x - pt1.x( ) ) / ( pt2.x( ) - pt1.x( ) ) ) ) );
+            }
+        }
+
+        return( m_ground.back( ).y( ) );
+    }
+
+protected:
+
+    virtual ptr<Terrain> generate_terrain( ) override
+    {
+        vvarray<Point> vertices;
+        vertices.insert_back( m_ground );
+
+        return( new TestTerrain( this, vertices ) );
+    }
+
+};
+
+class TestWalker : public Object
+{
+
+public:
+
+    // same shape and walking speed as Climber
+    static constexpr dec HEIGHT = ( 32.0 * 1.85 );
+    static constexpr dec WIDTH = ( HEIGHT / 2.5 );
+    static constexpr dec WIDTH_GROUND = ( WIDTH * 0.25 );
+    static constexpr dec SPEED = ( 1.0 );
+
+    dec walking = 0.0; // -1 left, 0 still, +1 right
+
+    TestWalker( ptr<Room> in_room, Point cref in_position ) : Object( in_room, in_position )
+    {
+        space( geometry::Polygon( { Point( +( WIDTH / 2.0 ), +( HEIGHT / 2.0 ) ),
+                                    Point( -( WIDTH / 2.0 ), +( HEIGHT / 2.0 ) ),
+                                    Point( -( WIDTH_GROUND / 2.0 ), -( HEIGHT / 2.0 ) ),
+                                    Point( +( WIDTH_GROUND / 2.0 ), -( HEIGHT / 2.0 ) ) } ) );
+    }
+
+    void step( ) { update( ); }
+    void track( uint in_count ) { track_position( in_count ); }
+
+protected:
+
+    // walking the way Climber::update_velocity does it
+    virtual void update_velocity( ) override
+    {
+        Object::update_velocity( );
+
+        if( walking != 0.0 )
+        {
+            Vector v = VectorX( walking * SPEED );
+
+            if( grounded( ) )
+            {
+                Line line = ground_bumper_line( );
+
+                if( !line.vertical( ) )
+                {
+                    v.rotate_to( v.angle( ).closest( { line.angle( ), line.angle( ).flipped( ) } ) );
+                }
+            }
+
+            add_velocity( v );
+        }
+    }
+
+};
+
+struct MovementFrame
+{
+    uint frame;
+    Point position;
+    Vector velocity;
+    bool grounded;
+    string ground;
+};
+
+static string describe_ground( ptr<Terrain::Node> in_node )
+{
+    if( is_null( in_node ) ) { return( "air" ); }
+    if( !is_null( cast( in_node, Terrain::Edge ) ) ) { return( "edge" ); }
+    return( "vertex" );
+}
+
+static void print_frames( string cref in_title, varray<MovementFrame> cref in_frames, uint in_from, uint in_to )
+{
+    cout << "---- " << in_title << endl;
+
+    for( uint i = in_from; ( i < in_to ) && ( i < in_frames.size( ) ); i++ )
+    {
+        MovementFrame cref f = in_frames[ i ];
+        cout << "  frame " << f.frame << "  pos ( " << dec( f.position.x( ) ) << ", " << dec( f.position.y( ) ) << " )  vel ( " << dec( f.velocity.dx( ) ) << ", " << dec( f.velocity.dy( ) ) << " )  " << f.ground << endl;
+    }
+}
+
+// drops a walker onto the terrain, lets it settle, then walks it in_direction for in_frames
+// returns false (and prints the frames around the problem) if it gets stuck or ends up inside the terrain
+static bool check_walk( string cref in_name, varray<Point> cref in_ground, Planc cref in_start_x, dec in_direction, uint in_frames, Planc cref in_stop_x )
+{
+    TestRoom room( in_ground );
+    room.init( );
+
+    TestWalker walker( &room, Point( in_start_x, room.ground_y( in_start_x ) + TestWalker::HEIGHT ) );
+
+    varray<MovementFrame> frames;
+
+    lambdaf( record )( uint in_frame )
+    {
+        frames.insert_back( { in_frame, walker.position( ), walker.velocity( ), walker.grounded( ), describe_ground( walker.ground( ) ) } );
+    };
+
+    uint settle_frames = 60;
+
+    for_range( frame, settle_frames + in_frames )
+    {
+        walker.walking = ( ( frame < settle_frames ) ? 0.0 : in_direction );
+        walker.step( );
+        record( frame );
+
+        // inside the terrain: the center went below the ground surface
+        if( walker.position( ).y( ) < room.ground_y( walker.position( ).x( ) ) )
+        {
+            print_frames( in_name + ": fell into the terrain", frames, ( frames.size( ) > 10 ) ? ( frames.size( ) - 10 ) : 0, frames.size( ) );
+            return( false );
+        }
+
+        // reached the end of the walk
+        if( in_direction > 0.0 ? ( walker.position( ).x( ) >= in_stop_x ) : ( walker.position( ).x( ) <= in_stop_x ) )
+        {
+            return( true );
+        }
+
+        // stuck: hardly moved over the last 20 walking frames
+        if( frame >= ( settle_frames + 40 ) )
+        {
+            Planc moved = abs( walker.position( ).x( ) - frames[ frames.size( ) - 20 ].position.x( ) );
+
+            if( moved < 2.0 )
+            {
+                print_frames( in_name + ": stuck", frames, frames.size( ) - 25, frames.size( ) );
+                return( false );
+            }
+        }
+    }
+
+    print_frames( in_name + ": never reached the end", frames, frames.size( ) - 10, frames.size( ) );
+    return( false );
+}
+
+// drops a walker onto the terrain and checks it stays put without walking
+static bool check_stand( string cref in_name, varray<Point> cref in_ground, Planc cref in_x )
+{
+    TestRoom room( in_ground );
+    room.init( );
+
+    TestWalker walker( &room, Point( in_x, room.ground_y( in_x ) + TestWalker::HEIGHT ) );
+
+    varray<MovementFrame> frames;
+    uint settle_frames = 60;
+    uint watch_frames = 240;
+
+    for_range( frame, settle_frames + watch_frames )
+    {
+        walker.step( );
+        frames.insert_back( { frame, walker.position( ), walker.velocity( ), walker.grounded( ), describe_ground( walker.ground( ) ) } );
+    }
+
+    Point settled = frames[ settle_frames ].position;
+    Point last = frames.back( ).position;
+
+    uint airborne = 0;
+    for( uint i = settle_frames; i < frames.size( ); i++ ) { if( !frames[ i ].grounded ) { airborne++; } }
+
+    if( ( settled.distance_to( last ) > 1.0 ) || airborne )
+    {
+        cout << "---- " << in_name << ": drifted " << dec( settled.distance_to( last ) ) << " while standing, airborne " << airborne << " of " << watch_frames << " frames" << endl;
+        print_frames( in_name, frames, settle_frames, settle_frames + 12 );
+        print_frames( in_name + " (end)", frames, frames.size( ) - 6, frames.size( ) );
+        return( false );
+    }
+
+    return( true );
+}
+
+// is one of the hitbox's bottom corners below the ground (ignoring corners right at a vertex, where a wall makes the height ambiguous)
+static bool feet_in_ground( TestRoom cref in_room, varray<Point> cref in_ground, Point cref in_center )
+{
+    const Planc TOLERANCE = 0.5;
+
+    for_each_const( side, varray<dec>( { -1.0, +1.0 } ) )
+    {
+        Point foot = in_center + Vector( side * ( TestWalker::WIDTH_GROUND / 2.0 ), -( TestWalker::HEIGHT / 2.0 ) );
+
+        bool at_vertex = false;
+        for_each_const( pt, in_ground ) { if( abs( dec( pt.x( ) - foot.x( ) ) ) < TOLERANCE ) { at_vertex = true; } }
+
+        if( !at_vertex && ( foot.y( ) < ( in_room.ground_y( foot.x( ) ) - TOLERANCE ) ) )
+        {
+            return( true );
+        }
+    }
+
+    return( false );
+}
+
+// drops the walker at many places and speeds onto the terrain, returns how many drops ended up in the ground
+static uint check_landings( string cref in_name, varray<Point> cref in_ground, Planc cref in_from_x, Planc cref in_to_x )
+{
+    uint failures = 0;
+
+    for( dec x = in_from_x; x <= in_to_x; x += 13.0 )
+    {
+        for_each_const( speed, varray<dec>( { -9.0, -3.0, 0.0, 3.0, 9.0 } ) )
+        {
+            for_each_const( walking, varray<dec>( { 0.0, 1.0 } ) )
+            {
+
+                TestRoom room( in_ground );
+                room.init( );
+
+                TestWalker walker( &room, Point( x, room.ground_y( x ) + 150.0 ) );
+                walker.velocity( Vector( speed, 0.0 ) );
+                walker.walking = ( ( speed > 0.0 ) ? walking : ( ( speed < 0.0 ) ? -walking : 0.0 ) );
+
+                varray<MovementFrame> frames;
+
+                for_range( frame, 150 )
+                {
+                    walker.step( );
+                    frames.insert_back( { frame, walker.position( ), walker.velocity( ), walker.grounded( ), describe_ground( walker.ground( ) ) } );
+
+                    // walked off either end of the test terrain, the ground height is made up past there
+                    break_if( ( walker.position( ).x( ) < ( in_ground.front( ).x( ) + 50.0 ) ) || ( walker.position( ).x( ) > ( in_ground.back( ).x( ) - 50.0 ) ) );
+
+                    if( feet_in_ground( room, in_ground, walker.position( ) ) )
+                    {
+                        if( failures < 3 )
+                        {
+                            cout << "---- " << in_name << ": dropped at x " << x << " speed " << speed << " walking " << walking << ", feet went into the ground" << endl;
+                            print_frames( "    frames", frames, ( frames.size( ) > 6 ) ? ( frames.size( ) - 6 ) : 0, frames.size( ) );
+                        }
+
+                        failures++;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    cout << "---- " << in_name << ": " << failures << " landings went into the ground" << endl;
+
+    return( failures );
+}
+
+test( "Landing on terrain" )
+{
+    varray<Point> flat = { Point( -400.0, 0.0 ), Point( 0.0, 0.0 ), Point( 200.0, 0.0 ), Point( 400.0, 0.0 ), Point( 600.0, 0.0 ), Point( 1400.0, 0.0 ) };
+    varray<Point> hill = { Point( -400.0, 0.0 ), Point( 200.0, 0.0 ), Point( 300.0, 58.0 ), Point( 400.0, 58.0 ), Point( 500.0, 0.0 ), Point( 1400.0, 0.0 ) };
+    varray<Point> valley = { Point( -400.0, 100.0 ), Point( 200.0, 100.0 ), Point( 300.0, 42.0 ), Point( 400.0, 42.0 ), Point( 500.0, 100.0 ), Point( 1400.0, 100.0 ) };
+    varray<Point> bumpy = { Point( -400.0, 0.0 ), Point( 100.0, 0.0 ), Point( 160.0, 8.0 ), Point( 220.0, 12.0 ), Point( 280.0, 10.0 ), Point( 340.0, 0.0 ), Point( 400.0, -6.0 ), Point( 460.0, 0.0 ), Point( 1400.0, 0.0 ) };
+    varray<Point> steps = { Point( -400.0, 0.0 ), Point( 200.0, 0.0 ), Point( 200.0, 40.0 ), Point( 300.0, 40.0 ), Point( 300.0, 80.0 ), Point( 450.0, 80.0 ), Point( 450.0, 20.0 ), Point( 1400.0, 20.0 ) };
+    varray<Point> spikes = { Point( -400.0, 0.0 ), Point( 150.0, 0.0 ), Point( 170.0, 30.0 ), Point( 190.0, 0.0 ), Point( 210.0, 30.0 ), Point( 230.0, 0.0 ), Point( 1400.0, 0.0 ) };
+
+    check( check_landings( "flat", flat, 150.0, 650.0 ) == 0 );
+    check( check_landings( "hill", hill, 150.0, 550.0 ) == 0 );
+    check( check_landings( "valley", valley, 150.0, 550.0 ) == 0 );
+    check( check_landings( "bumpy", bumpy, 50.0, 500.0 ) == 0 );
+    check( check_landings( "steps", steps, 150.0, 500.0 ) == 0 );
+    check( check_landings( "spikes", spikes, 120.0, 260.0 ) == 0 );
+}
+
+test( "Movement over terrain" )
+{
+    varray<Point> flat = { Point( -400.0, 0.0 ), Point( 0.0, 0.0 ), Point( 200.0, 0.0 ), Point( 400.0, 0.0 ), Point( 600.0, 0.0 ), Point( 1400.0, 0.0 ) };
+    varray<Point> hill = { Point( -400.0, 0.0 ), Point( 200.0, 0.0 ), Point( 300.0, 58.0 ), Point( 400.0, 58.0 ), Point( 500.0, 0.0 ), Point( 1400.0, 0.0 ) };
+    varray<Point> valley = { Point( -400.0, 100.0 ), Point( 200.0, 100.0 ), Point( 300.0, 42.0 ), Point( 400.0, 42.0 ), Point( 500.0, 100.0 ), Point( 1400.0, 100.0 ) };
+    varray<Point> bumpy = { Point( -400.0, 0.0 ), Point( 100.0, 0.0 ), Point( 160.0, 8.0 ), Point( 220.0, 12.0 ), Point( 280.0, 10.0 ), Point( 340.0, 0.0 ), Point( 400.0, -6.0 ), Point( 460.0, 0.0 ), Point( 1400.0, 0.0 ) };
+    varray<Point> gentle_slant = { Point( -400.0, 0.0 ), Point( 1400.0, 400.0 ) };
+    varray<Point> steep_slant = { Point( -400.0, 0.0 ), Point( 1400.0, 1000.0 ) };
+
+    section( "walking" )
+    {
+        check( check_walk( "flat right", flat, 50.0, +1.0, 600, 900.0 ) );
+        check( check_walk( "flat left", flat, 900.0, -1.0, 600, 50.0 ) );
+        check( check_walk( "hill right", hill, 50.0, +1.0, 600, 900.0 ) );
+        check( check_walk( "hill left", hill, 900.0, -1.0, 600, 50.0 ) );
+        check( check_walk( "valley right", valley, 50.0, +1.0, 600, 900.0 ) );
+        check( check_walk( "valley left", valley, 900.0, -1.0, 600, 50.0 ) );
+        check( check_walk( "bumpy right", bumpy, 50.0, +1.0, 600, 900.0 ) );
+        check( check_walk( "bumpy left", bumpy, 900.0, -1.0, 600, 50.0 ) );
+    }
+
+    section( "standing" )
+    {
+        check( check_stand( "flat", flat, 300.0 ) );
+        check( check_stand( "gentle slant", gentle_slant, 500.0 ) );
+        check( check_stand( "steep slant", steep_slant, 500.0 ) );
+    }
+}
+
+test( "Object position history" )
+{
+    varray<Point> flat = { Point( -400.0, 0.0 ), Point( 1400.0, 0.0 ) };
+    TestRoom room( flat );
+    room.init( );
+
+    TestWalker walker( &room, Point( 100.0, TestWalker::HEIGHT ) );
+    walker.track( 3 );
+
+    for_range( frame, 30 ) { walker.step( ); } // land and settle
+
+    walker.walking = +1.0;
+
+    varray<Point> frame_starts;
+    for_range( frame, 5 )
+    {
+        frame_starts.insert_back( walker.position( ) );
+        walker.step( );
+    }
+
+    // 1 = the current frame, which started where the object was 1 update ago
+    check( walker.last_position( 0 ) == walker.position( ) );
+    check( walker.last_position( 1 ) == frame_starts[ 4 ] );
+    check( walker.last_position( 2 ) == frame_starts[ 3 ] );
+    check( walker.last_position( 3 ) == frame_starts[ 2 ] );
+
+    // only 3 frames are tracked, further back gives the oldest
+    check( walker.last_position( 10 ) == frame_starts[ 2 ] );
+    check( walker.last_positions( ).size( ) == 3 );
+}
+
+test( "Object movement subscriptions" )
+{
+    varray<Point> flat = { Point( -400.0, 0.0 ), Point( 1400.0, 0.0 ) };
+    TestRoom room( flat );
+    room.init( );
+
+    ptr<TestWalker> leader = new TestWalker( &room, Point( 100.0, 100.0 ) );
+    ptr<TestWalker> follower1 = new TestWalker( &room, Point( 200.0, 100.0 ) );
+    ptr<TestWalker> follower2 = new TestWalker( &room, Point( 300.0, 100.0 ) );
+
+    follower1->subscribe_to_movement( leader );
+    follower2->subscribe_to_movement( leader );
+
+    check( leader->movement_subscribers( ).size( ) == 2 );
+
+    // deleting an object with several subscribers used to modify the set it was looping over
+    delete leader;
+
+    check( follower1->movement_subscriptions( ).size( ) == 0 );
+    check( follower2->movement_subscriptions( ).size( ) == 0 );
+
+    delete follower1;
+    delete follower2;
+}
+
+} // namespace axn

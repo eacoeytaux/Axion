@@ -12,6 +12,57 @@ section( DEBUG_OVERLAY )
 }
 #endif
 
+section( BUMPERS )
+{
+    dec dot_product( Point cref in_pt, Vector cref in_vec ) { return( ( in_pt.x( ) * in_vec.dx( ) ) + ( in_pt.y( ) * in_vec.dy( ) ) ); }
+
+    bool counter_clockwise( varray<Point> cref in_pts )
+    {
+        dec area = 0.0;
+
+        for_range( i, in_pts.size( ) )
+        {
+            Point cref pt1 = in_pts[ i ];
+            Point cref pt2 = in_pts[ ( i + 1 ) % in_pts.size( ) ];
+
+            area += ( pt1.x( ) * pt2.y( ) ) - ( pt2.x( ) * pt1.y( ) );
+        }
+
+        return( area > 0.0 );
+    }
+
+    // index of the (inverted) hitbox point that rests against in_edge, the bumper is the edge offset by this point
+    // when a side of the hitbox is parallel to the edge both of its points rest against it, the one furthest along the edge wins
+    // edges and vertices both use this so their bumpers always meet end to end
+    uint support_index( varray<Point> cref in_pts, ptr<const Terrain::Edge> in_edge )
+    {
+        Vector normal = VectorA( in_edge->normal( ), 1.0 );
+        Vector direction = in_edge->vector( );
+
+        uint support = 0;
+
+        for_range( i, in_pts.size( ) )
+        {
+            dec depth = dot_product( in_pts[ i ], normal );
+            dec support_depth = dot_product( in_pts[ support ], normal );
+
+            if( equal( depth, support_depth ) )
+            {
+                if( dot_product( in_pts[ i ], direction ) > dot_product( in_pts[ support ], direction ) )
+                {
+                    support = i;
+                }
+            }
+            else if( depth > support_depth )
+            {
+                support = i;
+            }
+        }
+
+        return( support );
+    }
+}
+
 Terrain::~Terrain( )
 {
     for_each( edges, m_edges ) { safe_delete( edges ); }
@@ -211,6 +262,20 @@ Drawing Terrain::debug_overlay( ) const
 }
 #endif
 
+Angle Terrain::Node::bumper_normal( Line cref in_bumper_line ) const
+{
+    // bumper lines are the node pushed out by the hitbox, so they always face away from the node
+    Angle normal = in_bumper_line.angle( ) + RIGHT;
+
+    Vector normal_vector = VectorA( normal, 1.0 );
+    Vector outward( center( ), midpoint( in_bumper_line.pt1( ), in_bumper_line.pt2( ) ) );
+
+    dec facing = ( normal_vector.dx( ) * outward.dx( ) ) + ( normal_vector.dy( ) * outward.dy( ) );
+
+    return_if( facing < 0.0, normal.flipped( ) );
+    return( normal );
+}
+
 Terrain::Vertex::Vertex( ptr<const Terrain> parent, Point cref in_position ) : Terrain::Node( parent ) { m_position = in_position; }
 
 Point cref Terrain::Vertex::position( ) const { return( m_position ); }
@@ -247,68 +312,35 @@ Terrain::Bumper Terrain::Vertex::bumpers( Hitbox cref in_hitbox ) const
     {
         if( edge1( ) && edge2( ) )
         {
-            varray<Point> bumpers;
+            // the hitbox rolls around the vertex from the point resting on edge1 to the point resting on edge2
+            // this includes any hitbox sides in between, so a side of the hitbox can sit on the vertex not just a corner
+            varray<Point> pts = in_hitbox.polygon( false ).inverted( ).points( );
+            uint pt_count = pts.size( );
 
-            Line e1 = edge1( )->line( ).flipped( );
-            Line e2 = edge2( )->line( ).flipped( );
-            Angle angle1 = e1.angle( ).truncate( );
-            Angle angle2 = e2.angle( ).truncate( );
+            uint index1 = support_index( pts, edge1( ) );
+            uint index2 = support_index( pts, edge2( ) );
 
-            uint min_i = 0;
-            Angle min_angle;
+            // the resting point follows the normal around the hitbox, so walk the hitbox the way the normal turns
+            Angle turn = edge1( )->normal( ).min_distance( edge2( )->normal( ) );
 
-            uint max_i = 0;
-            Angle max_angle;
-
-            uint max_below_i1 = 0;
-            Angle max_below_angle1;
-
-            uint max_below_i2 = 0;
-            Angle max_below_angle2;
-
-            Polygon polygon = in_hitbox.polygon( false ).inverted( );
-            varray<Line> perimeter = polygon.perimeter( ).lines( );
-            varray<Point> pts = polygon.points( );
-
-            for_range( i, perimeter.size( ) )
+            // a concave corner (a valley) has no bumper of its own: the edges' bumpers cross and that is the corner,
+            // an arc here would be inside the terrain and objects landing on it would sink in
+            if( dec( turn ) > 0.0 )
             {
-                Line line = perimeter[ i ];
-                Angle line_angle = line.angle( ).truncate( );
-
-                if( !i || ( line_angle < min_angle ) )
-                {
-                    min_angle = line_angle;
-                    min_i = i;
-                }
-
-                if( !i || ( line_angle > max_angle ) )
-                {
-                    max_angle = line_angle;
-                    max_i = i;
-                }
-
-                if( ( line_angle <= angle1 ) && ( line_angle > max_below_angle1 ) )
-                {
-                    max_below_angle1 = line_angle;
-                    max_below_i1 = i;
-                }
-
-                if( ( line_angle <= angle2 ) && ( line_angle > max_below_angle2 ) )
-                {
-                    max_below_angle2 = line_angle;
-                    max_below_i2 = i;
-                }
+                return( Terrain::Bumper( this, Path( ) ) );
             }
 
-            uint index1 = ( ( angle1 < min_angle ) ? max_i : max_below_i1 );
-            uint index2 = ( ( angle2 < min_angle ) ? max_i : max_below_i2 );
+            bool forward = !counter_clockwise( pts ); // convex corners turn clockwise
 
-            uint min_index = min( index1, index2 );
-            uint max_index = max( index1, index2 );
+            varray<Point> bumpers;
+            uint i = index1;
 
-            for_range( index, ( max_index - min_index ) + 1 )
+            bumpers.insert_back( pts[ i ] + position( ) );
+
+            while_max( ( i != index2 ), pt_count )
             {
-                bumpers.insert_back( perimeter[ ( index + min_index ) ].pt2( ) + position( ) );
+                i = ( forward ? ( ( i + 1 ) % pt_count ) : ( ( i + pt_count - 1 ) % pt_count ) );
+                bumpers.insert_back( pts[ i ] + position( ) );
             }
 
             return( Terrain::Bumper( this, Path( bumpers ) ) );
@@ -347,47 +379,9 @@ Terrain::Bumper Terrain::Edge::bumpers( Hitbox cref in_hitbox ) const
 {
     if( in_hitbox.polygon( ).sides( ) )
     {
-        Line edge = line( ).flipped( );
-        Angle edge_angle = edge.angle( ).truncate( );
+        varray<Point> pts = in_hitbox.polygon( false ).inverted( ).points( );
 
-        uint min_i = 0;
-        Angle min_angle;
-
-        uint max_i = 0;
-        Angle max_angle;
-
-        uint max_below_i = 0;
-        Angle max_below_angle;
-
-        Polygon polygon = in_hitbox.polygon( false ).inverted( );
-        varray<Line> perimeter = polygon.perimeter( ).lines( );
-        varray<Point> pts = polygon.points( );
-
-        for_range( i, perimeter.size( ) )
-        {
-            Line line = perimeter[ i ];
-            Angle line_angle = line.angle( ).truncate( );
-
-            if( ( !i ) || ( line_angle < min_angle ) )
-            {
-                min_angle = line_angle;
-                min_i = i;
-            }
-
-            if( ( !i ) || ( line_angle > max_angle ) )
-            {
-                max_angle = line_angle;
-                max_i = i;
-            }
-
-            if( ( line_angle < edge_angle ) && ( line_angle > max_below_angle ) )
-            {
-                max_below_angle = line_angle;
-                max_below_i = i;
-            }
-        }
-
-        return( Terrain::Bumper( this, Path( edge + perimeter[ ( ( edge_angle < min_angle ) ? max_i : max_below_i ) ].pt2( ) ) ) );
+        return( Terrain::Bumper( this, Path( line( ).flipped( ) + pts[ support_index( pts, this ) ] ) ) );
     }
 
     return( Terrain::Bumper( this, Path( line( ) ) ) );

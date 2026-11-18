@@ -1,4 +1,5 @@
 #include "axn/system/Engine.hpp"
+#include "axn/world/Terrain.hpp" // must come before Catch, windows.h declares its own Polygon
 
 #if defined( AXN_TESTS )
 
@@ -13,6 +14,8 @@
 #include "axn/tests/Tests.hpp"
 #include "axn/tests/TestsUtil.hpp"
 #include "axn/tests/TestsGeometry.hpp"
+#include "axn/tests/TestsTerrain.hpp"
+#include "axn/tests/TestsMovement.hpp"
 // include Test*.hpp files here
 
 namespace axn

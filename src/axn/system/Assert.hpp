@@ -41,16 +41,18 @@ public:
 
 private:
 
+    static string format( const char * in_message, va_list in_args );
+
     void pass( const char * in_message = nostring );
     void fail( const char * in_message = nostring );
 
 public:
 
     Assert( ) { fail( ); }
-    Assert( const char * in_message, ... ) { va_list va_args; va_start( va_args, in_message ); fail( in_message ); va_end( va_args ); }
+    Assert( const char * in_message, ... ) { va_list va_args; va_start( va_args, in_message ); fail( format( in_message, va_args ).c_str( ) ); va_end( va_args ); }
 
     Assert( bool in_pass ) { if( !in_pass ) { fail( ); } else { pass( ); } }
-    Assert( bool in_pass, const char * in_message, ... ) { va_list va_args; va_start( va_args, in_message ); if( !in_pass ) { fail( in_message ); } else { pass( ); } va_end( va_args ); }
+    Assert( bool in_pass, const char * in_message, ... ) { va_list va_args; va_start( va_args, in_message ); if( !in_pass ) { fail( format( in_message, va_args ).c_str( ) ); } else { pass( ); } va_end( va_args ); }
 
 };
 

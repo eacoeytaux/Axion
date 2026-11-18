@@ -66,9 +66,13 @@ public:
 
         virtual Angle normal( ) const = 0;
 
+        virtual Point center( ) const = 0; // a point on the node itself, its bumper lines all face away from it
+
         virtual FixedRectangle bounding_box( ) const = 0;
 
         virtual Bumper bumpers( Hitbox cref in_hitbox ) const = 0;
+
+        Angle bumper_normal( Line cref in_bumper_line ) const; // outward normal of one of this node's bumper lines
 
     };
 
@@ -102,6 +106,8 @@ public:
 
         Angle normal( ) const override;
 
+        Point center( ) const override { return( position( ) ); }
+
         FixedRectangle bounding_box( ) const override;
 
         Bumper bumpers( Hitbox cref in_hitbox ) const override;
@@ -130,6 +136,8 @@ public:
         ptr<Node> back( ) const override { return( vertex2( ) ); }
 
         Angle normal( ) const override;
+
+        Point center( ) const override { return( midpoint( m_v1->position( ), m_v2->position( ) ) ); }
 
         FixedRectangle bounding_box( ) const override;
 

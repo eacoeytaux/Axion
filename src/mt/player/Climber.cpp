@@ -542,16 +542,9 @@ void Climber::update_velocity( )
                 Angle a1, a2;
                 Angle va = v.angle( );
 
-                Line bumper_line;
-                varray<Line> bumper_lines = Object::ground( )->bumpers( terrain_hitbox( ) ).path( ).lines( );
-                for_each( line, bumper_lines )
-                {
-                    if( line.on( position( ) ) )
-                    {
-                        bumper_line = line;
-                        break;
-                    }
-                }
+                // an exact on( ) check fails from rounding on horizontal lines, leaving a default Line( ) that reads as vertical
+                // and turned walking into pushing down into the floor
+                Line bumper_line = ground_bumper_line( );
 
                 if( bumper_line.vertical( ) )
                 {

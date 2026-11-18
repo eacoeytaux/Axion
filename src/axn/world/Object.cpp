@@ -26,8 +26,13 @@ section( DEBUG_OVERLAY )
 
 section( MOVEMENT )
 {
+    // TODO shouldn't this be part of the standard point equality check?
     var_const( Planc BUMPER_EPSILON = ( 0.01 ) ); // how close the center has to be to count as touching a bumper
-    var_const( uint MAX_MOVEMENT_STEPS = ( 32 ) ); // safety net so update_movement can never loop forever
+
+    // velocity flattened onto a surface is at a right angle to its normal, rounding puts it a hair either side
+    // so only count as moving away from a surface when clearly moving away
+    var_const( Angle LEAVE_SURFACE_EPSILON = ( Angle( 0.001 ) ) );
+    var_const( uint MAX_MOVEMENT_STEPS = ( 100 ) ); // safety net so update_movement can never loop forever
 
     // floating point drift means the center is rarely exactly on a bumper line
     bool on_bumper( Line cref in_line, Point cref in_pt ) { return( in_line.closest( in_pt ).distance_to( in_pt ) < BUMPER_EPSILON ); }
@@ -64,6 +69,36 @@ section( MOVEMENT )
         return( along );
     }
 
+    // the bumper line under in_pt that lines up best with in_velocity (either way along it), empty line if not on the bumper
+    Line surface_line( Path cref in_path, Point cref in_pt, Vector cref in_velocity )
+    {
+        Line surface;
+        Angle surface_distance;
+        bool found = false;
+
+        for_each( line, in_path.lines( ) )
+        {
+            continue_if( is_zero( line.length( ) ) || !on_bumper( line, in_pt ) );
+
+            Angle distance = min( in_velocity.angle( ).min_distance( line.angle( ) ).abs( ), in_velocity.angle( ).min_distance( line.angle( ).flipped( ) ).abs( ) );
+
+            if( !found || ( distance < surface_distance ) )
+            {
+                surface = line;
+                surface_distance = distance;
+                found = true;
+            }
+        }
+
+        return( surface );
+    }
+
+    // moving away from a surface with in_normal, as opposed to into it or along it
+    bool moving_away( Angle cref in_normal, Vector cref in_velocity ) { return( abs( in_normal.min_distance( in_velocity.angle( ) ) ) < ( RIGHT - LEAVE_SURFACE_EPSILON ) ); }
+
+    // moving into a surface with in_normal, as opposed to along it or away from it
+    bool moving_into( Angle cref in_normal, Vector cref in_velocity ) { return( abs( in_normal.min_distance( in_velocity.angle( ) ) ) > ( RIGHT + LEAVE_SURFACE_EPSILON ) ); }
+
     // where in_path first touches in_bumper_line, Line::intersection returns the path's start for any overlapping parallel lines
     Point first_contact( Line cref in_path, Line cref in_bumper_line )
     {
@@ -88,12 +123,15 @@ Object::~Object( )
     total_objects--;
     #endif
 
-    for_each( object, m_movement_subscribers )
+    // loop over copies, unsubscribing removes entries from these sets and would break the loop
+    uset<ptr<Object>> subscribers = m_movement_subscribers;
+    for_each( object, subscribers )
     {
         object->unsubscribe_to_movement( this );
     } m_movement_subscribers.clear( );
 
-    for_each( object, m_movement_subscriptions )
+    uset<ptr<Object>> subscriptions = m_movement_subscriptions;
+    for_each( object, subscriptions )
     {
         object->remove_movement_subscriber( this );
     } m_movement_subscriptions.clear( );
@@ -182,8 +220,8 @@ void Object::update( )
 
     if( m_last_position_count )
     {
-        m_last_positions.push( );
-        m_last_positions.front( ).push( position( ) );
+        // start this frame's positions where the object is now, position( ) adds the rest as it moves
+        m_last_positions.push( ).push( position( ) );
     }
 
     update_movement( );
@@ -223,24 +261,22 @@ void Object::trim_velocity( )
             if( velocity.has_magnitude( ) )
             {
                 // TODO use in_semi here and elsewhere
-                if( abs( ground( )->normal( ).min_distance( velocity.angle( ) ) ) >= RIGHT )
+                // judge leaving against the bumper line actually under the object, a vertex's own normal
+                // is only an average of its edges and is wrong for most of its corner
+                Line surface = surface_line( ground( )->bumpers( terrain_hitbox( ) ).path( ), position( ), velocity );
+                Angle surface_normal = ( !is_zero( surface.length( ) ) ? ground( )->bumper_normal( surface ) : ground( )->normal( ) );
+
+                if( !moving_away( surface_normal, velocity ) )
                 {
-                    Path bumper = ground( )->bumpers( terrain_hitbox( ) ).path( );
-
-                    if( on_bumper( bumper, position( ) ) )
+                    // keep only the part of the velocity along the surface, anything pushing into it is stopped
+                    // (landing straight down onto flat ground leaves no velocity at all)
+                    if( !is_zero( surface.length( ) ) )
                     {
-                        // slide along the bumper line heading the same way as the velocity
-                        // at the end of the bumper there isn't one, update_movement moves onto the next node
-                        Line along = bumper_direction( bumper, position( ), velocity );
-
-                        if( !is_zero( along.length( ) ) )
-                        {
-                            velocity.flatten( along.angle( ) );
-                        }
+                        velocity.flatten( surface.angle( ) );
                     }
                     else
                     {
-                        // drifted off the bumper, slide along the surface
+                        // drifted off the bumper or it's a single point, slide along the surface
                         velocity.flatten( ground( )->normal( ) + RIGHT );
                     }
                 }
@@ -267,26 +303,24 @@ void Object::update_velocity( )
         }
     }
 
+    velocity *= one_minus( friction_resistance( ) );
+
     Matter::velocity( velocity );
 }
 
 void Object::update_movement( )
 {
-    // only the ground most recently left is skipped, skipping everything already checked
-    // let objects fall through terrain once a step changed their direction
-    ptr<Terrain::Node> previous_ground;
-
     // TODO if( m_passing_terrain && m_ground->passable( ) ) ground = nullptr;
 
     update_velocity( );
 
-    // friction once per update, not once per movement step
-    Matter::velocity( Matter::velocity( ) * one_minus( friction_resistance( ) ) );
+    dec remaining_percentage = 1.0;
+    uint steps = 0;
 
     uset<ptr<Object>> all_collided_objects = { this };
 
-    dec remaining_percentage = 1.0;
-    uint steps = 0;
+    // only the ground most recently left is skipped
+    ptr<Terrain::Node> previous_ground;
 
     do_while
     {
@@ -312,8 +346,6 @@ void Object::update_movement( )
         Terrain::Bumper next_bumper = ground_bumper( );
 
         bool collided = false; // touched a new object this step
-
-        // todo move all this into check_movement
 
         // if objects goes through walls, don't bother
         if( movement.has_magnitude( ) && terrain_bound( ) )
@@ -341,11 +373,21 @@ void Object::update_movement( )
                         next_ground = nullptr;
                         next_bumper = Terrain::Bumper( );
 
-                        varray<ptr<Terrain::Node>> neighbors = { ground( )->front( ), ground( )->back( ) };
+                        // a vertex between two edges at the same angle has no bumper to slide along, so also look one node further
+                        varray<ptr<Terrain::Node>> neighbors;
+
+                        for_each( neighbor, varray<ptr<Terrain::Node>>( { ground( )->front( ), ground( )->back( ) } ) )
+                        {
+                            continue_if( is_null( neighbor ) );
+
+                            neighbors.insert_back( neighbor );
+                            neighbors.insert_back( neighbor->front( ) );
+                            neighbors.insert_back( neighbor->back( ) );
+                        }
 
                         for_each( neighbor, neighbors )
                         {
-                            continue_if( is_null( neighbor ) );
+                            continue_if( is_null( neighbor ) || ( neighbor == ground( ) ) );
 
                             Terrain::Bumper neighbor_bumper = neighbor->bumpers( terrain_hitbox( ) );
 
@@ -381,13 +423,17 @@ void Object::update_movement( )
 
                     for_each( bumper_line, bumper.path( ).lines( ) )
                     {
+                        // a single point bumper (a vertex between edges at the same angle), the edges on either side cover it
+                        continue_if( is_zero( bumper_line.length( ) ) );
+
                         continue_if( !path.intersects( bumper_line ) );
 
                         Point contact = first_contact( path, bumper_line );
                         Planc distance = center.distance_to( contact );
 
-                        // already touching it and moving away from it
-                        continue_if( ( distance < BUMPER_EPSILON ) && ( abs( terrain_node->normal( ).min_distance( movement.angle( ) ) ) < RIGHT ) );
+                        // already touching it: only a hit when moving into it, sliding along a neighbor or leaving it isn't
+                        // (otherwise the neighbors at a vertex keep taking turns being the ground and the object never moves)
+                        continue_if( ( distance < BUMPER_EPSILON ) && !moving_into( terrain_node->bumper_normal( bumper_line ), movement ) );
 
                         if( !hit || ( distance < hit_distance ) )
                         {
@@ -503,8 +549,16 @@ void Object::update_movement( )
         }
 
         steps++;
+
+        if( steps > MAX_MOVEMENT_STEPS )
+        {
+            #if defined( AXN_DEBUG )
+            Assert( "too many movement steps!" );
+            #endif
+            break;
+        }
     }
-    while( is_pos( remaining_percentage ) && ( steps < MAX_MOVEMENT_STEPS ) );
+    while( is_pos( remaining_percentage ) );
 }
 
 dec Object::check_movement( Vector cref in_velocity )
@@ -640,6 +694,20 @@ dec Object::friction_resistance( ) const
 ptr<Terrain::Node> Object::ground( ) const { return( m_ground ); }
 Terrain::Bumper Object::ground_bumper( ) const { return( m_ground_bumper ); }
 
+Line Object::ground_bumper_line( ) const
+{
+    Assert( grounded( ), "not grounded" );
+
+    for_each( line, ground( )->bumpers( terrain_hitbox( ) ).path( ).lines( ) )
+    {
+        return_if( on_bumper( line, position( ) ), line );
+    }
+
+    // drifted off the bumper or the bumper is a single point, use the surface direction instead
+    // oriented the same way as an edge's bumper line
+    return( Line( position( ), position( ) + VectorA( ground( )->normal( ) + RIGHT, 1.0 ) ) );
+}
+
 void Object::ground( ptr<Terrain::Node> in_ground, Terrain::Bumper cref in_bumper )
 {
     // TODO no need for two objects passed when bumper points to ground node
@@ -707,13 +775,16 @@ Point Object::last_position( uint in_past ) const
     return( last_positions( in_past ).front( ) );
 }
 
+// m_last_positions holds one queue per frame, oldest at the front and the current frame at the back
+// in_past = 1 is the current frame (starting where the object was 1 update ago), 2 the frame before, ...
+// asking further back than is tracked gives the oldest frame
 queue<Point> Object::last_positions( uint in_past ) const
 {
-    if( in_past )
+    if( in_past && !is_empty( m_last_positions ) )
     {
-        uint position_size = m_last_positions.size( );
+        uint frame_count = m_last_positions.size( );
 
-        if( in_past > position_size )
+        if( in_past >= frame_count )
         {
             return( m_last_positions.front( ) );
         }
@@ -721,7 +792,7 @@ queue<Point> Object::last_positions( uint in_past ) const
         {
             queue<queue<Point>> last_positions = m_last_positions;
 
-            for_range( i, in_past - 1 ) { last_positions.pop( ); }
+            for_range( i, frame_count - in_past ) { last_positions.pop( ); }
 
             return( last_positions.front( ) );
         }

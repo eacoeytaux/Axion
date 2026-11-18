@@ -95,7 +95,12 @@ void Mob::update( )
 {
     Object::update( );
 
-    m_hurt_display_timer.tick( );
+    // tick( ) keeps returning true once completed, so only redraw on the frame the hurt display ends
+    if( !m_hurt_display_timer.completed( ) && m_hurt_display_timer.tick( ) )
+    {
+        needs_render( true );
+    }
+
     m_invincible_timer.tick( );
 
     // eyes
@@ -142,6 +147,7 @@ void Mob::die( )
     if( alive( ) )
     {
         m_alive = false;
+        needs_render( true );
     }
 }
 
@@ -150,6 +156,7 @@ void Mob::revive( )
     if( dead( ) )
     {
         m_alive = true;
+        needs_render( true );
 
         heal_full( );
     }
@@ -216,6 +223,7 @@ void Mob::hurt( dec in_damage )
 
         m_health.value( max( 0.0, health ) );
         m_hurt_display_timer.reset( );
+        needs_render( true ); // show the hurt display
     }
 }
 
@@ -234,7 +242,11 @@ bool Mob::facing_right( ) const
 
 void Mob::facing_right( bool in_facing_right )
 {
-    m_facing_right = in_facing_right;
+    if( m_facing_right != in_facing_right )
+    {
+        m_facing_right = in_facing_right;
+        needs_render( true );
+    }
 }
 
 #if defined( AXN_DEBUG )

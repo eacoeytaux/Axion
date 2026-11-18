@@ -263,12 +263,18 @@
     <ClCompile Include="src\mt\environment\plants\Tree.cpp">
       <Filter>Source Files\mt\environment\plants</Filter>
     </ClCompile>
+    <ClCompile Include="src\axn\Precompiled.cpp">
+      <Filter>Source Files\axn</Filter>
+    </ClCompile>
     <ClCompile Include="src\axn\system\Assert.cpp">
       <Filter>Source Files\axn\system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\axn\AXN.hpp">
+      <Filter>Source Files\axn</Filter>
+    </ClInclude>
+    <ClInclude Include="src\axn\Precompiled.hpp">
       <Filter>Source Files\axn</Filter>
     </ClInclude>
     <ClInclude Include="src\axn\audio\Audio.hpp">
@@ -551,6 +557,12 @@
       <Filter>Source Files\axn\system</Filter>
     </ClInclude>
     <ClInclude Include="src\axn\tests\TestsGeometry.hpp">
+      <Filter>Source Files\axn\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="src\axn\tests\TestsMovement.hpp">
+      <Filter>Source Files\axn\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="src\axn\tests\TestsTerrain.hpp">
       <Filter>Source Files\axn\tests</Filter>
     </ClInclude>
     <ClInclude Include="src\mt\terrain\CavesTerrain.hpp">

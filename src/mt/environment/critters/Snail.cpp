@@ -10,7 +10,7 @@ var_const( dec STRETCH_PERIOD = ( 10.0 ) );
 var_const( Color SLUG_COLOR = ( BLACK ) );
 var_const( Color SHELL_COLOR = ( RED ) );
 
-Snail::Snail( ptr<Room> in_room, Point cref _position ) : Mob( in_room, _position )
+Snail::Snail( ptr<Room> in_room, Point cref in_position ) : Mob( in_room, in_position )
 {
     needs_render_always( true );
 

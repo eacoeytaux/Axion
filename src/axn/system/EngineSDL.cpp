@@ -30,7 +30,7 @@
 // -------------------- //
 #endif
 
-#define initAssert( func, message ) bool macro_unique( assert_check ) = func; Assert( macro_unique( assert_check ), message ); macro_end
+#define initAssert( func, ... ) bool macro_unique( assert_check ) = func; Assert( macro_unique( assert_check ), __VA_ARGS__ ); macro_end
 
 var_static( bool PAUSED = ( false ) );
 
@@ -75,10 +75,10 @@ void Engine::init_eng( string cref in_app_name )
     initAssert( !SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 1 ),
                 "SDL GL attributes failed: %s", SDL_GetErrorStr( ) );
 
-    initAssert( WINDOW = SDL_CreateWindow(
-        charify( in_app_name ), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 0, 0,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN_DESKTOP ),
-        "SDL window initialization failed: %s", SDL_GetErrorStr( ) );
+    initAssert( ( WINDOW = SDL_CreateWindow( charify( in_app_name ),
+                                             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 0, 0,
+                                             SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN_DESKTOP ) ),
+                "SDL window initialization failed: %s", SDL_GetErrorStr( ) );
 
     SDL_DisplayMode display_mode;
     SDL_GetDesktopDisplayMode( 0, &display_mode );

@@ -172,11 +172,6 @@ void Room::render( )
     {
         for_each( object, in_objects )
         {
-            static dec death_fade = 1.0;
-            death_fade -= 0.01;
-
-            object->color_filter( [ ] ( Color ref in_color ) { in_color.a( in_color.a( ) * death_fade ); } );
-
             object->render_object( );
 
             bool in_view = !object->z( ) || camera->in_view( object->bounding_box( ) + object->position( ), object->z( ) );

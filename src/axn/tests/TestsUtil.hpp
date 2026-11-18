@@ -295,4 +295,26 @@ test( "math tests" )
     }
 }
 
+test( "queue tests" )
+{
+    queue<int> q;
+
+    // push gives back the element it just added, not the front
+    q.push( 1 );
+    q.push( 2 ) = 5;
+
+    check( q.front( ) == 1 );
+    check( q.back( ) == 5 );
+    check( q.pop( ) == 1 );
+    check( q.pop( ) == 5 );
+}
+
+test( "Assert message tests" )
+{
+    // asserts are disabled while tests run, so failing ones only record their message
+    check( string( Assert( false, "value %d is %s", 5, "bad" ) ) == "value 5 is bad" );
+    check( string( Assert( false, "plain message" ) ) == "plain message" );
+    check( string( Assert( true, "value %d", 5 ) ) == "" );
+}
+
 } // namespace axn

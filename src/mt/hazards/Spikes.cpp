@@ -7,7 +7,7 @@ var_const( span<dec> SPIKE_BASE_WIDTH_RATIO = { 4.0, 5.0 } );
 
 var_const( Angle SPIKE_MAX_ANGLE_OFFSET = ( Angle::fraction( 24.0 ) ) );
 
-Spike::Spike( ptr<Room> room, Point cref in_base ) : Hazard( room, in_base )
+Spike::Spike( ptr<Room> in_room, Point cref in_base ) : Hazard( in_room, in_base )
 {
     #if defined( AXN_DEBUG )
     draw_debug = true;
