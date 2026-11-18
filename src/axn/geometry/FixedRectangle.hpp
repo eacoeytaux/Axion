@@ -48,7 +48,7 @@ public:
 
     varray<Point> points( ) const { return{ top_right( ), top_left( ), bottom_left( ), bottom_right( ) }; }
 
-    Path perimeter( ) const { Path( { top( ), left( ), bottom( ), right( ) } ); }
+    Path perimeter( ) const { return( Path( { top( ), left( ), bottom( ), right( ) } ) ); }
 
     Planc upper_bound_x( ) const { return( center( ).x( ) + half( width( ) ) ); }
     Planc upper_bound_y( ) const { return( center( ).y( ) + half( height( ) ) ); }

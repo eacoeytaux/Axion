@@ -33,7 +33,7 @@
 
 #define return return
 
-#define return_if( b, x ) if( b ) return x
+#define return_if( b, ... ) if( b ) return __VA_ARGS__
 
 #define return_true_if( b ) return_if( b, true )
 #define return_false_if( b ) return_if( b, false )

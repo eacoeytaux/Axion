@@ -46,9 +46,9 @@ public:
     Angle ref truncate( ) { m_radians = ( radians( ) - ( floor( radians( ) / numbers::TAU ) * numbers::TAU ) ); rethis; }
     Angle truncated( ) const { return( Angle( radians( ) - ( floor( radians( ) / numbers::TAU ) * numbers::TAU ) ) ); }
 
-    Planc sin( ) const { return( ::sin( radians( ) ) ); }
-    Planc cos( ) const { return( ::cos( radians( ) ) ); }
-    Planc tan( ) const { return( ::tan( radians( ) ) ); }
+    Planc sin( ) const { return( ::sin( dec( radians( ) ) ) ); }
+    Planc cos( ) const { return( ::cos( dec( radians( ) ) ) ); }
+    Planc tan( ) const { return( ::tan( dec( radians( ) ) ) ); }
 
     Angle abs( ) const { return( ( truncated( ) > numbers::PI ) ? Angle( numbers::TAU - truncated( ).radians( ) ) : *this ); }
 

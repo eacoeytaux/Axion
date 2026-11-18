@@ -152,10 +152,10 @@ public:
     carray ref fill( T1 cref in_elem ) { for_range( i, size( ) ) { at( i ) = in_elem; } rethis; }
 
     carray ref reverse( ) { std::reverse( begin( ), end( ) ); rethis; }
-    carray reversed( ) const { carray<N, T1> ret = ( *this ); ret.reverse( ); return( ret ); }
+    carray reversed( ) const { carray<T1, N> ret = ( *this ); ret.reverse( ); return( ret ); }
 
     carray ref sort( std::function<bool( T1 cref in_x1, T1 cref in_x2 )> cref comparator, bool in_stable = false ) { if( in_stable ) { std::stable_sort( begin( ), end( ), comparator ); } else { std::sort( begin( ), end( ), comparator ); } rethis; }
-    carray sorted( std::function<bool( T1 cref in_x1, T1 cref in_x2 )> cref comparator, bool in_stable = false ) const { carray<N, T1> ret = ( *this ); ret.sort( comparator, in_stable ); return( ret ); }
+    carray sorted( std::function<bool( T1 cref in_x1, T1 cref in_x2 )> cref comparator, bool in_stable = false ) const { carray<T1, N> ret = ( *this ); ret.sort( comparator, in_stable ); return( ret ); }
 
     bool valid_index( uint in_index ) const { return( in_index < size( ) ); }
     bool assert_index( uint in_index ) const { Assert( valid_index( in_index ), "index ( %ui ) out of range, size: %ui", in_index, size( ) ); return( valid_index( in_index ) ); }

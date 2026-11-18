@@ -603,7 +603,7 @@ public:
         return( Polygon( ) );
     }
 
-    Polygon ref invert( ) { *this = inverted( ); }
+    Polygon ref invert( ) { rethis = inverted( ); }
     Polygon inverted( ) const
     {
         varray<Point> inverted_points = points( true );
@@ -612,7 +612,7 @@ public:
         return( Polygon( inverted_points ) );
     }
 
-    Polygon ref expand( Planc cref in_expansion, expand_type in_expand = POINTED ) { *this = expanded( in_expansion, in_expand ); }
+    Polygon ref expand( Planc cref in_expansion, expand_type in_expand = POINTED ) { rethis = expanded( in_expansion, in_expand ); }
     Polygon expanded( Planc cref in_expansion, expand_type in_expand = POINTED ) const
     {
         Assert( !is_neg( in_expansion ) );
@@ -713,7 +713,7 @@ public:
         return( true );
     }
 
-    Polygon ref join( Polygon cref in_polygon ) { *this = joined( in_polygon ); }
+    Polygon ref join( Polygon cref in_polygon ) { rethis = joined( in_polygon ); }
     Polygon joined( Polygon cref in_polygon ) const
     {
         return_if( !intersects( in_polygon ), *this );

@@ -147,7 +147,7 @@ public:
 
     Bezier( ) { }
 
-    Bezier( varray<Point> cref in_control_points ) : m_control_points( in_control_points ) { for_each( point, in_control_points ) { } }
+    Bezier( varray<Point> cref in_control_points ) : m_control_points( in_control_points ) { }
 
     varray<Point> cref control_points( ) const { return( m_control_points ); }
 
@@ -187,7 +187,7 @@ public:
 
     Path path( uint in_point_count )
     {
-        uint control_point_count = m_control_points.size( );
+        uint control_point_count = control_points( ).size( );
 
         if( is_pos( control_point_count ) )
         {

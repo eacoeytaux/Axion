@@ -28,7 +28,7 @@ public:
 
     Point offset( Angle cref in_angle ) const { return( polygon( ).intersection( Line( position( ), VectorA( in_angle, pythagorean( polygon( ).bound_width( ), polygon( ).bound_height( ) ) ) ) ).front( ).pt2( ) ); }
 
-    Hitbox ref expand( Hitbox cref in_hitbox ) { *this = expanded( in_hitbox ); }
+    Hitbox ref expand( Hitbox cref in_hitbox ) { rethis = expanded( in_hitbox ); }
     Hitbox expanded( Hitbox cref in_hitbox ) const
     {
         if( in_hitbox.polygon( false ).sides( ) )
