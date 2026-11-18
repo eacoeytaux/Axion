@@ -29,8 +29,6 @@ public:
 
     virtual void open( varray<ptr<Object>> cref in_objects = { } );
 
-    equal_default( Door );
-
 protected:
 
     #if defined( AXN_DEBUG )

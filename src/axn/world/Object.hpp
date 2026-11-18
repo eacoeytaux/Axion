@@ -248,6 +248,7 @@ private:
 public:
 
     virtual bool operator==( Object cref in_other ) const { return( id( ) == in_other.id( ) ); }
+    virtual bool operator!=( Object cref in_other ) const { return( id( ) != in_other.id( ) ); }
 
 };
 

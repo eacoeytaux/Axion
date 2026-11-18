@@ -1,8 +1,7 @@
 #ifndef Precompiled_hpp
 #define Precompiled_hpp
 
-// force-included into every .cpp and compiled once per build config (see Axion.vcxproj), so only add headers almost every file uses
-// changing any header in here still rebuilds everything, same as before
+// force include the following files into every *.cpp and compiled once per build config
 
 #include "axn/AXN.hpp"
 
