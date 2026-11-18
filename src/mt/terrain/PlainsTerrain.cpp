@@ -13,6 +13,7 @@ var_const( Planc GRASS_TUFTS_OUTLINE_THICKNESS = ( 3.0 ) );
 
 var_const( Planc BUSH_OFFSET = ( 10.0 ) );
 var_const( span<Planc> BUSH_RADIUS_BACK = { 16.0, 42.0 } );
+var_const( Planc BUSH_BACK_EXTRA_RADIUS = ( 5.0 ) );
 var_const( span<Planc> BUSH_RADIUS_FRONT = { 7.0, 25.0 } );
 
 PlainsTerrain::PlainsTerrain( ptr<Room> in_room, vvarray<Point> cref in_vertices ) : Terrain( in_room, in_vertices )
@@ -65,7 +66,7 @@ PlainsTerrain::PlainsTerrain( ptr<Room> in_room, vvarray<Point> cref in_vertices
                 {
                     Planc radius = Random::rPlanc( BUSH_RADIUS_BACK );
 
-                    bushes_back.insert_back( Polygon::circle( radius + 5.0, ( v * length ) ) ); // todo
+                    bushes_back.insert_back( Polygon::circle( radius + BUSH_BACK_EXTRA_RADIUS, ( v * length ) ) );
                     bushes_front.insert_back( Polygon::circle( radius, ( v * length ) ) );
 
                     length += radius;

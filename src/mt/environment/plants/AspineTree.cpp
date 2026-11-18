@@ -9,6 +9,7 @@ var_const( span<uint> BRANCH_COUNT = { 3, 5 } );
 var_const( span<dec> BRANCH_BASE_HEIGHT_RATIO = { 0.3, 0.333 } );
 var_const( span<dec> BRANCH_LENGTH_RATIO = { 0.333, 0.444444 } );
 var_const( Angle BRANCH_OFFSET = ( Angle::fraction( 8.0 ) ) );
+var_const( dec BRANCH_BOTH_SIDES_CHANCE = ( 0.0 ) );
 
 var_const( uint LEAF_TOP_COUNT = ( 10 ) );
 var_const( uint LEAF_BOTTOM_COUNT = ( 5 ) );
@@ -32,6 +33,9 @@ var_const( span<ticks> LEAF_COUNTDOWN = { 50.0, 300.0 } );
 
 var_const( Color TRUNK_COLOR = ( WHITE ) );
 var_const( Color TRUNK_MARK_COLOR = ( BLACK ) );
+var_const( span<dec> TRUNK_MARK_ALPHA = { 0.25, 0.75 } );
+var_const( span<dec> TRUNK_MARK_SIZE_RATIO = { 0.1, 0.3 } );
+var_const( Angle TRUNK_MARK_ROTATION_MAX = ( Angle::fraction( 16.0 ) ) );
 var_const( ColorSlider LEAF_COLOR = { RED, Color::rgb( 1.0, 0.7, 0.0 ) } );
 
 Drawing draw_trunk( Color cref in_leaf_color, bool in_draw_leaves, Planc cref in_length, Planc cref in_base_width, uint in_branch_count, Point ref leaf_base, Point ref leaf_side1, Point ref leaf_side2 );
@@ -114,7 +118,7 @@ Drawing draw_trunk( Color cref in_leaf_color, bool in_draw_leaves, Planc cref in
 
         bool add_left;
         bool add_right;
-        bool add_both = Random::rbool( 0 ); // todo
+        bool add_both = Random::rbool( BRANCH_BOTH_SIDES_CHANCE );
         if( add_both )
         {
             add_left = true;
@@ -156,8 +160,7 @@ Drawing draw_trunk( Color cref in_leaf_color, bool in_draw_leaves, Planc cref in
         // dec branch_remaining = one_minus( branch_height );
         branch_height += Random::rdec( 0.02, 0.1 );
 
-        // todo constants
-        trunk_drawing.draw( TRUNK_MARK_COLOR.a( Random::rdec( 0.25, 0.75 ) ), Polygon::equilateral( 4, Random::rPlanc( 0.1, 0.3 ) * in_base_width, Vector( trunk ).magnitude( trunk.magnitude( ) * branch_height ) + VectorA( trunk.angle( ) + Random::negated( Random::rAngle( RIGHT ) ), Random::rPlanc( in_base_width ) ), Random::negated( Random::rAngle( Angle::fraction( 16.0 ) ) ) ) );
+        trunk_drawing.draw( TRUNK_MARK_COLOR.a( Random::rdec( TRUNK_MARK_ALPHA ) ), Polygon::equilateral( 4, Random::rdec( TRUNK_MARK_SIZE_RATIO ) * in_base_width, Vector( trunk ).magnitude( trunk.magnitude( ) * branch_height ) + VectorA( trunk.angle( ) + Random::negated( Random::rAngle( RIGHT ) ), Random::rPlanc( in_base_width ) ), Random::negated( Random::rAngle( TRUNK_MARK_ROTATION_MAX ) ) ) );
     }
 
     tree_drawing.draw( trunk_drawing );

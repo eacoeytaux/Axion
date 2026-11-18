@@ -44,9 +44,9 @@ void Terrain::make( varray<Point> cref in_positions, Direction in_bound_directio
     ptr<Terrain::Vertex> last;
     ptr<Terrain::Vertex> previous;
 
-    lambdaf( make_edge )( ptr<Terrain::Vertex> in_v1, ptr<Terrain::Vertex> in_v12 )
+    lambdaf( make_edge )( ptr<Terrain::Vertex> in_v1, ptr<Terrain::Vertex> in_v2 )
     {
-        ptr<Terrain::Edge> edge = new Terrain::Edge( this, in_v1, in_v12 );
+        ptr<Terrain::Edge> edge = new Terrain::Edge( this, in_v1, in_v2 );
 
         room( )->object_grid( ).insert_terrain( edge );
 

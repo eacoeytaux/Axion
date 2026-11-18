@@ -18,11 +18,15 @@ var_const( dec JUMP_DEGRATION_RATIO = ( 0.9 ) );
 var_const( ticks JUMP_MAX_DURATION = ( 5.0 ) );
 var_const( ticks JUMP_RESET_WAIT_TIME = ( 7.0 ) ); // starts after jump duration ends
 var_const( ticks COYOTE_JUMP_TIME = ( 3.0 ) );
+var_const( Planc BOUNCE_MINIMUM_SPEED = ( 16.0 ) );
 
 var_const( ticks DASH_DURATION = ( 3.9 ) );
 var_const( ticks DASH_RESET_WAIT_TIME = ( 7.9 ) ); // starts after jump duration ends
 
 var_const( Planc LIGHT_SIGHT = ( HEIGHT * 3.0 ) );
+
+var_const( dec HEAL_RATE = ( 0.01 ) );
+var_const( uint TRACKED_POSITION_COUNT = ( 32 ) );
 
 var_const( ticks STEP_DURATION = ( 4.0 ) );
 var_const( Planc STEP_DISTANCE = ( 4.0 ) );
@@ -35,6 +39,11 @@ var_const( dec ARROW_VELOCITY_DAMPEN = ( 0.25 ) );
 
 var_const( Planc DEFAULT_HOOK_LAUNCH_SPEED = ( 32.0 ) );
 var_const( uint RELOAD_TIME = ( 20 ) );
+
+var_const( Planc ROPE_SHORTEN_SPEED = ( 3.0 ) );
+var_const( Planc ROPE_EXTEND_SPEED = ( 5.0 ) );
+var_const( dec TAUT_SPEED_RATIO = ( 2.0 ) );
+var_const( dec TAUT_AIR_RESISTANCE = ( 0.01 ) );
 
 var_const( Planc DUST_MINIMUM_SPEED = ( METER / 6.0 ) );
 var_const( span<dec> DUST_VELOCITY_DAMPEN_RATIO = { 0.075, 0.15 } );
@@ -68,6 +77,7 @@ var_const( Planc MOHAWK_OFFSET = ( MOHAWK_HEIGHT * 0.5 ) );
 
 var_const( Planc BODY_HEIGHT = ( HEIGHT / 3.0 ) );
 var_const( Planc LEG_HEIGHT = ( HEIGHT / 4.0 ) );
+var_const( dec FOOT_TUCK_RATIO = ( 0.25 ) );
 
 var_const( Planc BODY_WIDTH = ( HEIGHT / 2.0 ) );
 
@@ -231,7 +241,7 @@ m_low_health_effect( this )
     interactive( true );
     solid( true );
 
-    track_position( 32 ); // todo
+    track_position( TRACKED_POSITION_COUNT );
 
     space( Polygon( { Point( half( WIDTH ), half( HEIGHT ) ),
                       Point( -half( WIDTH ), half( HEIGHT ) ),
@@ -342,7 +352,7 @@ void Climber::update( )
     }
     else
     {
-        heal( 0.01 ); // todo
+        heal( HEAL_RATE );
 
         if( m_aim_display_timer.tick( ) )
         {
@@ -411,12 +421,12 @@ void Climber::update( )
         {
             if( looking_up( ) )
             {
-                hook( ).shorten_rope( 3.0 ); // todo
+                hook( ).shorten_rope( ROPE_SHORTEN_SPEED );
             }
 
             if( looking_down( ) )
             {
-                hook( ).extend_rope( 5.0 ); // todo
+                hook( ).extend_rope( ROPE_EXTEND_SPEED );
             }
         }
 
@@ -511,7 +521,7 @@ void Climber::update_velocity( )
     {
         if( hook( ).taut( ) )
         {
-            movement_speed *= 2.0; // todo
+            movement_speed *= TAUT_SPEED_RATIO;
         }
 
         Vector v;
@@ -694,7 +704,7 @@ dec Climber::air_resistance( ) const
 {
     if( hook( ).taut( ) )
     {
-        return( 0.01 ); // TODO
+        return( TAUT_AIR_RESISTANCE );
     }
 
     return( Player::air_resistance( ) );
@@ -834,7 +844,7 @@ void Climber::ground( ptr<Terrain::Node> ground, Terrain::Bumper cref in_bumper 
                 // todo room( )->add_object( new Dust( room( ), pt, dust_velocity + VectorA( a, Random::rPlanc( DUST_RISE ) ), room( )->terrain( )->dust_color( ) ) );
             }
 
-            if( velocity( ).flattened( ground->normal( ) ).magnitude( ) > 16.0 ) // todo set min bounce mag
+            if( velocity( ).flattened( ground->normal( ) ).magnitude( ) > BOUNCE_MINIMUM_SPEED )
             {
                 add_velocity( VectorA( velocity( ).angle( ).reflect( ground->normal( ) ).flip( ), ( velocity( ).magnitude( ) ) ) - velocity( ) );
             }
@@ -1347,7 +1357,7 @@ void Climber::draw_legs( )
         }
         else if( alive( ) && !god( ) )
         {
-            foot += VectorY( LEG_HEIGHT / 4.0 ); // todo
+            foot += VectorY( LEG_HEIGHT * FOOT_TUCK_RATIO );
         }
 
         Drawing boot_drawing_back = boot_drawing;

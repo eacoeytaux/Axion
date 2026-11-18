@@ -1,6 +1,10 @@
 #include "mt/mobs/enemies/Wisp.hpp"
 
 var_const( Planc MOVE_SPEED = ( 0.01 ) );
+var_const( dec ARRIVE_VELOCITY_DAMPEN_RATIO = ( 0.9 ) );
+
+var_const( Planc SIGHT_RANGE = ( 300.0 ) );
+var_const( Planc ALERT_RANGE = ( 200.0 ) );
 
 var_const( Planc HEAD_RADIUS = ( 10.0 ) );
 var_const( Planc FACE_RADIUS = ( HEAD_RADIUS * 0.8 ) );
@@ -51,9 +55,8 @@ Wisp::Wisp( ptr<Room> in_room, Point cref in_position ) : Enemy( in_room, in_pos
 
     hurt_display_duration( 3 );
 
-    // todo
-    sight_range( 300.0 );
-    alert_range( 200.0 );
+    sight_range( SIGHT_RANGE );
+    alert_range( ALERT_RANGE );
 
     m_reload_timer.duration( BULLET_RELOAD_TIME );
 
@@ -126,7 +129,7 @@ void Wisp::update( )
             }
             else
             {
-                add_velocity( -velocity( ) * 0.9 ); // todo
+                add_velocity( -velocity( ) * ARRIVE_VELOCITY_DAMPEN_RATIO );
             }
 
             if( m_reload_timer.completed( ) )

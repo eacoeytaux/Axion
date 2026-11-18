@@ -1,5 +1,5 @@
-#ifndef Stalite_hpp
-#define Stalite_hpp
+#ifndef Stalaite_hpp
+#define Stalaite_hpp
 
 #include "mt/MountMerciless.hpp"
 #include "axn/world/Object.hpp"
@@ -58,9 +58,9 @@ class Stalactite : public Stalaite<true>
 public:
 
     Stalactite( ptr<Room> in_room, Color cref in_color, Point cref in_base, Planc cref in_width, Planc cref in_height, dec in_z = 1.0 ) : Stalaite( in_room, in_color, in_base, in_width, in_height, in_z ) { }
-    Stalactite( ptr<Room> in_room, Color cref in_color, Point cref in_base, Planc cref in_width, Planc cref in_height, bool dripping, dec in_z = 1.0 ) : Stalaite( in_room, in_color, in_base, in_width, in_height, in_z )
+    Stalactite( ptr<Room> in_room, Color cref in_color, Point cref in_base, Planc cref in_width, Planc cref in_height, bool in_dripping, dec in_z = 1.0 ) : Stalaite( in_room, in_color, in_base, in_width, in_height, in_z )
     {
-        if( dripping )
+        if( in_dripping )
         {
             room( )->add_object( new WaterDropper( room( ), tip( ), z( ) ) );
         }
@@ -70,4 +70,4 @@ public:
 
 } // namespace mtmercy
 
-#endif /* Stalite_hpp */
+#endif /* Stalaite_hpp */

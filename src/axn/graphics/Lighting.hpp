@@ -26,7 +26,7 @@ public:
     Color cref tint( ) const { return( m_tint ); }
     void tint( Color cref in_color ) { m_tint = in_color; }
 
-    dec flicker( ) const { return( m_radius ); }
+    dec flicker( ) const { return( m_flicker ); }
     void flicker( dec in_flicker ) { m_flicker = in_flicker; }
 
     equal_default( LightSource );
@@ -38,7 +38,7 @@ private:
 
     Color m_tint;
 
-    dec m_flicker;
+    dec m_flicker = 0.0;
 
 };
 

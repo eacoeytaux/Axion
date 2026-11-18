@@ -12,6 +12,7 @@ var_const( uint END_AGE = ( 9999999 ) );
 #endif
 
 var_const( dec CAMERA_ZOOM_RATIO = ( 0.96875 ) );
+var_const( dec CAMERA_FOCUS_RATIO = ( 0.75 ) );
 
 #if defined( AXN_DEBUG )
 var_const( dec CAMERA_SIDE_BUFFER_RATIO = ( 0.1 ) );
@@ -323,10 +324,9 @@ void World::input( list<ptr<Input>> cref in_inputs )
                 {
                     if( pressed )
                     {
-                        static const dec ratio = 0.75; // todo
                         static bool focused = false;
 
-                        camera( )->height( camera( )->height( ) * ( ( focused = !focused ) ? ( ratio ) : inverse( ratio ) ) );
+                        camera( )->height( camera( )->height( ) * ( ( focused = !focused ) ? ( CAMERA_FOCUS_RATIO ) : inverse( CAMERA_FOCUS_RATIO ) ) );
                     }
                 };
 

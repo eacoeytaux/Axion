@@ -9,6 +9,7 @@ var_const( dec SUNSET_START = ( 0.75 ) );
 var_const( dec SUNSET_END = ( 0.8 ) );
 
 var_const( span<ticks> CLOUD_REGEN_RATE = { 1200.0 } ); // 0 for no clouds
+var_const( Planc CLOUD_START_Y = ( 5000.0 ) );
 
 var_const( Color MIDNIGHT_COLOR = ( BLACK ) );
 var_const( Color SUNRISE_COLOR = ( Color::rgb( 0xFF7800 ) ) );
@@ -118,7 +119,7 @@ ptr<Cloud> Sky::add_cloud( )
 
     ptr<Cloud> cloud = m_clouds.insert_back( new Cloud( room( ) ) );
 
-    cloud->position( Vector( ( cloud->room_bounds_z( ).lower_bound_x( ) - half( cloud->drawing_bounds_z( ).width( ) ) ), ( 5000.0 ) ) ); // todo 5000 // todo move to Cloud?
+    cloud->position( Vector( ( cloud->room_bounds_z( ).lower_bound_x( ) - half( cloud->drawing_bounds_z( ).width( ) ) ), ( CLOUD_START_Y ) ) ); // todo move to Cloud?
 
     return( room( )->add_object( cloud ) );
 }

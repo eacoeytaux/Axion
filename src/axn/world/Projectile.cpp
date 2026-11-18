@@ -4,6 +4,9 @@
 #include "axn/world/Mob.hpp"
 #include "axn/world/Player.hpp"
 
+var_const( dec DEFAULT_GRAVITY_SCALE = ( 0.5 ) );
+var_const( dec DEFAULT_AIR_RESISTANCE = ( 0.001 ) );
+
 Projectile::Projectile( ptr<Room> in_room, Damage cref in_damage, Point cref in_position, Vector cref in_velocity ) : Object( in_room, in_position, in_velocity )
 {
     #if defined( AXN_DEBUG )
@@ -14,9 +17,8 @@ Projectile::Projectile( ptr<Room> in_room, Damage cref in_damage, Point cref in_
 
     solid( true );
 
-    // todo
-    gravity_scale( 0.5 );
-    air_resistance( 0.001 );
+    gravity_scale( DEFAULT_GRAVITY_SCALE );
+    air_resistance( DEFAULT_AIR_RESISTANCE );
 
     m_damage = in_damage;
 

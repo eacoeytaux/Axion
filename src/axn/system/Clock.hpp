@@ -12,17 +12,17 @@ class Clock
 
 private:
 
-    uint m_ms; // milliseconds since epoch time
+    uint64 m_ms; // milliseconds since epoch time
 
 public:
 
     Clock( );
 
-    Clock( uint in_ms );
+    Clock( uint64 in_ms );
 
-    operator uint( ) const { return( m_ms ); }
+    operator uint64( ) const { return( m_ms ); }
 
-    uint milliseconds( ) const { return( m_ms ); }
+    uint64 milliseconds( ) const { return( m_ms ); }
     uint seconds( ) const { return( milliseconds( ) / 1000.0 ); }
     uint minutes( ) const { return( seconds( ) / 60.0 ); }
     uint hours( ) const { return( minutes( ) / 60.0 ); }
@@ -35,7 +35,7 @@ public:
 
 };
 
-inline uint milliseconds( ) { return( Clock( ).milliseconds( ) ); }
+inline uint64 milliseconds( ) { return( Clock( ).milliseconds( ) ); }
 inline uint seconds( ) { return( milliseconds( ) / 1000.0 ); }
 inline uint minutes( ) { return( seconds( ) / 60.0 ); }
 inline uint hours( ) { return( minutes( ) / 60.0 ); }

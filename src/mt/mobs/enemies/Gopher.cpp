@@ -116,7 +116,7 @@ void Gopher::render( )
     }
 }
 
-DirtBall::DirtBall( ptr<Room> room, Planc cref in_radius, Point cref in_position, Vector cref in_velocity ) : Object( room, in_position, in_velocity )
+DirtBall::DirtBall( ptr<Room> in_room, Planc cref in_radius, Point cref in_position, Vector cref in_velocity ) : Object( in_room, in_position, in_velocity )
 {
     #if defined( AXN_DEBUG )
     draw_debug = true;

@@ -41,7 +41,7 @@ public:
 
     static Error seed( uint in_seed );
     static Error seed( string cref in_seed ) { return( seed( stoi( in_seed ) ) ); }
-    static Error seed_milliseconds( ) { return( seed( milliseconds( ) ) ); }
+    static Error seed_milliseconds( ) { return( seed( uint( milliseconds( ) ) ) ); }
 
     static Error reset( ) { return( seed( seed( ) ) ); }
 
@@ -108,7 +108,7 @@ public:
         varray<Polygon> triangles = in_polygon.triangles( );
         varray<dec> div( triangles.size( ) );
 
-        return_if( !is_empty( triangles ), in_polygon.bounds_center( ) );
+        return_if( is_empty( triangles ), in_polygon.bounds_center( ) );
 
         double area = in_polygon.area( );
 

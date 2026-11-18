@@ -6,6 +6,7 @@
 var_const( Planc DEFAULT_ROPE_MAX_LENGTH = ( METER * 10.0 ) );
 var_const( Planc DEFAULT_ROPE_GROWTH_SPEED = ( 33.0 ) );
 var_const( Planc DEFAULT_ROPE_RETRACT_SPEED = ( 64.0 ) );
+var_const( dec LAUNCH_GRAVITY_SCALE = ( 0.25 ) );
 
 var_const( Planc HOOK_LENGTH = ( 38.0 ) );
 var_const( Planc HOOK_THICKNESS = ( 5.0 ) );
@@ -96,7 +97,7 @@ void Hook::update_velocity( )
     }
     else if( state( ) == LAUNCHING )
     {
-        gravity_scale( 0.25 ); // todo
+        gravity_scale( LAUNCH_GRAVITY_SCALE );
         m_rope_length = m_owner->position( ).distance_to( position( ) );
 
         if( grounded( ) )

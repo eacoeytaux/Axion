@@ -113,7 +113,7 @@ protected:
         }
     }
 
-    void add_light_source( Point cref in_position, Planc cref in_radius, Planc cref in_flicker = P0, Color cref in_tint = CLEAR ) { m_light_sources.insert_back( LightSource( in_position, in_radius ) ); }
+    void add_light_source( Point cref in_position, Planc cref in_radius, Planc cref in_flicker = P0, Color cref in_tint = CLEAR ) { m_light_sources.insert_back( LightSource( in_position, in_radius, in_tint, dec( in_flicker ) ) ); }
 
     LightSource cref add_light_source( LightSource cref in_light_source ) { m_light_sources.insert_back( in_light_source ); return( in_light_source ); }
     varray<LightSource> cref add_light_sources( varray<LightSource> cref in_light_sources ) { m_light_sources.insert_back( in_light_sources ); return( in_light_sources ); }

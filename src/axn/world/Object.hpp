@@ -103,7 +103,7 @@ public:
     Point position( ) const;
 
     Point last_position( uint in_past = 0 ) const;
-    queue<Point> cref last_positions( uint in_past = 0 ) const;
+    queue<Point> last_positions( uint in_past = 0 ) const;
     queue<queue<Point>> cref last_positions( ) const;
 
     void subscribe_to_movement( ptr<Object> in_object );

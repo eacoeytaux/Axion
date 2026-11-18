@@ -27,6 +27,7 @@ namespace axn
 {
 
 typedef unsigned int uint;
+typedef unsigned long long uint64;
 
 typedef double dec;
 
