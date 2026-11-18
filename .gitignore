@@ -1,5 +1,9 @@
 # -- ALL --
 
+/bin/
+/tmp/
+/jnk/
+
 # compiled object files
 *.o
 *.obj

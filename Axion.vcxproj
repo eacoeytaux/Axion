@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="DebugRelease|Win32">
-      <Configuration>DebugRelease</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugRelease|x64">
-      <Configuration>DebugRelease</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReDebug|Win32">
+      <Configuration>ReDebug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReDebug|x64">
+      <Configuration>ReDebug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -27,124 +27,172 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Angle.cpp" />
-    <ClCompile Include="Arrow.cpp" />
-    <ClCompile Include="AspenTree.cpp" />
-    <ClCompile Include="Bird.cpp" />
-    <ClCompile Include="Bush.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Climber.cpp" />
-    <ClCompile Include="Clock.cpp" />
-    <ClCompile Include="Cloud.cpp" />
-    <ClCompile Include="Coordinate.cpp" />
-    <ClCompile Include="DistantBird.cpp" />
-    <ClCompile Include="Drawing.cpp" />
-    <ClCompile Include="Dust.cpp" />
-    <ClCompile Include="Engine.cpp" />
-    <ClCompile Include="EngineSDL.cpp" />
-    <ClCompile Include="Fire.cpp" />
-    <ClCompile Include="FixedRectangle.cpp" />
-    <ClCompile Include="Fox.cpp" />
-    <ClCompile Include="God.cpp" />
-    <ClCompile Include="GrassTerrain.cpp" />
-    <ClCompile Include="Hills.cpp" />
-    <ClCompile Include="Joint.cpp" />
-    <ClCompile Include="Lighting.cpp" />
-    <ClCompile Include="LightSource.cpp" />
-    <ClCompile Include="Line.cpp" />
-    <ClCompile Include="Logger.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Matter.cpp" />
-    <ClCompile Include="Mob.cpp" />
-    <ClCompile Include="MountainRange.cpp" />
-    <ClCompile Include="MountMerciless.cpp" />
-    <ClCompile Include="Object.cpp" />
-    <ClCompile Include="OGL.cpp" />
-    <ClCompile Include="PineTree.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Polygon.cpp" />
-    <ClCompile Include="Random.cpp" />
-    <ClCompile Include="Skull.cpp" />
-    <ClCompile Include="Sky.cpp" />
-    <ClCompile Include="Snail.cpp" />
-    <ClCompile Include="SoundClip.cpp" />
-    <ClCompile Include="Speaker.cpp" />
-    <ClCompile Include="Terrain.cpp" />
-    <ClCompile Include="TerrainEdge.cpp" />
-    <ClCompile Include="TerrainVertex.cpp" />
-    <ClCompile Include="Transform.cpp" />
-    <ClCompile Include="Vector.cpp" />
-    <ClCompile Include="Waterfall.cpp" />
-    <ClCompile Include="World.cpp" />
+    <ClCompile Include="src\axn\audio\SoundClip.cpp" />
+    <ClCompile Include="src\axn\audio\Speaker.cpp" />
+    <ClCompile Include="src\axn\graphics\Camera.cpp" />
+    <ClCompile Include="src\axn\graphics\Drawing.cpp" />
+    <ClCompile Include="src\axn\graphics\Lighting.cpp" />
+    <ClCompile Include="src\axn\system\Assert.cpp" />
+    <ClCompile Include="src\axn\system\Clock.cpp" />
+    <ClCompile Include="src\axn\system\Engine.cpp" />
+    <ClCompile Include="src\axn\system\EngineCatch.cpp" />
+    <ClCompile Include="src\axn\system\EngineSDL.cpp" />
+    <ClCompile Include="src\axn\system\Logger.cpp" />
+    <ClCompile Include="src\axn\system\OGL.cpp" />
+    <ClCompile Include="src\axn\system\Random.cpp" />
+    <ClCompile Include="src\axn\system\Settings.cpp" />
+    <ClCompile Include="src\axn\world\Damage.cpp" />
+    <ClCompile Include="src\axn\world\Door.cpp" />
+    <ClCompile Include="src\axn\world\Enemy.cpp" />
+    <ClCompile Include="src\axn\world\Mob.cpp" />
+    <ClCompile Include="src\axn\world\Object.cpp" />
+    <ClCompile Include="src\axn\world\Particle.cpp" />
+    <ClCompile Include="src\axn\world\Player.cpp" />
+    <ClCompile Include="src\axn\world\Projectile.cpp" />
+    <ClCompile Include="src\axn\world\Room.cpp" />
+    <ClCompile Include="src\axn\world\SplashScreen.cpp" />
+    <ClCompile Include="src\axn\world\Terrain.cpp" />
+    <ClCompile Include="src\axn\world\World.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\mt\background\Cloud.cpp" />
+    <ClCompile Include="src\mt\background\DistantBird.cpp" />
+    <ClCompile Include="src\mt\background\Hills.cpp" />
+    <ClCompile Include="src\mt\background\MountainRange.cpp" />
+    <ClCompile Include="src\mt\background\Sky.cpp" />
+    <ClCompile Include="src\mt\environment\critters\Butterfly.cpp" />
+    <ClCompile Include="src\mt\environment\critters\Snail.cpp" />
+    <ClCompile Include="src\mt\environment\misc\Bone.cpp" />
+    <ClCompile Include="src\mt\environment\misc\CampFire.cpp" />
+    <ClCompile Include="src\mt\environment\misc\Dust.cpp" />
+    <ClCompile Include="src\mt\environment\misc\Fire.cpp" />
+    <ClCompile Include="src\mt\environment\misc\Sign.cpp" />
+    <ClCompile Include="src\mt\environment\plants\AspineTree.cpp" />
+    <ClCompile Include="src\mt\environment\plants\Bush.cpp" />
+    <ClCompile Include="src\mt\environment\plants\PineTree.cpp" />
+    <ClCompile Include="src\mt\environment\plants\Tree.cpp" />
+    <ClCompile Include="src\mt\environment\plants\WoakTree.cpp" />
+    <ClCompile Include="src\mt\environment\rocks\Boulder.cpp" />
+    <ClCompile Include="src\mt\environment\water\WaterDrop.cpp" />
+    <ClCompile Include="src\mt\environment\water\Waterfall.cpp" />
+    <ClCompile Include="src\mt\hazards\Spikes.cpp" />
+    <ClCompile Include="src\mt\hazards\Thorns.cpp" />
+    <ClCompile Include="src\mt\mobs\Bird.cpp" />
+    <ClCompile Include="src\mt\mobs\enemies\Fox.cpp" />
+    <ClCompile Include="src\mt\mobs\enemies\Gopher.cpp" />
+    <ClCompile Include="src\mt\mobs\enemies\Porkupine.cpp" />
+    <ClCompile Include="src\mt\mobs\enemies\Unalope.cpp" />
+    <ClCompile Include="src\mt\mobs\enemies\Wisp.cpp" />
+    <ClCompile Include="src\mt\MountMerciless.cpp" />
+    <ClCompile Include="src\mt\player\Arrow.cpp" />
+    <ClCompile Include="src\mt\player\Climber.cpp" />
+    <ClCompile Include="src\mt\player\Hook.cpp" />
+    <ClCompile Include="src\mt\rooms\Caves.cpp" />
+    <ClCompile Include="src\mt\rooms\TrainingGrounds.cpp" />
+    <ClCompile Include="src\mt\terrain\CavesTerrain.cpp" />
+    <ClCompile Include="src\mt\terrain\PlainsTerrain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Angle.hpp" />
-    <ClInclude Include="Arrow.hpp" />
-    <ClInclude Include="AspenTree.hpp" />
-    <ClInclude Include="Assert.hpp" />
-    <ClInclude Include="Audio.hpp" />
-    <ClInclude Include="AXN.hpp" />
-    <ClInclude Include="Background.hpp" />
-    <ClInclude Include="Bedrock.hpp" />
-    <ClInclude Include="Bird.hpp" />
-    <ClInclude Include="Bush.hpp" />
-    <ClInclude Include="Camera.hpp" />
-    <ClInclude Include="Climber.hpp" />
-    <ClInclude Include="Clock.hpp" />
-    <ClInclude Include="Cloud.hpp" />
-    <ClInclude Include="Color.hpp" />
-    <ClInclude Include="Constants.hpp" />
-    <ClInclude Include="Coordinate.hpp" />
-    <ClInclude Include="Debug.hpp" />
-    <ClInclude Include="DistantBird.hpp" />
-    <ClInclude Include="Drawing.hpp" />
-    <ClInclude Include="Dust.hpp" />
-    <ClInclude Include="Engine.hpp" />
-    <ClInclude Include="Error.hpp" />
-    <ClInclude Include="Fire.hpp" />
-    <ClInclude Include="FixedRectangle.hpp" />
-    <ClInclude Include="Foreground.hpp" />
-    <ClInclude Include="Fox.hpp" />
-    <ClInclude Include="Geometry.hpp" />
-    <ClInclude Include="Graphics.hpp" />
-    <ClInclude Include="GrassTerrain.hpp" />
-    <ClInclude Include="Hills.hpp" />
-    <ClInclude Include="Joint.hpp" />
-    <ClInclude Include="Lighting.hpp" />
-    <ClInclude Include="LightSource.hpp" />
-    <ClInclude Include="Line.hpp" />
-    <ClInclude Include="Logger.hpp" />
-    <ClInclude Include="Matter.hpp" />
-    <ClInclude Include="Mob.hpp" />
-    <ClInclude Include="MountainRange.hpp" />
-    <ClInclude Include="MountMerciless.hpp" />
-    <ClInclude Include="Namespaces.hpp" />
-    <ClInclude Include="Object.hpp" />
-    <ClInclude Include="OGL.hpp" />
-    <ClInclude Include="OS.hpp" />
-    <ClInclude Include="Physics.hpp" />
-    <ClInclude Include="PineTree.hpp" />
-    <ClInclude Include="Planc.hpp" />
-    <ClInclude Include="Player.hpp" />
-    <ClInclude Include="Polygon.hpp" />
-    <ClInclude Include="Random.hpp" />
-    <ClInclude Include="Skull.hpp" />
-    <ClInclude Include="Sky.hpp" />
-    <ClInclude Include="Snail.hpp" />
-    <ClInclude Include="SoundClip.hpp" />
-    <ClInclude Include="Speaker.hpp" />
-    <ClInclude Include="STD.hpp" />
-    <ClInclude Include="STDc.hpp" />
-    <ClInclude Include="STDptr.hpp" />
-    <ClInclude Include="Terrain.hpp" />
-    <ClInclude Include="TerrainEdge.hpp" />
-    <ClInclude Include="TerrainVertex.hpp" />
-    <ClInclude Include="Transform.hpp" />
-    <ClInclude Include="Utility.hpp" />
-    <ClInclude Include="Vector.hpp" />
-    <ClInclude Include="Visible.hpp" />
-    <ClInclude Include="Waterfall.hpp" />
-    <ClInclude Include="World.hpp" />
+    <ClInclude Include="src\axn\audio\Audio.hpp" />
+    <ClInclude Include="src\axn\audio\SoundClip.hpp" />
+    <ClInclude Include="src\axn\audio\Speaker.hpp" />
+    <ClInclude Include="src\axn\AXN.hpp" />
+    <ClInclude Include="src\axn\geometry\Angle.hpp" />
+    <ClInclude Include="src\axn\geometry\Curve.hpp" />
+    <ClInclude Include="src\axn\geometry\Circle.hpp" />
+    <ClInclude Include="src\axn\geometry\Crescent.hpp" />
+    <ClInclude Include="src\axn\geometry\Cycle.hpp" />
+    <ClInclude Include="src\axn\geometry\FixedRectangle.hpp" />
+    <ClInclude Include="src\axn\geometry\Geometry.hpp" />
+    <ClInclude Include="src\axn\geometry\Grid.hpp" />
+    <ClInclude Include="src\axn\geometry\Line.hpp" />
+    <ClInclude Include="src\axn\geometry\Path.hpp" />
+    <ClInclude Include="src\axn\geometry\Planc.hpp" />
+    <ClInclude Include="src\axn\geometry\Point.hpp" />
+    <ClInclude Include="src\axn\geometry\Polygon.hpp" />
+    <ClInclude Include="src\axn\geometry\Transform.hpp" />
+    <ClInclude Include="src\axn\geometry\Triangle.hpp" />
+    <ClInclude Include="src\axn\geometry\Vector.hpp" />
+    <ClInclude Include="src\axn\graphics\Camera.hpp" />
+    <ClInclude Include="src\axn\graphics\Color.hpp" />
+    <ClInclude Include="src\axn\graphics\Drawing.hpp" />
+    <ClInclude Include="src\axn\graphics\Graphics.hpp" />
+    <ClInclude Include="src\axn\graphics\Lighting.hpp" />
+    <ClInclude Include="src\axn\graphics\Visible.hpp" />
+    <ClInclude Include="src\axn\physics\Joint.hpp" />
+    <ClInclude Include="src\axn\physics\Matter.hpp" />
+    <ClInclude Include="src\axn\physics\Physics.hpp" />
+    <ClInclude Include="src\axn\system\Assert.hpp" />
+    <ClInclude Include="src\axn\system\Clock.hpp" />
+    <ClInclude Include="src\axn\system\Debug.hpp" />
+    <ClInclude Include="src\axn\system\Defines.hpp" />
+    <ClInclude Include="src\axn\system\Engine.hpp" />
+    <ClInclude Include="src\axn\system\Error.hpp" />
+    <ClInclude Include="src\axn\system\Logger.hpp" />
+    <ClInclude Include="src\axn\system\Namespaces.hpp" />
+    <ClInclude Include="src\axn\system\OGL.hpp" />
+    <ClInclude Include="src\axn\system\OS.hpp" />
+    <ClInclude Include="src\axn\system\Random.hpp" />
+    <ClInclude Include="src\axn\system\Settings.hpp" />
+    <ClInclude Include="src\axn\system\STD.hpp" />
+    <ClInclude Include="src\axn\system\STDc.hpp" />
+    <ClInclude Include="src\axn\system\STDio.hpp" />
+    <ClInclude Include="src\axn\system\STDptr.hpp" />
+    <ClInclude Include="src\axn\system\Utility.hpp" />
+    <ClInclude Include="src\axn\tests\Catch.hpp" />
+    <ClInclude Include="src\axn\tests\Tests.hpp" />
+    <ClInclude Include="src\axn\tests\TestsGeometry.hpp" />
+    <ClInclude Include="src\axn\tests\TestsUtil.hpp" />
+    <ClInclude Include="src\axn\world\Damage.hpp" />
+    <ClInclude Include="src\axn\world\Door.hpp" />
+    <ClInclude Include="src\axn\world\Enemy.hpp" />
+    <ClInclude Include="src\axn\world\Hazard.hpp" />
+    <ClInclude Include="src\axn\world\Hitbox.hpp" />
+    <ClInclude Include="src\axn\world\Mob.hpp" />
+    <ClInclude Include="src\axn\world\Object.hpp" />
+    <ClInclude Include="src\axn\world\Particle.hpp" />
+    <ClInclude Include="src\axn\world\Player.hpp" />
+    <ClInclude Include="src\axn\world\Projectile.hpp" />
+    <ClInclude Include="src\axn\world\Room.hpp" />
+    <ClInclude Include="src\axn\world\SplashScreen.hpp" />
+    <ClInclude Include="src\axn\world\Terrain.hpp" />
+    <ClInclude Include="src\axn\world\World.hpp" />
+    <ClInclude Include="src\mt\background\Cloud.hpp" />
+    <ClInclude Include="src\mt\background\DistantBird.hpp" />
+    <ClInclude Include="src\mt\background\Hills.hpp" />
+    <ClInclude Include="src\mt\background\MountainRange.hpp" />
+    <ClInclude Include="src\mt\background\Sky.hpp" />
+    <ClInclude Include="src\mt\environment\critters\Butterfly.hpp" />
+    <ClInclude Include="src\mt\environment\critters\Snail.hpp" />
+    <ClInclude Include="src\mt\environment\misc\Bone.hpp" />
+    <ClInclude Include="src\mt\environment\misc\CampFire.hpp" />
+    <ClInclude Include="src\mt\environment\misc\Dust.hpp" />
+    <ClInclude Include="src\mt\environment\misc\Fire.hpp" />
+    <ClInclude Include="src\mt\environment\misc\Sign.hpp" />
+    <ClInclude Include="src\mt\environment\plants\AspineTree.hpp" />
+    <ClInclude Include="src\mt\environment\plants\Bush.hpp" />
+    <ClInclude Include="src\mt\environment\plants\PineTree.hpp" />
+    <ClInclude Include="src\mt\environment\plants\Tree.hpp" />
+    <ClInclude Include="src\mt\environment\plants\WoakTree.hpp" />
+    <ClInclude Include="src\mt\environment\rocks\Boulder.hpp" />
+    <ClInclude Include="src\mt\environment\rocks\Stalaite.hpp" />
+    <ClInclude Include="src\mt\environment\water\WaterDrop.hpp" />
+    <ClInclude Include="src\mt\environment\water\Waterfall.hpp" />
+    <ClInclude Include="src\mt\hazards\Spikes.hpp" />
+    <ClInclude Include="src\mt\hazards\Thorns.hpp" />
+    <ClInclude Include="src\mt\mobs\Bird.hpp" />
+    <ClInclude Include="src\mt\mobs\enemies\Fox.hpp" />
+    <ClInclude Include="src\mt\mobs\enemies\Gopher.hpp" />
+    <ClInclude Include="src\mt\mobs\enemies\Porkupine.hpp" />
+    <ClInclude Include="src\mt\mobs\enemies\Unalope.hpp" />
+    <ClInclude Include="src\mt\mobs\enemies\Wisp.hpp" />
+    <ClInclude Include="src\mt\MountMerciless.hpp" />
+    <ClInclude Include="src\mt\player\Arrow.hpp" />
+    <ClInclude Include="src\mt\player\Climber.hpp" />
+    <ClInclude Include="src\mt\player\Hook.hpp" />
+    <ClInclude Include="src\mt\rooms\Caves.hpp" />
+    <ClInclude Include="src\mt\rooms\TrainingGrounds.hpp" />
+    <ClInclude Include="src\mt\terrain\CavesTerrain.hpp" />
+    <ClInclude Include="src\mt\terrain\PlainsTerrain.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -161,6 +209,12 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -168,17 +222,18 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReDebug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReDebug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
+    <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -188,7 +243,14 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReDebug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReDebug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
@@ -203,36 +265,73 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'" Label="PropertySheets">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReDebug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReDebug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)\libs\win\sdl2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\src;$(ProjectDir)\lib\win\sdl2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
+    <ClangTidyChecks>
+    </ClangTidyChecks>
+    <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)\libs\win\sdl2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\src;$(ProjectDir)\lib\win\sdl2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
+    <ClangTidyChecks>
+    </ClangTidyChecks>
+    <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'">
-    <IncludePath>$(ProjectDir)\libs\win\sdl2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReDebug|x64'">
+    <IncludePath>$(ProjectDir)\lib\win\sdl2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReDebug|x64'">
+    <IncludePath>$(ProjectDir)\src;$(ProjectDir)\lib\win\sdl2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib\win\sdl2\lib\x64;$(LibraryPath)</LibraryPath>
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\tmp\$(Platform)\$(Configuration)\</IntDir>
+    <ClangTidyChecks>
+    </ClangTidyChecks>
+    <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClangTidyChecks>
+    </ClangTidyChecks>
+    <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReDebug|Win32'">
+    <ClangTidyChecks>
+    </ClangTidyChecks>
+    <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClangTidyChecks>
+    </ClangTidyChecks>
+    <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -240,10 +339,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;$(ProjectDir)\lib\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -254,15 +358,20 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;$(ProjectDir)\lib\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReDebug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -270,27 +379,58 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <Profile>true</Profile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReDebug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;$(ProjectDir)\lib\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>AXN_DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;$(ProjectDir)\lib\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <MinimalRebuild>false</MinimalRebuild>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\libs\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\lib\win\glfw\lib-vc2013;$(ProjectDir)\lib\win\glfw\lib-vc2015;$(ProjectDir)\lib\win\glfw\lib-vc2017;$(ProjectDir)\lib\win\glfw\lib-vc2019;$(ProjectDir)\lib\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -301,7 +441,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;$(ProjectDir)\lib\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <PreprocessToFile>false</PreprocessToFile>
+      <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -309,18 +454,22 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\libs\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\lib\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <Profile>false</Profile>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugRelease|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReDebug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>AXN_DEBUG;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\libs\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\lib\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -328,7 +477,35 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\libs\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\lib\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <Profile>false</Profile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReDebug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>AXN_DEBUG;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;$(ProjectDir)\lib\win\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <Optimization>Full</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\lib\win\glfw\lib-vc2013;$(ProjectDir)\libs\win\glfw\lib-vc2015;$(ProjectDir)\libs\win\glfw\lib-vc2017;$(ProjectDir)\libs\win\glfw\lib-vc2019;$(ProjectDir)\libs\win\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <Profile>false</Profile>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
