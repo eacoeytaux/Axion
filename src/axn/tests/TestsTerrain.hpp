@@ -72,8 +72,16 @@ static void check_corner_bumpers( Hitbox cref in_hitbox, Point cref in_prev, Poi
     check_edge_bumper( bumper1, n1 );
     check_edge_bumper( bumper2, n2 );
 
+    bool concave = ( dec( edge1->normal( ).min_distance( edge2->normal( ) ) ) > 0.0 );
+
+    // concave corners have no arc of their own, the edges' bumpers cross (or touch) and that is the corner
+    if( concave )
+    {
+        check( is_empty( arc ) );
+        check( bumper1.front( ).intersects( bumper2.front( ) ) );
+    }
     // edges meet the vertex end to end
-    if( is_empty( arc ) )
+    else if( is_empty( arc ) )
     {
         Point end = ( is_endpoint( bumper2, bumper1.front( ).pt1( ) ) ? bumper1.front( ).pt1( ) : bumper1.back( ).pt2( ) );
         check( is_endpoint( bumper1, end ) );

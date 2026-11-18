@@ -34,20 +34,20 @@ void WaterDrop::render( )
     draw( m_color, Polygon::circle( m_radius ) );
 }
 
-void WaterDrop::ground( ptr<Terrain::Node> in_ground, Terrain::Bumper cref in_bumper )
+void WaterDrop::ground( Terrain::Bumper cref in_ground )
 {
-    Object::ground( in_ground, in_bumper );
+    Object::ground( in_ground );
 
     if( is_pos( age( ) ) )
     {
-        if( in_ground )
+        if( in_ground.node( ) )
         {
             if( !m_splashed )
             {
                 bool flipped = Random::rbool( );
                 for_range( i, Random::rint( SPLASH_DROP_COUNT ) )
                 {
-                    room( )->add_object( new WaterDrop( room( ), position( ), VectorA( in_ground->normal( ) + negated( negated( Random::rAngle( SPLASH_OFFSET ), ( i % 2 ) ), flipped ), velocity( ).magnitude( ) * Random::rPlanc( SPLASH_DAMPEN ) ) ) );
+                    room( )->add_object( new WaterDrop( room( ), position( ), VectorA( in_ground.node( )->normal( ) + negated( negated( Random::rAngle( SPLASH_OFFSET ), ( i % 2 ) ), flipped ), velocity( ).magnitude( ) * Random::rPlanc( SPLASH_DAMPEN ) ) ) );
                 }
             }
 
@@ -66,7 +66,7 @@ WaterDropper::WaterDropper( ptr<Room> in_room, Point cref in_position, dec in_z 
     solid( false );
     interactive( false );
 
-    do_count( Random::rint( m_drip.duration( ) ) ) { m_drip.tick( ); } // todo should this be like a universal function
+    m_drip.randomize( ); // start partway through so droppers don't all drip in sync
 }
 
 #if defined( AXN_DEBUG )

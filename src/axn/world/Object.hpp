@@ -31,7 +31,7 @@ public:
     virtual ~Object( );
 
     Object( ptr<Room> in_room );
-    Object( ptr<Room> in_room, dec z );
+    Object( ptr<Room> in_room, dec in_z );
     Object( ptr<Room> in_room, Point cref in_position );
     Object( ptr<Room> in_room, Point cref in_position, dec in_z );
     Object( ptr<Room> in_room, Point cref in_position, Vector cref in_velocity );
@@ -123,10 +123,9 @@ public:
     bool interactive( ) const;
     bool stationary( ) const;
 
-    bool grounded( ) const { return( !is_null( ground( ) ) ); }
+    bool grounded( ) const { return( !is_null( ground( ).node( ) ) ); }
 
-    ptr<Terrain::Node> ground( ) const;
-    Terrain::Bumper ground_bumper( ) const;
+    Terrain::Bumper cref ground( ) const { return( m_ground ); } // the bumper the object is on, ground( ).node( ) is the terrain node
     Line ground_bumper_line( ) const; // the bumper line the object is standing on, only meaningful when grounded
 
     bool has_gravity( ) const { return( gravity( ).has_magnitude( ) ); }
@@ -178,8 +177,8 @@ protected:
 
     virtual bool sticks( ptr<Terrain::Node> in_node ); // todo
 
-    virtual void ground( ptr<Terrain::Node> in_node, Terrain::Bumper cref in_bumper );
-    virtual void clear_ground( ) { ground( nullptr, Terrain::Bumper( ) ); }
+    virtual void ground( Terrain::Bumper cref in_ground );
+    virtual void clear_ground( ) { ground( Terrain::Bumper( ) ); }
 
     void gravity( Vector cref in_vec ) { m_gravity_change = in_vec; }
 
@@ -205,6 +204,7 @@ private:
 
     uint m_age = 0;
     uint m_last_world_age_update = 0;
+    bool m_ever_updated = false; // until then m_last_world_age_update means nothing (0 would match a room at age 0 and skip the first update)
 
     bool m_deleted = false;
     bool m_marked_to_delete = false;
@@ -219,8 +219,15 @@ private:
     Planc m_visible_width = P0;
     Planc m_visible_height = P0;
 
-    ptr<Terrain::Node> m_ground;
-    Terrain::Bumper m_ground_bumper;
+    Terrain::Bumper m_ground; // knows its own node, no node means not grounded
+
+    // bumpers depend only on the node and the hitbox shape but are asked for many times per update,
+    // so update_movement( ) caches them while it runs (cleared at the start and end, so nothing goes stale)
+    mutable umap<ptr<const Terrain::Node>, Terrain::Bumper> m_bumper_cache;
+    mutable bool m_bumper_cache_active = false;
+    varray<Point> m_bumper_shape; // Terrain::Node::bumper_shape( terrain_hitbox( ) ) for this update
+
+    Terrain::Bumper bumper( ptr<const Terrain::Node> in_node ) const;
     bool m_passing_terrain = false;
 
     // rotation is change, magnitude is scale

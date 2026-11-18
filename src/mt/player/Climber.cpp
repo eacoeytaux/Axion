@@ -608,7 +608,7 @@ void Climber::update_velocity( )
 
                 m_jump_degradation = one_minus( one_minus( m_jump_degradation ) * JUMP_DEGRATION_RATIO );
 
-                ground( nullptr, Terrain::Bumper( ) );
+                clear_ground( );
             }
             else
             {
@@ -815,9 +815,11 @@ uint Climber::extra_jumps_max( ) const
     return( m_extra_jumps_max );
 }
 
-void Climber::ground( ptr<Terrain::Node> ground, Terrain::Bumper cref in_bumper )
+void Climber::ground( Terrain::Bumper cref in_ground )
 {
-    if( ground )
+    ptr<const Terrain::Node> ground_node = in_ground.node( );
+
+    if( ground_node )
     {
         if( !grounded( ) )
         {
@@ -826,7 +828,7 @@ void Climber::ground( ptr<Terrain::Node> ground, Terrain::Bumper cref in_bumper 
             for_range( i, dust_count )
             {
                 Point pt = position( ) + foot( true ) + ( Vector( foot( true ), foot( false ) ) * ( dec( i ) / dec( dust_count ) ) );
-                Angle a = ground->normal( ) + Random::rAngle( DUST_LANDING_ANGLE.min( ), DUST_LANDING_ANGLE.max( ) );
+                Angle a = ground_node->normal( ) + Random::rAngle( DUST_LANDING_ANGLE.min( ), DUST_LANDING_ANGLE.max( ) );
                 // todo shouldn't start from normal not right?
 
                 if( ( i < half( dust_count ) ) ^ facing_left( ) )
@@ -837,25 +839,25 @@ void Climber::ground( ptr<Terrain::Node> ground, Terrain::Bumper cref in_bumper 
                 // todo room( )->add_object( new Dust( room( ), pt, dust_velocity + VectorA( a, Random::rPlanc( DUST_RISE ) ), room( )->terrain( )->dust_color( ) ) );
             }
 
-            if( velocity( ).flattened( ground->normal( ) ).magnitude( ) > BOUNCE_MINIMUM_SPEED )
+            if( velocity( ).flattened( ground_node->normal( ) ).magnitude( ) > BOUNCE_MINIMUM_SPEED )
             {
-                add_velocity( VectorA( velocity( ).angle( ).reflect( ground->normal( ) ).flip( ), ( velocity( ).magnitude( ) ) ) - velocity( ) );
+                add_velocity( VectorA( velocity( ).angle( ).reflect( ground_node->normal( ) ).flip( ), ( velocity( ).magnitude( ) ) ) - velocity( ) );
             }
             else
             {
                 m_extra_jumps = m_extra_jumps_max;
 
-                Object::ground( ground, in_bumper );
+                Object::ground( in_ground );
             }
         }
         else
         {
-            Object::ground( ground, in_bumper );
+            Object::ground( in_ground );
         }
     }
     else
     {
-        Object::ground( ground, in_bumper );
+        Object::ground( in_ground );
     }
 }
 

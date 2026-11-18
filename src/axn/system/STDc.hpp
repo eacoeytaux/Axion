@@ -375,14 +375,14 @@ public:
 
     uset<T1> cref keys( ) const { return( *this ); }
 
-    T2 ref at( T1 cref in_key ) { return( std::unordered_map<T1, T2>::at( in_key ) ); }
-    T2 cref at( T1 cref in_key ) const { return( std::unordered_map<T1, T2>::at( in_key ) ); }
+    T2 ref at( T1 cref in_key ) { return( std::map<T1, T2>::at( in_key ) ); }
+    T2 cref at( T1 cref in_key ) const { return( std::map<T1, T2>::at( in_key ) ); }
 
-    T2 ref insert( T1 cref in_key, T2 cref in_value = T2( ) ) { std::map<T1, T2>::insert( in_key, in_value ); oset<T1>::insert( in_key ); return( at( in_key ) ); }
+    T2 ref insert( T1 cref in_key, T2 cref in_value = T2( ) ) { std::map<T1, T2>::insert( { in_key, in_value } ); oset<T1>::insert( in_key ); return( at( in_key ) ); }
 
     omap ref remove( T1 cref in_key ) { std::map<T1, T2>::erase( in_key ); oset<T1>::remove( in_key ); rethis; }
 
-    omap ref clear( ) const { std::map<T1, T2>::clear( ); oset<T1>::clear( ); rethis; }
+    omap ref clear( ) { std::map<T1, T2>::clear( ); oset<T1>::clear( ); rethis; }
 
     uint size( ) const { return( uint( std::map<T1, T2>::size( ) ) ); }
 
@@ -398,7 +398,7 @@ public:
     auto begin( ) const { return( std::map<T1, T2>::begin( ) ); }
     auto end( ) const { return( std::map<T1, T2>::end( ) ); }
 
-    T2 ref operator[ ]( T1 cref in_key ) { return( at( in_key ) ); }
+    T2 ref operator[ ]( T1 cref in_key ) { return( contains( in_key ) ? at( in_key ) : insert( in_key ) ); } // adds a default value for a new key, like std::map
     T2 cref operator[ ]( T1 cref in_key ) const { return( at( in_key ) ); }
 
     equal_default( omap<T1, T2> );
@@ -423,7 +423,7 @@ public:
 
     umap ref remove( T1 cref in_key ) { std::unordered_map<T1, T2>::erase( in_key ); uset<T1>::remove( in_key ); rethis; }
 
-    umap ref clear( ) const { std::map<T1, T2>::clear( ); uset<T1>::clear( ); rethis; }
+    umap ref clear( ) { std::unordered_map<T1, T2>::clear( ); uset<T1>::clear( ); rethis; }
 
     uint size( ) const { return( uint( std::unordered_map<T1, T2>::size( ) ) ); }
 
@@ -439,7 +439,7 @@ public:
     auto begin( ) const { return( std::unordered_map<T1, T2>::begin( ) ); }
     auto end( ) const { return( std::unordered_map<T1, T2>::end( ) ); }
 
-    T2 ref operator[ ]( T1 cref in_key ) { return( at( in_key ) ); }
+    T2 ref operator[ ]( T1 cref in_key ) { return( contains( in_key ) ? at( in_key ) : insert( in_key ) ); } // adds a default value for a new key, like std::unordered_map
     T2 cref operator[ ]( T1 cref in_key ) const { return( at( in_key ) ); }
 
     equal_default( umap<T1, T2> );

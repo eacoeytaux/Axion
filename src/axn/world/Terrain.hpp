@@ -19,12 +19,14 @@ public:
 
     class Node;
 
+    // where an object's center can be while its hitbox touches a node, and which node that is
+    // an object's ground is a Bumper, a default Bumper (no node) means not grounded
     class Bumper
     {
 
     private:
 
-        ptr<const Node> m_parent;
+        ptr<const Node> m_node;
 
         Path m_bumpers;
 
@@ -32,9 +34,9 @@ public:
 
         Bumper( ) { }
 
-        Bumper( ptr<const Node> in_parent, Path cref in_bumpers ) : m_parent( in_parent ), m_bumpers( in_bumpers ) { }
+        Bumper( ptr<const Node> in_node, Path cref in_bumpers ) : m_node( in_node ), m_bumpers( in_bumpers ) { }
 
-        ptr<const Node> parent( ) const { return( m_parent ); }
+        ptr<const Node> node( ) const { return( m_node ); }
 
         Path cref path( ) const { return( m_bumpers ); }
 
@@ -53,7 +55,7 @@ public:
 
         Node( ) { }
 
-        Node( ptr<const Terrain> in_parent ) : m_parent( in_parent ) { }
+        Node( ptr<const Terrain> in_parent, bool in_passable = false ) : m_parent( in_parent ), m_passable( in_passable ) { }
 
         ptr<const Terrain> parent( ) { return( m_parent ); }
 
@@ -70,7 +72,12 @@ public:
 
         virtual FixedRectangle bounding_box( ) const = 0;
 
-        virtual Bumper bumpers( Hitbox cref in_hitbox ) const = 0;
+        // bumpers are built from the hitbox turned inside out, working that shape out is most of the cost,
+        // so when building several bumpers for the same hitbox get it once with bumper_shape( ) and pass it in
+        static varray<Point> bumper_shape( Hitbox cref in_hitbox );
+
+        virtual Bumper bumpers( varray<Point> cref in_shape ) const = 0;
+        Bumper bumpers( Hitbox cref in_hitbox ) const { return( bumpers( bumper_shape( in_hitbox ) ) ); }
 
         Angle bumper_normal( Line cref in_bumper_line ) const; // outward normal of one of this node's bumper lines
 
@@ -110,7 +117,8 @@ public:
 
         FixedRectangle bounding_box( ) const override;
 
-        Bumper bumpers( Hitbox cref in_hitbox ) const override;
+        using Node::bumpers;
+        Bumper bumpers( varray<Point> cref in_shape ) const override;
 
     };
 
@@ -141,7 +149,8 @@ public:
 
         FixedRectangle bounding_box( ) const override;
 
-        Bumper bumpers( Hitbox cref in_hitbox ) const override;
+        using Node::bumpers;
+        Bumper bumpers( varray<Point> cref in_shape ) const override;
 
     };
 

@@ -73,8 +73,6 @@ public:
     Drawing ref add_hole( Polygon cref in_hole ); // nothing will be drawn in the hole
     Drawing ref add_bounds( Polygon cref in_bounds ); // nothing will be drawn out of bounds
 
-    Drawing ref clear_bounds( ); // todo this should go away because erase and crop only affect before it
-
     Drawing ref color_filter( function<void( Color ref in_color )> cref in_color_filter ) { m_color_filter = in_color_filter; m_color_filter_set = true; rethis; }
     Drawing ref clear_color_filter( ) { m_color_filter_set = false; rethis; }
 
@@ -118,10 +116,6 @@ public:
         bool extend_lines = false;
 
         bool opaque = true;
-
-        bool fill = false;
-        bool hole = false;
-        bool reset = false;
 
         equal_default( ColoredPolygon );
 

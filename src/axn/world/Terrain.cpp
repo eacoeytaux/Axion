@@ -276,6 +276,15 @@ Angle Terrain::Node::bumper_normal( Line cref in_bumper_line ) const
     return( normal );
 }
 
+varray<Point> Terrain::Node::bumper_shape( Hitbox cref in_hitbox )
+{
+    // the hitbox turned inside out (every point negated), same as polygon( false ).inverted( ) without building a second polygon
+    varray<Point> shape = in_hitbox.polygon( false ).points( );
+    for_each( pt, shape ) { pt = -pt; }
+
+    return( shape );
+}
+
 Terrain::Vertex::Vertex( ptr<const Terrain> parent, Point cref in_position ) : Terrain::Node( parent ) { m_position = in_position; }
 
 Point cref Terrain::Vertex::position( ) const { return( m_position ); }
@@ -306,19 +315,16 @@ Angle Terrain::Vertex::normal( ) const
 
 FixedRectangle Terrain::Vertex::bounding_box( ) const { return( FixedRectangle( 0.0, 0.0, position( ) ) ); }
 
-Terrain::Bumper Terrain::Vertex::bumpers( Hitbox cref in_hitbox ) const
+Terrain::Bumper Terrain::Vertex::bumpers( varray<Point> cref in_shape ) const
 {
-    if( in_hitbox.polygon( ).sides( ) )
+    if( !is_empty( in_shape ) )
     {
         if( edge1( ) && edge2( ) )
         {
             // the hitbox rolls around the vertex from the point resting on edge1 to the point resting on edge2
             // this includes any hitbox sides in between, so a side of the hitbox can sit on the vertex not just a corner
-            varray<Point> pts = in_hitbox.polygon( false ).inverted( ).points( );
+            varray<Point> cref pts = in_shape;
             uint pt_count = pts.size( );
-
-            uint index1 = support_index( pts, edge1( ) );
-            uint index2 = support_index( pts, edge2( ) );
 
             // the resting point follows the normal around the hitbox, so walk the hitbox the way the normal turns
             Angle turn = edge1( )->normal( ).min_distance( edge2( )->normal( ) );
@@ -329,6 +335,9 @@ Terrain::Bumper Terrain::Vertex::bumpers( Hitbox cref in_hitbox ) const
             {
                 return( Terrain::Bumper( this, Path( ) ) );
             }
+
+            uint index1 = support_index( pts, edge1( ) );
+            uint index2 = support_index( pts, edge2( ) );
 
             bool forward = !counter_clockwise( pts ); // convex corners turn clockwise
 
@@ -351,10 +360,14 @@ Terrain::Bumper Terrain::Vertex::bumpers( Hitbox cref in_hitbox ) const
         }
     }
 
-    return( Terrain::Bumper( this, ( in_hitbox.polygon( false ).inverted( ) + position( ) ).perimeter( ) ) );
+    // only one edge (the end of an open terrain), the hitbox can rest against the vertex from any side
+    varray<Point> around;
+    for_each_const( pt, in_shape ) { around.insert_back( pt + position( ) ); }
+
+    return( Terrain::Bumper( this, Path( around, true ) ) );
 }
 
-Terrain::Edge::Edge( ptr<const Terrain> in_parent, ptr<Terrain::Vertex> in_v1, ptr<Terrain::Vertex> in_v2, bool in_passable ) : Terrain::Node( in_parent ),
+Terrain::Edge::Edge( ptr<const Terrain> in_parent, ptr<Terrain::Vertex> in_v1, ptr<Terrain::Vertex> in_v2, bool in_passable ) : Terrain::Node( in_parent, in_passable ),
 m_v1( in_v1 ),
 m_v2( in_v2 )
 {
@@ -375,13 +388,11 @@ Angle Terrain::Edge::normal( ) const { return( vector( ).angle( ) + RIGHT ); }
 
 FixedRectangle Terrain::Edge::bounding_box( ) const { return( FixedRectangle( m_v1->position( ), m_v2->position( ) ) ); }
 
-Terrain::Bumper Terrain::Edge::bumpers( Hitbox cref in_hitbox ) const
+Terrain::Bumper Terrain::Edge::bumpers( varray<Point> cref in_shape ) const
 {
-    if( in_hitbox.polygon( ).sides( ) )
+    if( !is_empty( in_shape ) )
     {
-        varray<Point> pts = in_hitbox.polygon( false ).inverted( ).points( );
-
-        return( Terrain::Bumper( this, Path( line( ).flipped( ) + pts[ support_index( pts, this ) ] ) ) );
+        return( Terrain::Bumper( this, Path( line( ).flipped( ) + in_shape[ support_index( in_shape, this ) ] ) ) );
     }
 
     return( Terrain::Bumper( this, Path( line( ) ) ) );

@@ -6,8 +6,20 @@
 
 // Polygon is written as geometry::Polygon because windows.h (pulled in by Catch) declares a Polygon function
 
+// the full landing sweep drops the walker about 1,700 times and takes around 2 minutes in a Debug build, too slow for every launch,
+// so normally a coarse sweep runs instead, plus the drops that have failed before. uncomment this when working on movement
+//#define AXN_FULL_MOVEMENT_TESTS
+
 namespace axn
 {
+
+#if defined( AXN_FULL_MOVEMENT_TESTS )
+static const dec LANDING_X_STEP = 13.0;
+static const varray<dec> LANDING_SPEEDS = { -9.0, -3.0, 0.0, 3.0, 9.0 };
+#else
+static const dec LANDING_X_STEP = 61.0;
+static const varray<dec> LANDING_SPEEDS = { -9.0, 3.0 };
+#endif
 
 // simulates an object walking over real terrain using the same update_movement the game uses
 
@@ -91,6 +103,7 @@ public:
 
     void step( ) { update( ); }
     void track( uint in_count ) { track_position( in_count ); }
+    void make_interactive( bool in_interactive ) { interactive( in_interactive ); }
 
 protected:
 
@@ -128,10 +141,10 @@ struct MovementFrame
     string ground;
 };
 
-static string describe_ground( ptr<Terrain::Node> in_node )
+static string describe_ground( Terrain::Bumper cref in_ground )
 {
-    if( is_null( in_node ) ) { return( "air" ); }
-    if( !is_null( cast( in_node, Terrain::Edge ) ) ) { return( "edge" ); }
+    if( is_null( in_ground.node( ) ) ) { return( "air" ); }
+    if( !is_null( cast_const( in_ground.node( ), Terrain::Edge ) ) ) { return( "edge" ); }
     return( "vertex" );
 }
 
@@ -256,52 +269,65 @@ static bool feet_in_ground( TestRoom cref in_room, varray<Point> cref in_ground,
     return( false );
 }
 
-// drops the walker at many places and speeds onto the terrain, returns how many drops ended up in the ground
+// drops the walker once at in_x with a sideways in_speed (walking that way too when in_walking), returns false if its feet went into the ground
+static bool check_landing( string cref in_name, varray<Point> cref in_ground, dec in_x, dec in_speed, dec in_walking, bool in_print = true )
+{
+    TestRoom room( in_ground );
+    room.init( );
+
+    TestWalker walker( &room, Point( in_x, room.ground_y( in_x ) + 150.0 ) );
+    walker.velocity( Vector( in_speed, 0.0 ) );
+    walker.walking = ( ( in_speed > 0.0 ) ? in_walking : ( ( in_speed < 0.0 ) ? -in_walking : 0.0 ) );
+
+    varray<MovementFrame> frames;
+
+    for_range( frame, 150 )
+    {
+        walker.step( );
+        frames.insert_back( { frame, walker.position( ), walker.velocity( ), walker.grounded( ), describe_ground( walker.ground( ) ) } );
+
+        // walked off either end of the test terrain, the ground height is made up past there
+        break_if( ( walker.position( ).x( ) < ( in_ground.front( ).x( ) + 50.0 ) ) || ( walker.position( ).x( ) > ( in_ground.back( ).x( ) - 50.0 ) ) );
+
+        if( feet_in_ground( room, in_ground, walker.position( ) ) )
+        {
+            if( in_print )
+            {
+                cout << "---- " << in_name << ": dropped at x " << in_x << " speed " << in_speed << " walking " << in_walking << ", feet went into the ground" << endl;
+                print_frames( "    frames", frames, ( frames.size( ) > 6 ) ? ( frames.size( ) - 6 ) : 0, frames.size( ) );
+            }
+
+            return( false );
+        }
+    }
+
+    return( true );
+}
+
+// drops the walker at many places and speeds onto the terrain (see LANDING_X_STEP / LANDING_SPEEDS), returns how many drops ended up in the ground
 static uint check_landings( string cref in_name, varray<Point> cref in_ground, Planc cref in_from_x, Planc cref in_to_x )
 {
     uint failures = 0;
 
-    for( dec x = in_from_x; x <= in_to_x; x += 13.0 )
+    for( dec x = in_from_x; x <= in_to_x; x += LANDING_X_STEP )
     {
-        for_each_const( speed, varray<dec>( { -9.0, -3.0, 0.0, 3.0, 9.0 } ) )
+        for_each_const( speed, LANDING_SPEEDS )
         {
             for_each_const( walking, varray<dec>( { 0.0, 1.0 } ) )
             {
-
-                TestRoom room( in_ground );
-                room.init( );
-
-                TestWalker walker( &room, Point( x, room.ground_y( x ) + 150.0 ) );
-                walker.velocity( Vector( speed, 0.0 ) );
-                walker.walking = ( ( speed > 0.0 ) ? walking : ( ( speed < 0.0 ) ? -walking : 0.0 ) );
-
-                varray<MovementFrame> frames;
-
-                for_range( frame, 150 )
+                // only print the first few, the rest are usually the same problem
+                if( !check_landing( in_name, in_ground, x, speed, walking, ( failures < 3 ) ) )
                 {
-                    walker.step( );
-                    frames.insert_back( { frame, walker.position( ), walker.velocity( ), walker.grounded( ), describe_ground( walker.ground( ) ) } );
-
-                    // walked off either end of the test terrain, the ground height is made up past there
-                    break_if( ( walker.position( ).x( ) < ( in_ground.front( ).x( ) + 50.0 ) ) || ( walker.position( ).x( ) > ( in_ground.back( ).x( ) - 50.0 ) ) );
-
-                    if( feet_in_ground( room, in_ground, walker.position( ) ) )
-                    {
-                        if( failures < 3 )
-                        {
-                            cout << "---- " << in_name << ": dropped at x " << x << " speed " << speed << " walking " << walking << ", feet went into the ground" << endl;
-                            print_frames( "    frames", frames, ( frames.size( ) > 6 ) ? ( frames.size( ) - 6 ) : 0, frames.size( ) );
-                        }
-
-                        failures++;
-                        break;
-                    }
+                    failures++;
                 }
             }
         }
     }
 
-    cout << "---- " << in_name << ": " << failures << " landings went into the ground" << endl;
+    if( failures )
+    {
+        cout << "---- " << in_name << ": " << failures << " landings went into the ground" << endl;
+    }
 
     return( failures );
 }
@@ -321,6 +347,13 @@ test( "Landing on terrain" )
     check( check_landings( "bumpy", bumpy, 50.0, 500.0 ) == 0 );
     check( check_landings( "steps", steps, 150.0, 500.0 ) == 0 );
     check( check_landings( "spikes", spikes, 120.0, 260.0 ) == 0 );
+
+    // drops that went into the ground before the fixes, always checked even when the sweep is coarse
+    check( check_landing( "steps", steps, 150.0, 3.0, 1.0 ) ); // walked into a step, fell into it at the top corner
+    check( check_landing( "steps", steps, 176.0, 3.0, 1.0 ) );
+    check( check_landing( "spikes", spikes, 133.0, 3.0, 0.0 ) ); // slid into the valley between two spikes
+    check( check_landing( "spikes", spikes, 146.0, 3.0, 0.0 ) );
+    check( check_landing( "spikes", spikes, 159.0, 3.0, 0.0 ) );
 }
 
 test( "Movement over terrain" )
@@ -381,6 +414,37 @@ test( "Object position history" )
     // only 3 frames are tracked, further back gives the oldest
     check( walker.last_position( 10 ) == frame_starts[ 2 ] );
     check( walker.last_positions( ).size( ) == 3 );
+}
+
+test( "Object updates and room grid" )
+{
+    varray<Point> flat = { Point( -400.0, 0.0 ), Point( 1400.0, 0.0 ) };
+    TestRoom room( flat );
+    room.init( );
+
+    TestWalker walker( &room, Point( 300.0, 100.0 ) );
+
+    lambdaf( in_grid )( )
+    {
+        for_each_const( object, room.objects_in_range( FixedRectangle( Point( 290.0, 90.0 ), Point( 310.0, 110.0 ) ) ) )
+        {
+            return_true_if( object.operator->( ) == &walker );
+        }
+
+        return( false );
+    };
+
+    // a new object updates even though the room is still at age 0
+    walker.update_object( );
+    check( walker.age( ) == 1 );
+
+    // switching interactive on puts an object that's already in the room into the grid straight away, not the next time it moves
+    check_not( in_grid( ) );
+    walker.make_interactive( true );
+    check( in_grid( ) );
+
+    walker.make_interactive( false );
+    check_not( in_grid( ) );
 }
 
 test( "Object movement subscriptions" )

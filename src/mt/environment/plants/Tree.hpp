@@ -37,7 +37,7 @@ public:
 
     protected:
 
-        void ground( ptr<Terrain::Node> in_node, Terrain::Bumper cref in_bumper ) override;
+        void ground( Terrain::Bumper cref in_ground ) override;
 
     private:
 

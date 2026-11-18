@@ -138,11 +138,11 @@ void Arrow::angle( Angle cref in_angle )
 
 dec Arrow::length( ) const { return( SHAFT_LENGTH + HEAD_LENGTH_INNER ); }
 
-void Arrow::ground( ptr<Terrain::Node> ground, Terrain::Bumper cref in_bumper )
+void Arrow::ground( Terrain::Bumper cref in_ground )
 {
-    Object::ground( ground, in_bumper );
+    Object::ground( in_ground );
 
-    if( ground )
+    if( in_ground.node( ) )
     {
         stationary( true );
         solid( false );

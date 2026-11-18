@@ -84,7 +84,7 @@ protected:
     void looking_up( bool in_looking );
     void looking_down( bool in_looking );
 
-    void ground( ptr<Terrain::Node> in_node, Terrain::Bumper cref in_bumper ) override;
+    void ground( Terrain::Bumper cref in_ground ) override;
 
     void dash( bool in_dashing );
 

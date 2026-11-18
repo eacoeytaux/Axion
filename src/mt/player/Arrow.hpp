@@ -30,7 +30,7 @@ public:
 
 protected:
 
-    virtual void ground( ptr<Terrain::Node> in_node, Terrain::Bumper cref in_bumper ) override;
+    virtual void ground( Terrain::Bumper cref in_ground ) override;
     virtual void react_to_movement( ptr<Object> in_object, Vector cref in_movement ) override;
 
     virtual void draw_head( );

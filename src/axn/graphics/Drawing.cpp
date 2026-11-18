@@ -64,7 +64,6 @@ Drawing ref Drawing::add_hole( Polygon cref in_polygon )
     ColoredPolygon colored_polygon;
     colored_polygon.polygon = in_polygon;
     colored_polygon.colors = { CLEAR };
-    colored_polygon.hole = true;
 
     back_node( !back_node( ).transform.is_identity( ) ).hole_shapes.insert_back( colored_polygon );
 
@@ -76,19 +75,10 @@ Drawing ref Drawing::add_bounds( Polygon cref in_polygon )
     ColoredPolygon colored_polygon;
     colored_polygon.polygon = in_polygon;
     colored_polygon.colors = { CLEAR };
-    colored_polygon.fill = true;
 
     m_bounding_box.union_with( in_polygon.bounds( ) ); // TODO not just union, but make bounding box only bounds
 
     back_node( !back_node( ).transform.is_identity( ) ).crop_shapes.insert_back( colored_polygon );
-
-    rethis;
-}
-
-Drawing ref Drawing::clear_bounds( )
-{
-    ColoredPolygon colored_polygon;
-    colored_polygon.reset = true;
 
     rethis;
 }

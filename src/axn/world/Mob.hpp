@@ -86,7 +86,7 @@ public:
     virtual void eye_info( Planc cref in_eye_radius ) { return( eye_info( in_eye_radius, 0.0, { 0.0, 0.0 } ) ); }
 
     virtual bool eyes_closed( ) const { return( m_eyes_closed || ( m_blink_duration && !m_blink_timer.completed( ) ) ); }
-    virtual void eyes_closed( bool in_closed ) { m_eyes_closed = in_closed; }
+    virtual void eyes_closed( bool in_closed ) { if( m_eyes_closed != in_closed ) { m_eyes_closed = in_closed; needs_render( true ); } }
 
     bool eyes_open( ) const { return( !eyes_closed( ) ); }
     void eyes_open( bool in_open ) { eyes_closed( !in_open ); }

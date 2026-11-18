@@ -21,4 +21,4 @@ void Particle::pop( ) { }
 
 bool Particle::collide( ptr<Object> in_object ) { return( false ); }
 
-void Particle::ground( ptr<Terrain::Node> in_node, Terrain::Bumper cref in_bumper ) { }
+void Particle::ground( Terrain::Bumper cref in_ground ) { }

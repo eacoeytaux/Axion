@@ -111,7 +111,8 @@ typeT inline T1 cube( T1 cref in_x ) { return( in_x * in_x * in_x ); }
 typeT inline T1 log( T1 cref in_x ) { return( T1( ::log( dec( in_x ) ) ) ); }
 typeT inline T1 log( T1 cref in_x, T1 cref in_base ) { return( T1( ::log( dec( in_x ) ) / ::log( dec( in_base ) ) ) ); }
 
-typeT inline T1 mod( T1 cref in_x, T1 cref in_y, bool in_floored = false ) { return( T1( fmod( dec( in_x ), dec( in_y ) ) ) ); } // TODO make use of floored https://www.geeksforgeeks.org/c/modulus-on-negative-numbers/
+// truncated (default) keeps the sign of in_x like fmod: mod( -1, 4 ) = -1, floored keeps the sign of in_y: mod( -1, 4, true ) = 3
+typeT inline T1 mod( T1 cref in_x, T1 cref in_y, bool in_floored = false ) { dec result = fmod( dec( in_x ), dec( in_y ) ); if( in_floored && ( result != 0.0 ) && ( ( result < 0.0 ) != ( dec( in_y ) < 0.0 ) ) ) { result += dec( in_y ); } return( T1( result ) ); }
 
 inline dec pythagorean( dec in_a, dec in_b ) { return( ( !is_zero( in_a ) && !is_zero( in_b ) ) ? ( sqrt( square( in_a ) + square( in_b ) ) ) : abs( in_a + in_b ) ); }
 
@@ -462,6 +463,8 @@ public:
     void reset( ); // defined in Random.hpp
     void reset( ticks in_countdown ) { duration( in_countdown ); reset( ); }
     void reset( span<ticks> in_countdown_range ) { duration( in_countdown_range ); reset( ); }
+
+    void randomize( ); // start at a random point in the current duration, defined in Random.hpp
 
     // returns true is countdown is finished
     bool tick( ) { return( !is_pos( m_countdown_remaining -= min( 1.0, m_countdown_remaining ) ) ); }

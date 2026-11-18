@@ -23,7 +23,7 @@ public:
     void trim_velocity( ) override;
     void update_velocity( ) override;
 
-    void ground( ptr<Terrain::Node> in_node, Terrain::Bumper cref in_bumper ) override;
+    void ground( Terrain::Bumper cref in_ground ) override;
 
     Planc max_rope_length( ) const;
     Planc rope_length( ) const;

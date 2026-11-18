@@ -19,7 +19,7 @@ bool quit_break = false;
 bool stepping = false; void Engine::step( ) { stepping = true; }
 #endif
 
-Error Engine::quit( ) { return_if( quit_break = true, no_error ); }
+Error Engine::quit( ) { quit_break = true; return( no_error ); }
 
 void Engine::update_eng( )
 {

@@ -26,16 +26,12 @@ section( DEBUG_OVERLAY )
 
 section( MOVEMENT )
 {
-    // TODO shouldn't this be part of the standard point equality check?
-    var_const( Planc BUMPER_EPSILON = ( 0.01 ) ); // how close the center has to be to count as touching a bumper
+    // rounding means the center is rarely exactly on a bumper line, or velocity flattened onto a surface exactly at a right angle to it,
+    // the Point / Planc / Angle comparisons already allow for that (DEFAULT_EPSILON) so they're used throughout instead of exact checks
 
-    // velocity flattened onto a surface is at a right angle to its normal, rounding puts it a hair either side
-    // so only count as moving away from a surface when clearly moving away
-    var_const( Angle LEAVE_SURFACE_EPSILON = ( Angle( 0.001 ) ) );
     var_const( uint MAX_MOVEMENT_STEPS = ( 100 ) ); // safety net so update_movement can never loop forever
 
-    // floating point drift means the center is rarely exactly on a bumper line
-    bool on_bumper( Line cref in_line, Point cref in_pt ) { return( in_line.closest( in_pt ).distance_to( in_pt ) < BUMPER_EPSILON ); }
+    bool on_bumper( Line cref in_line, Point cref in_pt ) { return( in_line.closest( in_pt ) == in_pt ); }
     bool on_bumper( Path cref in_path, Point cref in_pt ) { for_each( line, in_path.lines( ) ) { return_true_if( on_bumper( line, in_pt ) ); } return( false ); }
 
     // the stretch of bumper the center can slide along from in_pt in the direction of in_movement
@@ -53,7 +49,7 @@ section( MOVEMENT )
 
             for_each( end, ends )
             {
-                continue_if( end.distance_to( in_pt ) < BUMPER_EPSILON );
+                continue_if( end == in_pt );
 
                 Line direction( in_pt, end );
                 Angle distance = in_movement.angle( ).min_distance( direction.angle( ) ).abs( );
@@ -93,11 +89,14 @@ section( MOVEMENT )
         return( surface );
     }
 
+    // ptr<Terrain::Node> and ptr<const Terrain::Node> can't be compared directly, compare what they point at
+    bool same_node( const Terrain::Node * in_node1, const Terrain::Node * in_node2 ) { return( in_node1 == in_node2 ); }
+
     // moving away from a surface with in_normal, as opposed to into it or along it
-    bool moving_away( Angle cref in_normal, Vector cref in_velocity ) { return( abs( in_normal.min_distance( in_velocity.angle( ) ) ) < ( RIGHT - LEAVE_SURFACE_EPSILON ) ); }
+    bool moving_away( Angle cref in_normal, Vector cref in_velocity ) { return( in_normal.min_distance( in_velocity.angle( ) ).abs( ) < RIGHT ); }
 
     // moving into a surface with in_normal, as opposed to along it or away from it
-    bool moving_into( Angle cref in_normal, Vector cref in_velocity ) { return( abs( in_normal.min_distance( in_velocity.angle( ) ) ) > ( RIGHT + LEAVE_SURFACE_EPSILON ) ); }
+    bool moving_into( Angle cref in_normal, Vector cref in_velocity ) { return( in_normal.min_distance( in_velocity.angle( ) ).abs( ) > RIGHT ); }
 
     // where in_path first touches in_bumper_line, Line::intersection returns the path's start for any overlapping parallel lines
     Point first_contact( Line cref in_path, Line cref in_bumper_line )
@@ -229,7 +228,7 @@ void Object::update( )
 
 void Object::update_object( )
 {
-    return_if( m_last_world_age_update == room( )->age( ) );
+    return_if( m_ever_updated && ( m_last_world_age_update == room( )->age( ) ) ); // already updated this room tick
 
     if( marked_to_delete( ) && m_to_deletion_countdown.tick( ) && m_deletion_countdown.tick( ) )
     {
@@ -241,6 +240,7 @@ void Object::update_object( )
     }
 
     m_last_world_age_update = room( )->age( );
+    m_ever_updated = true;
     m_age++;
 }
 
@@ -256,15 +256,15 @@ void Object::trim_velocity( )
 
     if( grounded( ) && terrain_bound( ) )
     {
-        if( !passing_terrain( ) || !ground( )->passable( ) )
+        if( !passing_terrain( ) || !ground( ).node( )->passable( ) )
         {
             if( velocity.has_magnitude( ) )
             {
                 // TODO use in_semi here and elsewhere
                 // judge leaving against the bumper line actually under the object, a vertex's own normal
                 // is only an average of its edges and is wrong for most of its corner
-                Line surface = surface_line( ground( )->bumpers( terrain_hitbox( ) ).path( ), position( ), velocity );
-                Angle surface_normal = ( !is_zero( surface.length( ) ) ? ground( )->bumper_normal( surface ) : ground( )->normal( ) );
+                Line surface = surface_line( bumper( ground( ).node( ) ).path( ), position( ), velocity );
+                Angle surface_normal = ( !is_zero( surface.length( ) ) ? ground( ).node( )->bumper_normal( surface ) : ground( ).node( )->normal( ) );
 
                 if( !moving_away( surface_normal, velocity ) )
                 {
@@ -277,7 +277,7 @@ void Object::trim_velocity( )
                     else
                     {
                         // drifted off the bumper or it's a single point, slide along the surface
-                        velocity.flatten( ground( )->normal( ) + RIGHT );
+                        velocity.flatten( ground( ).node( )->normal( ) + RIGHT );
                     }
                 }
                 else
@@ -310,28 +310,23 @@ void Object::update_velocity( )
 
 void Object::update_movement( )
 {
-    // TODO if( m_passing_terrain && m_ground->passable( ) ) ground = nullptr;
+    // TODO if( m_passing_terrain && ground( ).node( )->passable( ) ) clear_ground( );
+
+    m_bumper_cache.clear( );
+    m_bumper_shape = Terrain::Node::bumper_shape( terrain_hitbox( ) );
+    m_bumper_cache_active = true;
 
     update_velocity( );
 
     dec remaining_percentage = 1.0;
     uint steps = 0;
+    uint still_steps = 0; // steps in a row that didn't move
 
     uset<ptr<Object>> all_collided_objects = { this };
 
-    // only the ground most recently left is skipped
-    ptr<Terrain::Node> previous_ground;
-
     do_while
     {
-        ptr<Terrain::Node> ground_before_trim = ground( );
-
         trim_velocity( );
-
-        if( ground( ) != ground_before_trim )
-        {
-            previous_ground = ground_before_trim;
-        }
 
         Assert( is_num( remaining_percentage ) );
 
@@ -342,8 +337,7 @@ void Object::update_movement( )
         Vector movement = Vector( center, center + adjusted_velocity );
         movement *= check_movement( movement );
 
-        ptr<Terrain::Node> next_ground = ground( );
-        Terrain::Bumper next_bumper = ground_bumper( );
+        Terrain::Bumper next_ground = ground( );
 
         bool collided = false; // touched a new object this step
 
@@ -352,11 +346,11 @@ void Object::update_movement( )
         {
             if( grounded( ) )
             {
-                Path bumper = ground( )->bumpers( terrain_hitbox( ) ).path( );
+                Path ground_path = bumper( ground( ).node( ) ).path( );
 
-                if( on_bumper( bumper, center ) )
+                if( on_bumper( ground_path, center ) )
                 {
-                    Line along = bumper_direction( bumper, center, movement );
+                    Line along = bumper_direction( ground_path, center, movement );
 
                     if( !is_zero( along.length( ) ) )
                     {
@@ -370,13 +364,12 @@ void Object::update_movement( )
                     {
                         // reached the end of the ground's bumper, step onto the neighbor that continues it
                         // if none do the object leaves the ground (e.g. walking off a ledge)
-                        next_ground = nullptr;
-                        next_bumper = Terrain::Bumper( );
+                        next_ground = Terrain::Bumper( );
 
                         // a vertex between two edges at the same angle has no bumper to slide along, so also look one node further
                         varray<ptr<Terrain::Node>> neighbors;
 
-                        for_each( neighbor, varray<ptr<Terrain::Node>>( { ground( )->front( ), ground( )->back( ) } ) )
+                        for_each( neighbor, varray<ptr<Terrain::Node>>( { ground( ).node( )->front( ), ground( ).node( )->back( ) } ) )
                         {
                             continue_if( is_null( neighbor ) );
 
@@ -387,14 +380,13 @@ void Object::update_movement( )
 
                         for_each( neighbor, neighbors )
                         {
-                            continue_if( is_null( neighbor ) || ( neighbor == ground( ) ) );
+                            continue_if( is_null( neighbor ) || same_node( neighbor, ground( ).node( ) ) );
 
-                            Terrain::Bumper neighbor_bumper = neighbor->bumpers( terrain_hitbox( ) );
+                            Terrain::Bumper neighbor_bumper = bumper( neighbor );
 
                             if( !is_zero( bumper_direction( neighbor_bumper.path( ), center, movement ).length( ) ) )
                             {
-                                next_ground = neighbor;
-                                next_bumper = neighbor_bumper;
+                                next_ground = neighbor_bumper;
 
                                 // the next step slides along the new ground
                                 movement = Vector( center, center );
@@ -414,14 +406,29 @@ void Object::update_movement( )
                 Planc hit_distance = P0;
                 Point hit_point;
 
-                for_each( terrain_node, room( )->terrain_in_range( terrain_hitbox( ).polygon( ).bounds( ).union_with( ( terrain_hitbox( ).polygon( ) + movement ).bounds( ) ) ) )
+                // the area the hitbox sweeps through this step, from the bumper shape (the hitbox negated)
+                // instead of building a new hitbox, which isn't cheap
+                Point lower = center;
+                Point upper = center;
+
+                for_each_const( shape_pt, m_bumper_shape )
                 {
-                    // current ground is dealt with above and the previous ground was just left
-                    continue_if( ( terrain_node == ground( ) ) || ( terrain_node == previous_ground ) );
+                    for_each_const( pt, varray<Point>( { center - shape_pt, center + movement - shape_pt } ) )
+                    {
+                        lower = Point( min( lower.x( ), pt.x( ) ), min( lower.y( ), pt.y( ) ) );
+                        upper = Point( max( upper.x( ), pt.x( ) ), max( upper.y( ), pt.y( ) ) );
+                    }
+                }
 
-                    Terrain::Bumper bumper = terrain_node->bumpers( terrain_hitbox( ) );
+                for_each( terrain_node, room( )->terrain_in_range( FixedRectangle( lower, upper ) ) )
+                {
+                    // the current ground is dealt with above, a node the object just left is skipped below
+                    // because it's only touching it and not moving into it
+                    continue_if( same_node( terrain_node, ground( ).node( ) ) );
 
-                    for_each( bumper_line, bumper.path( ).lines( ) )
+                    Terrain::Bumper node_bumper = bumper( terrain_node );
+
+                    for_each( bumper_line, node_bumper.path( ).lines( ) )
                     {
                         // a single point bumper (a vertex between edges at the same angle), the edges on either side cover it
                         continue_if( is_zero( bumper_line.length( ) ) );
@@ -433,7 +440,7 @@ void Object::update_movement( )
 
                         // already touching it: only a hit when moving into it, sliding along a neighbor or leaving it isn't
                         // (otherwise the neighbors at a vertex keep taking turns being the ground and the object never moves)
-                        continue_if( ( distance < BUMPER_EPSILON ) && !moving_into( terrain_node->bumper_normal( bumper_line ), movement ) );
+                        continue_if( ( contact == center ) && !moving_into( terrain_node->bumper_normal( bumper_line ), movement ) );
 
                         if( !hit || ( distance < hit_distance ) )
                         {
@@ -441,8 +448,7 @@ void Object::update_movement( )
                             hit_distance = distance;
                             hit_point = contact;
 
-                            next_ground = terrain_node;
-                            next_bumper = bumper;
+                            next_ground = node_bumper;
                         }
                     }
                 }
@@ -510,10 +516,9 @@ void Object::update_movement( )
                         collided = true;
 
                         // stopped by the object before reaching the terrain it was going to land on
-                        if( movement.magnitude( ) < ( terrain_movement - BUMPER_EPSILON ) )
+                        if( movement.magnitude( ) < terrain_movement )
                         {
                             next_ground = ground( );
-                            next_bumper = ground_bumper( );
                         }
 
                         break;
@@ -524,14 +529,9 @@ void Object::update_movement( )
 
         move( movement );
 
-        bool ground_changed = ( next_ground != ground( ) );
+        bool ground_changed = ( next_ground.node( ) != ground( ).node( ) );
 
-        if( ground_changed && grounded( ) )
-        {
-            previous_ground = ground( );
-        }
-
-        ground( next_ground, next_bumper );
+        ground( next_ground );
 
         if( adjusted_velocity.has_magnitude( ) )
         {
@@ -548,6 +548,14 @@ void Object::update_movement( )
             remaining_percentage = 0.0;
         }
 
+        // wedged, e.g. in a valley where each side redirects the object into the other: stop for this frame,
+        // a single step without movement (stepping onto the next node) is fine
+        still_steps = ( movement.has_magnitude( ) ? 0 : ( still_steps + 1 ) );
+        if( still_steps >= 2 )
+        {
+            remaining_percentage = 0.0;
+        }
+
         steps++;
 
         if( steps > MAX_MOVEMENT_STEPS )
@@ -559,6 +567,21 @@ void Object::update_movement( )
         }
     }
     while( is_pos( remaining_percentage ) );
+
+    m_bumper_cache_active = false;
+    m_bumper_cache.clear( );
+}
+
+Terrain::Bumper Object::bumper( ptr<const Terrain::Node> in_node ) const
+{
+    return_if( !m_bumper_cache_active, in_node->bumpers( terrain_hitbox( ) ) );
+
+    if( !m_bumper_cache.contains( in_node ) )
+    {
+        return( m_bumper_cache.insert( in_node, in_node->bumpers( m_bumper_shape ) ) );
+    }
+
+    return( m_bumper_cache.at( in_node ) );
 }
 
 dec Object::check_movement( Vector cref in_velocity )
@@ -630,9 +653,16 @@ void Object::interactive( bool in_interactive )
     {
         m_interactive = in_interactive;
 
-        if( !m_interactive )
+        if( room( ) )
         {
-            room( )->object_grid( ).remove( this );
+            if( interactive( ) && m_ever_updated )
+            {
+                room( )->object_grid( ).insert( this );
+            }
+            else
+            {
+                room( )->object_grid( ).remove( this );
+            }
         }
     }
 }
@@ -685,34 +715,29 @@ dec Object::friction_resistance( ) const
     if( grounded( ) )
     {
         return( 0.1 );
-        // TODO return( m_ground->resistance( ) );
+        // TODO return( ground( ).node( )->resistance( ) );
     }
 
     return( air_resistance( ) );
 }
 
-ptr<Terrain::Node> Object::ground( ) const { return( m_ground ); }
-Terrain::Bumper Object::ground_bumper( ) const { return( m_ground_bumper ); }
-
 Line Object::ground_bumper_line( ) const
 {
     Assert( grounded( ), "not grounded" );
 
-    for_each( line, ground( )->bumpers( terrain_hitbox( ) ).path( ).lines( ) )
+    for_each( line, bumper( ground( ).node( ) ).path( ).lines( ) )
     {
         return_if( on_bumper( line, position( ) ), line );
     }
 
     // drifted off the bumper or the bumper is a single point, use the surface direction instead
     // oriented the same way as an edge's bumper line
-    return( Line( position( ), position( ) + VectorA( ground( )->normal( ) + RIGHT, 1.0 ) ) );
+    return( Line( position( ), position( ) + VectorA( ground( ).node( )->normal( ) + RIGHT, 1.0 ) ) );
 }
 
-void Object::ground( ptr<Terrain::Node> in_ground, Terrain::Bumper cref in_bumper )
+void Object::ground( Terrain::Bumper cref in_ground )
 {
-    // TODO no need for two objects passed when bumper points to ground node
     m_ground = in_ground;
-    m_ground_bumper = in_bumper;
 }
 
 bool Object::sticks( ptr<Terrain::Node> in_node ) { return( false ); }
@@ -729,7 +754,7 @@ void Object::terrain_bound( bool in_terrain_bound )
     m_terrain_bound = in_terrain_bound;
     if( !m_terrain_bound )
     {
-        m_ground = nullptr;
+        clear_ground( );
     }
 }
 

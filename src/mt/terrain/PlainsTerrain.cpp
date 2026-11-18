@@ -234,4 +234,6 @@ Color PlainsTerrain::dust_color( const uint in_type ) const
     {
         return( DIRT_COLOR_1 );
     }
+
+    return( CLEAR );
 }

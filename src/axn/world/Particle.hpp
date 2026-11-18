@@ -22,7 +22,7 @@ protected:
 
     virtual bool collide( ptr<Object> in_object ) override;
 
-    virtual void ground( ptr<Terrain::Node> in_node, Terrain::Bumper cref in_bumper ) override;
+    virtual void ground( Terrain::Bumper cref in_ground ) override;
 
 private:
 

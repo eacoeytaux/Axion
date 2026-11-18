@@ -111,7 +111,8 @@ void Mob::update( )
         needs_render( true );
     }
 
-    if( m_blink_timer.tick( ) )
+    // tick( ) keeps returning true once completed, so only redraw on the frame the blink ends
+    if( !m_blink_timer.completed( ) && m_blink_timer.tick( ) )
     {
         needs_render( true );
     }
@@ -305,7 +306,7 @@ Drawing Mob::debug_overlay( ) const
 
 void Mob::RagDollLimb::update( )
 {
-    Assert( SWING_MIN < SWING_MAX ); // todo
+    static_once{ Assert( SWING_MIN < SWING_MAX ); } // constants only need checking once
 
     Angle d_angle_total;
 

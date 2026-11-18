@@ -78,11 +78,11 @@ bool Projectile::collide( ptr<Object> in_object )
     return( false );
 }
 
-void Projectile::ground( ptr<Terrain::Node> in_ground, Terrain::Bumper cref in_bumper )
+void Projectile::ground( Terrain::Bumper cref in_ground )
 {
-    Object::ground( in_ground, in_bumper );
+    Object::ground( in_ground );
 
-    if( in_ground )
+    if( in_ground.node( ) )
     {
         stationary( true );
 

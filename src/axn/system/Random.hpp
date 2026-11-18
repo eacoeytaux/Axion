@@ -141,6 +141,7 @@ public:
 };
 
 inline void Countdown::reset( ) { m_countdown_remaining = m_countdown_duration = Random::rticks( m_countdown_duration_range ); }
+inline void Countdown::randomize( ) { m_countdown_remaining = Random::rticks( m_countdown_duration ); }
 
 } // namespace axn
 

@@ -295,6 +295,84 @@ test( "math tests" )
     }
 }
 
+test( "mod tests" )
+{
+    // truncated (default), takes the sign of x like fmod
+    check( mod( 7.0, 4.0 ) == 3.0 );
+    check( mod( -7.0, 4.0 ) == -3.0 );
+    check( mod( 7.0, -4.0 ) == 3.0 );
+    check( mod( -7.0, -4.0 ) == -3.0 );
+    check( mod( 8.0, 4.0 ) == 0.0 );
+
+    // floored, takes the sign of y
+    check( mod( 7.0, 4.0, true ) == 3.0 );
+    check( mod( -7.0, 4.0, true ) == 1.0 );
+    check( mod( 7.0, -4.0, true ) == -1.0 );
+    check( mod( -7.0, -4.0, true ) == -3.0 );
+    check( mod( -8.0, 4.0, true ) == 0.0 );
+    check( mod( -1.0, 4.0, true ) == 3.0 );
+
+    // ints
+    check( mod( -7, 4 ) == -3 );
+    check( mod( -7, 4, true ) == 1 );
+}
+
+test( "Countdown randomize tests" )
+{
+    Countdown countdown( 10.0 );
+
+    for_range( i, 50 )
+    {
+        countdown.randomize( );
+
+        // somewhere within the duration, which stays the same
+        check( countdown.remaining( ) >= 0.0 );
+        check( countdown.remaining( ) <= 10.0 );
+        check( countdown.duration( ) == 10.0 );
+    }
+
+    Countdown empty;
+    empty.randomize( );
+    check( empty.completed( ) );
+}
+
+test( "map tests" )
+{
+    omap<int, int> ordered;
+    umap<int, int> unordered;
+
+    // operator[ ] adds a default value for a new key, then works like at( )
+    ordered[ 3 ] = 7;
+    unordered[ 3 ] = 7;
+
+    check( ordered.contains( 3 ) );
+    check( ordered.at( 3 ) == 7 );
+    check( ordered[ 3 ] == 7 );
+    check( ordered.size( ) == 1 );
+
+    check( unordered.contains( 3 ) );
+    check( unordered.at( 3 ) == 7 );
+    check( unordered[ 3 ] == 7 );
+    check( unordered.size( ) == 1 );
+
+    // insert doesn't replace an existing value, same as the std containers
+    check( ordered.insert( 4, 9 ) == 9 );
+    check( ordered.insert( 4, 1 ) == 9 );
+    check( unordered.insert( 4, 9 ) == 9 );
+    check( unordered.insert( 4, 1 ) == 9 );
+
+    check( ordered.size( ) == 2 );
+    check( unordered.size( ) == 2 );
+
+    ordered.clear( );
+    unordered.clear( );
+
+    check( ordered.empty( ) );
+    check( unordered.empty( ) );
+    check_not( ordered.contains( 3 ) );
+    check_not( unordered.contains( 3 ) );
+}
+
 test( "queue tests" )
 {
     queue<int> q;

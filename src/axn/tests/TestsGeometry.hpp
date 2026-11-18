@@ -32,4 +32,27 @@ test( "Circle tests" )
         Line( Point( sqrt( 0.75 ), 0.5 ), Point( -sqrt( 0.75 ), 0.5 ) ) );
 }
 
+test( "Angle comparison tests" )
+{
+    const dec ROUNDING = 0.00001; // smaller than DEFAULT_EPSILON, like floating point rounding
+    const dec REAL = 0.001; // bigger than DEFAULT_EPSILON, a real difference
+
+    // a rounding sized difference counts as equal whichever side the Angle is on
+    check( Angle( numbers::RIGHT + ROUNDING ) == RIGHT );
+    check_not( Angle( numbers::RIGHT + ROUNDING ) > RIGHT );
+    check_not( ( numbers::RIGHT + ROUNDING ) > RIGHT );
+    check( ( numbers::RIGHT + ROUNDING ) == RIGHT );
+    check( ( numbers::RIGHT + ROUNDING ) <= RIGHT );
+
+    // a real difference still counts
+    check( Angle( numbers::RIGHT + REAL ) > RIGHT );
+    check( ( numbers::RIGHT + REAL ) > RIGHT );
+    check( ( numbers::RIGHT - REAL ) < RIGHT );
+
+    // abs( ) keeps it an Angle so comparing the result allows for rounding too
+    check_not( abs( Angle( -( numbers::RIGHT + ROUNDING ) ) ) > RIGHT );
+    check( abs( Angle( -( numbers::RIGHT + REAL ) ) ) > RIGHT );
+    check( abs( Angle( -0.5 ) ) == Angle( 0.5 ) );
+}
+
 } // namespace axn

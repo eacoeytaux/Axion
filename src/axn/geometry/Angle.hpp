@@ -130,7 +130,7 @@ public:
     Angle operator+( ) const { return( Angle( +radians( ) ) ); }
     Angle operator-( ) const { return( Angle( -radians( ) ) ); }
 
-    #define AngleOps( type ) \
+    #define AngleOpsLeft( type ) \
         Angle ref operator=( type cref in_t ) { return( radians( dec( in_t ) ) ); } \
         Angle ref operator+=( type cref in_t ) { return( radians( add( radians( ), dec( in_t ) ) ) ); } \
         Angle ref operator-=( type cref in_t ) { return( radians( subtract( radians( ), dec( in_t ) ) ) ); } \
@@ -148,22 +148,38 @@ public:
         bool operator<( type cref in_t ) const { return( less( radians( ), dec( in_t ) ) ); } \
          macro_end
 
-    AngleOps( int );
-    AngleOps( uint );
-    AngleOps( dec );
-    AngleOps( Planc );
-    AngleOps( Angle );
+    AngleOpsLeft( int );
+    AngleOpsLeft( uint );
+    AngleOpsLeft( dec );
+    AngleOpsLeft( Planc );
+    AngleOpsLeft( Angle );
 
 };
+
+#define AngleOpsRight( type ) \
+    inline bool operator==( type cref in_t, Angle cref in_a ) { return( in_a == in_t ); } \
+    inline bool operator!=( type cref in_t, Angle cref in_a ) { return( in_a != in_t ); } \
+    inline bool operator<=( type cref in_t, Angle cref in_a ) { return( in_a >= in_t ); } \
+    inline bool operator>=( type cref in_t, Angle cref in_a ) { return( in_a <= in_t ); } \
+    inline bool operator<( type cref in_t, Angle cref in_a ) { return( in_a > in_t ); } \
+    inline bool operator>( type cref in_t, Angle cref in_a ) { return( in_a < in_t ); } \
+     macro_end
+
+AngleOpsRight( int );
+AngleOpsRight( uint );
+AngleOpsRight( dec );
+AngleOpsRight( Planc );
 
 var_const( Angle A0( 0.0 ) );
 var_const( Angle PI( numbers::PI ) );
 var_const( Angle TAU( numbers::TAU ) );
 var_const( Angle RIGHT( numbers::RIGHT ) );
 
+} // namespace geometry
+
+inline Angle abs( Angle cref in_a ) { return( in_a.abs( ) ); }
 inline Angle truncated( Angle cref in_a ) { return( in_a.truncated( ) ); }
 
-} // namespace geometry
 } // namespace axn
 
 #endif /* Angle_hpp */

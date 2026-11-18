@@ -48,11 +48,11 @@ void Tree::Leaf::render( )
     draw( copy( m_drawing ).stretch( VectorX( m_spin.at( age( ) ) ) ).rotate( m_rotation_speed * age( ) ).move( VectorX( m_sway.at( age( ) ) ) ) );
 }
 
-void Tree::Leaf::ground( ptr<Terrain::Node> ground, Terrain::Bumper cref in_bumper )
+void Tree::Leaf::ground( Terrain::Bumper cref in_ground )
 {
-    Object::ground( ground, in_bumper );
+    Object::ground( in_ground );
 
-    if( ground )
+    if( in_ground.node( ) )
     {
         mark_to_delete( ); // todo add time variable to leaf
     }

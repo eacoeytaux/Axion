@@ -130,9 +130,9 @@ void Hook::update_velocity( )
     }
 }
 
-void Hook::ground( ptr<Terrain::Node> ground, Terrain::Bumper cref in_bumper )
+void Hook::ground( Terrain::Bumper cref in_ground )
 {
-    Object::ground( ground, in_bumper );
+    Object::ground( in_ground );
 }
 
 bool Hook::collide( ptr<Object> in_object )
