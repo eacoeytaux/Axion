@@ -1,13 +1,16 @@
+#ifndef TestsMovement_hpp
+#define TestsMovement_hpp
+
 #include "axn/tests/Tests.hpp"
 
 #include "axn/world/Room.hpp"
 #include "axn/world/Object.hpp"
 #include "axn/world/Terrain.hpp"
 
-// Polygon is written as geometry::Polygon because windows.h (pulled in by Catch) declares a Polygon function
+// C! Polygon is written as geometry::Polygon because windows.h (pulled in by Catch) declares a Polygon function
 
-// the full landing sweep drops the walker about 1,700 times and takes around 2 minutes in a Debug build, too slow for every launch,
-// so normally a coarse sweep runs instead, plus the drops that have failed before. uncomment this when working on movement
+// C! the full landing sweep drops the walker about 1,700 times and takes around 2 minutes in a Debug build, too slow for every launch,
+// C! so normally a coarse sweep runs instead, plus the drops that have failed before. uncomment this when working on movement
 //#define AXN_FULL_MOVEMENT_TESTS
 
 namespace axn
@@ -21,7 +24,7 @@ static const dec LANDING_X_STEP = 61.0;
 static const varray<dec> LANDING_SPEEDS = { -9.0, 3.0 };
 #endif
 
-// simulates an object walking over real terrain using the same update_movement the game uses
+// C! simulates an object walking over real terrain using the same update_movement the game uses
 
 class TestTerrain : public Terrain
 {
@@ -43,7 +46,7 @@ public:
 
     TestRoom( varray<Point> cref in_ground ) : Room( nullptr ), m_ground( in_ground ) { }
 
-    virtual Vector gravity( ) const override { return( VectorY( -0.625 ) ); } // same as MtMerciless
+    virtual Vector gravity( ) const override { return( VectorY( -0.625 ) ); } // C! same as MtMerciless
     virtual Vector gravity( Point cref in_position ) const override { return( gravity( ) ); }
 
     virtual dec air_resistance( ) const override { return( 0.025 ); }
@@ -51,7 +54,7 @@ public:
 
     virtual void create( ) override { Room::create( FixedRectangle( Point( -2000.0, -2000.0 ), Point( 4000.0, 4000.0 ) ) ); }
 
-    // height of the ground surface at in_x
+    // C! height of the ground surface at in_x
     Planc ground_y( Planc cref in_x ) const
     {
         for_range( i, m_ground.size( ) - 1 )
@@ -85,13 +88,13 @@ class TestWalker : public Object
 
 public:
 
-    // same shape and walking speed as Climber
+    // C! same shape and walking speed as Climber
     static constexpr dec HEIGHT = ( 32.0 * 1.85 );
     static constexpr dec WIDTH = ( HEIGHT / 2.5 );
     static constexpr dec WIDTH_GROUND = ( WIDTH * 0.25 );
     static constexpr dec SPEED = ( 1.0 );
 
-    dec walking = 0.0; // -1 left, 0 still, +1 right
+    dec walking = 0.0; // C! -1 left, 0 still, +1 right
 
     TestWalker( ptr<Room> in_room, Point cref in_position ) : Object( in_room, in_position )
     {
@@ -107,7 +110,7 @@ public:
 
 protected:
 
-    // walking the way Climber::update_velocity does it
+    // C! walking the way Climber::update_velocity does it
     virtual void update_velocity( ) override
     {
         Object::update_velocity( );
@@ -134,11 +137,13 @@ protected:
 
 struct MovementFrame
 {
+
     uint frame;
     Point position;
     Vector velocity;
     bool grounded;
     string ground;
+
 };
 
 static string describe_ground( Terrain::Bumper cref in_ground )
@@ -152,15 +157,17 @@ static void print_frames( string cref in_title, varray<MovementFrame> cref in_fr
 {
     cout << "---- " << in_title << endl;
 
-    for( uint i = in_from; ( i < in_to ) && ( i < in_frames.size( ) ); i++ )
+    for_range( i, min( in_to, in_frames.size( ) ) )
     {
+        continue_if( i < in_from );
+
         MovementFrame cref f = in_frames[ i ];
         cout << "  frame " << f.frame << "  pos ( " << dec( f.position.x( ) ) << ", " << dec( f.position.y( ) ) << " )  vel ( " << dec( f.velocity.dx( ) ) << ", " << dec( f.velocity.dy( ) ) << " )  " << f.ground << endl;
     }
 }
 
-// drops a walker onto the terrain, lets it settle, then walks it in_direction for in_frames
-// returns false (and prints the frames around the problem) if it gets stuck or ends up inside the terrain
+// C! drops a walker onto the terrain, lets it settle, then walks it in_direction for in_frames
+// C! returns false (and prints the frames around the problem) if it gets stuck or ends up inside the terrain
 static bool check_walk( string cref in_name, varray<Point> cref in_ground, Planc cref in_start_x, dec in_direction, uint in_frames, Planc cref in_stop_x )
 {
     TestRoom room( in_ground );
@@ -183,20 +190,20 @@ static bool check_walk( string cref in_name, varray<Point> cref in_ground, Planc
         walker.step( );
         record( frame );
 
-        // inside the terrain: the center went below the ground surface
+        // C! inside the terrain: the center went below the ground surface
         if( walker.position( ).y( ) < room.ground_y( walker.position( ).x( ) ) )
         {
             print_frames( in_name + ": fell into the terrain", frames, ( frames.size( ) > 10 ) ? ( frames.size( ) - 10 ) : 0, frames.size( ) );
             return( false );
         }
 
-        // reached the end of the walk
+        // C! reached the end of the walk
         if( in_direction > 0.0 ? ( walker.position( ).x( ) >= in_stop_x ) : ( walker.position( ).x( ) <= in_stop_x ) )
         {
             return( true );
         }
 
-        // stuck: hardly moved over the last 20 walking frames
+        // C! stuck: hardly moved over the last 20 walking frames
         if( frame >= ( settle_frames + 40 ) )
         {
             Planc moved = abs( walker.position( ).x( ) - frames[ frames.size( ) - 20 ].position.x( ) );
@@ -213,7 +220,7 @@ static bool check_walk( string cref in_name, varray<Point> cref in_ground, Planc
     return( false );
 }
 
-// drops a walker onto the terrain and checks it stays put without walking
+// C! drops a walker onto the terrain and checks it stays put without walking
 static bool check_stand( string cref in_name, varray<Point> cref in_ground, Planc cref in_x )
 {
     TestRoom room( in_ground );
@@ -235,7 +242,7 @@ static bool check_stand( string cref in_name, varray<Point> cref in_ground, Plan
     Point last = frames.back( ).position;
 
     uint airborne = 0;
-    for( uint i = settle_frames; i < frames.size( ); i++ ) { if( !frames[ i ].grounded ) { airborne++; } }
+    for_range( i, frames.size( ) ) { continue_if( i < settle_frames ); if( !frames[ i ].grounded ) { airborne++; } }
 
     if( ( settled.distance_to( last ) > 1.0 ) || airborne )
     {
@@ -248,7 +255,7 @@ static bool check_stand( string cref in_name, varray<Point> cref in_ground, Plan
     return( true );
 }
 
-// is one of the hitbox's bottom corners below the ground (ignoring corners right at a vertex, where a wall makes the height ambiguous)
+// C! is one of the hitbox's bottom corners below the ground (ignoring corners right at a vertex, where a wall makes the height ambiguous)
 static bool feet_in_ground( TestRoom cref in_room, varray<Point> cref in_ground, Point cref in_center )
 {
     const Planc TOLERANCE = 0.5;
@@ -269,7 +276,7 @@ static bool feet_in_ground( TestRoom cref in_room, varray<Point> cref in_ground,
     return( false );
 }
 
-// drops the walker once at in_x with a sideways in_speed (walking that way too when in_walking), returns false if its feet went into the ground
+// C! drops the walker once at in_x with a sideways in_speed (walking that way too when in_walking), returns false if its feet went into the ground
 static bool check_landing( string cref in_name, varray<Point> cref in_ground, dec in_x, dec in_speed, dec in_walking, bool in_print = true )
 {
     TestRoom room( in_ground );
@@ -286,7 +293,7 @@ static bool check_landing( string cref in_name, varray<Point> cref in_ground, de
         walker.step( );
         frames.insert_back( { frame, walker.position( ), walker.velocity( ), walker.grounded( ), describe_ground( walker.ground( ) ) } );
 
-        // walked off either end of the test terrain, the ground height is made up past there
+        // C! walked off either end of the test terrain, the ground height is made up past there
         break_if( ( walker.position( ).x( ) < ( in_ground.front( ).x( ) + 50.0 ) ) || ( walker.position( ).x( ) > ( in_ground.back( ).x( ) - 50.0 ) ) );
 
         if( feet_in_ground( room, in_ground, walker.position( ) ) )
@@ -304,18 +311,21 @@ static bool check_landing( string cref in_name, varray<Point> cref in_ground, de
     return( true );
 }
 
-// drops the walker at many places and speeds onto the terrain (see LANDING_X_STEP / LANDING_SPEEDS), returns how many drops ended up in the ground
+// C! drops the walker at many places and speeds onto the terrain (see LANDING_X_STEP / LANDING_SPEEDS), returns how many drops ended up in the ground
 static uint check_landings( string cref in_name, varray<Point> cref in_ground, Planc cref in_from_x, Planc cref in_to_x )
 {
     uint failures = 0;
 
-    for( dec x = in_from_x; x <= in_to_x; x += LANDING_X_STEP )
+    // C! x runs from in_from_x up to in_to_x in LANDING_X_STEP steps, the epsilon keeps rounding from dropping the last step
+    for_range( step, uint( ( dec( in_to_x - in_from_x ) / LANDING_X_STEP ) + DEFAULT_EPSILON ) + 1 )
     {
+        dec x = dec( in_from_x ) + ( step * LANDING_X_STEP );
+
         for_each_const( speed, LANDING_SPEEDS )
         {
             for_each_const( walking, varray<dec>( { 0.0, 1.0 } ) )
             {
-                // only print the first few, the rest are usually the same problem
+                // C! only print the first few, the rest are usually the same problem
                 if( !check_landing( in_name, in_ground, x, speed, walking, ( failures < 3 ) ) )
                 {
                     failures++;
@@ -348,10 +358,10 @@ test( "Landing on terrain" )
     check( check_landings( "steps", steps, 150.0, 500.0 ) == 0 );
     check( check_landings( "spikes", spikes, 120.0, 260.0 ) == 0 );
 
-    // drops that went into the ground before the fixes, always checked even when the sweep is coarse
-    check( check_landing( "steps", steps, 150.0, 3.0, 1.0 ) ); // walked into a step, fell into it at the top corner
+    // C! drops that went into the ground before the fixes, always checked even when the sweep is coarse
+    check( check_landing( "steps", steps, 150.0, 3.0, 1.0 ) ); // C! walked into a step, fell into it at the top corner
     check( check_landing( "steps", steps, 176.0, 3.0, 1.0 ) );
-    check( check_landing( "spikes", spikes, 133.0, 3.0, 0.0 ) ); // slid into the valley between two spikes
+    check( check_landing( "spikes", spikes, 133.0, 3.0, 0.0 ) ); // C! slid into the valley between two spikes
     check( check_landing( "spikes", spikes, 146.0, 3.0, 0.0 ) );
     check( check_landing( "spikes", spikes, 159.0, 3.0, 0.0 ) );
 }
@@ -394,7 +404,7 @@ test( "Object position history" )
     TestWalker walker( &room, Point( 100.0, TestWalker::HEIGHT ) );
     walker.track( 3 );
 
-    for_range( frame, 30 ) { walker.step( ); } // land and settle
+    for_range( frame, 30 ) { walker.step( ); } // C! land and settle
 
     walker.walking = +1.0;
 
@@ -405,13 +415,13 @@ test( "Object position history" )
         walker.step( );
     }
 
-    // 1 = the current frame, which started where the object was 1 update ago
+    // C! 1 = the current frame, which started where the object was 1 update ago
     check( walker.last_position( 0 ) == walker.position( ) );
     check( walker.last_position( 1 ) == frame_starts[ 4 ] );
     check( walker.last_position( 2 ) == frame_starts[ 3 ] );
     check( walker.last_position( 3 ) == frame_starts[ 2 ] );
 
-    // only 3 frames are tracked, further back gives the oldest
+    // C! only 3 frames are tracked, further back gives the oldest
     check( walker.last_position( 10 ) == frame_starts[ 2 ] );
     check( walker.last_positions( ).size( ) == 3 );
 }
@@ -434,11 +444,11 @@ test( "Object updates and room grid" )
         return( false );
     };
 
-    // a new object updates even though the room is still at age 0
+    // C! a new object updates even though the room is still at age 0
     walker.update_object( );
     check( walker.age( ) == 1 );
 
-    // switching interactive on puts an object that's already in the room into the grid straight away, not the next time it moves
+    // C! switching interactive on puts an object that's already in the room into the grid straight away, not the next time it moves
     check_not( in_grid( ) );
     walker.make_interactive( true );
     check( in_grid( ) );
@@ -462,7 +472,7 @@ test( "Object movement subscriptions" )
 
     check( leader->movement_subscribers( ).size( ) == 2 );
 
-    // deleting an object with several subscribers used to modify the set it was looping over
+    // C! deleting an object with several subscribers used to modify the set it was looping over
     delete leader;
 
     check( follower1->movement_subscriptions( ).size( ) == 0 );
@@ -473,3 +483,5 @@ test( "Object movement subscriptions" )
 }
 
 } // namespace axn
+
+#endif /* TestsMovement_hpp */

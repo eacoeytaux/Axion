@@ -50,9 +50,11 @@ void Player::update( )
     }
 }
 
-void Player::update_movement( )
+void Player::out_of_bounds( )
 {
-    Mob::update_movement( );
+    #if !defined( AXN_DEBUG )
+    // Object::out_of_bounds( );
+    #endif
 }
 
 void Player::die( )
@@ -66,6 +68,11 @@ void Player::die( )
 bool Player::damages( Damage cref in_damage ) const
 {
     return( !god( ) && Mob::damages( in_damage ) );
+}
+
+void Player::update_movement( )
+{
+    Mob::update_movement( );
 }
 
 bool Player::collide( ptr<Object> in_object )
@@ -87,13 +94,6 @@ bool Player::collide( ptr<Object> in_object )
     }
 
     return( false );
-}
-
-void Player::out_of_bounds( )
-{
-    #if !defined( AXN_DEBUG )
-    // Object::out_of_bounds( );
-    #endif
 }
 
 void Player::god( bool in_god )

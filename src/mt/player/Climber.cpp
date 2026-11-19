@@ -309,38 +309,36 @@ void Climber::die( )
     Player::die( );
 }
 
-void Climber::trim_velocity( )
+void Climber::render( )
 {
-    Player::trim_velocity( );
+    Player::render( );
+    hook( ).render( );
+    // todo make render const? hook( ).render( );
 
-    // rope adjustment
-    if( hook( ).taut( ) )
-    {
-        Vector v = velocity( );
-        Vector rope = hook( ).rope( );
-
-        Angle d = ( rope.angle( ) - v.angle( ) ).truncated( );
-
-        // todo align with gravity
-        if( ( d >= RIGHT ) && ( d <= ( TAU - RIGHT ) ) )
-        {
-            Vector v_flat = v.flattened( rope.angle( ) + RIGHT );
-
-            if( v_flat.has_magnitude( ) )
-            {
-                Planc m = v_flat.magnitude( );
-
-                Angle a( dec( m / rope.magnitude( ) ) );
-                a = negated( a, ( d >= PI ) );
-
-                Vector rope_flipped( rope.destination( ), rope.origin( ) );
-                rope_flipped.rotate( a );
-
-                velocity( Vector( position( ), rope_flipped.destination( ) ) );
-            }
-        }
-    }
+    draw_rope( );
+    draw_legs( );
+    draw_torso( );
+    draw_arm_back( );
+    draw_head( );
+    draw_hook( );
+    draw_crossbow( );
+    draw_arm_front( );
+    draw_arrow( );
 }
+
+#if defined( AXN_DEBUG )
+Drawing Climber::debug_overlay( ) const
+{
+    Drawing debug_overlay;
+
+    if( !hook( ).loaded( ) )
+    {
+        debug_overlay.draw( hook( ).debug_overlay( ).move( hook( ).position( ) - position( ) ) );
+    }
+
+    return( debug_overlay.draw( Player::debug_overlay( ) ) );
+}
+#endif
 
 void Climber::update( )
 {
@@ -464,233 +462,270 @@ void Climber::update( )
     }
 }
 
-void Climber::update_velocity( )
+void Climber::input( ptr<Input> in_input )
 {
-    Player::update_velocity( );
-
-    bool add_dust = false;
-    bool add_clouds = false;
-
-    Planc movement_speed = ( grounded( ) ? ( m_movement_speed_ground ) : ( m_movement_speed_air ) );
-
-    if( !has_gravity( ) )
-    { // can fly?
-        if( looking_up( ) )
-        {
-            if( moving_right( ) )
-            {
-                add_velocity( VectorA( half( RIGHT ), movement_speed ) );
-            }
-            else if( moving_left( ) )
-            {
-                add_velocity( VectorA( half( RIGHT ) + RIGHT, movement_speed ) );
-            }
-            else
-            {
-                add_velocity( VectorY( movement_speed ) );
-            }
-        }
-        else if( looking_down( ) )
-        {
-            if( moving_right( ) )
-            {
-                add_velocity( VectorA( -half( RIGHT ), movement_speed ) );
-            }
-            else if( moving_left( ) )
-            {
-                add_velocity( VectorA( -half( RIGHT ) - RIGHT, movement_speed ) );
-            }
-            else
-            {
-                add_velocity( -VectorY( movement_speed ) );
-            }
-        }
-        else
-        {
-            if( moving_right( ) )
-            {
-                add_velocity( VectorX( movement_speed ) );
-            }
-            else if( moving_left( ) )
-            {
-                add_velocity( VectorX( -movement_speed ) );
-            }
-        }
-    }
-    else
+    if( cast_as( in_input, key_input, KeyInput ) )
     {
-        if( hook( ).taut( ) )
-        {
-            movement_speed *= TAUT_SPEED_RATIO;
-        }
+        KeyInput::Key key = key_input->key;
+        KeyInput::Dynamic dynamic = key_input->dynamic;
 
-        Vector v;
+        bool pressed = dynamic == KeyInput::PRESSED;
+        bool held = dynamic == KeyInput::HELD;
+        bool down = pressed || held;
 
-        if( moving_right( ) )
+        switch( key )
         {
-            v = VectorX( movement_speed );
-        }
-        else if( moving_left( ) )
-        {
-            v = VectorX( -movement_speed );
-        }
-
-        if( v.has_magnitude( ) )
-        {
-            if( grounded( ) )
+            default:
             {
-                Angle a1, a2;
-                Angle va = v.angle( );
 
-                // an exact on( ) check fails from rounding on horizontal lines, leaving a default Line( ) that reads as vertical
-                // and turned walking into pushing down into the floor
-                Line bumper_line = ground_bumper_line( );
+            }
 
-                if( bumper_line.vertical( ) )
+            b_case( ' ' ) :
+            {
+                jump( down );
+            }
+
+            b_case( 'w' ) :
+            {
+                looking_up( down );
+            }
+
+            b_case( 's' ) :
+            {
+                looking_down( down );
+            }
+
+            b_case( 'a' ) :
+            {
+                moving_left( down );
+            }
+
+            b_case( 'd' ) :
+            {
+                moving_right( down );
+            }
+
+            b_case( 'q' ) : a_case( 'e' ) :
+            {
+                if( pressed )
                 {
-                    if( bumper_line.pt1( ).y( ) > bumper_line.pt2( ).y( ) )
+                    dash( pressed );
+                }
+            }
+
+            #if defined( AXN_DEBUG_CONTROLS )
+
+            b_case( 'g' ) :
+            {
+                if( pressed )
+                {
+                    god( !god( ) );
+                }
+            }
+
+            b_case( 'h' ) :
+            {
+                if( down )
+                {
+                    heal_full( );
+                }
+            }
+
+            b_case( 'k' ) :
+            {
+                if( pressed )
+                {
+                    if( Settings::shifty( ) )
                     {
-                        if( is_pos( v.dx( ) ) )
+                        if( dead( ) )
                         {
-                            v.rotate_to( RIGHT );
-                        }
-                        else
-                        {
-                            v.rotate_to( -RIGHT );
+                            revive( );
                         }
                     }
                     else
                     {
-                        if( is_pos( v.dx( ) ) )
+                        if( alive( ) && !god( ) )
                         {
-                            v.rotate_to( -RIGHT );
-                        }
-                        else
-                        {
-                            v.rotate_to( RIGHT );
+                            die( );
                         }
                     }
                 }
-                else
-                {
-                    a1 = bumper_line.angle( );
-                    a2 = bumper_line.angle( ).flipped( );
-
-                    v.rotate_to( va.closest( { a1, a2 } ) );
-                }
             }
 
-            add_velocity( v );
+            #endif
         }
+    }
+    else if( cast_as( in_input, mouse_input, MouseInput ) )
+    {
+        MouseInput::Button button = mouse_input->button;
+        MouseInput::Dynamic dynamic = mouse_input->dynamic;
 
-        if( jumping( ) )
+        bool released = dynamic == MouseInput::RELEASED;
+        bool pressed = dynamic == MouseInput::PRESSED;
+        bool move = dynamic == MouseInput::MOVE;
+
+        if( move )
         {
-            if( can_jump( ) || is_pos( m_extra_jumps ) )
+            if( button == MouseInput::NO_BUTTON )
             {
-                if( m_jump_reset_timer.completed( ) )
-                {
-                    m_jumping_timer.reset( JUMP_MAX_DURATION );
-                    m_jump_reset_timer.reset( JUMP_RESET_WAIT_TIME + JUMP_MAX_DURATION );
-                    m_jump_degradation = 0.0;
-
-                    if( !grounded( ) )
-                    {
-                        m_extra_jumps--;
-
-                        add_clouds = true;
-                    }
-                }
-            }
-
-            if( !m_jumping_timer.tick( ) )
-            {
-                add_velocity( ( VectorA( gravity( ).angle( ).flipped( ), JUMP_STRENGTH ) - gravity( ) ) * one_minus( m_jump_degradation ) );
-
-                m_jump_degradation = one_minus( one_minus( m_jump_degradation ) * JUMP_DEGRATION_RATIO );
-
-                clear_ground( );
-            }
-            else
-            {
-                jump( false );
-
-                m_jump_reset_timer.reset( JUMP_RESET_WAIT_TIME );
+                // todo should this happen here?
+                aim( Angle( position( ), camera( )->cursor_world_position( ) ) );
             }
         }
         else
         {
-            m_jump_reset_timer.tick( );
-        }
-    }
+            // C! TODO these shouldn't be hardcoded
 
-    if( !m_dashing_timer.tick( ) )
-    {
-        if( moving_right( ) )
-        {
-            add_velocity( VectorX( m_movement_speed_dash ) );
-        }
-        else if( moving_left( ) )
-        {
-            add_velocity( VectorX( -m_movement_speed_dash ) );
-        }
-
-        m_jump_reset_timer.reset( DASH_RESET_WAIT_TIME );
-    }
-    else
-    {
-        m_dash_reset_timer.tick( );
-    }
-
-    if( add_dust )
-    {
-        // todo
-    }
-
-    if( add_clouds )
-    {
-        Vector dust_velocity = copy( velocity( ) ).dy( 0.0 ) * Random::rdec( DUST_VELOCITY_DAMPEN_RATIO );
-        uint dust_count = Random::rint( DUST_LANDING_COUNT );
-        for_range( i, dust_count )
-        {
-            Angle a = Random::rAngle( DUST_LANDING_ANGLE.min( ), DUST_LANDING_ANGLE.max( ) );
-            if( ( i < half( dust_count ) ) ^ facing_left( ) )
+            if( pressed )
             {
-                a = ( PI - a );
-            }
-
-            room( )->add_particle( new Dust( room( ), ( position( ) ), ( dust_velocity + VectorA( a, Random::rPlanc( DUST_RISE ) ) ), WHITE ) );
-        }
-    }
-}
-
-dec Climber::check_movement( Vector cref in_velocity )
-{
-    if( in_velocity.has_magnitude( ) )
-    {
-        if( hook( ).hooked( ) && !hook( ).taut( ) )
-        {
-            Vector rope = hook( ).rope( );
-
-            bool now_in_range = rope.destination( ).in_distance_range( position( ), hook( ).rope_length( ) );
-            bool will_be_in_range = rope.destination( ).in_distance_range( position( ) + in_velocity, hook( ).rope_length( ) );
-
-            if( now_in_range && !will_be_in_range )
-            {
-                Polygon rope_radius = Polygon::circle( hook( ).rope_length( ), rope.origin( ) );
-                varray<Line> intersections = rope_radius.intersection( Line( position( ), position( ) + in_velocity ) );
-
-                for_each( line, intersections )
+                if( button == MouseInput::LEFT_BUTTON )
                 {
-                    if( line.pt1( ) == center( ) )
-                    {
-                        return( line.length( ) / in_velocity.magnitude( ) );
-                    }
+                    launch_arrow( );
+                }
+                else if( button == MouseInput::RIGHT_BUTTON )
+                {
+                    launch_hook( );
+                }
+            }
+            else if( released )
+            {
+                if( button == MouseInput::LEFT_BUTTON )
+                {
+                    release_arrow( );
+                }
+                else if( button == MouseInput::RIGHT_BUTTON )
+                {
+                    release_hook( );
                 }
             }
         }
     }
+    else if( cast_as( in_input, controller_input, ControllerInput ) )
+    {
+        if( cast_as( controller_input, button_input, ControllerButtonInput ) )
+        {
+            ControllerButtonInput::Button button = button_input->button;
+            ControllerButtonInput::Dynamic dynamic = button_input->dynamic;
 
-    return( Player::check_movement( in_velocity ) );
+            bool pressed = dynamic == ControllerButtonInput::PRESSED;
+
+            switch( button )
+            {
+                default:
+                {
+                    break;
+                }
+
+                // C! TODO these shouldn't be hardcoded
+
+                b_case( ControllerButtonInput::L1_BUTTON ) : a_case( ControllerButtonInput::RIGHT_DOWN_BUTTON ) :
+                {
+                    if( alive( ) )
+                    {
+                        jump( pressed );
+                    }
+                }
+
+                b_case ControllerButtonInput::R1_BUTTON : a_case( ControllerButtonInput::RIGHT_LEFT_BUTTON ) :
+                {
+                    if( pressed )
+                    {
+                        launch_arrow( );
+                    }
+                    else
+                    {
+                        release_arrow( );
+                    }
+                }
+
+                b_case ControllerButtonInput::R2_BUTTON : a_case( ControllerButtonInput::RIGHT_RIGHT_BUTTON ) :
+                {
+                    if( pressed )
+                    {
+                        launch_hook( );
+                    }
+                    else
+                    {
+                        release_hook( );
+                    }
+                }
+
+                b_case ControllerButtonInput::LEFT_UP_BUTTON:
+                {
+                    looking_up( pressed );
+                }
+
+                b_case ControllerButtonInput::LEFT_DOWN_BUTTON :
+                {
+                    looking_down( pressed );
+                }
+
+                b_case ControllerButtonInput::LEFT_LEFT_BUTTON :
+                {
+                    moving_left( pressed );
+                }
+
+                b_case ControllerButtonInput::LEFT_RIGHT_BUTTON :
+                {
+                    moving_right( pressed );
+                }
+            }
+        }
+        else if( cast_as( controller_input, joystick_input, ControllerJoystickInput ) )
+        {
+            if( joystick_input->joystick == ControllerJoystickInput::LEFT_JOYSTICK )
+            {
+                if( joystick_input->dead_zone )
+                {
+                    movement_stop( );
+                }
+                else
+                {
+                    Vector cref v = joystick_input->vector;
+
+                    if( is_pos( v.dx( ) ) )
+                    {
+                        moving_right( true );
+                    }
+                    else if( is_neg( v.dx( ) ) )
+                    {
+                        moving_left( true );
+                    }
+
+                    if( is_pos( v.dy( ) ) )
+                    {
+                        looking_up( true );
+                    }
+                    else if( is_neg( v.dy( ) ) )
+                    {
+                        looking_down( true );
+                    }
+                }
+            }
+            else if( joystick_input->joystick == ControllerJoystickInput::RIGHT_JOYSTICK )
+            {
+                if( !joystick_input->dead_zone )
+                {
+                    aim( joystick_input->vector.angle( ) );
+                }
+            }
+        }
+    }
+}
+
+void Climber::clear_input( )
+{
+    m_slashing = false;
+
+    release_bow( );
+
+    moving_left( false );
+    moving_right( false );
+
+    looking_up( false );
+    looking_down( false );
+
+    jump( false );
 }
 
 dec Climber::air_resistance( ) const
@@ -815,49 +850,36 @@ uint Climber::extra_jumps_max( ) const
     return( m_extra_jumps_max );
 }
 
-void Climber::ground( Terrain::Bumper cref in_ground )
+void Climber::trim_velocity( )
 {
-    ptr<const Terrain::Node> ground_node = in_ground.node( );
+    Player::trim_velocity( );
 
-    if( ground_node )
+    // rope adjustment
+    if( hook( ).taut( ) )
     {
-        if( !grounded( ) )
+        Vector v = velocity( );
+        Vector rope = hook( ).rope( );
+
+        Angle d = ( rope.angle( ) - v.angle( ) ).truncated( );
+
+        // todo align with gravity
+        if( ( d >= RIGHT ) && ( d <= ( TAU - RIGHT ) ) )
         {
-            Vector dust_velocity = copy( velocity( ) ).dy( 0.0 ) * Random::rdec( DUST_VELOCITY_DAMPEN_RATIO );
-            uint dust_count = Random::rint( DUST_LANDING_COUNT );
-            for_range( i, dust_count )
+            Vector v_flat = v.flattened( rope.angle( ) + RIGHT );
+
+            if( v_flat.has_magnitude( ) )
             {
-                Point pt = position( ) + foot( true ) + ( Vector( foot( true ), foot( false ) ) * ( dec( i ) / dec( dust_count ) ) );
-                Angle a = ground_node->normal( ) + Random::rAngle( DUST_LANDING_ANGLE.min( ), DUST_LANDING_ANGLE.max( ) );
-                // todo shouldn't start from normal not right?
+                Planc m = v_flat.magnitude( );
 
-                if( ( i < half( dust_count ) ) ^ facing_left( ) )
-                {
-                    a = ( PI - a );
-                }
+                Angle a( dec( m / rope.magnitude( ) ) );
+                a = negated( a, ( d >= PI ) );
 
-                // todo room( )->add_object( new Dust( room( ), pt, dust_velocity + VectorA( a, Random::rPlanc( DUST_RISE ) ), room( )->terrain( )->dust_color( ) ) );
-            }
+                Vector rope_flipped( rope.destination( ), rope.origin( ) );
+                rope_flipped.rotate( a );
 
-            if( velocity( ).flattened( ground_node->normal( ) ).magnitude( ) > BOUNCE_MINIMUM_SPEED )
-            {
-                add_velocity( VectorA( velocity( ).angle( ).reflect( ground_node->normal( ) ).flip( ), ( velocity( ).magnitude( ) ) ) - velocity( ) );
-            }
-            else
-            {
-                m_extra_jumps = m_extra_jumps_max;
-
-                Object::ground( in_ground );
+                velocity( Vector( position( ), rope_flipped.destination( ) ) );
             }
         }
-        else
-        {
-            Object::ground( in_ground );
-        }
-    }
-    else
-    {
-        Object::ground( in_ground );
     }
 }
 
@@ -1189,35 +1211,203 @@ Color Climber::color( ColorPiece component ) const
     }
 }
 
-#if defined( AXN_DEBUG )
-Drawing Climber::debug_overlay( ) const
+void Climber::update_velocity( )
 {
-    Drawing debug_overlay;
+    Player::update_velocity( );
 
-    if( !hook( ).loaded( ) )
+    bool add_dust = false;
+    bool add_clouds = false;
+
+    Planc movement_speed = ( grounded( ) ? ( m_movement_speed_ground ) : ( m_movement_speed_air ) );
+
+    if( !has_gravity( ) )
+    { // can fly?
+        if( looking_up( ) )
+        {
+            if( moving_right( ) )
+            {
+                add_velocity( VectorA( half( RIGHT ), movement_speed ) );
+            }
+            else if( moving_left( ) )
+            {
+                add_velocity( VectorA( half( RIGHT ) + RIGHT, movement_speed ) );
+            }
+            else
+            {
+                add_velocity( VectorY( movement_speed ) );
+            }
+        }
+        else if( looking_down( ) )
+        {
+            if( moving_right( ) )
+            {
+                add_velocity( VectorA( -half( RIGHT ), movement_speed ) );
+            }
+            else if( moving_left( ) )
+            {
+                add_velocity( VectorA( -half( RIGHT ) - RIGHT, movement_speed ) );
+            }
+            else
+            {
+                add_velocity( -VectorY( movement_speed ) );
+            }
+        }
+        else
+        {
+            if( moving_right( ) )
+            {
+                add_velocity( VectorX( movement_speed ) );
+            }
+            else if( moving_left( ) )
+            {
+                add_velocity( VectorX( -movement_speed ) );
+            }
+        }
+    }
+    else
     {
-        debug_overlay.draw( hook( ).debug_overlay( ).move( hook( ).position( ) - position( ) ) );
+        if( hook( ).taut( ) )
+        {
+            movement_speed *= TAUT_SPEED_RATIO;
+        }
+
+        Vector v;
+
+        if( moving_right( ) )
+        {
+            v = VectorX( movement_speed );
+        }
+        else if( moving_left( ) )
+        {
+            v = VectorX( -movement_speed );
+        }
+
+        if( v.has_magnitude( ) )
+        {
+            if( grounded( ) )
+            {
+                Angle a1, a2;
+                Angle va = v.angle( );
+
+                // C! an exact on( ) check fails from rounding on horizontal lines, leaving a default Line( ) that reads as vertical
+                // C! and turned walking into pushing down into the floor
+                Line bumper_line = ground_bumper_line( );
+
+                if( bumper_line.vertical( ) )
+                {
+                    if( bumper_line.pt1( ).y( ) > bumper_line.pt2( ).y( ) )
+                    {
+                        if( is_pos( v.dx( ) ) )
+                        {
+                            v.rotate_to( RIGHT );
+                        }
+                        else
+                        {
+                            v.rotate_to( -RIGHT );
+                        }
+                    }
+                    else
+                    {
+                        if( is_pos( v.dx( ) ) )
+                        {
+                            v.rotate_to( -RIGHT );
+                        }
+                        else
+                        {
+                            v.rotate_to( RIGHT );
+                        }
+                    }
+                }
+                else
+                {
+                    a1 = bumper_line.angle( );
+                    a2 = bumper_line.angle( ).flipped( );
+
+                    v.rotate_to( va.closest( { a1, a2 } ) );
+                }
+            }
+
+            add_velocity( v );
+        }
+
+        if( jumping( ) )
+        {
+            if( can_jump( ) || is_pos( m_extra_jumps ) )
+            {
+                if( m_jump_reset_timer.completed( ) )
+                {
+                    m_jumping_timer.reset( JUMP_MAX_DURATION );
+                    m_jump_reset_timer.reset( JUMP_RESET_WAIT_TIME + JUMP_MAX_DURATION );
+                    m_jump_degradation = 0.0;
+
+                    if( !grounded( ) )
+                    {
+                        m_extra_jumps--;
+
+                        add_clouds = true;
+                    }
+                }
+            }
+
+            if( !m_jumping_timer.tick( ) )
+            {
+                add_velocity( ( VectorA( gravity( ).angle( ).flipped( ), JUMP_STRENGTH ) - gravity( ) ) * one_minus( m_jump_degradation ) );
+
+                m_jump_degradation = one_minus( one_minus( m_jump_degradation ) * JUMP_DEGRATION_RATIO );
+
+                clear_ground( );
+            }
+            else
+            {
+                jump( false );
+
+                m_jump_reset_timer.reset( JUMP_RESET_WAIT_TIME );
+            }
+        }
+        else
+        {
+            m_jump_reset_timer.tick( );
+        }
     }
 
-    return( debug_overlay.draw( Player::debug_overlay( ) ) );
-}
-#endif
+    if( !m_dashing_timer.tick( ) )
+    {
+        if( moving_right( ) )
+        {
+            add_velocity( VectorX( m_movement_speed_dash ) );
+        }
+        else if( moving_left( ) )
+        {
+            add_velocity( VectorX( -m_movement_speed_dash ) );
+        }
 
-void Climber::render( )
-{
-    Player::render( );
-    hook( ).render( );
-    // todo make render const? hook( ).render( );
+        m_jump_reset_timer.reset( DASH_RESET_WAIT_TIME );
+    }
+    else
+    {
+        m_dash_reset_timer.tick( );
+    }
 
-    draw_rope( );
-    draw_legs( );
-    draw_torso( );
-    draw_arm_back( );
-    draw_head( );
-    draw_hook( );
-    draw_crossbow( );
-    draw_arm_front( );
-    draw_arrow( );
+    if( add_dust )
+    {
+        // todo
+    }
+
+    if( add_clouds )
+    {
+        Vector dust_velocity = copy( velocity( ) ).dy( 0.0 ) * Random::rdec( DUST_VELOCITY_DAMPEN_RATIO );
+        uint dust_count = Random::rint( DUST_LANDING_COUNT );
+        for_range( i, dust_count )
+        {
+            Angle a = Random::rAngle( DUST_LANDING_ANGLE.min( ), DUST_LANDING_ANGLE.max( ) );
+            if( ( i < half( dust_count ) ) ^ facing_left( ) )
+            {
+                a = ( PI - a );
+            }
+
+            room( )->add_particle( new Dust( room( ), ( position( ) ), ( dust_velocity + VectorA( a, Random::rPlanc( DUST_RISE ) ) ), WHITE ) );
+        }
+    }
 }
 
 void Climber::draw_head( )
@@ -1691,268 +1881,78 @@ void Climber::LowHealthAlertEffect::render( ptr<Camera> in_camera )
     }
 }
 
-void Climber::input( ptr<Input> in_input )
+dec Climber::check_movement( Vector cref in_velocity )
 {
-    if( cast_as( in_input, key_input, KeyInput ) )
+    if( in_velocity.has_magnitude( ) )
     {
-        KeyInput::Key key = key_input->key;
-        KeyInput::Dynamic dynamic = key_input->dynamic;
-
-        bool pressed = dynamic == KeyInput::PRESSED;
-        bool held = dynamic == KeyInput::HELD;
-        bool down = pressed || held;
-
-        switch( key )
+        if( hook( ).hooked( ) && !hook( ).taut( ) )
         {
-            default:
-            {
+            Vector rope = hook( ).rope( );
 
-            }
+            bool now_in_range = rope.destination( ).in_distance_range( position( ), hook( ).rope_length( ) );
+            bool will_be_in_range = rope.destination( ).in_distance_range( position( ) + in_velocity, hook( ).rope_length( ) );
 
-            b_case( ' ' ) :
+            if( now_in_range && !will_be_in_range )
             {
-                jump( down );
-            }
+                Polygon rope_radius = Polygon::circle( hook( ).rope_length( ), rope.origin( ) );
+                varray<Line> intersections = rope_radius.intersection( Line( position( ), position( ) + in_velocity ) );
 
-            b_case( 'w' ) :
-            {
-                looking_up( down );
-            }
-
-            b_case( 's' ) :
-            {
-                looking_down( down );
-            }
-
-            b_case( 'a' ) :
-            {
-                moving_left( down );
-            }
-
-            b_case( 'd' ) :
-            {
-                moving_right( down );
-            }
-
-            b_case( 'q' ) : a_case( 'e' ) :
-            {
-                if( pressed )
+                for_each( line, intersections )
                 {
-                    dash( pressed );
-                }
-            }
-
-            #if defined( AXN_DEBUG_CONTROLS )
-
-            b_case( 'g' ) :
-            {
-                if( pressed )
-                {
-                    god( !god( ) );
-                }
-            }
-
-            b_case( 'h' ) :
-            {
-                if( down )
-                {
-                    heal_full( );
-                }
-            }
-
-            b_case( 'k' ) :
-            {
-                if( pressed )
-                {
-                    if( Settings::shifty( ) )
+                    if( line.pt1( ) == center( ) )
                     {
-                        if( dead( ) )
-                        {
-                            revive( );
-                        }
-                    }
-                    else
-                    {
-                        if( alive( ) && !god( ) )
-                        {
-                            die( );
-                        }
+                        return( line.length( ) / in_velocity.magnitude( ) );
                     }
                 }
             }
-
-            #endif
         }
     }
-    else if( cast_as( in_input, mouse_input, MouseInput ) )
+
+    return( Player::check_movement( in_velocity ) );
+}
+
+void Climber::ground( Terrain::Bumper cref in_ground )
+{
+    ptr<const Terrain::Node> ground_node = in_ground.node( );
+
+    if( ground_node )
     {
-        MouseInput::Button button = mouse_input->button;
-        MouseInput::Dynamic dynamic = mouse_input->dynamic;
-
-        bool released = dynamic == MouseInput::RELEASED;
-        bool pressed = dynamic == MouseInput::PRESSED;
-        bool move = dynamic == MouseInput::MOVE;
-
-        if( move )
+        if( !grounded( ) )
         {
-            if( button == MouseInput::NO_BUTTON )
+            Vector dust_velocity = copy( velocity( ) ).dy( 0.0 ) * Random::rdec( DUST_VELOCITY_DAMPEN_RATIO );
+            uint dust_count = Random::rint( DUST_LANDING_COUNT );
+            for_range( i, dust_count )
             {
-                // todo should this happen here?
-                aim( Angle( position( ), camera( )->cursor_world_position( ) ) );
+                Point pt = position( ) + foot( true ) + ( Vector( foot( true ), foot( false ) ) * ( dec( i ) / dec( dust_count ) ) );
+                Angle a = ground_node->normal( ) + Random::rAngle( DUST_LANDING_ANGLE.min( ), DUST_LANDING_ANGLE.max( ) );
+                // todo shouldn't start from normal not right?
+
+                if( ( i < half( dust_count ) ) ^ facing_left( ) )
+                {
+                    a = ( PI - a );
+                }
+
+                // todo room( )->add_object( new Dust( room( ), pt, dust_velocity + VectorA( a, Random::rPlanc( DUST_RISE ) ), room( )->terrain( )->dust_color( ) ) );
+            }
+
+            if( velocity( ).flattened( ground_node->normal( ) ).magnitude( ) > BOUNCE_MINIMUM_SPEED )
+            {
+                add_velocity( VectorA( velocity( ).angle( ).reflect( ground_node->normal( ) ).flip( ), ( velocity( ).magnitude( ) ) ) - velocity( ) );
+            }
+            else
+            {
+                m_extra_jumps = m_extra_jumps_max;
+
+                Object::ground( in_ground );
             }
         }
         else
         {
-            // TODO these shouldn't be hardcoded
-
-            if( pressed )
-            {
-                if( button == MouseInput::LEFT_BUTTON )
-                {
-                    launch_arrow( );
-                }
-                else if( button == MouseInput::RIGHT_BUTTON )
-                {
-                    launch_hook( );
-                }
-            }
-            else if( released )
-            {
-                if( button == MouseInput::LEFT_BUTTON )
-                {
-                    release_arrow( );
-                }
-                else if( button == MouseInput::RIGHT_BUTTON )
-                {
-                    release_hook( );
-                }
-            }
+            Object::ground( in_ground );
         }
     }
-    else if( cast_as( in_input, controller_input, ControllerInput ) )
+    else
     {
-        if( cast_as( controller_input, button_input, ControllerButtonInput ) )
-        {
-            ControllerButtonInput::Button button = button_input->button;
-            ControllerButtonInput::Dynamic dynamic = button_input->dynamic;
-
-            bool pressed = dynamic == ControllerButtonInput::PRESSED;
-
-            switch( button )
-            {
-                default:
-                {
-                    break;
-                }
-
-                // TODO these shouldn't be hardcoded
-
-                b_case( ControllerButtonInput::L1_BUTTON ) : a_case( ControllerButtonInput::RIGHT_DOWN_BUTTON ) :
-                {
-                    if( alive( ) )
-                    {
-                        jump( pressed );
-                    }
-                }
-
-                b_case ControllerButtonInput::R1_BUTTON : a_case( ControllerButtonInput::RIGHT_LEFT_BUTTON ) :
-                {
-                    if( pressed )
-                    {
-                        launch_arrow( );
-                    }
-                    else
-                    {
-                        release_arrow( );
-                    }
-                }
-
-                b_case ControllerButtonInput::R2_BUTTON : a_case( ControllerButtonInput::RIGHT_RIGHT_BUTTON ) :
-                {
-                    if( pressed )
-                    {
-                        launch_hook( );
-                    }
-                    else
-                    {
-                        release_hook( );
-                    }
-                }
-
-                b_case ControllerButtonInput::LEFT_UP_BUTTON:
-                {
-                    looking_up( pressed );
-                }
-
-                b_case ControllerButtonInput::LEFT_DOWN_BUTTON :
-                {
-                    looking_down( pressed );
-                }
-
-                b_case ControllerButtonInput::LEFT_LEFT_BUTTON :
-                {
-                    moving_left( pressed );
-                }
-
-                b_case ControllerButtonInput::LEFT_RIGHT_BUTTON :
-                {
-                    moving_right( pressed );
-                }
-            }
-        }
-        else if( cast_as( controller_input, joystick_input, ControllerJoystickInput ) )
-        {
-            if( joystick_input->joystick == ControllerJoystickInput::LEFT_JOYSTICK )
-            {
-                if( joystick_input->dead_zone )
-                {
-                    movement_stop( );
-                }
-                else
-                {
-                    Vector cref v = joystick_input->vector;
-
-                    if( is_pos( v.dx( ) ) )
-                    {
-                        moving_right( true );
-                    }
-                    else if( is_neg( v.dx( ) ) )
-                    {
-                        moving_left( true );
-                    }
-
-                    if( is_pos( v.dy( ) ) )
-                    {
-                        looking_up( true );
-                    }
-                    else if( is_neg( v.dy( ) ) )
-                    {
-                        looking_down( true );
-                    }
-                }
-            }
-            else if( joystick_input->joystick == ControllerJoystickInput::RIGHT_JOYSTICK )
-            {
-                if( !joystick_input->dead_zone )
-                {
-                    aim( joystick_input->vector.angle( ) );
-                }
-            }
-        }
+        Object::ground( in_ground );
     }
-}
-
-void Climber::clear_input( )
-{
-    m_slashing = false;
-
-    release_bow( );
-
-    moving_left( false );
-    moving_right( false );
-
-    looking_up( false );
-    looking_down( false );
-
-    jump( false );
 }

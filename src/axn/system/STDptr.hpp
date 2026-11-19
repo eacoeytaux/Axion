@@ -37,15 +37,20 @@ public:
 
     operator bool( ) const { return( !null( ) ); }
 
-    // todo? make a define similar to typeT but like typeT2?
-    
-    template<typename T2> operator ptr<T2>( ) const { return( as<T2>( ) ); }
+    // C! todo? make a define similar to typeT but like typeT2?
 
-    template<typename T2> ptr<T2> as( ) const { return( dynamic_cast<T2 *>( m_ptr ) ); }
+    // C! defined after the class, IntelliSense reports ptr<T2> as an incomplete type (E0070) while ptr is still being defined
+    template<typename T2> operator ptr<T2>( ) const;
+
+    template<typename T2> ptr<T2> as( ) const;
 
     equal_default( ptr<T1> );
 
 };
+
+typeT template<typename T2> ptr<T1>::operator ptr<T2>( ) const { return( as<T2>( ) ); }
+
+typeT template<typename T2> ptr<T2> ptr<T1>::as( ) const { return( dynamic_cast<T2 *>( m_ptr ) ); }
 
 typeT2 inline bool same( ) { return( std::same_as<T1, T2> ); }
 typeT2 inline bool same( T1 cref in_x1, T2 cref in_x2 ) { return( same<T1, T2>( ) ); }

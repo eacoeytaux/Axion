@@ -91,11 +91,65 @@ void Mob::eye_info( Planc cref in_eye_radius, ticks in_blink_duration, span<tick
     m_eye_info_set = true;
 }
 
+#if defined( AXN_DEBUG )
+Drawing Mob::debug_overlay( ) const
+{
+    Assert( RED_START < YELLOW_START );
+
+    Drawing debug_overlay;
+
+    if( Settings::get( Settings::DEBUG_HEALTH ) )
+    {
+        if( alive( ) )
+        {
+            Planc health_width = max( HEALTH_BAR_WIDTH_MIN, width( ) * HEALTH_BAR_TO_OBJECT_RATIO );
+            Planc health_height = HEALTH_BAR_HEIGHT;
+
+            Point offset( 0.0, ( health_height * -1.5 ) - HEALTH_BAR_BORDER_WIDTH - half( height( ) ) );
+
+            dec health_percentage = health( ) / max_health( );
+            Assert( in_range( health_percentage, 0.0, 1.0, true ) );
+
+            Color health_color;
+            if( invincible_always( ) )
+            {
+                health_color = CYAN;
+            }
+            else if( is_one( health_percentage ) )
+            {
+                health_color = GREEN;
+            }
+            else if( health_percentage >= YELLOW_START )
+            {
+                health_color = ColorSlider( YELLOW, GREEN ).color_at( ( health_percentage - YELLOW_START ) * inverse( one_minus( YELLOW_START ) ) );
+            }
+            else if( health_percentage >= RED_START )
+            {
+                health_color = ColorSlider( RED, YELLOW ).color_at( ( health_percentage - RED_START ) * inverse( one_minus( RED_START ) ) );
+            }
+            else
+            {
+                health_color = RED;
+            }
+
+            debug_overlay.draw( BLACK, Polygon::rectangle( health_width, health_height, offset ) );
+
+            debug_overlay.draw( health_color, Polygon::rectangle( health_width * health_percentage, health_height,
+                                                                  offset + VectorX( ( half( health_width ) * health_percentage ) - half( health_width ) ) ) );
+
+            debug_overlay.draw( WHITE, Polygon::rectangle( health_width, health_height, offset ), HEALTH_BAR_BORDER_WIDTH, true );
+        }
+    }
+
+    return( debug_overlay.draw( Object::debug_overlay( ) ) );
+}
+#endif
+
 void Mob::update( )
 {
     Object::update( );
 
-    // tick( ) keeps returning true once completed, so only redraw on the frame the hurt display ends
+    // C! tick( ) keeps returning true once completed, so only redraw on the frame the hurt display ends
     if( !m_hurt_display_timer.completed( ) && m_hurt_display_timer.tick( ) )
     {
         needs_render( true );
@@ -111,7 +165,7 @@ void Mob::update( )
         needs_render( true );
     }
 
-    // tick( ) keeps returning true once completed, so only redraw on the frame the blink ends
+    // C! tick( ) keeps returning true once completed, so only redraw on the frame the blink ends
     if( !m_blink_timer.completed( ) && m_blink_timer.tick( ) )
     {
         needs_render( true );
@@ -126,16 +180,6 @@ void Mob::trim_velocity( )
 void Mob::update_velocity( )
 {
     Object::update_velocity( );
-}
-
-void Mob::update_movement( )
-{
-    Object::update_movement( );
-
-    if( velocity( ).dx( ) )
-    {
-        facing_left( velocity( ).dx( ) < 0.0 );
-    }
 }
 
 bool Mob::alive( ) const
@@ -224,7 +268,7 @@ void Mob::hurt( dec in_damage )
 
         m_health.value( max( 0.0, health ) );
         m_hurt_display_timer.reset( );
-        needs_render( true ); // show the hurt display
+        needs_render( true ); // C! show the hurt display
     }
 }
 
@@ -250,63 +294,19 @@ void Mob::facing_right( bool in_facing_right )
     }
 }
 
-#if defined( AXN_DEBUG )
-Drawing Mob::debug_overlay( ) const
+void Mob::update_movement( )
 {
-    Assert( RED_START < YELLOW_START );
+    Object::update_movement( );
 
-    Drawing debug_overlay;
-
-    if( Settings::get( Settings::DEBUG_HEALTH ) )
+    if( velocity( ).dx( ) )
     {
-        if( alive( ) )
-        {
-            Planc health_width = max( HEALTH_BAR_WIDTH_MIN, width( ) * HEALTH_BAR_TO_OBJECT_RATIO );
-            Planc health_height = HEALTH_BAR_HEIGHT;
-
-            Point offset( 0.0, ( health_height * -1.5 ) - HEALTH_BAR_BORDER_WIDTH - half( height( ) ) );
-
-            dec health_percentage = health( ) / max_health( );
-            Assert( in_range( health_percentage, 0.0, 1.0, true ) );
-
-            Color health_color;
-            if( invincible_always( ) )
-            {
-                health_color = CYAN;
-            }
-            else if( is_one( health_percentage ) )
-            {
-                health_color = GREEN;
-            }
-            else if( health_percentage >= YELLOW_START )
-            {
-                health_color = ColorSlider( YELLOW, GREEN ).color_at( ( health_percentage - YELLOW_START ) * inverse( one_minus( YELLOW_START ) ) );
-            }
-            else if( health_percentage >= RED_START )
-            {
-                health_color = ColorSlider( RED, YELLOW ).color_at( ( health_percentage - RED_START ) * inverse( one_minus( RED_START ) ) );
-            }
-            else
-            {
-                health_color = RED;
-            }
-
-            debug_overlay.draw( BLACK, Polygon::rectangle( health_width, health_height, offset ) );
-
-            debug_overlay.draw( health_color, Polygon::rectangle( health_width * health_percentage, health_height,
-                                                                  offset + VectorX( ( half( health_width ) * health_percentage ) - half( health_width ) ) ) );
-
-            debug_overlay.draw( WHITE, Polygon::rectangle( health_width, health_height, offset ), HEALTH_BAR_BORDER_WIDTH, true );
-        }
+        facing_left( velocity( ).dx( ) < 0.0 );
     }
-
-    return( debug_overlay.draw( Object::debug_overlay( ) ) );
 }
-#endif
 
 void Mob::RagDollLimb::update( )
 {
-    static_once{ Assert( SWING_MIN < SWING_MAX ); } // constants only need checking once
+    static_once{ Assert( SWING_MIN < SWING_MAX ); } // C! constants only need checking once
 
     Angle d_angle_total;
 

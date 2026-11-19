@@ -31,9 +31,9 @@ section( BUMPERS )
         return( area > 0.0 );
     }
 
-    // index of the (inverted) hitbox point that rests against in_edge, the bumper is the edge offset by this point
-    // when a side of the hitbox is parallel to the edge both of its points rest against it, the one furthest along the edge wins
-    // edges and vertices both use this so their bumpers always meet end to end
+    // C! index of the (inverted) hitbox point that rests against in_edge, the bumper is the edge offset by this point
+    // C! when a side of the hitbox is parallel to the edge both of its points rest against it, the one furthest along the edge wins
+    // C! edges and vertices both use this so their bumpers always meet end to end
     uint support_index( varray<Point> cref in_pts, ptr<const Terrain::Edge> in_edge )
     {
         Vector normal = VectorA( in_edge->normal( ), 1.0 );
@@ -264,7 +264,7 @@ Drawing Terrain::debug_overlay( ) const
 
 Angle Terrain::Node::bumper_normal( Line cref in_bumper_line ) const
 {
-    // bumper lines are the node pushed out by the hitbox, so they always face away from the node
+    // C! bumper lines are the node pushed out by the hitbox, so they always face away from the node
     Angle normal = in_bumper_line.angle( ) + RIGHT;
 
     Vector normal_vector = VectorA( normal, 1.0 );
@@ -278,7 +278,7 @@ Angle Terrain::Node::bumper_normal( Line cref in_bumper_line ) const
 
 varray<Point> Terrain::Node::bumper_shape( Hitbox cref in_hitbox )
 {
-    // the hitbox turned inside out (every point negated), same as polygon( false ).inverted( ) without building a second polygon
+    // C! the hitbox turned inside out (every point negated), same as polygon( false ).inverted( ) without building a second polygon
     varray<Point> shape = in_hitbox.polygon( false ).points( );
     for_each( pt, shape ) { pt = -pt; }
 
@@ -321,16 +321,16 @@ Terrain::Bumper Terrain::Vertex::bumpers( varray<Point> cref in_shape ) const
     {
         if( edge1( ) && edge2( ) )
         {
-            // the hitbox rolls around the vertex from the point resting on edge1 to the point resting on edge2
-            // this includes any hitbox sides in between, so a side of the hitbox can sit on the vertex not just a corner
+            // C! the hitbox rolls around the vertex from the point resting on edge1 to the point resting on edge2
+            // C! this includes any hitbox sides in between, so a side of the hitbox can sit on the vertex not just a corner
             varray<Point> cref pts = in_shape;
             uint pt_count = pts.size( );
 
-            // the resting point follows the normal around the hitbox, so walk the hitbox the way the normal turns
+            // C! the resting point follows the normal around the hitbox, so walk the hitbox the way the normal turns
             Angle turn = edge1( )->normal( ).min_distance( edge2( )->normal( ) );
 
-            // a concave corner (a valley) has no bumper of its own: the edges' bumpers cross and that is the corner,
-            // an arc here would be inside the terrain and objects landing on it would sink in
+            // C! a concave corner (a valley) has no bumper of its own: the edges' bumpers cross and that is the corner,
+            // C! an arc here would be inside the terrain and objects landing on it would sink in
             if( dec( turn ) > 0.0 )
             {
                 return( Terrain::Bumper( this, Path( ) ) );
@@ -339,7 +339,7 @@ Terrain::Bumper Terrain::Vertex::bumpers( varray<Point> cref in_shape ) const
             uint index1 = support_index( pts, edge1( ) );
             uint index2 = support_index( pts, edge2( ) );
 
-            bool forward = !counter_clockwise( pts ); // convex corners turn clockwise
+            bool forward = !counter_clockwise( pts ); // C! convex corners turn clockwise
 
             varray<Point> bumpers;
             uint i = index1;
@@ -360,7 +360,7 @@ Terrain::Bumper Terrain::Vertex::bumpers( varray<Point> cref in_shape ) const
         }
     }
 
-    // only one edge (the end of an open terrain), the hitbox can rest against the vertex from any side
+    // C! only one edge (the end of an open terrain), the hitbox can rest against the vertex from any side
     varray<Point> around;
     for_each_const( pt, in_shape ) { around.insert_back( pt + position( ) ); }
 

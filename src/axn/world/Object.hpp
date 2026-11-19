@@ -49,11 +49,9 @@ public:
 
     uint age( ) const { return( m_age ); }
 
-    FixedRectangle cref bounds( ) const { return( space( ).bounds( ) ); }
-    FixedRectangle bounds( bool in_positioned ) const { return( space( in_positioned ).bounds( ) ); }
+    FixedRectangle bounds( bool in_positioned = false ) const { return( space( in_positioned ).bounds( ) ); }
 
-    FixedRectangle cref room_bounds( ) const { return( room( )->bounds( ) ); }
-    FixedRectangle room_bounds( dec in_z ) const { return( room( )->bounds( in_z ) ); }
+    FixedRectangle room_bounds( dec in_z = 1.0 ) const { return( room( )->bounds( in_z ) ); }
     FixedRectangle room_bounds_z( ) const { return( room_bounds( z( ) ) ); }
 
     ptr<Room> room( ) const { return( m_room ); }
@@ -98,7 +96,7 @@ public:
     Countdown cref deletion_countdown( ) const { return( m_deletion_countdown ); }
     Countdown cref to_deletion_countdown( ) const { return( m_to_deletion_countdown ); }
 
-    void position( Point cref in_pos ); // todo not protected?
+    virtual void position( Point cref in_pos ) override; // todo not protected?
 
     Point position( ) const;
 
@@ -125,8 +123,8 @@ public:
 
     bool grounded( ) const { return( !is_null( ground( ).node( ) ) ); }
 
-    Terrain::Bumper cref ground( ) const { return( m_ground ); } // the bumper the object is on, ground( ).node( ) is the terrain node
-    Line ground_bumper_line( ) const; // the bumper line the object is standing on, only meaningful when grounded
+    Terrain::Bumper cref ground( ) const { return( m_ground ); } // C! the bumper the object is on, ground( ).node( ) is the terrain node
+    Line ground_bumper_line( ) const; // C! the bumper line the object is standing on, only meaningful when grounded
 
     bool has_gravity( ) const { return( gravity( ).has_magnitude( ) ); }
 
@@ -166,7 +164,7 @@ protected:
     // returns 0 if should not move, 1 if no interruption, and (0,1) for interruption
     virtual dec check_movement( Vector cref in_velocity );
 
-    virtual void move( Vector cref in_movement );
+    virtual void move( Vector cref in_movement ) override;
 
     virtual void react_to_movement( ptr<Object> in_object, Vector cref in_movement );
 
@@ -204,7 +202,7 @@ private:
 
     uint m_age = 0;
     uint m_last_world_age_update = 0;
-    bool m_ever_updated = false; // until then m_last_world_age_update means nothing (0 would match a room at age 0 and skip the first update)
+    bool m_ever_updated = false; // C! until then m_last_world_age_update means nothing (0 would match a room at age 0 and skip the first update)
 
     bool m_deleted = false;
     bool m_marked_to_delete = false;
@@ -219,13 +217,13 @@ private:
     Planc m_visible_width = P0;
     Planc m_visible_height = P0;
 
-    Terrain::Bumper m_ground; // knows its own node, no node means not grounded
+    Terrain::Bumper m_ground; // C! knows its own node, no node means not grounded
 
-    // bumpers depend only on the node and the hitbox shape but are asked for many times per update,
-    // so update_movement( ) caches them while it runs (cleared at the start and end, so nothing goes stale)
+    // C! bumpers depend only on the node and the hitbox shape but are asked for many times per update,
+    // C! so update_movement( ) caches them while it runs (cleared at the start and end, so nothing goes stale)
     mutable umap<ptr<const Terrain::Node>, Terrain::Bumper> m_bumper_cache;
     mutable bool m_bumper_cache_active = false;
-    varray<Point> m_bumper_shape; // Terrain::Node::bumper_shape( terrain_hitbox( ) ) for this update
+    varray<Point> m_bumper_shape; // C! Terrain::Node::bumper_shape( terrain_hitbox( ) ) for this update
 
     Terrain::Bumper bumper( ptr<const Terrain::Node> in_node ) const;
     bool m_passing_terrain = false;
@@ -252,13 +250,12 @@ public:
 
 };
 
-// changing state requests a redraw, objects usually look different in each state
-#define STATE( ... )                                                                                                         \
-    public: enum state_enum { INVALID_STATE = 0, __VA_ARGS__ };                                                              \
-    private: state_enum m_state = INVALID_STATE;                                                                             \
-    public: state_enum state( ) const { return( m_state ); }                                                                 \
-    protected: virtual void state( state_enum in_state ) { if( m_state != in_state ) { m_state = in_state; needs_render( true ); } } \
-     macro_end
+#define STATE( ... ) \
+    public: enum state_enum { INVALID_STATE = 0, __VA_ARGS__ }; \
+    private: state_enum m_state = INVALID_STATE; \
+    public: state_enum state( ) const { return( m_state ); } \
+    protected: virtual void state( state_enum in_state ) { if( m_state != in_state ) { m_state = in_state; } } \
+    macro_end
 
 } // namespace reality
 } // namespace axn

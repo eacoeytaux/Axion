@@ -1,5 +1,5 @@
 #include "axn/system/Engine.hpp"
-#include "axn/world/Terrain.hpp" // must come before Catch, windows.h declares its own Polygon
+#include "axn/world/Terrain.hpp" // C! must come before Catch, windows.h declares its own Polygon
 
 #if defined( AXN_TESTS )
 

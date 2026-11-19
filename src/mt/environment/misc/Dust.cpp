@@ -27,6 +27,18 @@ Dust::Dust( ptr<Room> in_room, Point cref in_position, Vector cref in_velocity, 
     m_color = in_color;
 }
 
+void Dust::render( )
+{
+    Object::render( );
+
+    if( is_pos( m_alpha ) )
+    {
+        Polygon poly = Polygon::equilateral( m_sides, m_radius );
+        poly.rotate( m_rotation );
+        draw( m_color.a( m_alpha ), poly );
+    }
+}
+
 void Dust::update( )
 {
     m_radius += RADIUS_INCREASE_RATE;
@@ -38,16 +50,4 @@ void Dust::update( )
     }
 
     Object::update( );
-}
-
-void Dust::render( )
-{
-    Object::render( );
-
-    if( is_pos( m_alpha ) )
-    {
-        Polygon poly = Polygon::equilateral( m_sides, m_radius );
-        poly.rotate( m_rotation );
-        draw( m_color.a( m_alpha ), poly );
-    }
 }

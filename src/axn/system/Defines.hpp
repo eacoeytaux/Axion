@@ -62,7 +62,7 @@
 #define for_each( x, container ) for( auto ref x : container )
 #define for_each_const( x, container ) for( auto cref x : container )
 
-#define equal_default( ... ) bool operator==( __VA_ARGS__ cref ) const = default; bool operator!=( __VA_ARGS__ cref ) const = default; macro_end 
+#define equal_default( ... ) bool operator==( __VA_ARGS__ cref ) const = default; bool operator!=( __VA_ARGS__ cref ) const = default; macro_end
 #define equal_always( ... ) bool operator==( __VA_ARGS__ cref ) const { return( true ); } bool operator!=( __VA_ARGS__ cref ) const { return( false ); } macro_end
 #define equal_never( ... ) bool operator==( __VA_ARGS__ cref ) const { return( false ); } bool operator!=( __VA_ARGS__ cref ) const { return( true ); } macro_end
 

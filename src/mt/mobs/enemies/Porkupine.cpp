@@ -26,11 +26,6 @@ Porkupine::Porkupine( ptr<Room> in_room, Point cref in_position ) : Enemy( in_ro
     }
 }
 
-void Porkupine::update( )
-{
-    Enemy::update( );
-}
-
 void Porkupine::render( )
 {
     Enemy::render( );
@@ -40,4 +35,9 @@ void Porkupine::render( )
         Vector offset = VectorA( quill.angle( ) + RIGHT, QUILL_OFFSET );
         draw( QUILL_COLOR, Polygon( { quill.pt2( ), quill.pt1( ) + offset, quill.pt1( ) - offset } ) );
     }
+}
+
+void Porkupine::update( )
+{
+    Enemy::update( );
 }

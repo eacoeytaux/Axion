@@ -1,3 +1,6 @@
+#ifndef TestsTerrain_hpp
+#define TestsTerrain_hpp
+
 #include "axn/tests/Tests.hpp"
 
 #include "axn/world/Terrain.hpp"
@@ -5,10 +8,10 @@
 namespace axn
 {
 
-// Polygon is written as geometry::Polygon because windows.h (pulled in by Catch) declares a Polygon function
+// C! Polygon is written as geometry::Polygon because windows.h (pulled in by Catch) declares a Polygon function
 
-// builds prev -> corner -> next and checks the bumpers of both edges and the corner vertex
-// bumpers must meet end to end, and a hitbox centered anywhere on them must never be inside the terrain
+// C! builds prev -> corner -> next and checks the bumpers of both edges and the corner vertex
+// C! bumpers must meet end to end, and a hitbox centered anywhere on them must never be inside the terrain
 static void check_corner_bumpers( Hitbox cref in_hitbox, Point cref in_prev, Point cref in_corner, Point cref in_next )
 {
     const Planc EPSILON = 0.001;
@@ -33,7 +36,7 @@ static void check_corner_bumpers( Hitbox cref in_hitbox, Point cref in_prev, Poi
     lambdaf( close_to )( Point cref in_pt1, Point cref in_pt2 ) { return( in_pt1.distance_to( in_pt2 ) < EPSILON ); };
     lambdaf( is_endpoint )( Path cref in_path, Point cref in_pt ) { return( close_to( in_path.front( ).pt1( ), in_pt ) || close_to( in_path.back( ).pt2( ), in_pt ) ); };
 
-    // the terrain on the inside of the corner, convex corners are the intersection of the two edges' half planes
+    // C! the terrain on the inside of the corner, convex corners are the intersection of the two edges' half planes
     bool convex = ( dec( edge1->normal( ).min_distance( edge2->normal( ) ) ) < 0.0 );
 
     lambdaf( in_terrain )( Point cref in_pt )
@@ -50,7 +53,7 @@ static void check_corner_bumpers( Hitbox cref in_hitbox, Point cref in_prev, Poi
         return( false );
     };
 
-    // edges, a hitbox on an edge's bumper touches the edge's line without crossing it
+    // C! edges, a hitbox on an edge's bumper touches the edge's line without crossing it
     lambdaf( check_edge_bumper )( Path cref in_bumper, Vector cref in_normal )
     {
         require( in_bumper.line_count( ) == 1 );
@@ -74,13 +77,13 @@ static void check_corner_bumpers( Hitbox cref in_hitbox, Point cref in_prev, Poi
 
     bool concave = ( dec( edge1->normal( ).min_distance( edge2->normal( ) ) ) > 0.0 );
 
-    // concave corners have no arc of their own, the edges' bumpers cross (or touch) and that is the corner
+    // C! concave corners have no arc of their own, the edges' bumpers cross (or touch) and that is the corner
     if( concave )
     {
         check( is_empty( arc ) );
         check( bumper1.front( ).intersects( bumper2.front( ) ) );
     }
-    // edges meet the vertex end to end
+    // C! edges meet the vertex end to end
     else if( is_empty( arc ) )
     {
         Point end = ( is_endpoint( bumper2, bumper1.front( ).pt1( ) ) ? bumper1.front( ).pt1( ) : bumper1.back( ).pt2( ) );
@@ -92,7 +95,7 @@ static void check_corner_bumpers( Hitbox cref in_hitbox, Point cref in_prev, Poi
         check( is_endpoint( bumper1, arc.front( ) ) );
         check( is_endpoint( bumper2, arc.back( ) ) );
 
-        // the vertex arc wraps around the outside of convex corners
+        // C! the vertex arc wraps around the outside of convex corners
         if( convex )
         {
             for_each_const( pt, arc )
@@ -116,10 +119,10 @@ test( "Terrain bumper tests" )
         geometry::Polygon::rectangle( 10.0, 20.0, Angle::fraction( 16.0 ) ),
         geometry::Polygon::equilateral( 3, 12.0 ),
         geometry::Polygon::equilateral( 6, 8.0, Angle::fraction( 24.0 ) ),
-        geometry::Polygon( { Point( -5.0, -10.0 ), Point( -5.0, +10.0 ), Point( +5.0, +10.0 ), Point( +5.0, -10.0 ) } ) // clockwise
+        geometry::Polygon( { Point( -5.0, -10.0 ), Point( -5.0, +10.0 ), Point( +5.0, +10.0 ), Point( +5.0, -10.0 ) } ) // C! clockwise
     };
 
-    // turns of the terrain at the corner, negative is a right turn (convex), zero is a straight line
+    // C! turns of the terrain at the corner, negative is a right turn (convex), zero is a straight line
     varray<dec> turns = { 0.0, -0.25, -0.785, -1.571, -2.356, -3.0, 0.785, 1.571 };
 
     for_each_const( hitbox_polygon, hitboxes )
@@ -143,7 +146,7 @@ test( "Terrain bumper tests" )
         }
     }
 
-    // a box on flat ground stands half its height above the ground
+    // C! a box on flat ground stands half its height above the ground
     {
         ptr<Terrain::Vertex> a = new Terrain::Vertex( nullptr, Point( 0.0, 0.0 ) );
         ptr<Terrain::Vertex> b = new Terrain::Vertex( nullptr, Point( 100.0, 0.0 ) );
@@ -161,3 +164,5 @@ test( "Terrain bumper tests" )
 }
 
 } // namespace axn
+
+#endif /* TestsTerrain_hpp */

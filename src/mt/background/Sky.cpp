@@ -119,7 +119,7 @@ ptr<Cloud> Sky::add_cloud( )
 
     ptr<Cloud> cloud = m_clouds.insert_back( new Cloud( room( ) ) );
 
-    cloud->position( Vector( ( cloud->room_bounds_z( ).lower_bound_x( ) - half( cloud->drawing_bounds_z( ).width( ) ) ), ( CLOUD_START_Y ) ) ); // todo move to Cloud?
+    cloud->position( Vector( ( cloud->room_bounds_z( ).lower_bound_x( ) - half( cloud->drawing_bounds_z( ).width( ) ) ), ( CLOUD_START_Y ) ) ); // C! todo move to Cloud?
 
     return( room( )->add_object( cloud ) );
 }

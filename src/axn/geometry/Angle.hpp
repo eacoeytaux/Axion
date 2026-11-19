@@ -12,7 +12,7 @@ namespace geometry
 class Angle : public Stringable
 {
 
-    strinfo( Angle, stringify( dec( radians( ) * ( 360.0 / numbers::TAU ) ) ) + "°" );
+    strinfo( Angle, stringify( dec( radians( ) * ( 360.0 / numbers::TAU ) ) ) + "\xC2\xB0" );
 
 private:
 
@@ -146,7 +146,7 @@ public:
         bool operator<=( type cref in_t ) const { return( less_or_equal( radians( ), dec( in_t ) ) ); } \
         bool operator>( type cref in_t ) const { return( greater( radians( ), dec( in_t ) ) ); } \
         bool operator<( type cref in_t ) const { return( less( radians( ), dec( in_t ) ) ); } \
-         macro_end
+        macro_end
 
     AngleOpsLeft( int );
     AngleOpsLeft( uint );
@@ -163,7 +163,7 @@ public:
     inline bool operator>=( type cref in_t, Angle cref in_a ) { return( in_a <= in_t ); } \
     inline bool operator<( type cref in_t, Angle cref in_a ) { return( in_a > in_t ); } \
     inline bool operator>( type cref in_t, Angle cref in_a ) { return( in_a < in_t ); } \
-     macro_end
+    macro_end
 
 AngleOpsRight( int );
 AngleOpsRight( uint );

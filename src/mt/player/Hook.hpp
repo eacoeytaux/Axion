@@ -23,6 +23,12 @@ public:
     void trim_velocity( ) override;
     void update_velocity( ) override;
 
+protected:
+
+    virtual bool collide( ptr<Object> in_object ) override;
+
+public:
+
     void ground( Terrain::Bumper cref in_ground ) override;
 
     Planc max_rope_length( ) const;
@@ -45,10 +51,6 @@ public:
     void launch( Vector cref in_launch_speed );
     void retract( );
     void reload( );
-
-protected:
-
-    virtual bool collide( ptr<Object> in_object ) override;
 
 private:
 

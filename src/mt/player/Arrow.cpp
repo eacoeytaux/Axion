@@ -138,6 +138,13 @@ void Arrow::angle( Angle cref in_angle )
 
 dec Arrow::length( ) const { return( SHAFT_LENGTH + HEAD_LENGTH_INNER ); }
 
+void Arrow::react_to_movement( ptr<Object> in_object, Vector cref in_movement )
+{
+    Object::react_to_movement( in_object, in_movement );
+
+    move( in_movement );
+}
+
 void Arrow::ground( Terrain::Bumper cref in_ground )
 {
     Object::ground( in_ground );
@@ -147,11 +154,4 @@ void Arrow::ground( Terrain::Bumper cref in_ground )
         stationary( true );
         solid( false );
     }
-}
-
-void Arrow::react_to_movement( ptr<Object> in_object, Vector cref in_movement )
-{
-    Object::react_to_movement( in_object, in_movement );
-
-    move( in_movement );
 }

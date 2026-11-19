@@ -30,8 +30,8 @@ public:
 
 protected:
 
-    virtual void ground( Terrain::Bumper cref in_ground ) override;
     virtual void react_to_movement( ptr<Object> in_object, Vector cref in_movement ) override;
+    virtual void ground( Terrain::Bumper cref in_ground ) override;
 
     virtual void draw_head( );
     virtual void draw_shaft( );

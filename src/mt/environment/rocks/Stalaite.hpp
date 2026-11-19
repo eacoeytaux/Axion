@@ -29,8 +29,8 @@ public:
     Vector tip_offset( ) const { return( VectorY( negated( height( ), hanging ) ) ); }
     Point tip( ) const { return( position( ) + tip_offset( ) ); }
 
-    Planc width( ) const { return( m_width ); }
-    Planc height( ) const { return( m_height ); }
+    virtual Planc width( ) const override { return( m_width ); }
+    virtual Planc height( ) const override { return( m_height ); }
 
     Color cref color( ) { return( m_color ); }
 

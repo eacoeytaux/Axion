@@ -1,7 +1,7 @@
 #ifndef Precompiled_hpp
 #define Precompiled_hpp
 
-// force include the following files into every *.cpp and compiled once per build config
+// C! force include the following files into every *.cpp and compiled once per build config
 
 #include "axn/AXN.hpp"
 

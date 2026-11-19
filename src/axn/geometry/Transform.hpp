@@ -533,7 +533,7 @@ inline Point ref Point::transform( Transform cref in_trans ) { rethis = in_trans
     __VA_ARGS__ ref scale( Vector cref in_vec ) { Transformable::scale( in_vec ); rethis; } \
     __VA_ARGS__ ref scale( Planc cref in_x, Point cref in_pt = ORIGIN ) { Transformable::scale( in_x, in_pt ); rethis; } \
     __VA_ARGS__ ref rotate( Angle cref in_a, Point cref in_pt = ORIGIN ) { Transformable::rotate( in_a, in_pt ); rethis; } \
-     macro_end
+    macro_end
 
 } // namespace geometry
 } // namespace axn

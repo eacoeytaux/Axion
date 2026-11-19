@@ -46,7 +46,7 @@ public:
     Vector ref destination( Point in_pt ) { dx( in_pt.x( ) - origin( ).x( ) ); dy( in_pt.y( ) - origin( ).y( ) ); rethis; }
 
     Planc magnitude( ) const { return( origin( ).distance_to( destination( ) ) ); }
-    Vector ref magnitude( Planc cref in_m ) { Planc p = ( in_m / magnitude( ) ); dx( p * dx( ) ), dy( p * dy( ) );  rethis; }
+    Vector ref magnitude( Planc cref in_m ) { Planc p = ( in_m / magnitude( ) ); dx( p * dx( ) ); dy( p * dy( ) ); rethis; }
 
     bool has_magnitude( ) const { return( dx( ) || dy( ) ); }
 

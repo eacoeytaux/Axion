@@ -57,11 +57,6 @@ Unalope::Unalope( ptr<Room> in_room, Point cref in_position ) : Enemy( in_room, 
     alert_range( ALERT_RANGE );
 }
 
-void Unalope::update( )
-{
-    Enemy::update( );
-}
-
 void Unalope::render( )
 {
     Enemy::render( );
@@ -79,4 +74,9 @@ void Unalope::render( )
     draw( NOSE_COLOR, NOSE );
 
     // draw_eyes( Point( -24.0, 0.0 ), Point( 24.0, 0.0 ) );
+}
+
+void Unalope::update( )
+{
+    Enemy::update( );
 }

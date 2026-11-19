@@ -35,11 +35,17 @@ public:
 
     virtual bool damages( Damage cref in_damage ) const override;
 
-    virtual bool collide( ptr<Object> in_object );
-
     virtual bool opening_door( ) const { return( false ); }
 
     virtual void out_of_bounds( ) override;
+
+protected:
+
+    virtual void update_movement( ) override;
+
+public:
+
+    virtual bool collide( ptr<Object> in_object ) override;
 
     virtual bool layer_order_above( ptr<const Visible> in_visible ) const override { if( cast_as( in_visible, player, const Player ) ) { return( player_number( ) > player->player_number( ) ); } else { return( Mob::layer_order_above( in_visible ) ); } }
 
@@ -51,8 +57,6 @@ public:
 protected:
 
     virtual void die( ) override;
-
-    virtual void update_movement( ) override;
 
     // -------------- GOD MODE --------------
 

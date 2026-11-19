@@ -1,5 +1,5 @@
-#ifndef Dust_hpp
-#define Dust_hpp
+#ifndef Thorns_hpp
+#define Thorns_hpp
 
 #include "mt/MountMerciless.hpp"
 #include "axn/world/Hazard.hpp"
@@ -20,4 +20,4 @@ public:
 
 } // namespace mtmercy
 
-#endif /* Dust_hpp */
+#endif /* Thorns_hpp */

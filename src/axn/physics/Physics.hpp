@@ -5,4 +5,4 @@
 #include "axn/physics/Matter.hpp"
 #include "axn/physics/Joint.hpp"
 
-#endif /* physics_hpp */
+#endif /* Physics_hpp */

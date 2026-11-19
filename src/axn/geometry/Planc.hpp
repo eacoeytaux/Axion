@@ -76,7 +76,7 @@ public:
     inline bool operator>=( type cref in_t, Planc cref in_p ) { return( Planc( in_t ) >= in_p ); } \
     inline bool operator<( type cref in_t, Planc cref in_p ) { return( Planc( in_t ) < in_p ); } \
     inline bool operator>( type cref in_t, Planc cref in_p ) { return( Planc( in_t ) > in_p ); } \
-     macro_end
+    macro_end
 
 PlancOpsRight( int );
 PlancOpsRight( uint );

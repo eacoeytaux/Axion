@@ -20,11 +20,11 @@ public:
 
     Climber( uint in_player_number, ptr<Room> in_room, Point cref in_position );
 
+    void render( ) override;
+
     #if defined( AXN_DEBUG )
     Drawing debug_overlay( ) const override;
     #endif
-
-    void render( ) override;
 
     void update( ) override;
 

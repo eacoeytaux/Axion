@@ -37,6 +37,7 @@ public:
 
     class Bullet : public Projectile
     {
+
     public:
 
         Bullet( ptr<Room> in_room, Point cref in_position, Vector cref in_velocity );
@@ -52,6 +53,7 @@ public:
         Planc m_radius_max;
 
         Fire m_fire;
+
     };
 
 

@@ -1,3 +1,6 @@
+#ifndef TestsUtil_hpp
+#define TestsUtil_hpp
+
 #include "axn/tests/Tests.hpp"
 
 #include "axn/system/Utility.hpp"
@@ -297,14 +300,14 @@ test( "math tests" )
 
 test( "mod tests" )
 {
-    // truncated (default), takes the sign of x like fmod
+    // C! truncated (default), takes the sign of x like fmod
     check( mod( 7.0, 4.0 ) == 3.0 );
     check( mod( -7.0, 4.0 ) == -3.0 );
     check( mod( 7.0, -4.0 ) == 3.0 );
     check( mod( -7.0, -4.0 ) == -3.0 );
     check( mod( 8.0, 4.0 ) == 0.0 );
 
-    // floored, takes the sign of y
+    // C! floored, takes the sign of y
     check( mod( 7.0, 4.0, true ) == 3.0 );
     check( mod( -7.0, 4.0, true ) == 1.0 );
     check( mod( 7.0, -4.0, true ) == -1.0 );
@@ -312,7 +315,7 @@ test( "mod tests" )
     check( mod( -8.0, 4.0, true ) == 0.0 );
     check( mod( -1.0, 4.0, true ) == 3.0 );
 
-    // ints
+    // C! ints
     check( mod( -7, 4 ) == -3 );
     check( mod( -7, 4, true ) == 1 );
 }
@@ -325,7 +328,7 @@ test( "Countdown randomize tests" )
     {
         countdown.randomize( );
 
-        // somewhere within the duration, which stays the same
+        // C! somewhere within the duration, which stays the same
         check( countdown.remaining( ) >= 0.0 );
         check( countdown.remaining( ) <= 10.0 );
         check( countdown.duration( ) == 10.0 );
@@ -341,7 +344,7 @@ test( "map tests" )
     omap<int, int> ordered;
     umap<int, int> unordered;
 
-    // operator[ ] adds a default value for a new key, then works like at( )
+    // C! operator[ ] adds a default value for a new key, then works like at( )
     ordered[ 3 ] = 7;
     unordered[ 3 ] = 7;
 
@@ -355,7 +358,7 @@ test( "map tests" )
     check( unordered[ 3 ] == 7 );
     check( unordered.size( ) == 1 );
 
-    // insert doesn't replace an existing value, same as the std containers
+    // C! insert doesn't replace an existing value, same as the std containers
     check( ordered.insert( 4, 9 ) == 9 );
     check( ordered.insert( 4, 1 ) == 9 );
     check( unordered.insert( 4, 9 ) == 9 );
@@ -377,7 +380,7 @@ test( "queue tests" )
 {
     queue<int> q;
 
-    // push gives back the element it just added, not the front
+    // C! push gives back the element it just added, not the front
     q.push( 1 );
     q.push( 2 ) = 5;
 
@@ -389,10 +392,12 @@ test( "queue tests" )
 
 test( "Assert message tests" )
 {
-    // asserts are disabled while tests run, so failing ones only record their message
+    // C! asserts are disabled while tests run, so failing ones only record their message
     check( string( Assert( false, "value %d is %s", 5, "bad" ) ) == "value 5 is bad" );
     check( string( Assert( false, "plain message" ) ) == "plain message" );
-    check( string( Assert( true, "value %d", 5 ) ) == "" );
+    check( string( Assert( true, "value %d", 5 ) ) == nostring );
 }
 
 } // namespace axn
+
+#endif /* TestsUtil_hpp */

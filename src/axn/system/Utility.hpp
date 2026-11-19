@@ -111,7 +111,7 @@ typeT inline T1 cube( T1 cref in_x ) { return( in_x * in_x * in_x ); }
 typeT inline T1 log( T1 cref in_x ) { return( T1( ::log( dec( in_x ) ) ) ); }
 typeT inline T1 log( T1 cref in_x, T1 cref in_base ) { return( T1( ::log( dec( in_x ) ) / ::log( dec( in_base ) ) ) ); }
 
-// truncated (default) keeps the sign of in_x like fmod: mod( -1, 4 ) = -1, floored keeps the sign of in_y: mod( -1, 4, true ) = 3
+// C! truncated (default) keeps the sign of in_x like fmod: mod( -1, 4 ) = -1, floored keeps the sign of in_y: mod( -1, 4, true ) = 3
 typeT inline T1 mod( T1 cref in_x, T1 cref in_y, bool in_floored = false ) { dec result = fmod( dec( in_x ), dec( in_y ) ); if( in_floored && ( result != 0.0 ) && ( ( result < 0.0 ) != ( dec( in_y ) < 0.0 ) ) ) { result += dec( in_y ); } return( T1( result ) ); }
 
 inline dec pythagorean( dec in_a, dec in_b ) { return( ( !is_zero( in_a ) && !is_zero( in_b ) ) ? ( sqrt( square( in_a ) + square( in_b ) ) ) : abs( in_a + in_b ) ); }
@@ -168,10 +168,10 @@ inline string stringify( Stringable cref in_stringable ) { return( in_stringable
 inline string stringify( varray<string> cref in_strings, string cref in_delim = DEFAULT_STRINGIFY_DELIM ) { string str; for_range( i, in_strings.size( ) ) { if( i ) { str += in_delim; } str += in_strings[ i ]; } return( str ); }
 inline string stringify( vvarray<string> cref in_strings, string cref in_delim = DEFAULT_STRINGIFY_DELIM ) { string str; for_range( i, in_strings.size( ) ) { if( i ) { str += in_delim; } str += "[ " + stringify( in_strings[ i ], in_delim ) + " ]"; } return( str ); }
 inline string stringify( queue<string> cref in_strings, string cref in_delim = DEFAULT_STRINGIFY_DELIM ) { string str; queue<string> strs = in_strings; for_range( i, strs.size( ) ) { if( i ) { str += in_delim; } str += strs.pop( ); } return( str ); }
-inline string stringify( stack<string> cref in_strings, string cref in_delim = DEFAULT_STRINGIFY_DELIM ) { string str;  stack<string> strs = in_strings; for_range( i, strs.size( ) ) { if( i ) { str += in_delim; } str += strs.pop( ); } return( str ); }
+inline string stringify( stack<string> cref in_strings, string cref in_delim = DEFAULT_STRINGIFY_DELIM ) { string str; stack<string> strs = in_strings; for_range( i, strs.size( ) ) { if( i ) { str += in_delim; } str += strs.pop( ); } return( str ); }
 inline string stringify( list<string> cref in_strings, string cref in_delim = DEFAULT_STRINGIFY_DELIM ) { string str; for_range( i, in_strings.size( ) ) { if( i ) { str += in_delim; } str += in_strings[ i ]; } return( str ); }
 
-inline const char * charify( string in_string ) { return( in_string.c_str( ) ); }
+inline const char * charify( string cref in_string ) { return( in_string.c_str( ) ); }
 
 // -- Identifiable -- //
 
@@ -393,8 +393,8 @@ public:
 
 };
 
-classT Min : public MinOrMax<T1>{ strinfo( Min, "min: " + stringify( MinOrMax<T1>::value( ) ) ); public: Min( ) { } Min( T1 cref in_x ) : MinOrMax<T1>( in_x ) { } private: virtual T1 cref choose( T1 cref in_x1, T1 cref in_x2 ) const override { return( min( in_x1, in_x2 ) ); } equal_default( Min ); };
-classT Max : public MinOrMax<T1>{ strinfo( Max, "max: " + stringify( MinOrMax<T1>::value( ) ) ); public: Max( ) { } Max( T1 cref in_x ) : MinOrMax<T1>( in_x ) { } private: virtual T1 cref choose( T1 cref in_x1, T1 cref in_x2 ) const override { return( max( in_x1, in_x2 ) ); } equal_default( Max ); };
+classT Min : public MinOrMax<T1>{ strinfo( Min, "min: " + stringify( MinOrMax<T1>::value( ) ) ); public: Min( ) { } Min( T1 cref in_x ) : MinOrMax<T1>( in_x ) { } private: virtual T1 cref choose( T1 cref in_x1, T1 cref in_x2 ) const override { return( min( in_x1, in_x2 ) ); } public: equal_default( Min ); };
+classT Max : public MinOrMax<T1>{ strinfo( Max, "max: " + stringify( MinOrMax<T1>::value( ) ) ); public: Max( ) { } Max( T1 cref in_x ) : MinOrMax<T1>( in_x ) { } private: virtual T1 cref choose( T1 cref in_x1, T1 cref in_x2 ) const override { return( max( in_x1, in_x2 ) ); } public: equal_default( Max ); };
 
 classT MinMax : public Stringable
 {
@@ -464,7 +464,7 @@ public:
     void reset( ticks in_countdown ) { duration( in_countdown ); reset( ); }
     void reset( span<ticks> in_countdown_range ) { duration( in_countdown_range ); reset( ); }
 
-    void randomize( ); // start at a random point in the current duration, defined in Random.hpp
+    void randomize( ); // C! start at a random point in the current duration, defined in Random.hpp
 
     // returns true is countdown is finished
     bool tick( ) { return( !is_pos( m_countdown_remaining -= min( 1.0, m_countdown_remaining ) ) ); }

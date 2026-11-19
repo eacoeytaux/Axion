@@ -130,11 +130,6 @@ void Hook::update_velocity( )
     }
 }
 
-void Hook::ground( Terrain::Bumper cref in_ground )
-{
-    Object::ground( in_ground );
-}
-
 bool Hook::collide( ptr<Object> in_object )
 {
     if( state( ) != LOADED )
@@ -158,6 +153,11 @@ bool Hook::collide( ptr<Object> in_object )
     }
 
     return( false );
+}
+
+void Hook::ground( Terrain::Bumper cref in_ground )
+{
+    Object::ground( in_ground );
 }
 
 Planc Hook::max_rope_length( ) const

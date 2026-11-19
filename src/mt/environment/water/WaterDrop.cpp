@@ -66,7 +66,7 @@ WaterDropper::WaterDropper( ptr<Room> in_room, Point cref in_position, dec in_z 
     solid( false );
     interactive( false );
 
-    m_drip.randomize( ); // start partway through so droppers don't all drip in sync
+    m_drip.randomize( ); // C! start partway through so droppers don't all drip in sync
 }
 
 #if defined( AXN_DEBUG )

@@ -11,71 +11,6 @@ var_const( Color SIGHT_LINE_COLOR = ( GREEN.a( ALPHA ) ) );
 var_const( Color ALERT_LINE_COLOR = ( MAGENTA.a( ALPHA ) ) );
 #endif
 
-void Enemy::update( )
-{
-    if( alive( ) )
-    {
-        for_each( player, room( )->players( ) )
-        {
-            if( target( ) == player )
-            {
-                if( ( !target_locked( ) && !in_sight_range( player ) ) || !player->alive( ) )
-                {
-                    clear_target( );
-                }
-            }
-            else if( player->alive( ) && in_alert_range( player ) )
-            {
-                if( !has_target( ) || overrides_target( player ) )
-                {
-                    set_target( player );
-                }
-            }
-        }
-    }
-
-    Mob::update( );
-}
-
-bool Enemy::overrides_target( ptr<const Object> in_target ) const
-{
-    return( alive( ) && !target_locked( ) && position( ).closer_than( m_target->position( ), in_target->position( ) ) );
-}
-
-void Enemy::sight_range( Planc cref in_range )
-{
-    Assert( is_pos( in_range ) );
-
-    m_sight_range = in_range;
-
-    if( !alert_range( ) || ( alert_range( ) > sight_range( ) ) )
-    {
-        alert_range( sight_range( ) );
-    }
-}
-
-bool Enemy::in_sight_range( ptr<const Player> player ) const
-{
-    return( alive( ) && !sight_range( ) || position( ).in_distance_range( player->position( ), sight_range( ) ) );
-}
-
-void Enemy::alert_range( Planc cref in_range )
-{
-    Assert( is_pos( in_range ) );
-
-    m_alert_range = in_range;
-
-    if( sight_range( ) && ( sight_range( ) < alert_range( ) ) )
-    {
-        sight_range( alert_range( ) );
-    }
-}
-
-bool Enemy::in_alert_range( ptr<const Player> in_player ) const
-{
-    return( alive( ) && !alert_range( ) || position( ).in_distance_range( in_player->position( ), alert_range( ) ) );
-}
-
 #if defined( AXN_DEBUG )
 Drawing Enemy::debug_overlay( ) const
 {
@@ -109,3 +44,68 @@ Drawing Enemy::debug_overlay( ) const
     return( debug_overlay.draw( Mob::debug_overlay( ) ) );
 }
 #endif
+
+bool Enemy::overrides_target( ptr<const Object> in_target ) const
+{
+    return( alive( ) && ( !target_locked( ) && position( ).closer_than( m_target->position( ), in_target->position( ) ) ) );
+}
+
+void Enemy::sight_range( Planc cref in_range )
+{
+    Assert( is_pos( in_range ) );
+
+    m_sight_range = in_range;
+
+    if( !alert_range( ) || ( alert_range( ) > sight_range( ) ) )
+    {
+        alert_range( sight_range( ) );
+    }
+}
+
+bool Enemy::in_sight_range( ptr<const Player> player ) const
+{
+    return( alive( ) && ( !sight_range( ) || position( ).in_distance_range( player->position( ), sight_range( ) ) ) );
+}
+
+void Enemy::alert_range( Planc cref in_range )
+{
+    Assert( is_pos( in_range ) );
+
+    m_alert_range = in_range;
+
+    if( sight_range( ) && ( sight_range( ) < alert_range( ) ) )
+    {
+        sight_range( alert_range( ) );
+    }
+}
+
+bool Enemy::in_alert_range( ptr<const Player> in_player ) const
+{
+    return( alive( ) && ( !alert_range( ) || position( ).in_distance_range( in_player->position( ), alert_range( ) ) ) );
+}
+
+void Enemy::update( )
+{
+    if( alive( ) )
+    {
+        for_each( player, room( )->players( ) )
+        {
+            if( target( ) == player )
+            {
+                if( ( !target_locked( ) && !in_sight_range( player ) ) || !player->alive( ) )
+                {
+                    clear_target( );
+                }
+            }
+            else if( player->alive( ) && in_alert_range( player ) )
+            {
+                if( !has_target( ) || overrides_target( player ) )
+                {
+                    set_target( player );
+                }
+            }
+        }
+    }
+
+    Mob::update( );
+}

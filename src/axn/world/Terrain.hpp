@@ -19,8 +19,8 @@ public:
 
     class Node;
 
-    // where an object's center can be while its hitbox touches a node, and which node that is
-    // an object's ground is a Bumper, a default Bumper (no node) means not grounded
+    // C! where an object's center can be while its hitbox touches a node, and which node that is
+    // C! an object's ground is a Bumper, a default Bumper (no node) means not grounded
     class Bumper
     {
 
@@ -68,18 +68,18 @@ public:
 
         virtual Angle normal( ) const = 0;
 
-        virtual Point center( ) const = 0; // a point on the node itself, its bumper lines all face away from it
+        virtual Point center( ) const = 0; // C! a point on the node itself, its bumper lines all face away from it
 
         virtual FixedRectangle bounding_box( ) const = 0;
 
-        // bumpers are built from the hitbox turned inside out, working that shape out is most of the cost,
-        // so when building several bumpers for the same hitbox get it once with bumper_shape( ) and pass it in
+        // C! bumpers are built from the hitbox turned inside out, working that shape out is most of the cost,
+        // C! so when building several bumpers for the same hitbox get it once with bumper_shape( ) and pass it in
         static varray<Point> bumper_shape( Hitbox cref in_hitbox );
 
         virtual Bumper bumpers( varray<Point> cref in_shape ) const = 0;
         Bumper bumpers( Hitbox cref in_hitbox ) const { return( bumpers( bumper_shape( in_hitbox ) ) ); }
 
-        Angle bumper_normal( Line cref in_bumper_line ) const; // outward normal of one of this node's bumper lines
+        Angle bumper_normal( Line cref in_bumper_line ) const; // C! outward normal of one of this node's bumper lines
 
     };
 

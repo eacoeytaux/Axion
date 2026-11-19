@@ -15,20 +15,25 @@ public:
 
     Mob( ptr<Room> in_room, Point cref in_position, dec in_health = 1.0 );
 
+protected:
+
+    virtual void render( ) override;
+
+public:
+
     #if defined( AXN_DEBUG )
     virtual Drawing debug_overlay( ) const override;
     #endif
 
 protected:
 
-    virtual void render( ) override;
     virtual void hurt_display_settings( );
 
     virtual void update( ) override;
 
-    virtual void trim_velocity( );
-    virtual void update_velocity( );
-    virtual void update_movement( );
+    virtual void trim_velocity( ) override;
+    virtual void update_velocity( ) override;
+    virtual void update_movement( ) override;
 
 public:
 

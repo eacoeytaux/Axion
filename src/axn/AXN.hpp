@@ -1,5 +1,5 @@
-#ifndef Axion_hpp
-#define Axion_hpp
+#ifndef AXN_hpp
+#define AXN_hpp
 
 #define AXN_VERSION "0.0"
 
@@ -22,4 +22,4 @@
 #include "axn/system/Logger.hpp"
 #include "axn/system/Utility.hpp"
 
-#endif /* Axion_hpp */
+#endif /* AXN_hpp */

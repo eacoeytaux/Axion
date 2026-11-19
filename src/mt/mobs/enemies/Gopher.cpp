@@ -55,27 +55,6 @@ Gopher::Gopher( ptr<Room> in_room, Point cref in_position ) : Enemy( in_room, in
     state( EXPOSED );
 }
 
-void Gopher::update( )
-{
-    Enemy::update( );
-
-    m_reload_timer.tick( );
-
-    if( state( ) == EXPOSED )
-    {
-        if( has_target( ) )
-        {
-            facing_left( target( )->position( ).x( ) < position( ).x( ) );
-
-            if( m_reload_timer.completed( ) )
-            {
-                room( )->add_object( new DirtBall( room( ), BALL_WIDTH, position( ), VectorA( Angle( position( ), target( )->position( ) ), 5.0 ) ) );
-                m_reload_timer.reset( RELOAD_TIME );
-            }
-        }
-    }
-}
-
 void Gopher::render( )
 {
     Enemy::render( );
@@ -112,6 +91,27 @@ void Gopher::render( )
         if( facing_left( ) )
         {
             mirror_y( );
+        }
+    }
+}
+
+void Gopher::update( )
+{
+    Enemy::update( );
+
+    m_reload_timer.tick( );
+
+    if( state( ) == EXPOSED )
+    {
+        if( has_target( ) )
+        {
+            facing_left( target( )->position( ).x( ) < position( ).x( ) );
+
+            if( m_reload_timer.completed( ) )
+            {
+                room( )->add_object( new DirtBall( room( ), BALL_WIDTH, position( ), VectorA( Angle( position( ), target( )->position( ) ), 5.0 ) ) );
+                m_reload_timer.reset( RELOAD_TIME );
+            }
         }
     }
 }
