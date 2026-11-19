@@ -18,15 +18,24 @@ var_static( bool b_using_console = ( true ) );
 
 var_static( string log_directory = ( "logs/" ) );
 var_static( file * log_file = ( nullptr ) );
+Error Logger::close( )
+{
+    if( b_initialized )
+    {
+        log_message( INFO_LOG, "complete ............... :)\n" );
+    }
 
-bool Logger::printing_to_console( ) { return( b_using_console ); }
-Error Logger::print_to_console( bool in_print ) { b_using_console = in_print; return( no_error ); }
+    b_initialized = false;
 
-bool Logger::paused( ) { return( b_paused ); }
-Error Logger::pause( bool in_pause ) { b_paused = in_pause; return( no_error ); }
-
-Error Logger::pop_pause( ) { Assert( b_paused_stack.size( ) ); return( pause( b_paused_stack.pop( ) ) ); }
-Error Logger::push_pause( bool in_pause ) { b_paused_stack.push( in_pause ); return( pause( in_pause ) ); }
+    if( log_file )
+    {
+        return( fclose( log_file ) ? error_system : no_error );
+    }
+    else
+    {
+        return( no_error );
+    }
+}
 
 Error Logger::init( bool in_file )
 {
@@ -123,23 +132,13 @@ Error Logger::log_message( message_type in_type, const char * in_entry, ... )
     return( no_error );
 }
 
-Error Logger::close( )
-{
-    if( b_initialized )
-    {
-        log_message( INFO_LOG, "complete ............... :)\n" );
-    }
+bool Logger::printing_to_console( ) { return( b_using_console ); }
+Error Logger::print_to_console( bool in_print ) { b_using_console = in_print; return( no_error ); }
 
-    b_initialized = false;
+bool Logger::paused( ) { return( b_paused ); }
+Error Logger::pause( bool in_pause ) { b_paused = in_pause; return( no_error ); }
 
-    if( log_file )
-    {
-        return( fclose( log_file ) ? error_system : no_error );
-    }
-    else
-    {
-        return( no_error );
-    }
-}
+Error Logger::pop_pause( ) { Assert( b_paused_stack.size( ) ); return( pause( b_paused_stack.pop( ) ) ); }
+Error Logger::push_pause( bool in_pause ) { b_paused_stack.push( in_pause ); return( pause( in_pause ) ); }
 
 #endif

@@ -46,7 +46,7 @@ public:
 
     Path loop( ) { if( size( ) && ( back( ).pt2( ) != front( ).pt1( ) ) ) { return( Path( lines( ) + Line( back( ).pt2( ), front( ).pt1( ) ) ) ); } else { rethis; } }
 
-    Path ref transform( Transform cref in_transform ) override { Transformable::transform( in_transform ); for_each( line, *this ) { line.transform( in_transform ); } rethis; }
+    virtual Path ref transform( Transform cref in_transform ) override { Transformable::transform( in_transform ); for_each( line, *this ) { line.transform( in_transform ); } rethis; }
 
     uint line_count( ) const { return( size( ) ); }
     uint point_count( ) const { return( size( ) ? size( ) + 1 : 0 ); }

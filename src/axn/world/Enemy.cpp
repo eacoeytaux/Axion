@@ -45,6 +45,32 @@ Drawing Enemy::debug_overlay( ) const
 }
 #endif
 
+void Enemy::update( )
+{
+    if( alive( ) )
+    {
+        for_each( player, room( )->players( ) )
+        {
+            if( target( ) == player )
+            {
+                if( ( !target_locked( ) && !in_sight_range( player ) ) || !player->alive( ) )
+                {
+                    clear_target( );
+                }
+            }
+            else if( player->alive( ) && in_alert_range( player ) )
+            {
+                if( !has_target( ) || overrides_target( player ) )
+                {
+                    target( player );
+                }
+            }
+        }
+    }
+
+    Mob::update( );
+}
+
 bool Enemy::overrides_target( ptr<const Object> in_target ) const
 {
     return( alive( ) && ( !target_locked( ) && position( ).closer_than( m_target->position( ), in_target->position( ) ) ) );
@@ -82,30 +108,4 @@ void Enemy::alert_range( Planc cref in_range )
 bool Enemy::in_alert_range( ptr<const Player> in_player ) const
 {
     return( alive( ) && ( !alert_range( ) || position( ).in_distance_range( in_player->position( ), alert_range( ) ) ) );
-}
-
-void Enemy::update( )
-{
-    if( alive( ) )
-    {
-        for_each( player, room( )->players( ) )
-        {
-            if( target( ) == player )
-            {
-                if( ( !target_locked( ) && !in_sight_range( player ) ) || !player->alive( ) )
-                {
-                    clear_target( );
-                }
-            }
-            else if( player->alive( ) && in_alert_range( player ) )
-            {
-                if( !has_target( ) || overrides_target( player ) )
-                {
-                    set_target( player );
-                }
-            }
-        }
-    }
-
-    Mob::update( );
 }

@@ -185,14 +185,15 @@ void Fire::flame_alpha_shrink( dec in_flame_alpha_shrink ) { m_flame_alpha_shrin
 void Fire::wind_resistance_ratio( dec in_wind_resistance_ratio ) { m_wind_resistance_ratio = in_wind_resistance_ratio; }
 void Fire::movement_resistance_ratio( dec in_movement_resistance_ratio ) { m_movement_resistance_ratio = in_movement_resistance_ratio; }
 
-void Fire::light_distance( Planc cref in_light_distance ) { m_light_distance = in_light_distance; set_light_source( ); }
+void Fire::light_distance( Planc cref in_light_distance ) { m_light_distance = in_light_distance; update_light_sources( ); }
+
+void Fire::tint_distance( Planc cref in_tint_distance ) { m_tint_distance = in_tint_distance; update_light_sources( ); }
+void Fire::tint_flicker( Planc cref in_tint_flicker ) { m_tint_flicker = in_tint_flicker; update_light_sources( ); }
 
 // todo make ratio to light distance instead? tint shouldn't be greater than light
-void Fire::tint_intensity( dec in_tint_intensity ) { m_tint_intensity = in_tint_intensity; set_light_source( ); }
-void Fire::tint_distance( Planc cref in_tint_distance ) { m_tint_distance = in_tint_distance; set_light_source( ); }
-void Fire::tint_flicker( Planc cref in_tint_flicker ) { m_tint_flicker = in_tint_flicker; set_light_source( ); }
+void Fire::tint_intensity( dec in_tint_intensity ) { m_tint_intensity = in_tint_intensity; update_light_sources( ); }
 
-void Fire::set_light_source( )
+void Fire::update_light_sources( )
 {
     clear_light_sources( );
 

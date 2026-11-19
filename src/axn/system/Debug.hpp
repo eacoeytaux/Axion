@@ -73,6 +73,7 @@ public:
             return( false );
         }
     }
+
 };
 
 class Base { }; class Derived : public Base { };

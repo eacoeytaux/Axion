@@ -21,7 +21,7 @@ public:
 
 protected:
 
-    void render( ) override
+    virtual void render( ) override
     {
         Object::render( );
 
@@ -76,6 +76,7 @@ protected:
         draw( LETTER_COLOR, Polygon::circle( half( LETTER_THICKNESS ), Point( -half( LETTER_WIDTH ), -half( LETTER_HEIGHT ) ) + letter_center ) );
         draw( LETTER_COLOR, Polygon::circle( half( LETTER_THICKNESS ), PointY( half( LETTER_HEIGHT ) ) + letter_center ) );
     }
+
 };
 
 class SplashRoom : public Room
@@ -95,18 +96,12 @@ protected:
 
         add_object( new Logo( this ) );
     }
+
 };
 
 bool SplashScreen::quit( ) const
 {
     return( m_complete || ( age( ) > ( dec( MAX_SPLASH_DURATION_SEC ) * dec( Engine::FPS ) ) ) );
-}
-
-void SplashScreen::create( )
-{
-    World::create( );
-
-    add_room( new SplashRoom( this ) );
 }
 
 void SplashScreen::input( list<ptr<Input>> cref in_inputs )
@@ -160,4 +155,11 @@ void SplashScreen::input( list<ptr<Input>> cref in_inputs )
             }
         }
     }
+}
+
+void SplashScreen::create( )
+{
+    World::create( );
+
+    add_room( new SplashRoom( this ) );
 }

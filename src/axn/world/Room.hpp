@@ -260,11 +260,12 @@ public:
 
     private:
 
-        uint m_grid_x_size;
-        uint m_grid_y_size;
+        uint m_grid_x_size = 0; // C! 0 until init( ), so a grid that was never set up has no valid blocks (left uninitialized it crashed clang builds)
+        uint m_grid_y_size = 0;
         Block m_out_of_bounds_block;
         vvarray<Block> m_grid;
         FixedRectangle m_bounds;
+
     };
 
 private:

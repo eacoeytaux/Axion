@@ -20,22 +20,22 @@ public:
 
     Climber( uint in_player_number, ptr<Room> in_room, Point cref in_position );
 
-    void render( ) override;
+    virtual void render( ) override;
 
     #if defined( AXN_DEBUG )
-    Drawing debug_overlay( ) const override;
+    virtual Drawing debug_overlay( ) const override;
     #endif
 
-    void update( ) override;
+    virtual void update( ) override;
 
-    void input( ptr<Input> in_input ) override;
-    void clear_input( ) override;
+    virtual void input( ptr<Input> in_input ) override;
+    virtual void clear_input( ) override;
 
-    void die( ) override;
+    virtual void die( ) override;
 
-    Planc light_sight( ) const override;
+    virtual Planc light_sight( ) const override;
 
-    bool opening_door( ) const override;
+    virtual bool opening_door( ) const override;
 
     bool moving_right( ) const;
     bool moving_left( ) const;
@@ -72,8 +72,8 @@ protected:
 
     virtual dec air_resistance( ) const override;
 
-    void trim_velocity( ) override;
-    void update_velocity( ) override;
+    virtual void trim_velocity( ) override;
+    virtual void update_velocity( ) override;
 
     virtual dec check_movement( Vector cref in_velocity ) override;
 
@@ -84,7 +84,7 @@ protected:
     void looking_up( bool in_looking );
     void looking_down( bool in_looking );
 
-    void ground( Terrain::Bumper cref in_ground ) override;
+    virtual void ground( Terrain::Bumper cref in_ground ) override;
 
     void dash( bool in_dashing );
 
@@ -155,7 +155,7 @@ protected:
     };
 
     Color color( ColorPiece in_color_piece ) const;
-    Color eye_color( ) const override { return( color( EYE ) ); }
+    virtual Color eye_color( ) const override { return( color( EYE ) ); }
 
 private:
 
@@ -220,7 +220,7 @@ public:
 
         HealthHUD( ptr<Climber> in_climber = nullptr );
 
-        void render( ptr<Camera> in_camera ) override;
+        virtual void render( ptr<Camera> in_camera ) override;
 
     private:
 
@@ -244,7 +244,7 @@ public:
 
         JumpHUD( ptr<Climber> in_climber = nullptr );
 
-        void render( ptr<Camera> in_camera ) override;
+        virtual void render( ptr<Camera> in_camera ) override;
 
     private:
 
@@ -268,7 +268,7 @@ public:
 
         AimHUD( ptr<Climber> in_climber = nullptr );
 
-        void render( ptr<Camera> camera ) override;
+        virtual void render( ptr<Camera> camera ) override;
 
     private:
 
@@ -289,7 +289,7 @@ public:
 
         LowHealthAlertEffect( ptr<Climber> in_climber = nullptr );
 
-        void render( ptr<Camera> in_camera ) override;
+        virtual void render( ptr<Camera> in_camera ) override;
 
     private:
 

@@ -45,52 +45,6 @@ void Mob::render( )
     }
 }
 
-void Mob::hurt_display_settings( )
-{
-    color_filter( [ ] ( Color ref color )
-    {
-        color.r( ( one_minus( color.r( ) ) * 0.25 ) + color.r( ) );
-        color.g( 0.0 );
-        color.b( 0.0 );
-    } );
-}
-
-void Mob::draw_eye( Point cref in_position, Angle cref in_angle )
-{
-    if( m_eye_info_set )
-    {
-        if( alive( ) )
-        {
-            Planc eye_width = x2( m_eye_radius );
-            Planc eye_height = eyes_closed( ) ? Planc( 1.0 ) : ( eye_width * ( squinting( ) ? 0.5 : 1.0 ) );
-
-            Polygon eye = Polygon::rectangle( eye_width, eye_height ).rotate( in_angle ).move( in_position );
-
-            draw( eye_color( ), eye );
-        }
-        else
-        {
-            draw( eye_color( ), Line( in_position + Vector( m_eye_radius, m_eye_radius ), in_position + Vector( -m_eye_radius, -m_eye_radius ) ), 0.75 );
-            draw( eye_color( ), Line( in_position + Vector( m_eye_radius, -m_eye_radius ), in_position + Vector( -m_eye_radius, m_eye_radius ) ), 0.75 );
-        }
-    }
-}
-
-void Mob::eye_info( Planc cref in_eye_radius, ticks in_blink_duration, span<ticks> cref in_blink_pause_duration, Color cref in_eye_color )
-{
-    m_eye_radius = in_eye_radius;
-    m_eyes_closed = false;
-    m_eyes_squinting = false;
-    m_blink_duration = in_blink_duration;
-    m_blink_pause_duration = in_blink_pause_duration;
-    m_eye_color = in_eye_color;
-
-    m_blink_timer.duration( m_blink_duration );
-    m_blink_pause_timer.duration( m_blink_pause_duration );
-
-    m_eye_info_set = true;
-}
-
 #if defined( AXN_DEBUG )
 Drawing Mob::debug_overlay( ) const
 {
@@ -145,6 +99,16 @@ Drawing Mob::debug_overlay( ) const
 }
 #endif
 
+void Mob::hurt_display_settings( )
+{
+    color_filter( [ ] ( Color ref color )
+    {
+        color.r( ( one_minus( color.r( ) ) * 0.25 ) + color.r( ) );
+        color.g( 0.0 );
+        color.b( 0.0 );
+    } );
+}
+
 void Mob::update( )
 {
     Object::update( );
@@ -182,29 +146,19 @@ void Mob::update_velocity( )
     Object::update_velocity( );
 }
 
+void Mob::update_movement( )
+{
+    Object::update_movement( );
+
+    if( velocity( ).dx( ) )
+    {
+        facing_left( velocity( ).dx( ) < 0.0 );
+    }
+}
+
 bool Mob::alive( ) const
 {
     return( m_alive );
-}
-
-void Mob::die( )
-{
-    if( alive( ) )
-    {
-        m_alive = false;
-        needs_render( true );
-    }
-}
-
-void Mob::revive( )
-{
-    if( dead( ) )
-    {
-        m_alive = true;
-        needs_render( true );
-
-        heal_full( );
-    }
 }
 
 dec Mob::health_percentage( ) const
@@ -239,6 +193,40 @@ void Mob::max_health( dec in_health, bool in_add )
 
     m_health = slider<dec>( in_health );
     m_health.value( min( health, in_health ) );
+}
+
+bool Mob::facing_right( ) const
+{
+    return( m_facing_right );
+}
+
+void Mob::facing_right( bool in_facing_right )
+{
+    if( m_facing_right != in_facing_right )
+    {
+        m_facing_right = in_facing_right;
+        needs_render( true );
+    }
+}
+
+void Mob::die( )
+{
+    if( alive( ) )
+    {
+        m_alive = false;
+        needs_render( true );
+    }
+}
+
+void Mob::revive( )
+{
+    if( dead( ) )
+    {
+        m_alive = true;
+        needs_render( true );
+
+        heal_full( );
+    }
 }
 
 void Mob::heal( dec in_health )
@@ -280,27 +268,39 @@ void Mob::damage( Damage cref in_damage )
     }
 }
 
-bool Mob::facing_right( ) const
+void Mob::eye_info( Planc cref in_eye_radius, ticks in_blink_duration, span<ticks> cref in_blink_pause_duration, Color cref in_eye_color )
 {
-    return( m_facing_right );
+    m_eye_radius = in_eye_radius;
+    m_eyes_closed = false;
+    m_eyes_squinting = false;
+    m_blink_duration = in_blink_duration;
+    m_blink_pause_duration = in_blink_pause_duration;
+    m_eye_color = in_eye_color;
+
+    m_blink_timer.duration( m_blink_duration );
+    m_blink_pause_timer.duration( m_blink_pause_duration );
+
+    m_eye_info_set = true;
 }
 
-void Mob::facing_right( bool in_facing_right )
+void Mob::draw_eye( Point cref in_position, Angle cref in_angle )
 {
-    if( m_facing_right != in_facing_right )
+    if( m_eye_info_set )
     {
-        m_facing_right = in_facing_right;
-        needs_render( true );
-    }
-}
+        if( alive( ) )
+        {
+            Planc eye_width = x2( m_eye_radius );
+            Planc eye_height = eyes_closed( ) ? Planc( 1.0 ) : ( eye_width * ( squinting( ) ? 0.5 : 1.0 ) );
 
-void Mob::update_movement( )
-{
-    Object::update_movement( );
+            Polygon eye = Polygon::rectangle( eye_width, eye_height ).rotate( in_angle ).move( in_position );
 
-    if( velocity( ).dx( ) )
-    {
-        facing_left( velocity( ).dx( ) < 0.0 );
+            draw( eye_color( ), eye );
+        }
+        else
+        {
+            draw( eye_color( ), Line( in_position + Vector( m_eye_radius, m_eye_radius ), in_position + Vector( -m_eye_radius, -m_eye_radius ) ), 0.75 );
+            draw( eye_color( ), Line( in_position + Vector( m_eye_radius, -m_eye_radius ), in_position + Vector( -m_eye_radius, m_eye_radius ) ), 0.75 );
+        }
     }
 }
 

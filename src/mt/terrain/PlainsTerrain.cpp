@@ -211,9 +211,9 @@ PlainsTerrain::PlainsTerrain( ptr<Room> in_room, vvarray<Point> cref in_vertices
 
     fill_color( DIRT_COLOR_2 );
 
-    for_each( polygon, grass_back ) draw( PLANT_GREEN_2, polygon.expanded( GRASS_TUFTS_OUTLINE_THICKNESS ) );
-    for_each( polygon, grass_front ) draw( PLANT_GREEN_2, polygon.expanded( GRASS_TUFTS_OUTLINE_THICKNESS ) );
-    for_each( polygon, grass_front ) draw( PLANT_GREEN_1, polygon );
+    for_each( polygon, grass_back ) { draw( PLANT_GREEN_2, polygon.expanded( GRASS_TUFTS_OUTLINE_THICKNESS ) ); }
+    for_each( polygon, grass_front ) { draw( PLANT_GREEN_2, polygon.expanded( GRASS_TUFTS_OUTLINE_THICKNESS ) ); }
+    for_each( polygon, grass_front ) { draw( PLANT_GREEN_1, polygon ); }
 
     crop( );
 }

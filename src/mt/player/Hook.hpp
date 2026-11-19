@@ -16,12 +16,12 @@ public:
 
     Hook( ptr<Room> in_room, Climber * in_owner );
 
-    void render( ) override;
+    virtual void render( ) override;
 
-    void update( ) override;
+    virtual void update( ) override;
 
-    void trim_velocity( ) override;
-    void update_velocity( ) override;
+    virtual void trim_velocity( ) override;
+    virtual void update_velocity( ) override;
 
 protected:
 
@@ -29,7 +29,7 @@ protected:
 
 public:
 
-    void ground( Terrain::Bumper cref in_ground ) override;
+    virtual void ground( Terrain::Bumper cref in_ground ) override;
 
     Planc max_rope_length( ) const;
     Planc rope_length( ) const;

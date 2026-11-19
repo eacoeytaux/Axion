@@ -15,11 +15,21 @@
 #include <concepts>
 
 using namespace mtmercy;
-
-dec MtMerciless::air_resistance( ) const { return( 0.025 ); }
-Vector MtMerciless::gravity( ) const { return( VectorY( -0.625 ) ); }
-
 #define assign( ... ) if( ( cast_const( in_object, __VA_ARGS__ ) && ( order.push( score + 1 ) && !( score = 0 ) ) ) || ++score ) { } macro_end
+
+void MtMerciless::create( )
+{
+    World::create( );
+
+    ptr<Room> training_grounds = add_room( new TrainingGrounds( this ), true );
+    ptr<Room> caves = add_room( new Caves( this ) );
+
+    ptr<Door> door1 = *training_grounds->doors( ).begin( );
+    ptr<Door> door2 = *caves->doors( ).begin( );
+
+    if( !is_null( door1 ) ) { door1->out( door2 ); }
+    if( !is_null( door2 ) ) { door2->out( door1 ); }
+}
 
 Visible::LayerOrder MtMerciless::layer_order( ptr<const Object> in_object ) const
 {
@@ -41,16 +51,5 @@ Visible::LayerOrder MtMerciless::layer_order( ptr<const Object> in_object ) cons
     return( order );
 }
 
-void MtMerciless::create( )
-{
-    World::create( );
-
-    ptr<Room> training_grounds = add_room( new TrainingGrounds( this ), true );
-    ptr<Room> caves = add_room( new Caves( this ) );
-
-    ptr<Door> door1 = *training_grounds->doors( ).begin( );
-    ptr<Door> door2 = *caves->doors( ).begin( );
-
-    if( !is_null( door1 ) ) { door1->out( door2 ); }
-    if( !is_null( door2 ) ) { door2->out( door1 ); }
-}
+dec MtMerciless::air_resistance( ) const { return( 0.025 ); }
+Vector MtMerciless::gravity( ) const { return( VectorY( -0.625 ) ); }

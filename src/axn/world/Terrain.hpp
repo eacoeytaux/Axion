@@ -108,17 +108,17 @@ public:
         void edge1( ptr<Edge> in_edge );
         void edge2( ptr<Edge> in_edge );
 
-        ptr<Node> front( ) const override { return( edge1( ) ); }
-        ptr<Node> back( ) const override { return( edge2( ) ); }
+        virtual ptr<Node> front( ) const override { return( edge1( ) ); }
+        virtual ptr<Node> back( ) const override { return( edge2( ) ); }
 
-        Angle normal( ) const override;
+        virtual Angle normal( ) const override;
 
-        Point center( ) const override { return( position( ) ); }
+        virtual Point center( ) const override { return( position( ) ); }
 
-        FixedRectangle bounding_box( ) const override;
+        virtual FixedRectangle bounding_box( ) const override;
 
         using Node::bumpers;
-        Bumper bumpers( varray<Point> cref in_shape ) const override;
+        virtual Bumper bumpers( varray<Point> cref in_shape ) const override;
 
     };
 
@@ -140,17 +140,17 @@ public:
         ptr<Vertex> vertex1( ) const;
         ptr<Vertex> vertex2( ) const;
 
-        ptr<Node> front( ) const override { return( vertex1( ) ); }
-        ptr<Node> back( ) const override { return( vertex2( ) ); }
+        virtual ptr<Node> front( ) const override { return( vertex1( ) ); }
+        virtual ptr<Node> back( ) const override { return( vertex2( ) ); }
 
-        Angle normal( ) const override;
+        virtual Angle normal( ) const override;
 
-        Point center( ) const override { return( midpoint( m_v1->position( ), m_v2->position( ) ) ); }
+        virtual Point center( ) const override { return( midpoint( m_v1->position( ), m_v2->position( ) ) ); }
 
-        FixedRectangle bounding_box( ) const override;
+        virtual FixedRectangle bounding_box( ) const override;
 
         using Node::bumpers;
-        Bumper bumpers( varray<Point> cref in_shape ) const override;
+        virtual Bumper bumpers( varray<Point> cref in_shape ) const override;
 
     };
 

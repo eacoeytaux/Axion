@@ -1,20 +1,5 @@
 #include "axn/graphics/Drawing.hpp"
 
-varray<Drawing::Node> Drawing::nodes( ) const
-{
-    return( m_nodes );
-}
-
-Drawing::Node ref Drawing::back_node( bool in_add_new )
-{
-    if( in_add_new || is_empty( m_nodes ) )
-    {
-        m_nodes.insert_back( );
-    }
-
-    return( m_nodes.back( ) );
-}
-
 Drawing ref Drawing::transform( Transform cref in_trans )
 {
     back_node( ).transform.chain( in_trans );
@@ -55,30 +40,6 @@ Drawing ref Drawing::draw( Drawing cref in_drawing, Color cref in_color )
                !back_node( ).colored_shapes.empty( ) ||
                !back_node( ).crop_shapes.empty( ) ||
                !back_node( ).hole_shapes.empty( ) ).drawings.insert_back( in_drawing.nodes( ) );
-
-    rethis;
-}
-
-Drawing ref Drawing::add_hole( Polygon cref in_polygon )
-{
-    ColoredPolygon colored_polygon;
-    colored_polygon.polygon = in_polygon;
-    colored_polygon.colors = { CLEAR };
-
-    back_node( !back_node( ).transform.is_identity( ) ).hole_shapes.insert_back( colored_polygon );
-
-    rethis;
-}
-
-Drawing ref Drawing::add_bounds( Polygon cref in_polygon )
-{
-    ColoredPolygon colored_polygon;
-    colored_polygon.polygon = in_polygon;
-    colored_polygon.colors = { CLEAR };
-
-    m_bounding_box.union_with( in_polygon.bounds( ) ); // TODO not just union, but make bounding box only bounds
-
-    back_node( !back_node( ).transform.is_identity( ) ).crop_shapes.insert_back( colored_polygon );
 
     rethis;
 }
@@ -186,7 +147,46 @@ Drawing ref Drawing::draw( Color cref in_color,
 }
 #endif
 
+Drawing ref Drawing::add_hole( Polygon cref in_polygon )
+{
+    ColoredPolygon colored_polygon;
+    colored_polygon.polygon = in_polygon;
+    colored_polygon.colors = { CLEAR };
+
+    back_node( !back_node( ).transform.is_identity( ) ).hole_shapes.insert_back( colored_polygon );
+
+    rethis;
+}
+
+Drawing ref Drawing::add_bounds( Polygon cref in_polygon )
+{
+    ColoredPolygon colored_polygon;
+    colored_polygon.polygon = in_polygon;
+    colored_polygon.colors = { CLEAR };
+
+    m_bounding_box.union_with( in_polygon.bounds( ) ); // TODO not just union, but make bounding box only bounds
+
+    back_node( !back_node( ).transform.is_identity( ) ).crop_shapes.insert_back( colored_polygon );
+
+    rethis;
+}
+
 void Drawing::optimize( )
 {
     // TODO
+}
+
+varray<Drawing::Node> Drawing::nodes( ) const
+{
+    return( m_nodes );
+}
+
+Drawing::Node ref Drawing::back_node( bool in_add_new )
+{
+    if( in_add_new || is_empty( m_nodes ) )
+    {
+        m_nodes.insert_back( );
+    }
+
+    return( m_nodes.back( ) );
 }

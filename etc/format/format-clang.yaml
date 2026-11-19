@@ -1,3 +1,13 @@
+# C! clang-format settings for the src files, matching .claude/CLAUDE.md as closely as clang-format can
+# C! clang-format can't do all of the style guide, so running it over whole files changes code that's already correct:
+# C!   - it always splits a one-line function or block with more than one statement ( { a; b; rethis; } ) onto separate lines
+# C!   - it writes return( x ) as return ( x )
+# C!   - it moves #if lines inside functions and classes back to column 0
+# C!   - it removes the blank line before a class's closing };
+# C!   - it doesn't know the engine's macros beyond the ones listed under ForEachMacros, StatementMacros and Macros
+# C! so use etc/format/format-check.sh and format-fix.sh for the whole style, and this file to format a selection in an editor (format-fix.sh --clang-format runs it over whole files)
+# C! clang-format only finds this file automatically when it's named .clang-format in a folder above the source, so pass it explicitly:
+# C!   clang-format --style=file:etc/format/format-clang.yaml ...
 ---
 Language: Cpp
 # BasedOnStyle: LLVM
@@ -36,17 +46,17 @@ AlignConsecutiveShortCaseStatements:
 AlignEscapedNewlines: Right
 AlignOperands: Align
 AlignTrailingComments:
-  Kind: Always
+  Kind: Leave
   OverEmptyLines: 0
 AllowAllArgumentsOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
-AllowShortBlocksOnASingleLine: Never
+AllowShortBlocksOnASingleLine: Always
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortEnumsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
-AllowShortIfStatementsOnASingleLine: Never
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AllowShortLambdasOnASingleLine: All
-AllowShortLoopsOnASingleLine: false
+AllowShortLoopsOnASingleLine: true
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
@@ -94,14 +104,16 @@ ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
 DerivePointerAlignment: false
 DisableFormat: false
-EmptyLineAfterAccessModifier: Never
-EmptyLineBeforeAccessModifier: LogicalBlock
+EmptyLineAfterAccessModifier: Always
+EmptyLineBeforeAccessModifier: Always
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
 ForEachMacros:
-  - foreach
-  - Q_FOREACH
-  - BOOST_FOREACH
+  - for_range
+  - for_each
+  - for_each_const
+  - do_count
+  - while_max
 IfMacros:
   - KJ_IF_MAYBE
 IncludeBlocks: Preserve
@@ -169,7 +181,7 @@ PointerAlignment: Middle
 PPIndentWidth: -1
 QualifierAlignment: Leave
 ReferenceAlignment: Pointer
-ReflowComments: true
+ReflowComments: false
 RemoveBracesLLVM: false
 RemoveParentheses: Leave
 RemoveSemicolon: false
@@ -208,7 +220,7 @@ SpacesBeforeTrailingComments: 1
 SpacesInAngles: Never
 SpacesInContainerLiterals: true
 SpacesInLineCommentPrefix:
-  Minimum: 1
+  Minimum: 0
   Maximum: -1
 SpacesInParens: Custom
 SpacesInParensOptions:
@@ -221,8 +233,24 @@ Standard: Latest
 StatementAttributeLikeMacros:
   - Q_EMIT
 StatementMacros:
-  - Q_UNUSED
-  - QT_REQUIRE_VERSION
+  - equal_default
+  - equal_never
+  - equal_always
+  - strinfo
+  - STATE
+  - var_const
+  - var_static
+  - macro_end
+Macros:
+  - "classT=template<typename T1> class"
+  - "structT=template<typename T1> struct"
+  - "typeT=template<typename T1>"
+  - "typeT2=template<typename T1, typename T2>"
+  - "classT2=template<typename T1, typename T2> class"
+  - "lambdaf(name)=auto name = [&]"
+  - "static_once=if(true)"
+  - "b_case(x)=break; case x"
+  - "a_case(x)=case x"
 TabWidth: 8
 UseTab: Never
 VerilogBreakBetweenInstancePorts: true

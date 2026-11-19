@@ -198,6 +198,7 @@ protected:
         varray<Limb> m_limbs;
 
     };
+
 };
 
 } // namespace reality

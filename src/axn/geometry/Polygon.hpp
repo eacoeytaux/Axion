@@ -772,8 +772,8 @@ public:
 
 private:
 
-    Polygon cref dirty( ) const override { Transformable::dirty( ); m_bounds_dirty = true; rethis; }
-    Polygon cref clean( ) const override { Transformable::clean( ); m_bounds_dirty = false; rethis; }
+    virtual Polygon cref dirty( ) const override { Transformable::dirty( ); m_bounds_dirty = true; rethis; }
+    virtual Polygon cref clean( ) const override { Transformable::clean( ); m_bounds_dirty = false; rethis; }
 
     void apply_transform( ) const
     {

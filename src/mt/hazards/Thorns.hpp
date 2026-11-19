@@ -14,7 +14,7 @@ public:
 
     Thorns( ptr<Room> in_room, Point cref in_start, Point cref in_end );
 
-    bool collide( ptr<Object> in_object ) override;
+    virtual bool collide( ptr<Object> in_object ) override;
 
 };
 

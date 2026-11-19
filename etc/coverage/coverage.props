@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- C! extra MSBuild settings for the coverage build, imported by coverage.sh with /p:ForceImportBeforeCppTargets -->
+<!-- C! compiles with clang-cl and source-based coverage, and links clang's profile runtime -->
+<!-- C! defines AXN_COVERAGE so the program exits after the tests, unless AxnCoveragePlay is true (coverage.sh with its play option), which runs the game as normal -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemDefinitionGroup Condition="'$(AxnCoveragePlay)' != 'true'">
+    <ClCompile>
+      <PreprocessorDefinitions>AXN_COVERAGE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalOptions>-fprofile-instr-generate -fcoverage-mapping -Wno-everything %(AdditionalOptions)</AdditionalOptions>
+      <SDLCheck>false</SDLCheck>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>clang_rt.profile-x86_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(AxnLlvmLib);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>

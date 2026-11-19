@@ -1,7 +1,7 @@
 #include "axn/graphics/Lighting.hpp"
 #include "axn/graphics/Camera.hpp"
 
-var_const( Color NIGHT_AMBIENT_COLOR = Color::rgb( 0.0, 0.0, 0.5, 0.2 ) );
+var_const( Color NIGHT_AMBIENT_COLOR = ( Color::rgb( 0.0, 0.0, 0.5, 0.2 ) ) );
 
 #if defined( AXN_DEBUG )
 var_const( dec DARKNESS_MAX_INTENSITY = ( 0.25 ) );
@@ -42,13 +42,6 @@ varray<LightSource> cref Lighting::light_sources( ) const
     return( m_light_sources );
 }
 
-LightSource cref Lighting::add_light_source( LightSource cref in_light_source )
-{
-    m_light_sources.insert_back( in_light_source );
-
-    return( in_light_source );
-}
-
 varray<LightSource> cref Lighting::add_light_sources( varray<LightSource> cref in_light_sources )
 {
     for_each( light_source, in_light_sources )
@@ -57,6 +50,13 @@ varray<LightSource> cref Lighting::add_light_sources( varray<LightSource> cref i
     }
 
     return( in_light_sources );
+}
+
+LightSource cref Lighting::add_light_source( LightSource cref in_light_source )
+{
+    m_light_sources.insert_back( in_light_source );
+
+    return( in_light_source );
 }
 
 void Lighting::clear_light_sources( )

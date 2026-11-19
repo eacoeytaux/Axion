@@ -115,7 +115,7 @@ private:
     Color m_flame_color;
     Color m_flame_inner_color;
 
-    void set_light_source( );
+    void update_light_sources( );
 
 };
 

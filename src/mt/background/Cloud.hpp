@@ -14,8 +14,8 @@ public:
 
     Cloud( ptr<Room> in_room );
 
-    void render( ) override;
-    void update( ) override;
+    virtual void render( ) override;
+    virtual void update( ) override;
 
 private:
 

@@ -35,8 +35,8 @@ public:
 
     Waterfall( ptr<Room> in_room, Point cref in_bottom, Planc cref in_width, Planc cref in_height, dec in_z = 1.0 );
 
-    void render( ) override;
-    void update( ) override;
+    virtual void render( ) override;
+    virtual void update( ) override;
 
 private:
 

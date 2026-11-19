@@ -60,13 +60,10 @@ Cloud::Cloud( ptr<Room> in_room ) : Object( in_room )
         }
     }
 
-    for_each( puff, small_puffs ) m_cloud_drawing.draw( OUTSIDE_COLOR, puff, FILLED );
-    for_each( puff, large_puffs ) m_cloud_drawing.draw( OUTSIDE_COLOR, puff, FILLED );
-    for_each( puff, large_puffs ) m_cloud_drawing.draw( INSIDE_COLOR, puff * PUFF_OUTLINE_RATIO, FILLED );
+    for_each( puff, small_puffs ) { m_cloud_drawing.draw( OUTSIDE_COLOR, puff, FILLED ); }
+    for_each( puff, large_puffs ) { m_cloud_drawing.draw( OUTSIDE_COLOR, puff, FILLED ); }
+    for_each( puff, large_puffs ) { m_cloud_drawing.draw( INSIDE_COLOR, puff * PUFF_OUTLINE_RATIO, FILLED ); }
 }
-
-Planc Cloud::max_dx( ) { return( ( LARGE_PUFF_RADIUS.max( ) + LARGE_PUFF_DISTANCE.max( ) ) * X_STRETCH_LARGE ) + ( ( SMALL_PUFF_RADIUS.max( ) + SMALL_PUFF_DISTANCE.max( ) ) * X_STRETCH_SMALL ); }
-Planc Cloud::max_dy( ) { return( LARGE_PUFF_RADIUS.max( ) + LARGE_PUFF_DISTANCE.max( ) + SMALL_PUFF_RADIUS.max( ) + SMALL_PUFF_DISTANCE.max( ) ); }
 
 void Cloud::render( )
 {
@@ -81,3 +78,6 @@ void Cloud::update( )
 
     Object::update( );
 }
+
+Planc Cloud::max_dx( ) { return( ( LARGE_PUFF_RADIUS.max( ) + LARGE_PUFF_DISTANCE.max( ) ) * X_STRETCH_LARGE ) + ( ( SMALL_PUFF_RADIUS.max( ) + SMALL_PUFF_DISTANCE.max( ) ) * X_STRETCH_SMALL ); }
+Planc Cloud::max_dy( ) { return( LARGE_PUFF_RADIUS.max( ) + LARGE_PUFF_DISTANCE.max( ) + SMALL_PUFF_RADIUS.max( ) + SMALL_PUFF_DISTANCE.max( ) ); }

@@ -19,9 +19,9 @@ public:
     virtual void render( ) override;
     virtual void update( ) override;
 
-    void die( ) override;
+    virtual void die( ) override;
 
-    void move( Vector cref in_movement ) override;
+    virtual void move( Vector cref in_movement ) override;
 
 private:
 

@@ -2,8 +2,8 @@
 
 #include "mt/environment/rocks/Stalaite.hpp"
 
-var_const( Angle HANG_ANGLE = Angle::fraction( 6.0 ) );
-var_const( Angle FLOOR_ANGLE = Angle::fraction( 8.0 ) );
+var_const( Angle HANG_ANGLE = ( Angle::fraction( 6.0 ) ) );
+var_const( Angle FLOOR_ANGLE = ( Angle::fraction( 8.0 ) ) );
 
 var_const( uint STALACTITE_PASSES = ( 1 ) );
 var_const( span<Planc> STALACTITE_WIDTH = { 20.0, 40.0 } );

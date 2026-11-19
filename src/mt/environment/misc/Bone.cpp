@@ -48,6 +48,10 @@ void Bone::update( )
     }
 }
 
+void Bone::thickness( Planc cref in_thickness ) { m_thickness = in_thickness; }
+void Bone::rotation_distance( Planc cref in_distance ) { m_rotation_distance = in_distance; }
+void Bone::movement_ratio( dec in_ratio ) { m_movement_ratio = in_ratio; }
+
 bool Bone::collide( ptr<Object> in_object )
 {
     Object::collide( in_object );
@@ -68,10 +72,6 @@ bool Bone::collide( ptr<Object> in_object )
 
     return( false );
 }
-
-void Bone::thickness( Planc cref in_thickness ) { m_thickness = in_thickness; }
-void Bone::rotation_distance( Planc cref in_distance ) { m_rotation_distance = in_distance; }
-void Bone::movement_ratio( dec in_ratio ) { m_movement_ratio = in_ratio; }
 
 Skull::Skull( ptr<Room> in_room, Point cref in_position ) : Bone( in_room, SKULL_RADIUS, in_position )
 {

@@ -196,7 +196,7 @@ public:
         return( in_point.distance_to( pt1( ) ) < in_point.distance_to( pt2( ) ) ? pt1( ) : pt2( ) );
     }
 
-    Line ref transform( Transform cref in_t ) override { m_pt1 = in_t.apply( m_pt1 ); m_pt2 = in_t.apply( m_pt2 ); return( solve_mb( ) ); }
+    virtual Line ref transform( Transform cref in_t ) override { m_pt1 = in_t.apply( m_pt1 ); m_pt2 = in_t.apply( m_pt2 ); return( solve_mb( ) ); }
 
     Line ref operator+=( Vector cref in_vec ) { rethis = ( *this + in_vec ); }
     Line ref operator-=( Vector cref in_vec ) { rethis = ( *this - in_vec ); }

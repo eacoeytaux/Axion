@@ -50,24 +50,16 @@ void Player::update( )
     }
 }
 
+bool Player::damages( Damage cref in_damage ) const
+{
+    return( !god( ) && Mob::damages( in_damage ) );
+}
+
 void Player::out_of_bounds( )
 {
     #if !defined( AXN_DEBUG )
     // Object::out_of_bounds( );
     #endif
-}
-
-void Player::die( )
-{
-    // static SoundClip death_cry( "WilhelmScream.wav" );
-    // death_cry.play( );
-
-    Mob::die( );
-}
-
-bool Player::damages( Damage cref in_damage ) const
-{
-    return( !god( ) && Mob::damages( in_damage ) );
 }
 
 void Player::update_movement( )
@@ -94,6 +86,14 @@ bool Player::collide( ptr<Object> in_object )
     }
 
     return( false );
+}
+
+void Player::die( )
+{
+    // static SoundClip death_cry( "WilhelmScream.wav" );
+    // death_cry.play( );
+
+    Mob::die( );
 }
 
 void Player::god( bool in_god )

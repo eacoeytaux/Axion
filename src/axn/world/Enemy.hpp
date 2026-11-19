@@ -26,8 +26,8 @@ protected: // todo should this be the case for all objects?
     bool has_target( ) const { return( target( ) ); }
     ptr<Object> target( ) const { return( m_target ); }
 
-    virtual void set_target( ptr<Object> in_target ) { m_target = in_target; }
-    virtual void clear_target( ) { set_target( nullptr ); }
+    virtual void target( ptr<Object> in_target ) { m_target = in_target; }
+    virtual void clear_target( ) { target( nullptr ); }
     virtual bool overrides_target( ptr<const Object> in_target ) const;
 
     bool target_locked( ) const { return( m_target_locked ); }

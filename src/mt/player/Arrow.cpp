@@ -33,10 +33,6 @@ var_const( Polygon FEATHER( { Point( 0.0, 0.0 ),
 
 var_const( Color TIP_COLOR = ( GRAY_LIGHT ) );
 var_const( Color SHAFT_COLOR = ( Color::rgb( 0x8B4513 ) ) );
-
-Arrow Arrow::tip( ptr<Room> in_room, Point cref in_tip, Vector cref in_launch_speed, Color cref in_feather_color ) { return( Arrow( in_room, in_tip, in_launch_speed, in_feather_color ) ); }
-Arrow Arrow::base( ptr<Room> in_room, Point cref in_base, Vector cref in_launch_speed, Color cref in_feather_color ) { return( Arrow( in_room, in_base + VectorA( in_launch_speed.angle( ), ( SHAFT_LENGTH + HEAD_LENGTH_INNER ) ), in_launch_speed, in_feather_color ) ); }
-
 Arrow::Arrow( ptr<Room> in_room, Point cref in_tip, Vector cref in_launch_speed, Color cref in_feather_color ) : Projectile( in_room, DAMAGE, in_tip )
 {
     #if defined( AXN_DEBUG )
@@ -59,6 +55,9 @@ Arrow::Arrow( ptr<Room> in_room, Point cref in_tip, Vector cref in_launch_speed,
     m_feather_color = in_feather_color;
 }
 
+Arrow Arrow::tip( ptr<Room> in_room, Point cref in_tip, Vector cref in_launch_speed, Color cref in_feather_color ) { return( Arrow( in_room, in_tip, in_launch_speed, in_feather_color ) ); }
+Arrow Arrow::base( ptr<Room> in_room, Point cref in_base, Vector cref in_launch_speed, Color cref in_feather_color ) { return( Arrow( in_room, in_base + VectorA( in_launch_speed.angle( ), ( SHAFT_LENGTH + HEAD_LENGTH_INNER ) ), in_launch_speed, in_feather_color ) ); }
+
 void Arrow::render( )
 {
     Object::render( );
@@ -68,36 +67,6 @@ void Arrow::render( )
     draw_feather( );
 
     Drawing::rotate( rotation( ) );
-}
-
-void Arrow::draw_head( )
-{
-    Polygon head = HEAD;
-
-    head.rotate( angle( ) );
-
-    draw( TIP_COLOR.a( to_deletion_countdown( ).percentage( ) ), head );
-}
-
-void Arrow::draw_shaft( )
-{
-    Point tip( -HEAD_LENGTH_INNER, 0.0 );
-    Point back( -( SHAFT_LENGTH + HEAD_LENGTH_INNER ), 0.0 );
-
-    tip.rotate( angle( ) );
-    back.rotate( angle( ) );
-
-    draw( SHAFT_COLOR.a( to_deletion_countdown( ).percentage( ) ), Line( tip, back ), SHAFT_THICKNESS );
-}
-
-void Arrow::draw_feather( )
-{
-    Polygon feather = FEATHER;
-
-    feather.move( VectorX( -( SHAFT_LENGTH + HEAD_LENGTH_INNER ) + FEATHER_NOTCH_LENGTH ) );
-    feather.rotate( angle( ) );
-
-    draw( m_feather_color.a( to_deletion_countdown( ).percentage( ) ), feather );
 }
 
 void Arrow::update( )
@@ -154,4 +123,34 @@ void Arrow::ground( Terrain::Bumper cref in_ground )
         stationary( true );
         solid( false );
     }
+}
+
+void Arrow::draw_head( )
+{
+    Polygon head = HEAD;
+
+    head.rotate( angle( ) );
+
+    draw( TIP_COLOR.a( to_deletion_countdown( ).percentage( ) ), head );
+}
+
+void Arrow::draw_shaft( )
+{
+    Point tip( -HEAD_LENGTH_INNER, 0.0 );
+    Point back( -( SHAFT_LENGTH + HEAD_LENGTH_INNER ), 0.0 );
+
+    tip.rotate( angle( ) );
+    back.rotate( angle( ) );
+
+    draw( SHAFT_COLOR.a( to_deletion_countdown( ).percentage( ) ), Line( tip, back ), SHAFT_THICKNESS );
+}
+
+void Arrow::draw_feather( )
+{
+    Polygon feather = FEATHER;
+
+    feather.move( VectorX( -( SHAFT_LENGTH + HEAD_LENGTH_INNER ) + FEATHER_NOTCH_LENGTH ) );
+    feather.rotate( angle( ) );
+
+    draw( m_feather_color.a( to_deletion_countdown( ).percentage( ) ), feather );
 }

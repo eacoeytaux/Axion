@@ -19,15 +19,6 @@ bool quit_break = false;
 bool stepping = false; void Engine::step( ) { stepping = true; }
 #endif
 
-Error Engine::quit( ) { quit_break = true; return( no_error ); }
-
-void Engine::update_eng( )
-{
-    #if defined( AXN_DEBUG )
-    static uint loop_count = 0; loop_count++;
-    #endif
-}
-
 Error Engine::run( ptr<World> in_world )
 {
     return_if( is_null( in_world ), error_system );
@@ -131,6 +122,10 @@ Error Engine::run( ptr<World> in_world )
     Debug::bbreakpoint = true;
     #endif
 
+    #if defined( AXN_COVERAGE )
+    return( errored ? error_system : no_error ); // C! coverage builds only run the tests, then exit so the coverage data gets written
+    #endif
+
     try_catch( run_eng( ) );
 
     try_catch( clear_inputs( ) );
@@ -146,4 +141,13 @@ Error Engine::run( ptr<World> in_world )
     #endif
 
     return( errored ? error_system : no_error );
+}
+
+Error Engine::quit( ) { quit_break = true; return( no_error ); }
+
+void Engine::update_eng( )
+{
+    #if defined( AXN_DEBUG )
+    static uint loop_count = 0; loop_count++;
+    #endif
 }

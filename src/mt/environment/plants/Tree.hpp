@@ -33,11 +33,11 @@ public:
 
         Leaf( ptr<Room> in_room, Drawing cref in_drawing, Point cref in_center, dec in_gravity_scale, dec in_z = 1.0 );
 
-        void render( ) override;
+        virtual void render( ) override;
 
     protected:
 
-        void ground( Terrain::Bumper cref in_ground ) override;
+        virtual void ground( Terrain::Bumper cref in_ground ) override;
 
     private:
 

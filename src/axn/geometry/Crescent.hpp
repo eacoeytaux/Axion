@@ -116,6 +116,7 @@ public:
     }
 
     operator Crescent( ) const { return( crescent( ) ); }
+
 };
 
 } // namespace geometry

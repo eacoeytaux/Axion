@@ -39,9 +39,6 @@
 var_const( Planc DOOR_PLAYER_WIDTH = ( 2.5 ) );
 var_const( Planc DOOR_PLAYER_HEIGHT = ( 1.5 ) );
 
-// TODO remove static player count
-ptr<Player> TrainingGrounds::create_player( Point cref in_position ) { static uint player_count = 0; return( new Climber( ++player_count, this, in_position ) ); }
-
 void TrainingGrounds::create( )
 {
     Room::create( FixedRectangle( 5000.0, 2500.0 ) );
@@ -145,3 +142,6 @@ ptr<Terrain> TrainingGrounds::generate_terrain( )
 
     return( new PlainsTerrain( this, terrain_points ) );
 }
+
+// TODO remove static player count
+ptr<Player> TrainingGrounds::create_player( Point cref in_position ) { static uint player_count = 0; return( new Climber( ++player_count, this, in_position ) ); }

@@ -14,9 +14,6 @@
 var_const( Planc DOOR_PLAYER_WIDTH = ( METER * 1.5 ) );
 var_const( Planc DOOR_PLAYER_HEIGHT = ( METER * 2.75 ) );
 
-// TODO remove static player count
-ptr<Player> Caves::create_player( Point cref in_position ) { static uint player_count = 0; return( new Climber( ++player_count, this, in_position ) ); }
-
 void Caves::create( )
 {
     Room::create( FixedRectangle( 5000.0, 2000.0 ) );
@@ -59,3 +56,6 @@ ptr<Terrain> Caves::generate_terrain( )
 
     return( new CavesTerrain( this, terrain_points ) );
 }
+
+// TODO remove static player count
+ptr<Player> Caves::create_player( Point cref in_position ) { static uint player_count = 0; return( new Climber( ++player_count, this, in_position ) ); }

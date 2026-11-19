@@ -158,6 +158,20 @@ void Object::init( )
     background( z( ) < 1.0 );
 }
 
+void Object::render( )
+{
+    Visible::center( position( ) );
+    Visible::render( );
+}
+
+void Object::render_object( )
+{
+    if( needs_render( ) )
+    {
+        render( );
+    }
+}
+
 Drawing Object::trajection_drawing( Planc cref in_distance, Color cref in_color, dec in_alpha_start, dec in_alpha_end ) const
 {
     Drawing trajection;
@@ -196,19 +210,89 @@ Drawing Object::trajection_drawing( Planc cref in_distance, Color cref in_color,
     return( trajection );
 }
 
-void Object::render( )
+#if defined( AXN_DEBUG )
+Drawing Object::debug_overlay( ) const
 {
-    Visible::center( position( ) );
-    Visible::render( );
-}
+    static_once{ Assert( TRACKING_THICKNESS <= x2( DOT_RADIUS ) ); }
 
-void Object::render_object( )
-{
-    if( needs_render( ) )
+    Drawing debug_overlay;
+
+    if( is_one( z( ) ) )
     {
-        render( );
+        if( Settings::get( Settings::DEBUG_PHYSICS ) )
+        {
+            // position tracking
+            uint position_count = m_last_positions.size( );
+
+            if( position_count )
+            {
+                queue<queue<Point>> last_positions = m_last_positions;
+
+                dec d_a = ( ( TRACKING_ALPHA_START - TRACKING_ALPHA_END ) / dec( position_count ) );
+                dec a = ( TRACKING_ALPHA_END );
+
+                Point pt_prev = last_positions.front( ).front( );
+
+                for_range( i, position_count )
+                {
+                    queue<Point> positions = last_positions.pop( );
+
+                    while( positions.size( ) )
+                    {
+                        Point pt = positions.pop( );
+
+                        if( pt != pt_prev )
+                        {
+                            debug_overlay.draw( draw_debug_color.a( a ), draw_debug_color.a( a + d_a ), ( Line( pt_prev, pt ) - position( ) ), TRACKING_THICKNESS );
+                        }
+
+                        pt_prev = pt;
+                    }
+
+                    a += d_a;
+                }
+
+                debug_overlay.draw( draw_debug_color.a( a ), ( Line( pt_prev - position( ), ORIGIN ) ), TRACKING_THICKNESS );
+            }
+
+            // center
+            {
+                debug_overlay.draw( draw_debug_color, Polygon::circle( DOT_RADIUS ), FILLED );
+            }
+
+            // velocity
+            if( velocity( ).magnitude( ) >= VELOCITY_MAGNITUDE_MINIMUM )
+            {
+                debug_overlay.draw( draw_debug_color, ( velocity( ) * VELOCITY_SCALE ).origin( ORIGIN ), min( VELOCITY_ARROW_LENGTH, ( velocity( ).magnitude( ) ) ), VELOCITY_THICKNESS, true );
+            }
+
+            // hitboxes
+            {
+                for_each( hitbox, hitboxes( ) )
+                {
+                    debug_overlay.draw( draw_debug_color, hitbox.polygon( false ), HITBOX_THICKNESS, true );
+                }
+            }
+        }
+
+        if( Settings::get( Settings::DEBUG_TERRAIN ) )
+        {
+            if( room( ) && room( )->terrain( ) )
+            {
+                debug_overlay.draw( room( )->terrain( )->draw_debug_color, terrain_hitbox( ).polygon( false ), HITBOX_THICKNESS, true );
+            }
+        }
     }
+
+    return( debug_overlay );
 }
+#endif
+
+bool Object::foreground( ) const { return( m_foreground ); }
+void Object::foreground( bool in_foreground ) { m_foreground = ( in_foreground || ( z( ) > 1.0 ) ); }
+
+bool Object::background( ) const { return( m_background ); }
+void Object::background( bool in_background ) { m_background = ( in_background || ( z( ) < 1.0 ) ); }
 
 void Object::update( )
 {
@@ -242,6 +326,241 @@ void Object::update_object( )
     m_last_world_age_update = room( )->age( );
     m_ever_updated = true;
     m_age++;
+}
+
+Point Object::position( ) const { return( Matter::position( ) ); }
+void Object::position( Point cref in_position )
+{
+    if( in_position != position( ) )
+    {
+        if( interactive( ) )
+        {
+            room( )->object_grid( ).remove( this );
+        }
+
+        if( !is_empty( m_last_positions ) )
+        {
+            m_last_positions.back( ).push( position( ) );
+        }
+
+        Visible::center( in_position );
+        Matter::position( in_position );
+
+        if( interactive( ) )
+        {
+            room( )->object_grid( ).insert( this );
+        }
+    }
+}
+
+Point Object::last_position( uint in_past ) const
+{
+    return( last_positions( in_past ).front( ) );
+}
+
+// C! m_last_positions holds one queue per frame, oldest at the front and the current frame at the back
+// C! in_past = 1 is the current frame (starting where the object was 1 update ago), 2 the frame before, ...
+// C! asking further back than is tracked gives the oldest frame
+queue<Point> Object::last_positions( uint in_past ) const
+{
+    if( in_past && !is_empty( m_last_positions ) )
+    {
+        uint frame_count = m_last_positions.size( );
+
+        if( in_past >= frame_count )
+        {
+            return( m_last_positions.front( ) );
+        }
+        else
+        {
+            queue<queue<Point>> last_positions = m_last_positions;
+
+            for_range( i, frame_count - in_past ) { last_positions.pop( ); }
+
+            return( last_positions.front( ) );
+        }
+    }
+
+    // todo allow queue to be initialized by vector
+    queue<Point> ret;
+    ret.push( position( ) );
+
+    return( ret );
+}
+
+queue<queue<Point>> cref Object::last_positions( ) const
+{
+    return( m_last_positions );
+}
+
+void Object::subscribe_to_movement( ptr<Object> in_object )
+{
+    m_movement_subscriptions.insert( in_object );
+    in_object->add_movement_subscriber( this );
+}
+
+void Object::unsubscribe_to_movement( ptr<Object> in_object )
+{
+    m_movement_subscriptions.remove( in_object );
+    in_object->remove_movement_subscriber( this );
+}
+
+uset<ptr<Object>> cref Object::movement_subscribers( ) const
+{
+    return( m_movement_subscribers );
+}
+
+uset<ptr<Object>> cref Object::movement_subscriptions( ) const
+{
+    return( m_movement_subscriptions );
+}
+
+Planc Object::width( ) const { return( space( ).bound_width( true ) ); }
+Planc Object::height( ) const { return( space( ).bound_height( true ) ); }
+
+void Object::rotate( Angle cref in_a, Point cref in_origin ) { m_rotation += in_a; move( position( ).rotate( in_a, in_origin ) - position( ) ); }
+
+bool Object::interactive( ) const { return( m_interactive && !( background( ) || foreground( ) ) ); }
+void Object::interactive( bool in_interactive )
+{
+    if( m_interactive != in_interactive )
+    {
+        m_interactive = in_interactive;
+
+        if( room( ) )
+        {
+            if( interactive( ) && m_ever_updated )
+            {
+                room( )->object_grid( ).insert( this );
+            }
+            else
+            {
+                room( )->object_grid( ).remove( this );
+            }
+        }
+    }
+}
+
+bool Object::stationary( ) const
+{
+    return( m_stationary );
+}
+
+void Object::stationary( bool in_stationary )
+{
+    m_stationary = in_stationary;
+
+    if( m_stationary )
+    {
+        velocity( V0 );
+    }
+}
+
+void Object::ground( Terrain::Bumper cref in_ground )
+{
+    m_ground = in_ground;
+}
+
+Line Object::ground_bumper_line( ) const
+{
+    Assert( grounded( ), "not grounded" );
+
+    for_each( line, bumper( ground( ).node( ) ).path( ).lines( ) )
+    {
+        return_if( on_bumper( line, position( ) ), line );
+    }
+
+    // C! drifted off the bumper or the bumper is a single point, use the surface direction instead
+    // C! oriented the same way as an edge's bumper line
+    return( Line( position( ), position( ) + VectorA( ground( ).node( )->normal( ) + RIGHT, 1.0 ) ) );
+}
+
+Vector Object::gravity( ) const
+{
+    return( room( )->gravity( position( ) ).rotate( m_gravity_change.angle( ) ) * m_gravity_change.magnitude( ) );
+}
+
+dec Object::air_resistance( ) const { return( room( )->air_resistance( position( ) ) * m_air_resistance ); }
+void Object::air_resistance( dec in_air_resistance_ratio ) { m_air_resistance = in_air_resistance_ratio; }
+
+dec Object::friction_resistance( ) const
+{
+    if( grounded( ) )
+    {
+        return( 0.1 );
+        // C! TODO return( ground( ).node( )->resistance( ) );
+    }
+
+    return( air_resistance( ) );
+}
+
+bool Object::terrain_bound( ) const { return( m_terrain_bound ); }
+void Object::terrain_bound( bool in_terrain_bound )
+{
+    m_terrain_bound = in_terrain_bound;
+    if( !m_terrain_bound )
+    {
+        clear_ground( );
+    }
+}
+
+Hitbox Object::hitbox( ) const
+{
+    return( Hitbox( space( ), position( ) ) );
+}
+
+varray<Hitbox> Object::hitboxes( ) const
+{
+    return{ hitbox( ) };
+}
+
+FixedRectangle Object::hitboxes_bounds( bool in_include_terrain ) const
+{
+    FixedRectangle bounds = FixedRectangle( position( ) );
+
+    for_each( hitbox, hitboxes( ) )
+    {
+        bounds.union_with( hitbox.polygon( ).bounds( ) );
+    }
+
+    return( bounds );
+}
+
+Hitbox Object::terrain_hitbox( ) const
+{
+    return( Hitbox( space( ), position( ) ) );
+}
+
+void Object::mark_deleted( ticks in_deletion_countdown )
+{
+    mark_to_delete( 0, in_deletion_countdown );
+
+    if( !in_deletion_countdown )
+    {
+        m_deleted = true;
+    }
+}
+
+void Object::mark_to_delete( ticks in_countdown, ticks in_deletion_countdown )
+{
+    if( m_marked_to_delete )
+    {
+        m_to_deletion_countdown.reset( min( in_countdown, m_deletion_countdown.remaining( ) ) );
+        m_deletion_countdown.reset( min( in_deletion_countdown, m_deletion_countdown.remaining( ) ) );
+    }
+    else
+    {
+        m_marked_to_delete = true;
+        m_to_deletion_countdown.reset( in_countdown );
+        m_deletion_countdown.reset( in_deletion_countdown );
+    }
+}
+
+void Object::out_of_bounds( ) { mark_deleted( ); }
+
+void Object::track_position( uint in_count )
+{
+    m_last_position_count = in_count;
 }
 
 void Object::trim_velocity( )
@@ -572,18 +891,6 @@ void Object::update_movement( )
     m_bumper_cache.clear( );
 }
 
-Terrain::Bumper Object::bumper( ptr<const Terrain::Node> in_node ) const
-{
-    return_if( !m_bumper_cache_active, in_node->bumpers( terrain_hitbox( ) ) );
-
-    if( !m_bumper_cache.contains( in_node ) )
-    {
-        return( m_bumper_cache.insert( in_node, in_node->bumpers( m_bumper_shape ) ) );
-    }
-
-    return( m_bumper_cache.at( in_node ) );
-}
-
 dec Object::check_movement( Vector cref in_velocity )
 {
     return( 1.0 ); // only changes when overidden
@@ -610,252 +917,7 @@ void Object::move( Vector cref in_movement )
     }
 }
 
-Point Object::position( ) const { return( Matter::position( ) ); }
-void Object::position( Point cref in_position )
-{
-    if( in_position != position( ) )
-    {
-        if( interactive( ) )
-        {
-            room( )->object_grid( ).remove( this );
-        }
-
-        if( !is_empty( m_last_positions ) )
-        {
-            m_last_positions.back( ).push( position( ) );
-        }
-
-        Visible::center( in_position );
-        Matter::position( in_position );
-
-        if( interactive( ) )
-        {
-            room( )->object_grid( ).insert( this );
-        }
-    }
-}
-
-Planc Object::width( ) const { return( space( ).bound_width( true ) ); }
-Planc Object::height( ) const { return( space( ).bound_height( true ) ); }
-
-void Object::rotate( Angle cref in_a, Point cref in_origin ) { m_rotation += in_a; move( position( ).rotate( in_a, in_origin ) - position( ) ); }
-
-bool Object::background( ) const { return( m_background ); }
-void Object::background( bool in_background ) { m_background = ( in_background || ( z( ) < 1.0 ) ); }
-
-bool Object::foreground( ) const { return( m_foreground ); }
-void Object::foreground( bool in_foreground ) { m_foreground = ( in_foreground || ( z( ) > 1.0 ) ); }
-
-bool Object::interactive( ) const { return( m_interactive && !( background( ) || foreground( ) ) ); }
-void Object::interactive( bool in_interactive )
-{
-    if( m_interactive != in_interactive )
-    {
-        m_interactive = in_interactive;
-
-        if( room( ) )
-        {
-            if( interactive( ) && m_ever_updated )
-            {
-                room( )->object_grid( ).insert( this );
-            }
-            else
-            {
-                room( )->object_grid( ).remove( this );
-            }
-        }
-    }
-}
-
-bool Object::stationary( ) const
-{
-    return( m_stationary );
-}
-
-void Object::stationary( bool in_stationary )
-{
-    m_stationary = in_stationary;
-
-    if( m_stationary )
-    {
-        velocity( V0 );
-    }
-}
-
-void Object::mark_deleted( ticks in_deletion_countdown )
-{
-    mark_to_delete( 0, in_deletion_countdown );
-
-    if( !in_deletion_countdown )
-    {
-        m_deleted = true;
-    }
-}
-
-void Object::mark_to_delete( ticks in_countdown, ticks in_deletion_countdown )
-{
-    if( m_marked_to_delete )
-    {
-        m_to_deletion_countdown.reset( min( in_countdown, m_deletion_countdown.remaining( ) ) );
-        m_deletion_countdown.reset( min( in_deletion_countdown, m_deletion_countdown.remaining( ) ) );
-    }
-    else
-    {
-        m_marked_to_delete = true;
-        m_to_deletion_countdown.reset( in_countdown );
-        m_deletion_countdown.reset( in_deletion_countdown );
-    }
-}
-
-dec Object::air_resistance( ) const { return( room( )->air_resistance( position( ) ) * m_air_resistance ); }
-void Object::air_resistance( dec in_air_resistance_ratio ) { m_air_resistance = in_air_resistance_ratio; }
-
-dec Object::friction_resistance( ) const
-{
-    if( grounded( ) )
-    {
-        return( 0.1 );
-        // C! TODO return( ground( ).node( )->resistance( ) );
-    }
-
-    return( air_resistance( ) );
-}
-
-Line Object::ground_bumper_line( ) const
-{
-    Assert( grounded( ), "not grounded" );
-
-    for_each( line, bumper( ground( ).node( ) ).path( ).lines( ) )
-    {
-        return_if( on_bumper( line, position( ) ), line );
-    }
-
-    // C! drifted off the bumper or the bumper is a single point, use the surface direction instead
-    // C! oriented the same way as an edge's bumper line
-    return( Line( position( ), position( ) + VectorA( ground( ).node( )->normal( ) + RIGHT, 1.0 ) ) );
-}
-
-void Object::ground( Terrain::Bumper cref in_ground )
-{
-    m_ground = in_ground;
-}
-
-bool Object::sticks( ptr<Terrain::Node> in_node ) { return( false ); }
-
-void Object::out_of_bounds( ) { mark_deleted( ); }
-
-bool Object::collide( ptr<Object> in_object ) { return( false ); }
-
 void Object::react_to_movement( ptr<Object> in_object, Vector cref in_movement ) { Assert( m_movement_subscriptions.contains( in_object ), "not subscribed to object's movement" ); }
-
-bool Object::terrain_bound( ) const { return( m_terrain_bound ); }
-void Object::terrain_bound( bool in_terrain_bound )
-{
-    m_terrain_bound = in_terrain_bound;
-    if( !m_terrain_bound )
-    {
-        clear_ground( );
-    }
-}
-
-Vector Object::gravity( ) const
-{
-    return( room( )->gravity( position( ) ).rotate( m_gravity_change.angle( ) ) * m_gravity_change.magnitude( ) );
-}
-
-Hitbox Object::hitbox( ) const
-{
-    return( Hitbox( space( ), position( ) ) );
-}
-
-varray<Hitbox> Object::hitboxes( ) const
-{
-    return{ hitbox( ) };
-}
-
-FixedRectangle Object::hitboxes_bounds( bool in_include_terrain ) const
-{
-    FixedRectangle bounds = FixedRectangle( position( ) );
-
-    for_each( hitbox, hitboxes( ) )
-    {
-        bounds.union_with( hitbox.polygon( ).bounds( ) );
-    }
-
-    return( bounds );
-}
-
-Hitbox Object::terrain_hitbox( ) const
-{
-    return( Hitbox( space( ), position( ) ) );
-}
-
-void Object::track_position( uint in_count )
-{
-    m_last_position_count = in_count;
-}
-
-Point Object::last_position( uint in_past ) const
-{
-    return( last_positions( in_past ).front( ) );
-}
-
-// C! m_last_positions holds one queue per frame, oldest at the front and the current frame at the back
-// C! in_past = 1 is the current frame (starting where the object was 1 update ago), 2 the frame before, ...
-// C! asking further back than is tracked gives the oldest frame
-queue<Point> Object::last_positions( uint in_past ) const
-{
-    if( in_past && !is_empty( m_last_positions ) )
-    {
-        uint frame_count = m_last_positions.size( );
-
-        if( in_past >= frame_count )
-        {
-            return( m_last_positions.front( ) );
-        }
-        else
-        {
-            queue<queue<Point>> last_positions = m_last_positions;
-
-            for_range( i, frame_count - in_past ) { last_positions.pop( ); }
-
-            return( last_positions.front( ) );
-        }
-    }
-
-    // todo allow queue to be initialized by vector
-    queue<Point> ret;
-    ret.push( position( ) );
-
-    return( ret );
-}
-
-queue<queue<Point>> cref Object::last_positions( ) const
-{
-    return( m_last_positions );
-}
-
-void Object::subscribe_to_movement( ptr<Object> in_object )
-{
-    m_movement_subscriptions.insert( in_object );
-    in_object->add_movement_subscriber( this );
-}
-
-void Object::unsubscribe_to_movement( ptr<Object> in_object )
-{
-    m_movement_subscriptions.remove( in_object );
-    in_object->remove_movement_subscriber( this );
-}
-
-uset<ptr<Object>> cref Object::movement_subscribers( ) const
-{
-    return( m_movement_subscribers );
-}
-
-uset<ptr<Object>> cref Object::movement_subscriptions( ) const
-{
-    return( m_movement_subscriptions );
-}
 
 void Object::add_movement_subscriber( ptr<Object> in_object )
 {
@@ -867,80 +929,18 @@ void Object::remove_movement_subscriber( ptr<Object> in_object )
     m_movement_subscribers.remove( in_object );
 }
 
-#if defined( AXN_DEBUG )
-Drawing Object::debug_overlay( ) const
+bool Object::collide( ptr<Object> in_object ) { return( false ); }
+
+bool Object::sticks( ptr<Terrain::Node> in_node ) { return( false ); }
+
+Terrain::Bumper Object::bumper( ptr<const Terrain::Node> in_node ) const
 {
-    static_once{ Assert( TRACKING_THICKNESS <= x2( DOT_RADIUS ) ); }
+    return_if( !m_bumper_cache_active, in_node->bumpers( terrain_hitbox( ) ) );
 
-    Drawing debug_overlay;
-
-    if( is_one( z( ) ) )
+    if( !m_bumper_cache.contains( in_node ) )
     {
-        if( Settings::get( Settings::DEBUG_PHYSICS ) )
-        {
-            // position tracking
-            uint position_count = m_last_positions.size( );
-
-            if( position_count )
-            {
-                queue<queue<Point>> last_positions = m_last_positions;
-
-                dec d_a = ( ( TRACKING_ALPHA_START - TRACKING_ALPHA_END ) / dec( position_count ) );
-                dec a = ( TRACKING_ALPHA_END );
-
-                Point pt_prev = last_positions.front( ).front( );
-
-                for_range( i, position_count )
-                {
-                    queue<Point> positions = last_positions.pop( );
-
-                    while( positions.size( ) )
-                    {
-                        Point pt = positions.pop( );
-
-                        if( pt != pt_prev )
-                        {
-                            debug_overlay.draw( draw_debug_color.a( a ), draw_debug_color.a( a + d_a ), ( Line( pt_prev, pt ) - position( ) ), TRACKING_THICKNESS );
-                        }
-
-                        pt_prev = pt;
-                    }
-
-                    a += d_a;
-                }
-
-                debug_overlay.draw( draw_debug_color.a( a ), ( Line( pt_prev - position( ), ORIGIN ) ), TRACKING_THICKNESS );
-            }
-
-            // center
-            {
-                debug_overlay.draw( draw_debug_color, Polygon::circle( DOT_RADIUS ), FILLED );
-            }
-
-            // velocity
-            if( velocity( ).magnitude( ) >= VELOCITY_MAGNITUDE_MINIMUM )
-            {
-                debug_overlay.draw( draw_debug_color, ( velocity( ) * VELOCITY_SCALE ).origin( ORIGIN ), min( VELOCITY_ARROW_LENGTH, ( velocity( ).magnitude( ) ) ), VELOCITY_THICKNESS, true );
-            }
-
-            // hitboxes
-            {
-                for_each( hitbox, hitboxes( ) )
-                {
-                    debug_overlay.draw( draw_debug_color, hitbox.polygon( false ), HITBOX_THICKNESS, true );
-                }
-            }
-        }
-
-        if( Settings::get( Settings::DEBUG_TERRAIN ) )
-        {
-            if( room( ) && room( )->terrain( ) )
-            {
-                debug_overlay.draw( room( )->terrain( )->draw_debug_color, terrain_hitbox( ).polygon( false ), HITBOX_THICKNESS, true );
-            }
-        }
+        return( m_bumper_cache.insert( in_node, in_node->bumpers( m_bumper_shape ) ) );
     }
 
-    return( debug_overlay );
+    return( m_bumper_cache.at( in_node ) );
 }
-#endif

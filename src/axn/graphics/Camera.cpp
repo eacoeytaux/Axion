@@ -75,7 +75,7 @@ section( PAUSE_HUD )
 
         PauseHUD( ) : HUD( half( PAUSE_WIDTH ), one_minus( half( PAUSE_HEIGHT ) ), PAUSE_WIDTH, PAUSE_HEIGHT ) { }
 
-        void render( ptr<Camera> camera ) override
+        virtual void render( ptr<Camera> camera ) override
         {
             HUD::render( camera );
 
@@ -115,63 +115,6 @@ section( PAUSE_HUD )
     };
 
     var_static( PauseHUD pause_hud );
-}
-
-Camera::Camera( ptr<World> in_world, Planc cref in_width, Planc cref in_height, dec in_zoom ) : m_world( in_world )
-{
-    Assert( !is_null( in_world ) );
-
-    cursor_world_position_reset( );
-    width( in_width );
-    height( in_height );
-    zoom( in_zoom );
-
-    target_offset_ratio_y( DEFAULT_TARGET_OFFSET_Y );
-
-    hud_offset_percentage( DEFAULT_HUD_OFFSET );
-
-    add_always_hud_element( &pause_hud );
-
-    #if defined( AXN_DEBUG )
-    show_hud( false );
-    #endif
-
-    transition_duration( DEFAULT_TRANSITION_DURATION, DEFAULT_TRANSITION_COMPLETE_DURATION );
-}
-
-void Camera::clear_all( )
-{
-    clear_subjects( );
-    clear_screen_effects( );
-    clear_hud_elements( );
-}
-
-void Camera::clear_subjects( )
-{
-    m_subjects.clear( );
-    m_background_subjects.clear( );
-    m_foreground_subjects.clear( );
-
-    safe_delete( m_owned_subjects );
-    safe_delete( m_background_owned_subjects );
-    safe_delete( m_foreground_owned_subjects );
-
-    #if defined( AXN_DEBUG )
-    m_debug_subjects.clear( );
-    safe_delete( m_owned_debug_subjects );
-    #endif
-}
-
-void Camera::clear_screen_effects( )
-{
-    m_screen_effects.clear( );
-    safe_delete( m_owned_screen_effects );
-}
-
-void Camera::clear_hud_elements( )
-{
-    m_hud_elements.clear( );
-    safe_delete( m_hud_elements );
 }
 
 void render_convex_polygon( varray<Color> cref in_colors, varray<Point> cref in_points )
@@ -351,6 +294,132 @@ void render_nodes( varray<Drawing::Node> cref in_drawing_nodes,
 void render_drawing( Drawing cref in_drawing, dec in_zoom )
 {
     render_nodes( in_drawing.nodes( ), varray<Drawing::ColoredPolygon>( ), varray<Drawing::ColoredPolygon>( ), in_zoom );
+}
+
+Camera::Camera( ptr<World> in_world, Planc cref in_width, Planc cref in_height, dec in_zoom ) : m_world( in_world )
+{
+    Assert( !is_null( in_world ) );
+
+    cursor_world_position_reset( );
+    width( in_width );
+    height( in_height );
+    zoom( in_zoom );
+
+    target_offset_ratio_y( DEFAULT_TARGET_OFFSET_Y );
+
+    hud_offset_percentage( DEFAULT_HUD_OFFSET );
+
+    add_always_hud_element( &pause_hud );
+
+    #if defined( AXN_DEBUG )
+    show_hud( false );
+    #endif
+
+    transition_duration( DEFAULT_TRANSITION_DURATION, DEFAULT_TRANSITION_COMPLETE_DURATION );
+}
+
+#if defined( AXN_DEBUG )
+Drawing Camera::debug_overlay_drawing( ) const
+{
+    static Angle delta;
+
+    static Angle last_delta;
+    static Angle last_target_delta;
+
+    delta -= DELTA;
+
+    const Planc c_thickness = FPS_LINE_THICKNESS * zoom( );
+
+    const Planc c_width = width( );
+    const Planc c_height = height( );
+
+    const Planc c_half_width = half( c_width );
+    const Planc c_half_height = half( c_height );
+
+    const Vector c_target_offset = target( ) - center( );
+
+    const Polygon c_target_outer = Polygon::circle( TARGET_RADIUS + c_thickness, c_target_offset );
+    const Polygon c_target_inner = Polygon::circle( TARGET_RADIUS, c_target_offset );
+    const Polygon c_target_cover = Polygon::circle( TARGET_RADIUS );
+
+    const Polygon c_fps_circle = Polygon::circle( FPS_RADIUS );
+    const Polygon c_fps_dot = Polygon::circle( TARGET_RADIUS );
+
+    const Angle c_target_delta( ( ( dec( milliseconds( ) ) / 1000.0 ) * -TAU ) * DELTA );
+
+    const Line c_fps_target_line( ORIGIN, PointY( FPS_RADIUS ).rotate( c_target_delta ) );
+    const Line c_fps_line( ORIGIN, PointY( FPS_RADIUS ).rotate( delta ) );
+
+    const Angle c_d_delta( delta - last_delta );
+    const Angle c_d_target_delta( c_target_delta - last_target_delta );
+    const Angle c_d_d_delta( ( c_d_delta - c_d_target_delta ) * TAU );
+
+    const Polygon c_lag( Arc::ccw( FPS_RADIUS, delta + RIGHT, delta + c_d_d_delta + RIGHT ).points( ) + ORIGIN );
+
+    last_delta = delta;
+    last_target_delta = c_target_delta;
+
+    Drawing overlay_drawing;
+
+    overlay_drawing.draw( TARGET_COLOR.a( COLOR_OPACITY ), c_fps_target_line, c_thickness, true );
+
+    // draw lag
+    // if( is_pos( c_d_d_delta ) ) { overlay_drawing.draw( TARGET_COLOR.a( LAG_COLOR_OPACITY ), c_lag, FILLED ); }
+
+    overlay_drawing.draw( MAIN_COLOR,
+                          Line( Point( -c_half_width, -c_half_height ),
+                                Point( +c_half_width, -c_half_height ) ),
+                          BORDER_LINE_THICKNESS, true, true );
+    overlay_drawing.draw( MAIN_COLOR,
+                          Line( Point( -c_half_width, +c_half_height ),
+                                Point( +c_half_width, +c_half_height ) ),
+                          BORDER_LINE_THICKNESS, true, true );
+    overlay_drawing.draw( MAIN_COLOR,
+                          Line( Point( -c_half_width, -c_half_height ),
+                                Point( -c_half_width, +c_half_height ) ),
+                          BORDER_LINE_THICKNESS, true, true );
+    overlay_drawing.draw( MAIN_COLOR,
+                          Line( Point( +c_half_width, -c_half_height ),
+                                Point( +c_half_width, +c_half_height ) ),
+                          BORDER_LINE_THICKNESS, true, true );
+
+    overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
+                          Line( PointX( -c_half_width ),
+                                PointX( +c_half_width ) ),
+                          CROSSHAIR_LINE_THICKNESS, true );
+    overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
+                          Line( PointY( -c_half_height ),
+                                PointY( +c_half_height ) ),
+                          CROSSHAIR_LINE_THICKNESS, true );
+
+    overlay_drawing.draw( MAIN_COLOR, c_target_outer, FILLED );
+    overlay_drawing.draw( TARGET_COLOR, c_target_inner, FILLED );
+    overlay_drawing.draw( MAIN_COLOR, c_target_cover, FILLED );
+
+    overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ), c_fps_line, c_thickness, true );
+    overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ), c_fps_circle, c_thickness, true );
+    overlay_drawing.draw( MAIN_COLOR, c_fps_dot, FILLED );
+    // TODO c_thickness shouldn't be necessary, preserve thickness isn't working
+
+    return( overlay_drawing );
+}
+#endif
+
+void Camera::update( )
+{
+    Point old_center = center( );
+    Vector movement = Vector( old_center, target( ) ) * m_movement_ratio;
+    Point new_center = old_center + movement;
+
+    center( new_center );
+    cursor_world_position( cursor_world_position( ) + ( center( ) - old_center ) );
+
+    if( m_transition_timer.tick( ) && m_transition_complete_timer.tick( ) )
+    {
+        m_transitioned = m_transitioning_out;
+    }
+
+    m_age++;
 }
 
 void Camera::render( )
@@ -718,123 +787,39 @@ void Camera::render( )
     #endif
 }
 
-Drawing Camera::cursor_drawing( ) const
+void Camera::clear_all( )
 {
-    static_setup( Drawing cursor_drawing )
-    {
-        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_LENGTH + x2( RETICLE_BORDER_WIDTH ),
-                                                        RETICLE_WIDTH + x2( RETICLE_BORDER_WIDTH ) ) );
-        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_WIDTH + x2( RETICLE_BORDER_WIDTH ),
-                                                        RETICLE_LENGTH + x2( RETICLE_BORDER_WIDTH ) ) );
-        cursor_drawing.draw( WHITE, Polygon::rectangle( RETICLE_WIDTH, RETICLE_LENGTH ) );
-        cursor_drawing.draw( WHITE, Polygon::rectangle( RETICLE_LENGTH, RETICLE_WIDTH ) );
-    }
-
-    return( cursor_drawing );
+    clear_subjects( );
+    clear_screen_effects( );
+    clear_hud_elements( );
 }
 
-#if defined( AXN_DEBUG )
-Drawing Camera::debug_overlay_drawing( ) const
+void Camera::clear_subjects( )
 {
-    static Angle delta;
+    m_subjects.clear( );
+    m_background_subjects.clear( );
+    m_foreground_subjects.clear( );
 
-    static Angle last_delta;
-    static Angle last_target_delta;
+    safe_delete( m_owned_subjects );
+    safe_delete( m_background_owned_subjects );
+    safe_delete( m_foreground_owned_subjects );
 
-    delta -= DELTA;
-
-    const Planc c_thickness = FPS_LINE_THICKNESS * zoom( );
-
-    const Planc c_width = width( );
-    const Planc c_height = height( );
-
-    const Planc c_half_width = half( c_width );
-    const Planc c_half_height = half( c_height );
-
-    const Vector c_target_offset = target( ) - center( );
-
-    const Polygon c_target_outer = Polygon::circle( TARGET_RADIUS + c_thickness, c_target_offset );
-    const Polygon c_target_inner = Polygon::circle( TARGET_RADIUS, c_target_offset );
-    const Polygon c_target_cover = Polygon::circle( TARGET_RADIUS );
-
-    const Polygon c_fps_circle = Polygon::circle( FPS_RADIUS );
-    const Polygon c_fps_dot = Polygon::circle( TARGET_RADIUS );
-
-    const Angle c_target_delta( ( ( dec( milliseconds( ) ) / 1000.0 ) * -TAU ) * DELTA );
-
-    const Line c_fps_target_line( ORIGIN, PointY( FPS_RADIUS ).rotate( c_target_delta ) );
-    const Line c_fps_line( ORIGIN, PointY( FPS_RADIUS ).rotate( delta ) );
-
-    const Angle c_d_delta( delta - last_delta );
-    const Angle c_d_target_delta( c_target_delta - last_target_delta );
-    const Angle c_d_d_delta( ( c_d_delta - c_d_target_delta ) * TAU );
-
-    const Polygon c_lag( Arc::ccw( FPS_RADIUS, delta + RIGHT, delta + c_d_d_delta + RIGHT ).points( ) + ORIGIN );
-
-    last_delta = delta;
-    last_target_delta = c_target_delta;
-
-    Drawing overlay_drawing;
-
-    overlay_drawing.draw( TARGET_COLOR.a( COLOR_OPACITY ), c_fps_target_line, c_thickness, true );
-
-    // draw lag
-    // if( is_pos( c_d_d_delta ) ) { overlay_drawing.draw( TARGET_COLOR.a( LAG_COLOR_OPACITY ), c_lag, FILLED ); }
-
-    overlay_drawing.draw( MAIN_COLOR,
-                          Line( Point( -c_half_width, -c_half_height ),
-                                Point( +c_half_width, -c_half_height ) ),
-                          BORDER_LINE_THICKNESS, true, true );
-    overlay_drawing.draw( MAIN_COLOR,
-                          Line( Point( -c_half_width, +c_half_height ),
-                                Point( +c_half_width, +c_half_height ) ),
-                          BORDER_LINE_THICKNESS, true, true );
-    overlay_drawing.draw( MAIN_COLOR,
-                          Line( Point( -c_half_width, -c_half_height ),
-                                Point( -c_half_width, +c_half_height ) ),
-                          BORDER_LINE_THICKNESS, true, true );
-    overlay_drawing.draw( MAIN_COLOR,
-                          Line( Point( +c_half_width, -c_half_height ),
-                                Point( +c_half_width, +c_half_height ) ),
-                          BORDER_LINE_THICKNESS, true, true );
-
-    overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
-                          Line( PointX( -c_half_width ),
-                                PointX( +c_half_width ) ),
-                          CROSSHAIR_LINE_THICKNESS, true );
-    overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ),
-                          Line( PointY( -c_half_height ),
-                                PointY( +c_half_height ) ),
-                          CROSSHAIR_LINE_THICKNESS, true );
-
-    overlay_drawing.draw( MAIN_COLOR, c_target_outer, FILLED );
-    overlay_drawing.draw( TARGET_COLOR, c_target_inner, FILLED );
-    overlay_drawing.draw( MAIN_COLOR, c_target_cover, FILLED );
-
-    overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ), c_fps_line, c_thickness, true );
-    overlay_drawing.draw( MAIN_COLOR.a( COLOR_OPACITY ), c_fps_circle, c_thickness, true );
-    overlay_drawing.draw( MAIN_COLOR, c_fps_dot, FILLED );
-    // TODO c_thickness shouldn't be necessary, preserve thickness isn't working
-
-    return( overlay_drawing );
+    #if defined( AXN_DEBUG )
+    m_debug_subjects.clear( );
+    safe_delete( m_owned_debug_subjects );
+    #endif
 }
-#endif
 
-void Camera::update( )
+void Camera::clear_screen_effects( )
 {
-    Point old_center = center( );
-    Vector movement = Vector( old_center, target( ) ) * m_movement_ratio;
-    Point new_center = old_center + movement;
+    m_screen_effects.clear( );
+    safe_delete( m_owned_screen_effects );
+}
 
-    center( new_center );
-    cursor_world_position( cursor_world_position( ) + ( center( ) - old_center ) );
-
-    if( m_transition_timer.tick( ) && m_transition_complete_timer.tick( ) )
-    {
-        m_transitioned = m_transitioning_out;
-    }
-
-    m_age++;
+void Camera::clear_hud_elements( )
+{
+    m_hud_elements.clear( );
+    safe_delete( m_hud_elements );
 }
 
 ptr<Visible> Camera::capture( ptr<Visible> in_subject, bool in_should_delete )
@@ -993,6 +978,22 @@ void Camera::center( Point cref in_center )
     }
 }
 
+FixedRectangle Camera::bounds( bool in_positioned ) const { return( FixedRectangle( width( ), height( ), ( in_positioned ? center( ) : ORIGIN ) ) ); }
+
+Point Camera::target( bool in_include_offset ) const { return( m_target - ( in_include_offset ? target_offset( ) : V0 ) ); }
+void Camera::target( Point cref in_target, bool in_hard_set )
+{
+    m_target = in_target;
+    m_target += target_offset( );
+
+    if( in_hard_set ) { center( m_target ); }
+}
+
+Vector Camera::target_offset( ) const { return( VectorY( ( height( ) * target_offset_ratio_y( ) ) / zoom( ) ) ); }
+
+dec Camera::target_offset_ratio_y( ) const { return( m_offset_ratio_y ); }
+void Camera::target_offset_ratio_y( dec in_offset_y ) { m_offset_ratio_y = in_offset_y; }
+
 dec Camera::zoom( ) const { return( m_zoom ); }
 void Camera::zoom( dec in_zoom )
 {
@@ -1025,22 +1026,6 @@ void Camera::show_hud( bool in_show_hud ) { m_show_hud = in_show_hud; }
 
 dec Camera::hud_offset_percentage( ) const { return( m_hud_offset_percentage ); }
 void Camera::hud_offset_percentage( dec in_hud_offset_percentage ) { m_hud_offset_percentage = in_hud_offset_percentage; }
-
-Point Camera::target( bool in_include_offset ) const { return( m_target - ( in_include_offset ? target_offset( ) : V0 ) ); }
-void Camera::target( Point cref in_target, bool in_hard_set )
-{
-    m_target = in_target;
-    m_target += target_offset( );
-
-    if( in_hard_set ) { center( m_target ); }
-}
-
-Vector Camera::target_offset( ) const { return( VectorY( ( height( ) * target_offset_ratio_y( ) ) / zoom( ) ) ); }
-
-dec Camera::target_offset_ratio_y( ) const { return( m_offset_ratio_y ); }
-void Camera::target_offset_ratio_y( dec in_offset_y ) { m_offset_ratio_y = in_offset_y; }
-
-FixedRectangle Camera::bounds( bool in_positioned ) const { return( FixedRectangle( width( ), height( ), ( in_positioned ? center( ) : ORIGIN ) ) ); }
 
 bool Camera::in_view( Point cref in_world_position, dec in_z ) const
 {
@@ -1088,6 +1073,45 @@ void Camera::cursor_world_position( Point cref in_cursor_world_position ) { m_cu
 
 void Camera::cursor_world_position_reset( ) { m_cursor_world_position = INVALID_POINT; }
 
+Drawing Camera::cursor_drawing( ) const
+{
+    static_setup( Drawing cursor_drawing )
+    {
+        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_LENGTH + x2( RETICLE_BORDER_WIDTH ),
+                                                        RETICLE_WIDTH + x2( RETICLE_BORDER_WIDTH ) ) );
+        cursor_drawing.draw( BLACK, Polygon::rectangle( RETICLE_WIDTH + x2( RETICLE_BORDER_WIDTH ),
+                                                        RETICLE_LENGTH + x2( RETICLE_BORDER_WIDTH ) ) );
+        cursor_drawing.draw( WHITE, Polygon::rectangle( RETICLE_WIDTH, RETICLE_LENGTH ) );
+        cursor_drawing.draw( WHITE, Polygon::rectangle( RETICLE_LENGTH, RETICLE_WIDTH ) );
+    }
+
+    return( cursor_drawing );
+}
+
+bool Camera::transitioned( ) const { return( m_transitioned ); }
+bool Camera::transitioning( ) const { return( m_transition_timer.remaining( ) || m_transition_complete_timer.remaining( ) ); }
+
+void Camera::transition( transition_type in_transition, Vector cref in_vec )
+{
+    Assert( !transitioning( ) );
+
+    m_transition_type = in_transition;
+    m_transition_vec = in_vec;
+
+    m_transition_timer.reset( );
+    m_transition_complete_timer.reset( );
+
+    m_transitioning_out = !transitioned( );
+}
+
+void Camera::transition_duration( ticks in_duration, ticks in_completion_duration )
+{
+    Assert( !transitioning( ) );
+
+    m_transition_timer.duration( in_duration );
+    m_transition_complete_timer.duration( in_completion_duration );
+}
+
 Camera::HUD::HUD( dec in_center_x_percent, dec in_center_y_percent, dec in_width_percent, dec in_height_percent )
 {
     width( in_width_percent );
@@ -1115,28 +1139,4 @@ FixedRectangle Camera::HUD::bounds( ptr<Camera> camera ) const
     Point center = Point( width * ( m_center_x_percent - 0.5 ), height * ( m_center_y_percent - 0.5 ) );
 
     return( FixedRectangle( display_width, display_height, center ) );
-}
-
-bool Camera::transitioned( ) const { return( m_transitioned ); }
-bool Camera::transitioning( ) const { return( m_transition_timer.remaining( ) || m_transition_complete_timer.remaining( ) ); }
-
-void Camera::transition( transition_type in_transition, Vector cref in_vec )
-{
-    Assert( !transitioning( ) );
-
-    m_transition_type = in_transition;
-    m_transition_vec = in_vec;
-
-    m_transition_timer.reset( );
-    m_transition_complete_timer.reset( );
-
-    m_transitioning_out = !transitioned( );
-}
-
-void Camera::transition_duration( ticks in_duration, ticks in_completion_duration )
-{
-    Assert( !transitioning( ) );
-
-    m_transition_timer.duration( in_duration );
-    m_transition_complete_timer.duration( in_completion_duration );
 }

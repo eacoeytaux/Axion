@@ -28,6 +28,13 @@ void Door::render( )
     draw( door_drawing( ) );
 }
 
+void Door::open( varray<ptr<Object>> cref in_objects )
+{
+    //room( )->remove_objects( in_objects, false );
+    room( )->world( )->current_room( out( )->room( ) );
+    //out( )->room( )->pass( in_objects );
+}
+
 #if defined( AXN_DEBUG )
 Drawing Door::debug_overlay( ) const
 {
@@ -41,11 +48,4 @@ Drawing Door::debug_overlay( ) const
     return( debug_overlay.draw( Object::debug_overlay( ) ) );
 }
 #endif
-
-void Door::open( varray<ptr<Object>> cref in_objects )
-{
-    //room( )->remove_objects( in_objects, false );
-    room( )->world( )->current_room( out( )->room( ) );
-    //out( )->room( )->pass( in_objects );
-}
 

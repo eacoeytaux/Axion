@@ -30,26 +30,6 @@ World::~World( )
     destroy( ); // from destruction comes destruction
 }
 
-void World::destroy( )
-{
-    safe_delete( m_rooms );
-
-    m_current_room = nullptr;
-    m_next_room = nullptr;
-
-    safe_delete( m_camera );
-}
-
-void World::reset( )
-{
-    dec zoom = !is_null( camera( ) ) ? camera( )->zoom( ) : 1.0;
-
-    destroy( );
-    init( );
-
-    camera( )->zoom( zoom );
-}
-
 void World::init( )
 {
     m_age = 0;
@@ -65,24 +45,6 @@ void World::init( )
     #if !defined( AXN_DEBUG )
     age( START_AGE );
     #endif
-}
-
-void World::pause( bool in_paused )
-{
-    m_paused = in_paused;
-
-    if( paused( ) )
-    {
-        for_each( player, current_room( )->players( ) )
-        {
-            player->clear_input( );
-        }
-    }
-}
-
-bool World::paused( ) const
-{
-    return( m_paused || ( is_null( camera( ) ) || ( camera( )->transitioning( ) || camera( )->transitioned( ) ) ) );
 }
 
 void World::render( )
@@ -143,33 +105,22 @@ void World::update( )
     #endif
 }
 
-void World::create( ) { }
-
-ptr<Room> World::next_room( ) { return( m_next_room ); }
-ptr<Room> World::current_room( ) { return( m_current_room ); }
-ptr<Room> World::current_room( ptr<Room> in_room ) { return( m_next_room = in_room ); }
-
-ptr<Room> World::current_room_swap( ptr<Room> in_room )
+void World::pause( bool in_paused )
 {
-    m_current_room = in_room;
+    m_paused = in_paused;
 
-    if( camera( ) && ( current_room( ) && current_room( )->player_main( ) ) )
+    if( paused( ) )
     {
-        camera( )->target( current_room( )->player_main( )->position( ), true );
+        for_each( player, current_room( )->players( ) )
+        {
+            player->clear_input( );
+        }
     }
-
-    return( current_room( in_room ) );
 }
 
-ptr<Room> World::add_room( ptr<Room> in_room, bool in_current )
+bool World::paused( ) const
 {
-    in_room->init( );
-
-    m_rooms.insert( in_room );
-
-    if( in_current || is_null( current_room( ) ) ) { current_room_swap( in_room ); }
-
-    return( in_room );
+    return( m_paused || ( is_null( camera( ) ) || ( camera( )->transitioning( ) || camera( )->transitioned( ) ) ) );
 }
 
 void World::input( list<ptr<Input>> cref in_inputs )
@@ -535,4 +486,53 @@ void World::input( list<ptr<Input>> cref in_inputs )
             current_room( )->input( in_inputs );
         }
     }
+}
+
+ptr<Room> World::next_room( ) { return( m_next_room ); }
+ptr<Room> World::current_room( ) { return( m_current_room ); }
+ptr<Room> World::current_room( ptr<Room> in_room ) { return( m_next_room = in_room ); }
+
+ptr<Room> World::add_room( ptr<Room> in_room, bool in_current )
+{
+    in_room->init( );
+
+    m_rooms.insert( in_room );
+
+    if( in_current || is_null( current_room( ) ) ) { current_room_swap( in_room ); }
+
+    return( in_room );
+}
+
+void World::create( ) { }
+
+void World::destroy( )
+{
+    safe_delete( m_rooms );
+
+    m_current_room = nullptr;
+    m_next_room = nullptr;
+
+    safe_delete( m_camera );
+}
+
+void World::reset( )
+{
+    dec zoom = !is_null( camera( ) ) ? camera( )->zoom( ) : 1.0;
+
+    destroy( );
+    init( );
+
+    camera( )->zoom( zoom );
+}
+
+ptr<Room> World::current_room_swap( ptr<Room> in_room )
+{
+    m_current_room = in_room;
+
+    if( camera( ) && ( current_room( ) && current_room( )->player_main( ) ) )
+    {
+        camera( )->target( current_room( )->player_main( )->position( ), true );
+    }
+
+    return( current_room( in_room ) );
 }
