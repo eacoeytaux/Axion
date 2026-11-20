@@ -17,13 +17,17 @@ namespace axn
 namespace reality
 {
 
-class Object : public Identifiable, public Visible, public Matter
+class Object : public Identifiable, public Visible, public Mass
 {
 
 private:
 
     #if defined( AXN_DEBUG )
     static uint total_objects;
+
+    // C! set by Object::update( ) and Object::render( ), so update_object( ) and render_object( ) can check that an override didn't skip them
+    bool m_base_update_reached = false;
+    bool m_base_render_reached = false;
     #endif
 
 public:
@@ -55,8 +59,19 @@ public:
     FixedRectangle room_bounds_z( ) const { return( room_bounds( z( ) ) ); }
 
     ptr<Room> room( ) const { return( m_room ); }
-    ptr<World> world( ) const { return( m_room->world( ) ); }
-    ptr<Camera> camera( ) const { return( m_room->camera( ) ); }
+
+    // C! moves the object's own state to another room: Room::pass( ) calls it, and moves the object between the rooms' lists itself
+    virtual void room( ptr<Room> in_room );
+
+    // C! called once it's come out of in_door into its new room (Room::pass( )), placed where it'll be: for anything it has to put
+    // C! right straight away, since the room doesn't update while the camera transitions in. Nothing by default
+    virtual void pass_door( ptr<Door> in_door ) { }
+
+    ptr<World> world( ) const { return_null_if( !room( ) ); return( room( )->world( ) ); } // C! null when not in a room (no ?: with nullptr: IntelliSense then reports ptr<World> as incomplete, E0070)
+    // C! queues in_sound with the world, played from this object's position (see World::play_sound( ))
+    void play_sound( SoundFX cref in_sound ) const;
+
+    ptr<Camera> camera( ) const { return_null_if( !room( ) ); return( room( )->camera( ) ); } // C! null when not in a room, or the room's world has no camera
 
     Drawing cref drawing( ) const { return( *cast_const( this, Drawing ) ); }
 
@@ -122,6 +137,7 @@ public:
     bool stationary( ) const;
 
     bool grounded( ) const { return( !is_null( ground( ).node( ) ) ); }
+    void find_ground( ); // C! grounds it on whatever floor it's resting on (gravity pulls it into), when it's been put somewhere without moving there
 
     Terrain::Bumper cref ground( ) const { return( m_ground ); } // C! the bumper the object is on, ground( ).node( ) is the terrain node
     Line ground_bumper_line( ) const; // C! the bumper line the object is standing on, only meaningful when grounded
@@ -138,10 +154,8 @@ public:
 
     bool terrain_bound( ) const;
 
-    virtual Hitbox hitbox( ) const; // todo remove in favor of hitboxes
-
     virtual varray<Hitbox> hitboxes( ) const;
-    virtual FixedRectangle hitboxes_bounds( bool include_terrain = true ) const;
+    virtual FixedRectangle hitboxes_bounds( bool in_include_terrain = true ) const;
 
     virtual Hitbox terrain_hitbox( ) const;
 
@@ -174,6 +188,7 @@ protected:
     virtual bool collide( ptr<Object> in_object );
 
     virtual bool sticks( ptr<Terrain::Node> in_node ); // todo
+    // C! TODO sticks( ) is never called: decide what sticking to terrain means (stop on contact like an arrow, or cling like the climber) or remove it
 
     virtual void ground( Terrain::Bumper cref in_ground );
     virtual void clear_ground( ) { ground( Terrain::Bumper( ) ); }
@@ -219,11 +234,11 @@ private:
 
     Terrain::Bumper m_ground; // C! knows its own node, no node means not grounded
 
-    // C! bumpers depend only on the node and the hitbox shape but are asked for many times per update,
+    // C! bumpers depend only on the node and the hitbox polygon but are asked for many times per update,
     // C! so update_movement( ) caches them while it runs (cleared at the start and end, so nothing goes stale)
     mutable umap<ptr<const Terrain::Node>, Terrain::Bumper> m_bumper_cache;
     mutable bool m_bumper_cache_active = false;
-    varray<Point> m_bumper_shape; // C! Terrain::Node::bumper_shape( terrain_hitbox( ) ) for this update
+    varray<Point> m_bumper_poly; // C! Terrain::Node::bumper_polygon( terrain_hitbox( ) ) for this update
 
     Terrain::Bumper bumper( ptr<const Terrain::Node> in_node ) const;
     bool m_passing_terrain = false;

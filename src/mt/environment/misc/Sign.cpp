@@ -28,7 +28,7 @@ var_const( dec INK_OFFSET = ( 0.4 ) );
 var_const( Angle MAX_INK_SWAY = ( Angle::fraction( 32.0 ) ) );
 
 var_const( Color INK_COLOR = ( BLACK ) );
-var_const( Color WOOD_COLOR = ( mtmercy::WOOD_COLOR_1 ) );
+var_const( Color WOOD_COLOR = ( WOOD_COLOR_1 ) );
 
 var_const( Planc MESSAGE_WIDTH = ( 100.0 ) );
 var_const( Planc MESSAGE_HEIGHT = ( 50.0 ) );
@@ -111,7 +111,6 @@ Sign::Sign( ptr<Room> in_room, Point cref in_base ) : Object( in_room, in_base )
                 return( text );
             };
 
-
             uint row_count = max( 1, int( ( ( BOARD_HEIGHT * one_minus( INK_OFFSET ) ) / INK_ROW_HEIGHT ) - ( Random::rbool( ) ? 1 : 0 ) ) );
 
             Point row_center = sign_center - ( VectorA( post_angle, INK_ROW_HEIGHT ) * half( row_count ) );
@@ -126,6 +125,7 @@ Sign::Sign( ptr<Room> in_room, Point cref in_base ) : Object( in_room, in_base )
         }
 
         m_sign_drawing.move( -sign_center );
+        m_sign_drawing.optimize( ); // C! drawn every frame, so flatten the rotated rows of text once here
     }
 
     { // message
@@ -152,6 +152,8 @@ void Sign::render( )
 
 bool Sign::collide( ptr<Object> in_object )
 {
+    Object::collide( in_object );
+
     if( cast( in_object, Player ) )
     {
         m_reading = true;

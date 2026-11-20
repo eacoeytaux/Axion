@@ -2,33 +2,34 @@
 
 #include "axn/system/Logger.hpp"
 
-var_const( uint RANDOM_BUFFER_SIZE = ( 65536 ) );
+var_const( uint BUFFER_SIZE = ( 65536 ) );
 
-var_static( bool RANDOM_BUFFER_FILLED = ( false ) );
-var_static( uint RANDOM_BUFFER[ RANDOM_BUFFER_SIZE ] );
-var_static( uint RANDOM_BUFFER_INDEX = ( 0 ) );
+var_static( carray<uint, BUFFER_SIZE> buffer );
+var_static( uint buffer_index = ( 0 ) );
+var_static( bool buffer_filled = ( false ) );
 
-uint Random::seed_value = 0;
 default_random_engine Random::engine = default_random_engine{ };
 
-uint Random::random_int( ) { return( RANDOM_BUFFER[ RANDOM_BUFFER_INDEX = ( ( RANDOM_BUFFER_INDEX + 1 ) % RANDOM_BUFFER_SIZE ) ] ); }
+uint Random::seed_value = 0;
+
+uint Random::next( ) { return( buffer[ buffer_index = ( ( buffer_index + 1 ) % buffer.size( ) ) ] ); }
 
 Error Random::seed( uint in_seed )
 {
     try
     {
-        if( ( seed_value != in_seed ) || !RANDOM_BUFFER_FILLED )
+        if( ( seed_value != in_seed ) || !buffer_filled )
         {
             seed_value = in_seed;
 
             ::srand( in_seed );
             engine.seed( in_seed );
 
-            for_range( i, RANDOM_BUFFER_SIZE ) { RANDOM_BUFFER[ i ] = ::rand( ); }
-            RANDOM_BUFFER_FILLED = true;
+            for_range( i, buffer.size( ) ) { buffer[ i ] = ::rand( ); }
+            buffer_filled = true;
         }
 
-        RANDOM_BUFFER_INDEX = 0;
+        buffer_index = 0;
     }
     catch_error_return( );
 

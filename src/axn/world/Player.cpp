@@ -57,6 +57,8 @@ bool Player::damages( Damage cref in_damage ) const
 
 void Player::out_of_bounds( )
 {
+    skip_override; // C! Object::out_of_bounds( ) deletes the object, which a player mustn't be
+
     #if !defined( AXN_DEBUG )
     // Object::out_of_bounds( );
     #endif
@@ -69,6 +71,8 @@ void Player::update_movement( )
 
 bool Player::collide( ptr<Object> in_object )
 {
+    Mob::collide( in_object );
+
     if( opening_door( ) )
     {
         if( cast_as( in_object, door, Door ) )
@@ -90,7 +94,7 @@ bool Player::collide( ptr<Object> in_object )
 
 void Player::die( )
 {
-    // static SoundClip death_cry( "WilhelmScream.wav" );
+    // static Sound death_cry( "WilhelmScream.wav" );
     // death_cry.play( );
 
     Mob::die( );

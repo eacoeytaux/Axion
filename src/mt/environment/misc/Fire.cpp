@@ -118,6 +118,8 @@ void Fire::update( )
 
 void Fire::move( Vector cref in_velocity )
 {
+    skip_override; // C! the flames trail behind instead: Object::move( ) would move the fire itself
+
     for_each( flame, m_flames )
     {
         flame.offset -= ( in_velocity * one_minus( m_movement_resistance_ratio ) );

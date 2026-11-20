@@ -1,6 +1,7 @@
 #include "axn/system/Logger.hpp"
 
 #include "axn/AXN.hpp"
+#include "axn/system/Engine.hpp"
 
 #if defined( AXN_DEBUG )
 
@@ -8,16 +9,40 @@
 #include <stdarg.h>
 #include <sys/stat.h>
 
+var_const( string LOGS_DIR = ( "logs" ) );
+var_const( string MAIN_LOG = ( "main" ) );
+
+var_static( mutex log_mutex );
+
 var_static( bool b_initialized = ( false ) );
+
+var_static( bool b_using_console = ( true ) );
 
 var_static( bool b_paused = ( false ) );
 var_static( stack<bool> b_paused_stack );
 
-var_static( bool b_using_file = ( false ) );
-var_static( bool b_using_console = ( true ) );
+struct LogFile { file * opened = nullptr; uset<message_type> types; bool tried = false; };
+var_static( umap<string, LogFile> log_files );
 
-var_static( string log_directory = ( "logs/" ) );
-var_static( file * log_file = ( nullptr ) );
+file * log_file( string cref in_log, LogFile ref in_log_file )
+{
+    return_if( in_log_file.tried, in_log_file.opened );
+
+    in_log_file.tried = true;
+
+    string log_filename = Engine::run_directory( "logs" ) + in_log + ".log";
+
+    #if defined( OS_WINDOWS )
+    fopen_s( &in_log_file.opened, charify( log_filename ), "w+" );
+    #elif defined( OS_APPLE )
+    in_log_file.opened = fopen( charify( log_filename ), "w+" );
+    #elif defined( OS_LINUX )
+    in_log_file.opened = fopen( charify( log_filename ), "w+" );
+    #endif
+
+    return( in_log_file.opened );
+}
+
 Error Logger::close( )
 {
     if( b_initialized )
@@ -27,39 +52,42 @@ Error Logger::close( )
 
     b_initialized = false;
 
-    if( log_file )
+    lock_guard<mutex> lock( log_mutex );
+
+    Error error = no_error;
+
+    for_each( log, log_files )
     {
-        return( fclose( log_file ) ? error_system : no_error );
+        if( log.second.opened && fclose( log.second.opened ) ) { error = error_system; }
     }
-    else
-    {
-        return( no_error );
-    }
+
+    log_files.clear( );
+
+    return( error );
 }
 
-Error Logger::init( bool in_file )
+Error Logger::init( bool in_print_to_file )
 {
     b_paused = false;
     b_initialized = false;
 
-    if( in_file )
-    {
-        string log_filename = log_directory + datestamp( ) + "-" + timestamp( ) + ".log";
-
-        #if defined( OS_WINDOWS )
-        fopen_s( &log_file, charify( log_filename ), "w+" );
-        #elif defined( OS_APPLE )
-        log_file = fopen( charify( log_filename ), "w+" );
-        #elif defined( OS_LINUX )
-        log_file = fopen( charify( log_filename ), "w+" );
-        #endif
-
-        return_if( !( b_using_file = log_file ), error_not_init );
-    }
+    if( in_print_to_file ) { add_log( MAIN_LOG ); }
 
     b_initialized = true;
 
     log_message( INFO_LOG, "starting ............... ( v%s )\n", AXN_VERSION );
+
+    return( no_error );
+}
+
+Error Logger::add_log( string cref in_name, initializer_list<message_type> in_types )
+{
+    lock_guard<mutex> lock( log_mutex );
+
+    return_if( log_files.contains( in_name ), error_system ); // C! already a log by that name
+
+    LogFile ref log = log_files.insert( in_name );
+    for_each_const( type, in_types ) { log.types.insert( type ); }
 
     return( no_error );
 }
@@ -70,8 +98,7 @@ Error Logger::log_message( message_type in_type, const char * in_entry, ... )
 
     try
     {
-        va_list va_args;
-        va_start( va_args, in_entry );
+        lock_guard<mutex> lock( log_mutex );
 
         string type_str;
 
@@ -99,30 +126,39 @@ Error Logger::log_message( message_type in_type, const char * in_entry, ... )
 
             b_case( DEBUG_LOG ) :
             {
-                #if defined( AXN_DEBUG )
                 type_str = "DEBUG";
-                #else
-                va_end( va_args );
-                return( no_error );
-                #endif
             }
         }
 
+        va_list va_args;
+        va_start( va_args, in_entry );
+
         if( b_using_console )
         {
+            va_list console_args;
+            va_copy( console_args, va_args ); // C! a va_list can only be read once, so each place written to gets a copy
             printf( "[ %s ] ", charify( type_str ) );
-            vprintf( in_entry, va_args );
+            vprintf( in_entry, console_args );
             printf( "\n" );
+            va_end( console_args );
         }
 
-        if( b_using_file )
+        for_each( log, log_files )
         {
-            fprintf( log_file, "[ %s ] ", charify( timestamp( ) ) );
-            fprintf( log_file, "[ %s ] ", charify( type_str ) );
-            vfprintf( log_file, in_entry, va_args );
-            fprintf( log_file, "\n" );
+            continue_if( !log.second.types.empty( ) && !log.second.types.contains( in_type ) ); // C! not a type this log takes
 
-            fflush( log_file );
+            file * opened = log_file( log.first, log.second );
+            continue_if( !opened );
+
+            va_list file_args;
+            va_copy( file_args, va_args );
+            fprintf( opened, "[ %s ] ", charify( timestamp( ':' ) ) );
+            fprintf( opened, "[ %s ] ", charify( type_str ) );
+            vfprintf( opened, in_entry, file_args );
+            fprintf( opened, "\n" );
+            va_end( file_args );
+
+            fflush( opened );
         }
 
         va_end( va_args );

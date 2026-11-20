@@ -4,14 +4,19 @@
 #include <iostream>
 #include <fstream>
 #include <cstdarg>
+#include <cstdio>
 #include <cmath>
 #include <memory>
 #include <chrono>
 #include <functional>
 #include <algorithm>
 #include <random>
+#include <thread>
+#include <atomic>
+#include <mutex>
 
 #include <vector>
+#include <array>
 #include <stack>
 #include <queue>
 #include <list>
@@ -54,9 +59,22 @@ use_std( ostream );
 use_std( iostream );
 use_std( ifstream );
 use_std( ofstream );
+use_std( getline );
 
 use_std( cout );
 use_std( endl );
+
+// -- threads -- //
+
+use_std( thread );
+use_std( move );
+use_std( atomic );
+use_std( mutex );
+use_std( lock_guard );
+
+// -- containers -- //
+
+use_std( initializer_list );
 
 // -- strings -- //
 
@@ -64,6 +82,7 @@ use_std( string );
 
 use_std_to_string( int );
 use_std_to_string( uint );
+use_std_to_string( uint64 );
 use_std_to_string( dec );
 
 // -- math std -- //

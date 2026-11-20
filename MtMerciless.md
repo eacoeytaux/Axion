@@ -27,8 +27,9 @@
 - `-` volume down
 - `m` volume off
 - `tab` toggle HUD
-- `\\` sync controllers
+- `x` save a screenshot (png, to `tmp/screenshots/`)
 - `c` toggle cinematic
+- `\\` sync controllers
 ---
 ### debug
 ---

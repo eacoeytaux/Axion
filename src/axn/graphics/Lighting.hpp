@@ -52,8 +52,8 @@ public:
     bool darkness_active( ) const;
     void darkness_active( bool in_active );
 
-    dec darkness_intensity( ) const;
-    void darkness_intensity( dec in_intensity );
+    declmp darkness_intensity( ) const;
+    void darkness_intensity( declmp in_intensity );
 
     varray<LightSource> cref light_sources( ) const;
     varray<LightSource> cref add_light_sources( varray<LightSource> cref in_sources );
@@ -68,7 +68,7 @@ private:
     varray<LightSource> m_light_sources;
 
     bool m_darkness_active = false;
-    slider<dec> m_darkness_slider;
+    slider<dec> m_darkness_slider = slider<dec>( 0.0, 1.0 ); // C! was the default 0 to 0 range, set to 1.0 straight away
 
     Color m_ambient_color = CLEAR;
 

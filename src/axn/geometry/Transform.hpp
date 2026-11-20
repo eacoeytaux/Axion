@@ -180,15 +180,7 @@ public:
     {
         //https://matrixcalc.org/#{{1,0,x},{0,1,y},{0,0,1}}*{{1,m,0},{0,1,0},{0,0,1}}*{{m,0,0},{0,1,0},{0,0,1}}*{{c,-s,0},{s,c,0},{0,0,1}}^(-1)*{{1,0,x},{0,1,y},{0,0,1}}^(-1)
 
-        Transform mt = move( in_vec.origin( ) );
-        Transform rt = rotate( in_vec.angle( ) );
-        Transform st = Transform( ( 1.0 ), ( in_vec.magnitude( ) ), ( 0.0 ),
-                                  ( 0.0 ), ( 1.0 ), ( 0.0 ),
-                                  ( 0.0 ), ( 0.0 ), ( 1.0 ) );
-
-        return( mt * rt * st * rt.inverse( ) * mt.inverse( ) );
-
-        // todo
+        // C! worked out from move * rotate * shear * rotate^-1 * move^-1 (the "Transform shear, stretch, and squeeze" test checks it against that)
 
         Planc m = ( in_vec.magnitude( ) );
 
@@ -200,13 +192,13 @@ public:
         Planc s = ( a.sin( ) );
         Planc c = ( a.cos( ) );
 
-        Planc ms = ( m * s );
-        Planc mc = ( m * c );
+        Planc t11 = ( 1.0 - ( m * c * s ) );
+        Planc t12 = ( +m * square( c ) );
+        Planc t21 = ( -m * square( s ) );
+        Planc t22 = ( 1.0 + ( m * s * c ) );
 
-        Planc t3 = ( ( x * s ) + ( y * c ) );
-
-        return( Transform( ( -mc * s ), ( +mc * c ), ( +mc * t3 ),
-                           ( -ms * s ), ( +ms * c ), ( +ms * t3 ),
+        return( Transform( ( t11 ), ( t12 ), ( ( x * one_minus( t11 ) ) - ( y * t12 ) ),
+                           ( t21 ), ( t22 ), ( ( y * one_minus( t22 ) ) - ( x * t21 ) ),
                            ( 0.0 ), ( 0.0 ), ( 1.0 ) ) );
     }
 
@@ -214,15 +206,7 @@ public:
     {
         //https://matrixcalc.org/#{{1,0,x},{0,1,y},{0,0,1}}*{{c,-s,0},{s,c,0},{0,0,1}}*{{m,0,0},{0,1,0},{0,0,1}}*{{c,-s,0},{s,c,0},{0,0,1}}^(-1)*{{1,0,x},{0,1,y},{0,0,1}}^(-1)
 
-        Transform mt = move( in_vec.origin( ) );
-        Transform rt = rotate( in_vec.angle( ) );
-        Transform st = Transform( ( in_vec.magnitude( ) ), ( 0.0 ), ( 0.0 ),
-                                  ( 0.0 ), ( 1.0 ), ( 0.0 ),
-                                  ( 0.0 ), ( 0.0 ), ( 1.0 ) );
-
-        return( mt * rt * st * rt.inverse( ) * mt.inverse( ) );
-
-        // todo
+        // C! worked out from move * rotate * stretch * rotate^-1 * move^-1 (the "Transform shear, stretch, and squeeze" test checks it against that)
 
         Planc m = ( in_vec.magnitude( ) );
 
@@ -251,15 +235,7 @@ public:
 
         return_if( !in_vec.has_magnitude( ), Transform( false ) );
 
-        Transform mt = move( in_vec.origin( ) );
-        Transform rt = rotate( in_vec.angle( ) );
-        Transform st = Transform( ( in_vec.magnitude( ) ), ( 0.0 ), ( 0.0 ),
-                                  ( 0.0 ), ( 1.0 / in_vec.magnitude( ) ), ( 0.0 ),
-                                  ( 0.0 ), ( 0.0 ), ( 1.0 ) );
-
-        return( mt * rt * st * rt.inverse( ) * mt.inverse( ) );
-
-        // todo
+        // C! worked out from move * rotate * squeeze * rotate^-1 * move^-1 (the "Transform shear, stretch, and squeeze" test checks it against that)
 
         Planc m = ( in_vec.magnitude( ) );
 
@@ -271,11 +247,11 @@ public:
         Planc s = ( a.sin( ) );
         Planc c = ( a.cos( ) );
 
-        Planc t11 = ( m * c );
-        Planc t21 = ( m * s );
+        Planc t11 = ( ( m * square( c ) ) + ( square( s ) / m ) );
+        Planc t22 = ( ( m * square( s ) ) + ( square( c ) / m ) );
 
-        Planc t12 = ( -s / m );
-        Planc t22 = ( +c / m );
+        Planc t12 = ( ( s * c ) * ( m - ( 1.0 / m ) ) );
+        Planc t21 = ( t12 );
 
         return( Transform( ( t11 ), ( t12 ), ( ( x * one_minus( t11 ) ) - ( y * t12 ) ),
                            ( t21 ), ( t22 ), ( ( y * one_minus( t22 ) ) - ( x * t21 ) ),

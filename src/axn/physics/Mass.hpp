@@ -1,5 +1,5 @@
-#ifndef Matter_hpp
-#define Matter_hpp
+#ifndef Mass_hpp
+#define Mass_hpp
 
 #include "axn/geometry/Geometry.hpp"
 
@@ -8,7 +8,8 @@ namespace axn
 namespace physics
 {
 
-class Matter
+// C! something with a mass, a position, and a velocity, that forces move: the physics part of an Object, and a Spring's ends
+class Mass
 {
 
 private:
@@ -25,9 +26,9 @@ private:
 
 public:
 
-    Matter( ) { }
+    Mass( ) { }
 
-    Matter( Point cref in_position ) : m_position( in_position ) { }
+    Mass( Point cref in_position ) : m_position( in_position ) { }
 
     Planc cref mass( ) const { return( m_mass ); }
     virtual void mass( Planc cref in_mass ) { m_mass = in_mass; Assert( is_pos( in_mass ) ); }
@@ -60,4 +61,4 @@ public:
 } // namespace physics
 } // namespace axn
 
-#endif /* Matter_hpp */
+#endif /* Mass_hpp */

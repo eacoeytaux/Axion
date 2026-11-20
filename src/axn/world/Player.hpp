@@ -8,13 +8,15 @@ namespace axn
 namespace reality
 {
 
-class Player : public Mob
+class Player : public Mob, public Listener
 {
 
 private:
 
     uint m_player_number;
     Color m_player_color;
+
+    bool m_invisible = false;
 
 public:
 
@@ -36,6 +38,11 @@ public:
     virtual bool damages( Damage cref in_damage ) const override;
 
     virtual bool opening_door( ) const { return( false ); }
+
+    virtual Point listening_position( ) const override { return( position( ) ); } // C! a player hears from where it is
+
+    bool invisible( ) const { return( m_invisible ); } // C! mobs don't notice it, or go after it
+    void invisible( bool in_invisible ) { m_invisible = in_invisible; }
 
     virtual void out_of_bounds( ) override;
 

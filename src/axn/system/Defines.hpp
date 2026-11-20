@@ -37,6 +37,7 @@
 
 #define return_true_if( b ) return_if( b, true )
 #define return_false_if( b ) return_if( b, false )
+#define return_null_if( b ) return_if( b, nullptr )
 
 #define rethis return( *this )
 #define rethis_if( b ) return_if( b, *this )
@@ -101,6 +102,8 @@
 #define typeT2N templateN( typename T1, typename T2 )
 #define classT2N templateN( typename T1, typename T2 ) class
 #define structT2N templateN( typename T1, typename T2 ) struct
+
+#define skip_override // purposely blank, used by outside validation scripts
 
 #define use_std( x ) using std::x
 

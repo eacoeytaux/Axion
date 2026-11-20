@@ -37,6 +37,8 @@ public:
 
     static Error clear_stencil( );
 
+    static varray<unsigned char> read_pixels( uint in_x, uint in_y, uint in_width, uint in_height ); // C! RGB from the back buffer, bottom row first, in_y counted up from the bottom
+
     static Error load_identity( );
 
 private:
@@ -120,6 +122,7 @@ public:
     static Error depth_less( );
 
     static Error depth_mask( bool in_mask );
+    static Error color_mask( bool in_mask ); // C! false draws nothing to the screen (only to the depth and stencil buffers)
     static bool depth_mask( );
 
 private:

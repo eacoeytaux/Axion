@@ -30,7 +30,8 @@ public:
 
 protected:
 
-    virtual void react_to_movement( ptr<Object> in_object, Vector cref in_movement ) override;
+    // C! the projectile's own, plus a thunk on the hit that stops the arrow (into the ground or something solid)
+    virtual bool collide( ptr<Object> in_object ) override;
     virtual void ground( Terrain::Bumper cref in_ground ) override;
 
     virtual void draw_head( );

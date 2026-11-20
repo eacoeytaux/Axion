@@ -53,7 +53,7 @@ void Enemy::update( )
         {
             if( target( ) == player )
             {
-                if( ( !target_locked( ) && !in_sight_range( player ) ) || !player->alive( ) )
+                if( ( !target_locked( ) && !in_sight_range( player ) ) || !player->alive( ) || player->invisible( ) )
                 {
                     clear_target( );
                 }
@@ -73,6 +73,8 @@ void Enemy::update( )
 
 bool Enemy::overrides_target( ptr<const Object> in_target ) const
 {
+    return_false_if( is_null( m_target ) || is_null( in_target ) ); // C! nothing to compare (callers check has_target( ) first, so a missing target is handled there)
+
     return( alive( ) && ( !target_locked( ) && position( ).closer_than( m_target->position( ), in_target->position( ) ) ) );
 }
 
@@ -90,7 +92,7 @@ void Enemy::sight_range( Planc cref in_range )
 
 bool Enemy::in_sight_range( ptr<const Player> player ) const
 {
-    return( alive( ) && ( !sight_range( ) || position( ).in_distance_range( player->position( ), sight_range( ) ) ) );
+    return( alive( ) && !player->invisible( ) && ( !sight_range( ) || position( ).in_distance_range( player->position( ), sight_range( ) ) ) );
 }
 
 void Enemy::alert_range( Planc cref in_range )
@@ -107,5 +109,5 @@ void Enemy::alert_range( Planc cref in_range )
 
 bool Enemy::in_alert_range( ptr<const Player> in_player ) const
 {
-    return( alive( ) && ( !alert_range( ) || position( ).in_distance_range( in_player->position( ), alert_range( ) ) ) );
+    return( alive( ) && !in_player->invisible( ) && ( !alert_range( ) || position( ).in_distance_range( in_player->position( ), alert_range( ) ) ) );
 }

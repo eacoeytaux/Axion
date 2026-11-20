@@ -26,17 +26,15 @@ public:
 
 protected:
 
-    virtual void react_to_movement( ptr<Object> in_object, Vector cref in_movement ) override;
-
     virtual bool collide( ptr<Object> in_object ) override;
 
     virtual void ground( Terrain::Bumper cref in_ground ) override;
 
 private:
 
-    bool m_active = false; // must be activated
+    bool m_active = false; // must be activated (the constructor does)
 
-    bool m_player_only;
+    bool m_player_only = false;
 
     Damage m_damage;
 

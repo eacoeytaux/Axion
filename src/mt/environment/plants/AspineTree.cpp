@@ -105,10 +105,10 @@ Drawing draw_trunk( Color cref in_leaf_color, bool in_draw_leaves, Planc cref in
     }
 
     Polygon trunk_base = Polygon::circle( half( in_base_width ) );
-    Polygon trunk_polygon( { base_right, Vector( top ) * TRUNK_LEAF_OFFSET, base_left } );
+    Polygon trunk_poly( { base_right, Vector( top ) * TRUNK_LEAF_OFFSET, base_left } );
 
     trunk_drawing.draw( TRUNK_COLOR, trunk_base );
-    trunk_drawing.draw( TRUNK_COLOR, trunk_polygon );
+    trunk_drawing.draw( TRUNK_COLOR, trunk_poly );
 
     do_count( in_branch_count )
     {
@@ -152,7 +152,7 @@ Drawing draw_trunk( Color cref in_leaf_color, bool in_draw_leaves, Planc cref in
         branch_height += branch_remaining * Random::rdec( BRANCH_BASE_HEIGHT_RATIO );
     }
 
-    trunk_drawing.add_bounds( trunk_polygon );
+    trunk_drawing.add_bounds( trunk_poly );
 
     branch_height = 0.0;
     while( branch_height < 1.0 )
@@ -189,6 +189,7 @@ AspineTree::AspineTree( ptr<Room> in_room, Point cref in_root, const dec in_z ) 
     uint branch_count = Random::rint( BRANCH_COUNT );
 
     draw( draw_trunk( m_leaf_color, true, height, base_width, branch_count, m_leaf_base, m_leaf_side1, m_leaf_side2 ).rotate( sway ) );
+    optimize( ); // C! drawn once and kept, so flatten the branches (the cropped trunk marks keep their crop)
 
     m_leaf_base.rotate( sway );
     m_leaf_side1.rotate( sway );

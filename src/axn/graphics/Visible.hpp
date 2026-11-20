@@ -39,13 +39,14 @@ public:
     FixedRectangle drawing_bounds( dec in_z = 1.0 ) { render( ); return( bounding_box( ) / in_z ); }
     FixedRectangle drawing_bounds_z( ) { return( drawing_bounds( z( ) ) ); }
 
-    bool visible( ) const { return( true ); } // TODO polygon_count( ) || light_sources( ).size( ); }
+    bool visible( ) const { return( !empty( ) || !light_sources( ).empty( ) ); } // C! something drawn or giving off light
 
     varray<LightSource> cref light_sources( ) const { return( m_light_sources ); }
     void clear_light_sources( ) { m_light_sources.clear( ); }
+    void move_light_sources( Vector cref in_movement ) { for_each( light_source, m_light_sources ) { light_source.position( light_source.position( ) + in_movement ); } } // C! with the object, when it's moved without updating (going through a door)
 
-    LayerOrder layer_order( ) const { return( m_layer_order ); }
-    void layer_order( LayerOrder in_layer_order ) { m_layer_order = in_layer_order; }
+    LayerOrder cref layer_order( ) const { return( m_layer_order ); }
+    void layer_order( LayerOrder cref in_layer_order ) { m_layer_order = in_layer_order; }
 
     // todo better name for this func
     virtual bool layer_order_above( ptr<const Visible> in_visible ) const { return( false ); }
@@ -59,8 +60,17 @@ public:
         }
         else
         {
-            LayerOrder o1 = in_v1->layer_order( );
-            LayerOrder o2 = in_v2->layer_order( );
+            LayerOrder cref order1 = in_v1->layer_order( );
+            LayerOrder cref order2 = in_v2->layer_order( );
+
+            // C! the first level settles it nearly every time, so the orders are only copied (to pop through) when it doesn't
+            return_false_if( is_empty( order1 ) && is_empty( order2 ) );
+            return_if( is_empty( order1 ) || is_empty( order2 ), !is_empty( order1 ) );
+            return_if( order1.front( ) != order2.front( ), order1.front( ) > order2.front( ) );
+            return_if( ( order1.size( ) == order2.size( ) ) && is_one( order1.size( ) ), in_v1->layer_order_above( in_v2 ) );
+
+            LayerOrder o1 = order1;
+            LayerOrder o2 = order2;
 
             while( !is_empty( o1 ) || !is_empty( o2 ) )
             {

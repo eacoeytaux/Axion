@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # C! checks the src files against the style guide in .claude/CLAUDE.md and lists every violation, changing nothing
 # C! usage: etc/format/format-check.sh [--overrides] [src files...]
-# C!   with no files it checks every src file ( .cpp / .hpp / .h under src/, except the third-party Catch.hpp )
+# C!   with no files it checks every src file ( .cpp / .hpp / .h under src/, except the third-party Catch.hpp ),
+# C!   and reports any comments in the Visual Studio and Xcode project setting files
 # C!   --overrides also compiles each .cpp with clang to find functions that override without saying override
 # C! exits 1 when it finds violations, 0 when the code is clean
 

@@ -65,6 +65,8 @@ void TrainingGrounds::create( )
     list<dec> aspine_zs = { 1.0 }; // { 1.0, 0.5 };
     for_each( z, aspine_zs )
     {
+        break_if( is_null( terrain( ) ) ); // C! no terrain to stand the trees on
+
         terrain( )->traverse_x( span<Planc>( 25.0, 500.0 ), [ & ] ( Point cref in_pt, ptr<const Terrain::Edge> in_edge )
         {
             aspines.insert_back( new AspineTree( this, in_pt, z ) );
@@ -75,7 +77,10 @@ void TrainingGrounds::create( )
 
     add_player( Point( 350.0, 50.0 ) );
 
-    add_door( new Door( this, Point( -325.0, -100.0 ), player_main( )->width( ) * DOOR_PLAYER_WIDTH, player_main( )->height( ) * DOOR_PLAYER_HEIGHT ) );
+    if( player_main( ) ) // C! the door is sized from the player, so none without one
+    {
+        add_door( new Door( this, Point( -325.0, -100.0 ), player_main( )->width( ) * DOOR_PLAYER_WIDTH, player_main( )->height( ) * DOOR_PLAYER_HEIGHT ) );
+    }
 
     add_object( new CampFire( this, Point( 0.0, 20.0 ) ) );
 
@@ -112,10 +117,12 @@ void TrainingGrounds::create( )
 
 ptr<Terrain> TrainingGrounds::generate_terrain( )
 {
-    vvarray<Point> terrain_points;
+    skip_override;
+
+    vvarray<Point> terrain_pts;
 
     // ground
-    terrain_points.insert_back( {
+    terrain_pts.insert_back( {
         Point( bounds( ).lower_bound_x( ), bounds( ).lower_bound_y( ) ),
         Point( bounds( ).lower_bound_x( ) + 100.0, 0.0 ),
         Point( -450.0, 0.0 ),
@@ -140,8 +147,8 @@ ptr<Terrain> TrainingGrounds::generate_terrain( )
     //    Point( 3200.0, 500.0 ),
     //    Point( 0.0, 500.0 ) } );
 
-    return( new PlainsTerrain( this, terrain_points ) );
+    return( new PlainsTerrain( this, terrain_pts ) );
 }
 
-// TODO remove static player count
-ptr<Player> TrainingGrounds::create_player( Point cref in_position ) { static uint player_count = 0; return( new Climber( ++player_count, this, in_position ) ); }
+// C! numbered from the room's own players (a static count kept going up when the room was made again)
+ptr<Player> TrainingGrounds::create_player( Point cref in_position ) { skip_override; return( new Climber( ( player_count( ) + 1 ), this, in_position ) ); }

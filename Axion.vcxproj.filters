@@ -80,7 +80,13 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\axn\audio\SoundClip.cpp">
+    <ClCompile Include="src\axn\audio\Sound.cpp">
+      <Filter>Source Files\axn\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\axn\audio\SoundFX.cpp">
+      <Filter>Source Files\axn\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\axn\audio\Music.cpp">
       <Filter>Source Files\axn\audio</Filter>
     </ClCompile>
     <ClCompile Include="src\axn\audio\Speaker.cpp">
@@ -117,6 +123,9 @@
       <Filter>Source Files\axn\world</Filter>
     </ClCompile>
     <ClCompile Include="src\axn\world\SplashScreen.cpp">
+      <Filter>Source Files\axn\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\axn\world\LoadingScreen.cpp">
       <Filter>Source Files\axn\world</Filter>
     </ClCompile>
     <ClCompile Include="src\axn\world\Terrain.cpp">
@@ -280,7 +289,16 @@
     <ClInclude Include="src\axn\audio\Audio.hpp">
       <Filter>Source Files\axn\audio</Filter>
     </ClInclude>
-    <ClInclude Include="src\axn\audio\SoundClip.hpp">
+    <ClInclude Include="src\axn\audio\Sound.hpp">
+      <Filter>Source Files\axn\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\axn\audio\SoundFX.hpp">
+      <Filter>Source Files\axn\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\axn\audio\Music.hpp">
+      <Filter>Source Files\axn\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\axn\audio\Listener.hpp">
       <Filter>Source Files\axn\audio</Filter>
     </ClInclude>
     <ClInclude Include="src\axn\audio\Speaker.hpp">
@@ -289,7 +307,10 @@
     <ClInclude Include="src\axn\physics\Joint.hpp">
       <Filter>Source Files\axn\physics</Filter>
     </ClInclude>
-    <ClInclude Include="src\axn\physics\Matter.hpp">
+    <ClInclude Include="src\axn\physics\Spring.hpp">
+      <Filter>Source Files\axn\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\axn\physics\Mass.hpp">
       <Filter>Source Files\axn\physics</Filter>
     </ClInclude>
     <ClInclude Include="src\axn\physics\Physics.hpp">
@@ -349,6 +370,9 @@
     <ClInclude Include="src\axn\geometry\Triangle.hpp">
       <Filter>Source Files\axn\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="src\axn\geometry\Trapezoid.hpp">
+      <Filter>Source Files\axn\geometry</Filter>
+    </ClInclude>
     <ClInclude Include="src\axn\geometry\Vector.hpp">
       <Filter>Source Files\axn\geometry</Filter>
     </ClInclude>
@@ -370,6 +394,9 @@
     <ClInclude Include="src\axn\world\Object.hpp">
       <Filter>Source Files\axn\world</Filter>
     </ClInclude>
+    <ClInclude Include="src\axn\world\SkeletonRig.hpp">
+      <Filter>Source Files\axn\world</Filter>
+    </ClInclude>
     <ClInclude Include="src\axn\world\Particle.hpp">
       <Filter>Source Files\axn\world</Filter>
     </ClInclude>
@@ -383,6 +410,9 @@
       <Filter>Source Files\axn\world</Filter>
     </ClInclude>
     <ClInclude Include="src\axn\world\SplashScreen.hpp">
+      <Filter>Source Files\axn\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\axn\world\LoadingScreen.hpp">
       <Filter>Source Files\axn\world</Filter>
     </ClInclude>
     <ClInclude Include="src\axn\world\Terrain.hpp">
@@ -555,6 +585,15 @@
     </ClInclude>
     <ClInclude Include="src\axn\system\STDio.hpp">
       <Filter>Source Files\axn\system</Filter>
+    </ClInclude>
+    <ClInclude Include="src\axn\tests\TestsDrawing.hpp">
+      <Filter>Source Files\axn\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="src\axn\tests\TestsSkeletonRig.hpp">
+      <Filter>Source Files\axn\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="src\axn\tests\TestsPhysics.hpp">
+      <Filter>Source Files\axn\tests</Filter>
     </ClInclude>
     <ClInclude Include="src\axn\tests\TestsGeometry.hpp">
       <Filter>Source Files\axn\tests</Filter>

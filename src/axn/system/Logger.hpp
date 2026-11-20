@@ -17,7 +17,7 @@ enum message_type
     DEBUG_LOG,
 };
 
-class Logger
+class Logger final
 {
 
 private:
@@ -28,9 +28,13 @@ public:
 
     static Error close( );
 
-    static Error init( bool in_print_to_file = false );
+    static Error init( bool in_print_to_file = false ); // C! in_print_to_file adds the log "main", which takes every message
 
-    static Error log_message( message_type in_type, const char * in_entry, ... );
+    // C! another log file, run_directory( "logs" ) + in_name + ".log", taking the messages of in_types (every type when empty).
+    // C! Each file is made the first time a message is written to it
+    static Error add_log( string cref in_name, initializer_list<message_type> in_types = { } );
+
+    static Error log_message( message_type in_type, const char * in_entry, ... ); // C! to the console and every log that takes in_type
 
     static bool printing_to_console( );
     static Error print_to_console( bool in_print );

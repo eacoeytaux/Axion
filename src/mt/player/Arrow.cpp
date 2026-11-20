@@ -2,6 +2,8 @@
 
 #include "axn/world/Mob.hpp"
 
+var_const( string THUNK_SOUND = ( "thunk.wav" ) ); // C! the arrow sinking into something
+
 var_const( dec DAMAGE = ( 10.0 ) );
 
 var_const( dec GRAVITY = ( 0.5 ) );
@@ -62,6 +64,8 @@ void Arrow::render( )
 {
     Object::render( );
 
+    opacity( deletion_countdown( ).percentage( ) ); // C! fades as one, so the shaft doesn't show through the head and feather
+
     draw_shaft( );
     draw_head( );
     draw_feather( );
@@ -107,22 +111,22 @@ void Arrow::angle( Angle cref in_angle )
 
 dec Arrow::length( ) const { return( SHAFT_LENGTH + HEAD_LENGTH_INNER ); }
 
-void Arrow::react_to_movement( ptr<Object> in_object, Vector cref in_movement )
+bool Arrow::collide( ptr<Object> in_object )
 {
-    Object::react_to_movement( in_object, in_movement );
+    const bool c_was_active = active( );
+    const bool c_collided = Projectile::collide( in_object );
 
-    move( in_movement );
+    if( c_was_active && !active( ) ) { play_sound( SoundFX( THUNK_SOUND ) ); } // C! only the hit that stops it
+
+    return( c_collided );
 }
 
 void Arrow::ground( Terrain::Bumper cref in_ground )
 {
-    Object::ground( in_ground );
+    const bool c_was_active = active( );
+    Projectile::ground( in_ground );
 
-    if( in_ground.node( ) )
-    {
-        stationary( true );
-        solid( false );
-    }
+    if( c_was_active && !active( ) ) { play_sound( SoundFX( THUNK_SOUND ) ); }
 }
 
 void Arrow::draw_head( )
@@ -131,7 +135,7 @@ void Arrow::draw_head( )
 
     head.rotate( angle( ) );
 
-    draw( TIP_COLOR.a( to_deletion_countdown( ).percentage( ) ), head );
+    draw( TIP_COLOR, head );
 }
 
 void Arrow::draw_shaft( )
@@ -142,7 +146,7 @@ void Arrow::draw_shaft( )
     tip.rotate( angle( ) );
     back.rotate( angle( ) );
 
-    draw( SHAFT_COLOR.a( to_deletion_countdown( ).percentage( ) ), Line( tip, back ), SHAFT_THICKNESS );
+    draw( SHAFT_COLOR, Line( tip, back ), SHAFT_THICKNESS );
 }
 
 void Arrow::draw_feather( )
@@ -152,5 +156,5 @@ void Arrow::draw_feather( )
     feather.move( VectorX( -( SHAFT_LENGTH + HEAD_LENGTH_INNER ) + FEATHER_NOTCH_LENGTH ) );
     feather.rotate( angle( ) );
 
-    draw( m_feather_color.a( to_deletion_countdown( ).percentage( ) ), feather );
+    draw( m_feather_color, feather );
 }

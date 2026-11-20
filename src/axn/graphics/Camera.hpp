@@ -28,6 +28,7 @@ public:
 
     class HUD;
     class ScreenVisual;
+    class Shutter;
 
     ~Camera( ) { clear_all( ); }
 
@@ -42,7 +43,7 @@ public:
 
     ptr<World> world( ) const { return( m_world ); }
 
-    virtual void update( );
+    virtual void update( ); // C! every frame, paused or not (called by Engine::run)
     virtual void render( );
 
     void clear_all( );
@@ -92,6 +93,7 @@ public:
     void center( Point cref in_center );
 
     FixedRectangle bounds( bool in_positioned = true ) const;
+    FixedRectangle lens_bounds( ) const; // C! the part of bounds( false ) that's shown, shorter in cinematic mode
 
     Point target( bool in_include_offset = false ) const;
     void target( Point cref in_target, bool in_hard_set = false );
@@ -110,11 +112,21 @@ public:
     bool show_hud( ) const;
     void show_hud( bool in_show_hud );
 
+    bool cinematic( ) const;
+    void cinematic( bool in_cinematic ); // C! black bars top and bottom, without changing the frame or moving the center
+
     dec hud_offset_percentage( ) const;
     void hud_offset_percentage( dec in_offset );
 
     bool in_view( Point cref in_world_position, dec in_z = 1.0 ) const;
     bool in_view( FixedRectangle cref in_world_bounding_box, dec in_z = 1.0 ) const;
+
+    // C! how far outside the view an object's last drawing can be and still be redrawn: Room::render( ) skips redrawing the rest,
+    // C! so this has to cover how much a drawing can change between frames (its position is always the current one)
+    Planc cref render_buffer( ) const { return( m_render_buffer ); }
+    void render_buffer( Planc cref in_render_buffer ) { m_render_buffer = in_render_buffer; }
+
+    bool in_render_range( ptr<const Object> in_object ) const; // C! whether the object's max_bounding_box( ), where it is now and grown by render_buffer( ) on every side, is in view
 
     Point screen_to_world( Point cref in_screen_position ) const;
     Point world_to_screen( Point cref in_world_position ) const;
@@ -139,6 +151,8 @@ public:
     void transition( transition_type in_transition, Vector cref in_vec = V0 );
 
     void transition_duration( ticks in_duration, ticks in_completion_duration );
+
+    Shutter ref shutter( ); // C! always one of the screen effects, shown once it's started
 
 private:
 
@@ -180,7 +194,11 @@ private:
     varray<ptr<HUD>> m_owned_always_hud_elements; // subset of always hud elements that camera needs to delete
 
     dec m_hud_offset_percentage = 0.0;
+
+    Planc m_render_buffer = P0;
     bool m_show_hud = true;
+
+    bool m_cinematic = false;
 
     #if defined( AXN_DEBUG )
     varray<ptr<Visible>> m_debug_subjects;
@@ -206,6 +224,7 @@ public:
         virtual FixedRectangle bounds( ptr<Camera> in_camera ) const { return( in_camera->bounds( ) ); }
 
         virtual void render( ptr<Camera> in_camera ) { Visible::render( ); }
+        virtual void update( ptr<Camera> in_camera ) { } // C! called by Camera::update( ) every frame, before the render, even while the engine is paused
 
     };
 
@@ -216,13 +235,13 @@ public:
 
         HUD( dec in_center_x_percent, dec in_center_y_percent, dec in_width_percent, dec in_height_percent );
 
-        void width( dec in_width_percent );
-        void height( dec in_height_percent );
-        void center( dec in_center_x_percent, dec in_center_y_percent );
-
         virtual FixedRectangle bounds( ptr<Camera> in_camera ) const override;
 
         virtual void render( ptr<Camera> in_camera ) override { ScreenVisual::render( in_camera ); }
+
+        void width( dec in_width_percent );
+        void height( dec in_height_percent );
+        void center( dec in_center_x_percent, dec in_center_y_percent );
 
     private:
 
@@ -233,6 +252,43 @@ public:
         dec m_height_percent = 0.0;
 
     };
+
+    // C! the screen closing and opening again like a camera's iris shutter
+    class Shutter : public ScreenVisual
+    {
+
+    public:
+
+        Shutter( uint in_sides, ticks in_duration ) : m_sides( in_sides ), m_duration( in_duration ) { }
+
+        virtual void render( ptr<Camera> in_camera ) override;
+        virtual void update( ptr<Camera> in_camera ) override;
+
+        void start( );
+
+        bool active( ) const { return( !m_countdown.completed( ) ); }
+        bool paused_engine( ) const { return( m_paused_engine ); } // C! the pause on now is the shutter's own
+        uint sides( ) const { return( m_sides ); }
+        void sides( uint in_sides ) { m_sides = in_sides; }
+
+        ticks duration( ) const { return( m_duration ); }
+        void duration( ticks in_duration ) { m_duration = in_duration; }
+
+    private:
+
+        uint m_sides = 0;
+        ticks m_duration = 0.0;
+
+        Countdown m_countdown;
+
+        bool m_paused_engine = false; // C! start( ) paused the engine, so it gets unpaused when the shutter is done
+        bool m_starting = false; // C! start( ) was just called, so the next update( ) doesn't tick and the first render shows it fully open
+
+    };
+
+private:
+
+    Shutter m_shutter;
 
 };
 

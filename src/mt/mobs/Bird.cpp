@@ -17,6 +17,10 @@ var_const( Planc LIFT_DISTANCE = ( 16.0 ) );
 
 var_const( Color COLOR = ( RED ) );
 
+var_const( ticks WING_FLAP_WAVELENGTH = ( 16.0 ) ); // C!
+var_const( Planc WING_FLAP_HEIGHT = ( 16.0 ) ); // C!
+var_const( Cycle WING_FLAP = ( Cycle( WING_FLAP_WAVELENGTH, WING_FLAP_HEIGHT ) ) ); // C! the wing tip's height
+
 Feather::Feather( ptr<Room> in_room, Point cref in_position ) : Object( in_room, in_position )
 {
     m_color = Random::rColor( );
@@ -47,9 +51,8 @@ void Bird::render( )
 {
     Mob::render( );
 
-    // todo make cycle
-    Polygon wing = Polygon( { Point( 0.0, 0.0 ), Point( -24.0, sin( age( ) / 16.0 ) * 16.0 ), Point( 16.0, 0.0 ) } );
-    if( velocity( ).dx( ) < 0.0 )
+    Polygon wing = Polygon( { Point( 0.0, 0.0 ), Point( -24.0, WING_FLAP.at( age( ) ) ), Point( 16.0, 0.0 ) } );
+    if( is_neg( velocity( ).dx( ) ) )
         wing.mirror_y( );
 
     draw( COLOR, Line( Point( -16.0, 0.0 ), Point( 16.0, 0.0 ) ), 4.0 );
@@ -65,7 +68,7 @@ void Bird::update( )
         target += Vector( sin( dec( ( Planc( room( )->age( ) ) * ROTATIONAL_SPEED / ROTATIONAL_RADIUS ) * ROTATIONAL_RADIUS ) ), 0.0 );
         target += VectorY( -sin( dec( ( ( Planc( room( )->age( ) ) - ( LIFT_DISTANCE / 2.0 ) ) * LIFT_SPEED / LIFT_DISTANCE ) * LIFT_DISTANCE ) ) );
         Vector movement = Vector( position( ), target );
-        if( movement.dx( ) > 0.0 )
+        if( is_pos( movement.dx( ) ) )
             movement.dx( min( SPEED, movement.dx( ) ) );
         else
             movement.dx( max( -SPEED, movement.dx( ) ) );

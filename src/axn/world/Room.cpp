@@ -16,8 +16,16 @@ section( OBJECT_GRID )
     var_const( Color HAS_TERRAIN_COLOR = ( YELLOW.a( 0.15 ) ) );
     var_const( Color GRID_LINE_COLOR = ( Settings::get( Settings::DEBUG_BACKGROUND_COLOR ) ? BLACK : WHITE ) );
 }
-#endif
 
+section( SOUND_RANGES )
+{
+    var_const( Planc SOUND_RANGE_THICKNESS = ( 1.0 ) ); // C! a playing sound's umbra and penumbra outlines
+    var_const( Color SOUND_UMBRA_COLOR = ( GREEN ) ); // C!
+    var_const( Color SOUND_PENUMBRA_COLOR = ( YELLOW ) ); // C! the penumbra's outer edge, drawn only when it has one
+    var_const( Color SOUND_COLOR = ( GREEN ) ); // C! the dot where it was played
+    var_const( Planc SOUND_DOT_RADIUS = ( 1.5 ) ); // C!
+}
+#endif
 
 Room::~Room( )
 {
@@ -51,6 +59,16 @@ void Room::render( )
 {
     ptr<Camera> camera = world( )->camera( );
 
+    #if defined( AXN_DEBUG )
+    // C! every setting the render uses, read once here, so the whole frame is drawn with the same settings
+    const bool c_show_terrain = Settings::get( Settings::DEBUG_SHOW_TERRAIN );
+    const bool c_show_background = Settings::get( Settings::DEBUG_SHOW_BACKGROUND );
+    const bool c_show_background_all = Settings::get( Settings::DEBUG_SHOW_BACKGROUND_ALL );
+    const bool c_show_foreground = Settings::get( Settings::DEBUG_SHOW_FOREGROUND );
+    const bool c_show_objects = Settings::get( Settings::DEBUG_SHOW_OBJECTS );
+    const bool c_show_grid = Settings::get( Settings::DEBUG_GRID );
+    #endif
+
     camera->clear_subjects( );
 
     if( m_lighting ) { m_lighting->clear_light_sources( ); }
@@ -60,7 +78,7 @@ void Room::render( )
         if( m_terrain )
         {
             #if defined( AXN_DEBUG )
-            if( Settings::get( Settings::DEBUG_SHOW_TERRAIN ) )
+            if( c_show_terrain )
                 #endif
                 camera->capture( m_terrain );
 
@@ -74,18 +92,50 @@ void Room::render( )
     {
         for_each( object, in_objects )
         {
-            object->render_object( );
+            // C! a light reaches further than the drawing, so an object whose light reaches the view counts as in view
+            lambdaf( light_in_view )( )
+            {
+                return_false_if( !m_lighting || !in_light_source );
 
-            bool in_view = !object->z( ) || camera->in_view( object->bounding_box( ) + object->position( ), object->z( ) );
+                for_each_const( light_source, object->light_sources( ) )
+                {
+                    return_true_if( camera->in_view( FixedRectangle( x2( x2( light_source.radius( ) ) ), x2( x2( light_source.radius( ) ) ) ) + object->position( ), object->z( ) ) );
+                }
+
+                return( false );
+            };
+
+            // C! the largest the object's drawing has ever been, at its current position, decides whether it's worth redrawing: one further out of
+            // C! view than the camera's render buffer isn't redrawn (every object used to be redrawn first, then culled)
+            bool skip_render = ( object->ever_rendered( ) && object->z( ) && !camera->in_render_range( object ) && !light_in_view( ) );
+
+            if( !skip_render )
+            {
+                object->render_object( );
+            }
+            #if defined( AXN_DEBUG )
+            else
+            {
+                // C! checks the skip: redrawn anyway, it has to still be out of view, otherwise the camera's render buffer is too small for how much
+                // C! this object's drawing changes in a frame (it's drawn this time, so nothing goes missing in debug)
+                object->render_object( );
+
+                if( camera->in_view( object->bounding_box( ) + object->position( ), object->z( ) ) )
+                {
+                    breakpoint;
+
+                    skip_render = false;
+                }
+            }
+            #endif
+
+            bool in_view = ( !skip_render && ( !object->z( ) || camera->in_view( object->bounding_box( ) + object->position( ), object->z( ) ) ) );
 
             if( m_lighting && in_light_source )
             {
                 m_lighting->add_light_sources( object->light_sources( ) );
 
-                for_each( light_source, object->light_sources( ) )
-                {
-                    break_if( in_view || ( in_view = camera->in_view( FixedRectangle( x2( x2( light_source.radius( ) ) ), x2( x2( light_source.radius( ) ) ) ) + object->position( ), object->z( ) ) ) );
-                }
+                in_view = ( in_view || ( !skip_render && light_in_view( ) ) );
             }
 
             if( in_view )
@@ -93,22 +143,21 @@ void Room::render( )
                 if( object->background( ) )
                 {
                     #if defined( AXN_DEBUG )
-                    if( Settings::get( Settings::DEBUG_SHOW_BACKGROUND ) &&
-                        ( Settings::get( Settings::DEBUG_SHOW_BACKGROUND_ALL ) || ( object->z( ) != 1.0 ) ) )
+                    if( c_show_background && ( c_show_background_all || ( object->z( ) != 1.0 ) ) )
                         #endif
                         camera->capture_background( object );
                 }
                 else if( object->foreground( ) )
                 {
                     #if defined( AXN_DEBUG )
-                    if( Settings::get( Settings::DEBUG_SHOW_FOREGROUND ) )
+                    if( c_show_foreground )
                         #endif
                         camera->capture_foreground( object );
                 }
                 else
                 {
                     #if defined( AXN_DEBUG )
-                    if( Settings::get( Settings::DEBUG_SHOW_OBJECTS ) )
+                    if( c_show_objects )
                         #endif
                         camera->capture( object );
 
@@ -126,7 +175,21 @@ void Room::render( )
     render_objects( m_foreground_objects, false );
 
     #if defined( AXN_DEBUG )
-    if( ( Debug::active ) && Settings::get( Settings::DEBUG_GRID ) ) { render_object_grid( camera ); }
+    if( Debug::active && c_show_grid ) { render_object_grid( camera ); }
+
+    if( Debug::active && Settings::get( Settings::DEBUG_AUDIO ) && world( ) && !is_empty( world( )->heard_sounds( ) ) ) // C! the umbra and penumbra of each sound while it plays
+    {
+        Drawing sound_ranges;
+
+        for_each_const( heard, world( )->heard_sounds( ) )
+        {
+            sound_ranges.draw( SOUND_COLOR, Polygon::circle( SOUND_DOT_RADIUS, heard.position ) );
+            sound_ranges.draw( SOUND_UMBRA_COLOR, Polygon::circle( heard.umbra, heard.position ), SOUND_RANGE_THICKNESS, true );
+            if( is_pos( heard.penumbra ) ) { sound_ranges.draw( SOUND_PENUMBRA_COLOR, Polygon::circle( heard.umbra + heard.penumbra, heard.position ), SOUND_RANGE_THICKNESS, true ); }
+        }
+
+        camera->capture_debug( new Visible( sound_ranges ), true );
+    }
     #endif
 }
 
@@ -199,7 +262,7 @@ void Room::update( )
 
     #if defined( AXN_DEBUG )
     if( Settings::get( Settings::DEBUG_SHOW_BACKGROUND ) )
-        #endif
+    #endif
     {
         m_background_objects.sort( object_sort, true );
         update_objects( m_background_objects );
@@ -210,13 +273,14 @@ void Room::update( )
 
     #if defined( AXN_DEBUG )
     if( Settings::get( Settings::DEBUG_SHOW_FOREGROUND ) )
-        #endif
+    #endif
     {
         m_foreground_objects.sort( object_sort, true );
         update_objects( m_foreground_objects );
     }
 
     // TODO update_object( m_terrain );
+    // C! TODO Terrain isn't an Object and has no update( ), so this can't be done as written: decide whether terrain should animate (give Terrain an update( )) or drop this
 
     m_age++;
 }
@@ -235,16 +299,114 @@ void Room::input( list<ptr<Input>> cref in_inputs )
     }
 }
 
-void Room::pass( varray<ptr<Object>> cref in_objects )
+void Room::pass( varray<ptr<Object>> cref in_objects, ptr<Door> in_door )
 {
-    ptr<Door> door = *doors( ).begin( ); // todo select better
+    // C! objects come in at the door they came through, or the first door when that isn't one of this room's
+    // C! (the first door used to be read even when there were none)
+    ptr<Door> door = in_door;
 
-    for_each( object, in_objects )
+    if( is_null( door ) || !doors( ).contains( door ) )
     {
+        door = ( doors( ).empty( ) ? ptr<Door>( nullptr ) : *doors( ).begin( ) );
+    }
+
+    Point entrance = Point( 0.0, 50.0 ); // C! with no door at all, where things used to come out
+
+    // C! how far each point of in_points goes along in_direction: the most, and the middle of the least and the most
+    lambdaf( reach )( varray<Point> cref in_pts, Vector cref in_direction, dec ref out_most, dec ref out_middle )
+    {
+        dec least = 0.0;
+        for_range( k, in_pts.size( ) )
+        {
+            const dec c_along = ( dec( in_pts[ k ].x( ) ) * dec( in_direction.dx( ) ) ) + ( dec( in_pts[ k ].y( ) ) * dec( in_direction.dy( ) ) );
+            if( is_zero( k ) || ( c_along > out_most ) ) { out_most = c_along; }
+            if( is_zero( k ) || ( c_along < least ) ) { least = c_along; }
+        }
+        out_middle = half( least + out_most );
+    };
+
+    // C! "down" for things coming out (the door's gravity), and across it
+    const Vector c_down = VectorA( is_null( door ) ? VectorY( -1.0 ).angle( ) : door->exit_gravity( ), 1.0 );
+    const Vector c_across = VectorA( c_down.angle( ) + RIGHT, 1.0 );
+
+    dec door_down = 0.0; dec door_down_middle = 0.0; dec door_across = 0.0; dec door_across_middle = 0.0;
+    const bool c_door_has_space = !is_null( door ) && !is_zero( door->space( ).sides( ) );
+    if( c_door_has_space )
+    {
+        reach( door->space( true ).points( ), c_down, door_down, door_down_middle );
+        reach( door->space( true ).points( ), c_across, door_across, door_across_middle );
+    }
+    else if( !is_null( door ) )
+    {
+        entrance = door->position( );
+    }
+
+    for_range( i, in_objects.size( ) )
+    {
+        ptr<Object> object = in_objects[ i ];
+
+        continue_if( is_null( object ) ); // C! nothing to pass
+
+        const Point c_from = object->position( );
+
+        object->room( this );
+        // C! as far "down" (the door's gravity) as the door goes, and centered across it: with gravity down, the bottom of its hitbox on the
+        // C! bottom of the door, centered left to right. With no door, or no hitbox on one or the other, at the entrance itself
+        if( !c_door_has_space || is_zero( object->space( ).sides( ) ) )
+        {
+            object->position( entrance );
+        }
+        else
+        {
+            dec object_down = 0.0; dec object_down_middle = 0.0; dec object_across = 0.0; dec object_across_middle = 0.0;
+            reach( object->space( ).points( ), c_down, object_down, object_down_middle );
+            reach( object->space( ).points( ), c_across, object_across, object_across_middle );
+
+            object->position( Point( ( c_down * ( door_down - object_down ) ) + ( c_across * ( door_across_middle - object_across_middle ) ) ) );
+        }
+        object->move_light_sources( Vector( c_from, object->position( ) ) ); // C! its lights were placed at its last update, back in the other room
+        object->find_ground( ); // C! the room doesn't update while the camera transitions in, so it's grounded now if it's resting on a floor
+        object->pass_door( door ); // C! once it's where it'll be
+
         add_object( object );
 
-        object->position( Point( 0.0, 50.0 ) );
+        if( cast_as( object, player, Player ) )
+        {
+            m_players.insert_back( player );
+            subscribe_object_input( player );
+        }
     }
+
+    add_objects_from_queue( ); // C! into the room's lists straight away, so they're drawn while the camera transitions in (the room doesn't update until it's done)
+}
+
+void Room::release( ptr<Object> in_object )
+{
+    return_if( is_null( in_object ) ); // C! nothing to release
+
+    m_object_grid.remove( in_object );
+
+    m_objects.remove( in_object );
+    m_foreground_objects.remove( in_object );
+    m_background_objects.remove( in_object );
+    m_input_subscribers.remove( in_object );
+
+    if( cast_as( in_object, player, Player ) )
+    {
+        m_players.remove( player );
+    }
+
+    // C! one added this frame is still waiting in the queue
+    queue<ptr<Object>> waiting;
+
+    while( m_object_queue.size( ) )
+    {
+        ptr<Object> object = m_object_queue.pop( );
+
+        if( object != in_object ) { waiting.push( object ); }
+    }
+
+    m_object_queue = waiting;
 }
 
 void Room::bounds( FixedRectangle cref in_bounds )
@@ -254,34 +416,31 @@ void Room::bounds( FixedRectangle cref in_bounds )
 
 Vector Room::gravity( ) const
 {
-    return( world( )->gravity( ) ); // todo
+    return( world( )->gravity( ) );
 }
 
+// C! the same everywhere in the room unless a room overrides this; a room with its own gravity overrides gravity( )
 Vector Room::gravity( Point cref in_position ) const
 {
-    return( world( )->gravity( ) ); // todo
+    return( gravity( ) );
 }
 
 dec Room::air_resistance( ) const
 {
-    return( world( )->air_resistance( ) ); // todo
+    return( world( )->air_resistance( ) );
 }
 
+// C! the same everywhere in the room unless a room overrides this; a room with its own air resistance overrides air_resistance( )
 dec Room::air_resistance( Point cref in_position ) const
 {
-    return( world( )->air_resistance( ) ); // todo
+    return( air_resistance( ) );
 }
 
 ptr<Player> Room::player( uint in_player_number )
 {
-    if( m_players.valid_index( in_player_number ) )
-    {
-        return( m_players[ in_player_number ] );
-    }
-    else
-    {
-        return( nullptr );
-    }
+    return_null_if( !players( ).valid_index( in_player_number ) );
+
+    return( players( )[ in_player_number ] );
 }
 
 ptr<Player> Room::player_main( )
@@ -420,6 +579,8 @@ uset<ptr<Room>> Room::connected_rooms( ) const
 
                 for_each( door, room->doors( ) )
                 {
+                    continue_if( is_null( door ) || is_null( door->out( ) ) || is_null( door->out( )->room( ) ) ); // C! a door that doesn't lead anywhere yet adds no room
+
                     rooms_to_check.push( door->out( )->room( ) );
                 }
             }
@@ -517,7 +678,12 @@ void Room::create( FixedRectangle cref in_bounds )
 
     m_terrain = generate_terrain( );
 
-    m_lighting = new Lighting( ); // TODO generate_lighting( );
+    m_lighting = generate_lighting( );
+
+    if( is_null( m_lighting ) )
+    {
+        m_lighting = new Lighting( ); // C! the default, for rooms that don't make their own
+    }
 }
 
 void Room::destroy( )
@@ -540,7 +706,7 @@ void Room::add_objects_from_queue( )
     {
         ptr<Object> object = m_object_queue.front( );
 
-        object->layer_order( world( )->layer_order( object ) );
+        object->layer_order( world( ) ? world( )->layer_order( object ) : Visible::LayerOrder( ) ); // C! a room with no world (like the tests' rooms) has no layer order to give
 
         if( object->foreground( ) )
         {
@@ -627,7 +793,7 @@ uint Room::Grid::x( Planc cref in_x ) const
 {
     Planc x_translated = in_x - m_bounds.lower( ).x( );
 
-    if( x_translated >= 0.0 )
+    if( !is_neg( x_translated ) )
     {
         return( floor( x_translated / GRID_BLOCK_SIZE ) );
     }
@@ -641,7 +807,7 @@ uint Room::Grid::y( Planc cref in_y ) const
 {
     Planc y_translated = in_y - m_bounds.lower( ).y( );
 
-    if( y_translated >= 0.0 )
+    if( !is_neg( y_translated ) )
     {
         return( floor( y_translated / GRID_BLOCK_SIZE ) );
     }

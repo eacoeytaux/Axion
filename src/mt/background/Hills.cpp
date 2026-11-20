@@ -53,20 +53,20 @@ Hills::Hills( ptr<Room> in_room, Planc cref in_base_bottom, dec in_z ) : Object(
         do_count( tree_count )
         {
             Vector offset_vector = VectorA( Random::rAngle( ), Random::rPlanc( HILL_RADIUS ) );
-            Point offset_point = Transform::stretch( VectorX( HILL_SCALE_X ) ).apply( offset_vector );
-            offset_point += VectorY( in_base_bottom );
-            offset_point += center;
+            Point offset_pt = Transform::stretch( VectorX( HILL_SCALE_X ) ).apply( offset_vector );
+            offset_pt += VectorY( in_base_bottom );
+            offset_pt += center;
 
-            draw( TREE_COLOR_1, Polygon( tree ).move( offset_point ) );
+            draw( TREE_COLOR_1, Polygon( tree ).move( offset_pt ) );
         }
 
         uint top_tree_count = Random::rPlanc( TOP_TREE_COUNT );
         do_count( top_tree_count )
         {
             Vector offset_vector = VectorA( RIGHT + Random::negated( Random::rAngle( TOP_TREE_ANGLE ) ), HILL_RADIUS );
-            Point offset_point = Transform::stretch( VectorX( HILL_SCALE_X ) ).apply( offset_vector );
-            offset_point += VectorY( in_base_bottom );
-            offset_point += center;
+            Point offset_pt = Transform::stretch( VectorX( HILL_SCALE_X ) ).apply( offset_vector );
+            offset_pt += VectorY( in_base_bottom );
+            offset_pt += center;
 
             // draw( TREE_COLOR_1, Polygon( tree ).move( offset_point ) );
         }

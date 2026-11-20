@@ -38,7 +38,12 @@ bool Spike::collide( ptr<Object> in_object )
 
     if( cast_as( in_object, mob, Mob ) )
     {
-        // TODO if( is_pos( mob->gravity( ) ) && is_neg( mob->velocity( ).dy( ) ) )
+        // C! only a mob falling onto the spikes (moving along its gravity) is hurt, or any mob that touches them without gravity
+        // C! TODO spikes used to hurt any mob that touched them, now walking into them sideways is safe: keep, or go back
+        Vector gravity = mob->gravity( );
+        dec falling = ( dec( gravity.dx( ) * mob->velocity( ).dx( ) ) + dec( gravity.dy( ) * mob->velocity( ).dy( ) ) );
+
+        if( !gravity.has_magnitude( ) || is_pos( falling ) )
         {
             mob->hurt_full( );
             return( true );

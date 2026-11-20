@@ -22,7 +22,7 @@ void Caves::create( )
 
     lighting_active( true );
 
-    add_player( Point( 0.0, 50.0 ) );
+    // C! no player of its own any more: the player comes in through the door from the training grounds (see World::pass( ))
 
     add_door( new Door( this, Point( 0.0, 0.0 ), DOOR_PLAYER_WIDTH, DOOR_PLAYER_HEIGHT ) );
 
@@ -33,10 +33,12 @@ void Caves::create( )
 
 ptr<Terrain> Caves::generate_terrain( )
 {
-    vvarray<Point> terrain_points;
+    skip_override;
+
+    vvarray<Point> terrain_pts;
 
     // ground
-    terrain_points.insert_back( {
+    terrain_pts.insert_back( {
         Point( bounds( ).lower_bound_x( ), bounds( ).lower_bound_y( ) ),
         Point( bounds( ).lower_bound_x( ), bounds( ).upper_bound_y( ) ),
         Point( bounds( ).lower_bound_x( ) + 100.0, bounds( ).upper_bound_y( ) ),
@@ -48,14 +50,14 @@ ptr<Terrain> Caves::generate_terrain( )
         Point( bounds( ).upper_bound_x( ), bounds( ).upper_bound_y( ) ),
         Point( bounds( ).upper_bound_x( ), bounds( ).lower_bound_y( ) ) } );
 
-    terrain_points.insert_back( {
+    terrain_pts.insert_back( {
         Point( bounds( ).upper_bound_x( ), bounds( ).upper_bound_y( ) ),
         Point( bounds( ).upper_bound_x( ), bounds( ).upper_bound_y( ) - 500.0 ),
         Point( bounds( ).lower_bound_x( ), bounds( ).upper_bound_y( ) - 500.0 ),
         Point( bounds( ).lower_bound_x( ), bounds( ).upper_bound_y( ) ) } );
 
-    return( new CavesTerrain( this, terrain_points ) );
+    return( new CavesTerrain( this, terrain_pts ) );
 }
 
-// TODO remove static player count
-ptr<Player> Caves::create_player( Point cref in_position ) { static uint player_count = 0; return( new Climber( ++player_count, this, in_position ) ); }
+// C! numbered from the room's own players (a static count kept going up when the room was made again)
+ptr<Player> Caves::create_player( Point cref in_position ) { skip_override; return( new Climber( ( player_count( ) + 1 ), this, in_position ) ); }

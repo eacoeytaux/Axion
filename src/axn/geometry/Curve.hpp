@@ -141,15 +141,15 @@ class Bezier
 
 private:
 
-    varray<Point> m_control_points;
+    varray<Point> m_control_pts;
 
 public:
 
     Bezier( ) { }
 
-    Bezier( varray<Point> cref in_control_points ) : m_control_points( in_control_points ) { }
+    Bezier( varray<Point> cref in_control_pts ) : m_control_pts( in_control_pts ) { }
 
-    varray<Point> cref control_points( ) const { return( m_control_points ); }
+    varray<Point> cref control_points( ) const { return( m_control_pts ); }
 
     Point position( dec in_perc )
     {
@@ -185,25 +185,25 @@ public:
         return( path( min<uint>( max<uint>( 2, ceil( length ) ), CURVE_MAX_COUNT ) ) );
     }
 
-    Path path( uint in_point_count )
+    Path path( uint in_pt_count )
     {
-        uint control_point_count = control_points( ).size( );
+        uint control_pt_count = control_points( ).size( );
 
-        if( is_pos( control_point_count ) )
+        if( is_pos( control_pt_count ) )
         {
-            if( control_point_count <= 2 )
+            if( control_pt_count <= 2 )
             {
                 return{ Line( control_points( ).front( ), control_points( ).back( ) ) };
             }
             else
             {
-                dec dt = inverse( dec( in_point_count ) );
+                dec dt = inverse( dec( in_pt_count ) );
 
                 Point last = control_points( ).front( );
 
                 varray<Line> lines;
 
-                for_range( i, in_point_count - 1 )
+                for_range( i, in_pt_count - 1 )
                 {
                     Point pt = position( dt * ( i + 1.0 ) );
                     lines.insert_back( Line( last, pt ) );

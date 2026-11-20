@@ -149,11 +149,15 @@ void Wisp::update( )
 
     if( dead( ) && grounded( ) )
     {
-        // todo rather than dx, check ground direction
         // todo rotation_distance( ) instead of width( )
+        // C! TODO rotation_distance( ) only exists on Bone: move it up to Object (or Mob) to use it here, or keep width( )
+        // C! roll the way the ground turns it: clockwise when moving with the ground on the right of the velocity (on flat ground, moving right)
+        Vector ground_normal = VectorA( ground( ).node( )->normal( ) );
+        dec turn = ( dec( ground_normal.dx( ) * velocity( ).dy( ) ) - dec( ground_normal.dy( ) * velocity( ).dx( ) ) );
+
         m_rotation_speed = TAU * Random::negated( velocity( ).magnitude( ) /
                                                   Circle::circumference( width( ) ),
-                                                  !is_neg( velocity( ).dx( ) ) );
+                                                  !is_pos( turn ) );
     }
 
     m_rotation_speed *= one_minus( friction_resistance( ) );
@@ -246,15 +250,12 @@ void Wisp::Bullet::render( )
     }
     #endif
 
-    if( marked_to_delete( ) )
-    {
-        color.a( to_deletion_countdown( ).percentage( ) );
-    }
+    opacity( marked_to_delete( ) ? dec( to_deletion_countdown( ).percentage( ) ) : 1.0 ); // C! fades as one, fire included, so the fire doesn't show through the core
 
     m_fire.render( );
-    draw( m_fire ); // todo alpha-ize fire
+    draw( m_fire );
 
-    draw( color, Polygon::circle( m_radius ) );
+    draw( color, Polygon::circle( m_radius ) ); // C! over the fire, drawn after it
 }
 
 void Wisp::Bullet::update( )

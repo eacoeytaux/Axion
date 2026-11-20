@@ -13,9 +13,7 @@ Projectile::Projectile( ptr<Room> in_room, Damage cref in_damage, Point cref in_
     draw_debug = true;
     #endif
 
-    interactive( true );
-
-    solid( true );
+    activate( true ); // C! solid and interactive until it hits something
 
     gravity_scale( DEFAULT_GRAVITY_SCALE );
     air_resistance( DEFAULT_AIR_RESISTANCE );
@@ -44,16 +42,11 @@ void Projectile::activate( bool in_active )
     }
 }
 
-void Projectile::react_to_movement( ptr<Object> in_object, Vector cref in_movement )
-{
-    Object::react_to_movement( in_object, in_movement );
-
-    move( in_movement ); // TODO this should be standard in Object
-}
-
 bool Projectile::collide( ptr<Object> in_object )
 {
     Object::collide( in_object );
+
+    return_false_if( !active( ) ); // C! once it's hit the ground or a target it's inert, so nothing else picks it up
 
     if( in_object->solid( ) )
     {

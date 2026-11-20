@@ -8,19 +8,23 @@ namespace axn
 namespace audio
 {
 
+class SoundFX;
+
 class Speaker
 {
 
 private:
 
-    dec m_volume = 1.0;
+    declmp m_volume = 1.0;
 
 public:
 
-    Speaker( dec in_volume );
+    Speaker( declmp in_volume = 1.0 ) : m_volume( in_volume ) { }
 
-    dec volume( ) const { return( m_volume ); }
-    void volume( dec in_volume ) { m_volume = in_volume; }
+    declmp volume( ) const { return( m_volume ); }
+    Speaker ref volume( declmp in_volume ) { m_volume = in_volume; rethis; }
+
+    void play( SoundFX cref in_sound, declmp in_heard_volume = 1.0 ) const; // C! in_sound at its own volume times this speaker's, times how loudly it's heard
 
 };
 

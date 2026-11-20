@@ -25,7 +25,7 @@ private:
     struct Ripple
     {
 
-        Polygon polygon;
+        Polygon poly;
         Planc height;
         dec alpha;
 

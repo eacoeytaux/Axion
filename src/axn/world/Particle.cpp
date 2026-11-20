@@ -19,6 +19,6 @@ void Particle::render( ) { draw( m_color.a( m_alpha ), Polygon::equilateral( m_s
 void Particle::update( ) { if( !is_pos( m_radius ) || !is_pos( m_alpha ) ) { mark_deleted( ); } Object::update( ); }
 void Particle::pop( ) { }
 
-bool Particle::collide( ptr<Object> in_object ) { return( false ); }
+bool Particle::collide( ptr<Object> in_object ) { skip_override; return( false ); }
 
-void Particle::ground( Terrain::Bumper cref in_ground ) { }
+void Particle::ground( Terrain::Bumper cref in_ground ) { skip_override; } // C! particles never land, so Object::ground( ) isn't called

@@ -1,5 +1,6 @@
 #include "axn/system/Engine.hpp"
-#include "axn/world/Terrain.hpp" // C! must come before Catch, windows.h declares its own Polygon
+#include "axn/world/Terrain.hpp"
+#include "axn/world/SkeletonRig.hpp" // C! before Catch too, it uses ref (undefined once Catch is in)
 
 #if defined( AXN_TESTS )
 
@@ -7,6 +8,7 @@
 
 #define main catch_main
 
+#define NOGDI // C! keeps windows.h (which Catch pulls in) from declaring its own Polygon
 #define DO_NOT_USE_WMAIN
 #define CATCH_CONFIG_MAIN
 #include "axn/tests/Catch.hpp"
@@ -16,6 +18,9 @@
 #include "axn/tests/TestsGeometry.hpp"
 #include "axn/tests/TestsTerrain.hpp"
 #include "axn/tests/TestsMovement.hpp"
+#include "axn/tests/TestsDrawing.hpp"
+#include "axn/tests/TestsSkeletonRig.hpp"
+#include "axn/tests/TestsPhysics.hpp"
 // include Test*.hpp files here
 
 namespace axn

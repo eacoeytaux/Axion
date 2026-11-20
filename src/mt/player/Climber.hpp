@@ -2,6 +2,7 @@
 #define Climber_hpp
 
 #include "axn/world/Player.hpp"
+#include "axn/world/SkeletonRig.hpp"
 
 #include "mt/MountMerciless.hpp"
 #include "mt/player/Hook.hpp"
@@ -20,6 +21,10 @@ public:
 
     Climber( uint in_player_number, ptr<Room> in_room, Point cref in_position );
 
+    ptr<Room> room( ) const { return( Player::room( ) ); } // C! room( ) as well, which the override below would hide
+    virtual void room( ptr<Room> in_room ) override;
+    virtual void pass_door( ptr<Door> in_door ) override; // C! stows the hook at once, so it doesn't show where it was in the old room
+
     virtual void render( ) override;
 
     #if defined( AXN_DEBUG )
@@ -32,6 +37,8 @@ public:
     virtual void clear_input( ) override;
 
     virtual void die( ) override;
+
+    virtual void hurt( dec in_health ) override; // C! plays the hurt sound when it costs any health
 
     virtual Planc light_sight( ) const override;
 
@@ -105,6 +112,27 @@ protected:
 
     // all of these are offsets from position
 
+    // C! the body as a tree of points (see SkeletonRig), which head_center( ), face_center( ), shoulder( ), elbow( ), hand( ), hip( ), and foot( ) read:
+    // C! each arm runs shoulder, elbow, hand, the feet hang off the hips, and the face off the head; the rest hang off the climber's position
+    enum BodyPoint
+    {
+        NO_BODY_PT = 0,
+        HEAD,
+        FACE,
+        FRONT_SHOULDER,
+        BACK_SHOULDER,
+        FRONT_ELBOW,
+        BACK_ELBOW,
+        FRONT_HAND,
+        BACK_HAND,
+        FRONT_HIP,
+        BACK_HIP,
+        FRONT_FOOT,
+        BACK_FOOT,
+    };
+
+    SkeletonRig<BodyPoint> cref rig( ) const; // C! set from the climber's state (age, aim, facing, alive) each time it's asked for, so it's never stale
+
     Point head_center( ) const;
     Point face_center( ) const;
 
@@ -113,6 +141,7 @@ protected:
     Point hand( bool in_front ) const;
 
     Point hand_to_crossbow_offset( bool in_front ) const;
+    Point hand_position( bool in_front ) const; // C! where the hand is worked out to be, which rig( ) hangs off the elbow (hand( ) reads it back from the rig)
 
     Planc arm_width( bool in_front ) const;
     Planc arm_length_upper( bool in_front ) const;
@@ -120,6 +149,7 @@ protected:
 
     Point hip( bool in_front ) const;
     Point foot( bool in_front ) const;
+    Vector foot_step( bool in_front ) const; // C! how far the foot is from standing: walking steps it along and lifts it, and in the air the back foot tucks up
 
     void draw_head( );
 
@@ -170,6 +200,8 @@ private:
 
     Hook m_hook;
 
+    mutable SkeletonRig<BodyPoint> m_rig{ nullptr }; // C! in no room and kept at the origin, so its points are offsets from position
+
     Planc m_movement_speed_dash;
     Planc m_movement_speed_ground;
     Planc m_movement_speed_air;
@@ -187,8 +219,8 @@ private:
     Countdown m_jumping_timer;
     Countdown m_jump_reset_timer;
     Countdown m_coyote_jump_timer;
-    uint m_extra_jumps_max;
-    uint m_extra_jumps;
+    uint m_extra_jumps_max = 0; // C! these two had no starting value, so a climber that hadn't landed yet had a garbage number of jumps
+    uint m_extra_jumps = 0;
 
     RagDollLimb m_dead_face;
     RagDollLimb m_dead_arm_front;
@@ -267,6 +299,8 @@ public:
     public:
 
         AimHUD( ptr<Climber> in_climber = nullptr );
+
+        virtual FixedRectangle bounds( ptr<Camera> in_camera ) const override; // C! centered on the climber, not the screen
 
         virtual void render( ptr<Camera> camera ) override;
 

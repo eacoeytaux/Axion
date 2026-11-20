@@ -1,0 +1,8 @@
+sounds/
+sounds/arrow.wav
+sounds/click.wav
+sounds/crackle.wav
+sounds/hook.wav
+sounds/hurt.wav
+sounds/jump.wav
+sounds/thunk.wav

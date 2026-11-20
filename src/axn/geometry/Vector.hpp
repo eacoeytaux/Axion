@@ -13,7 +13,7 @@ namespace geometry
 class Vector : public Stringable
 {
 
-    strinfo( Point, string( Point( dx( ), dy( ) ) ) + string( angle( ) ) + " origin: " + string( origin( ) ) );
+    strinfo( Vector, string( Point( dx( ), dy( ) ) ) + string( angle( ) ) + " origin: " + string( origin( ) ) );
 
 private:
 
@@ -51,6 +51,8 @@ public:
     bool has_magnitude( ) const { return( dx( ) || dy( ) ); }
 
     Angle angle( ) const { return( Angle( m_dx, m_dy ) ); }
+
+    dec dot( Vector cref in_vec ) const { return( dec( ( dx( ) * in_vec.dx( ) ) + ( dy( ) * in_vec.dy( ) ) ) ); } // C! the dot product
 
     Vector ref normalize( ) { return( magnitude( 1.0 ) ); }
     Vector normalized( ) const { return( Vector( dx( ) / magnitude( ), dy( ) / magnitude( ) ) ); }

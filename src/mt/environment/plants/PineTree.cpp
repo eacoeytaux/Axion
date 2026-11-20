@@ -38,7 +38,7 @@ PineTree::PineTree( ptr<Room> in_room, Point cref in_root, dec in_z ) : Object( 
     trunk.draw( TRUNK_BORDER_COLOR, Line( trunk_vector ), TRUNK_THICKNESS + x2( LEAVES_BORDER_WIDTH ) );
     trunk.draw( TRUNK_COLOR, Line( trunk_vector ), TRUNK_THICKNESS );
 
-    m_leave_bunches_rotation_points.insert_back( base );
+    m_leave_bunches_rotation_pts.insert_back( base );
 
     Point last_top = trunk_vector.destination( );
 
@@ -73,7 +73,7 @@ PineTree::PineTree( ptr<Room> in_room, Point cref in_root, dec in_z ) : Object( 
         Polygon leaf_bunch = Polygon( leaf_bunch_pts );
         leaf_bunch += last_top + sub_trunk;
 
-        m_leave_bunches_rotation_points.insert_back( last_top );
+        m_leave_bunches_rotation_pts.insert_back( last_top );
 
         Drawing ref leaves = m_leave_bunches_and_trunk.insert_back( );
 
@@ -98,9 +98,9 @@ void PineTree::render( )
     {
         Drawing drawing = m_leave_bunches_and_trunk[ i ];
 
-        Point pre_position = m_leave_bunches_rotation_points[ i ];
+        Point pre_position = m_leave_bunches_rotation_pts[ i ];
         Point post_position = pre_position;
-        post_position.rotate( d_sway_angle * i, i ? m_leave_bunches_rotation_points[ i - 1 ] : ORIGIN );
+        post_position.rotate( d_sway_angle * i, i ? m_leave_bunches_rotation_pts[ i - 1 ] : ORIGIN );
 
         Vector d_sway = post_position - pre_position;
         offset += d_sway;

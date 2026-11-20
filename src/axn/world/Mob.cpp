@@ -19,6 +19,7 @@ section( RAGDOLL )
     var_const( dec SWING_DAMPER = ( 0.95 ) );
     var_const( Angle SWING_MIN = ( 0.009 ) );
     var_const( Angle SWING_MAX = ( 0.01 ) );
+    var_const( dec SWING_TURBULENCE = ( 0.002 ) ); // C! most a swinging limb gets knocked around each update, well under SWING_MIN so a still limb stays still
 }
 
 Mob::Mob( ptr<Room> in_room, Point cref in_position, dec in_health ) : Object( in_room, in_position )
@@ -89,7 +90,7 @@ Drawing Mob::debug_overlay( ) const
             debug_overlay.draw( BLACK, Polygon::rectangle( health_width, health_height, offset ) );
 
             debug_overlay.draw( health_color, Polygon::rectangle( health_width * health_percentage, health_height,
-                                                                  offset + VectorX( ( half( health_width ) * health_percentage ) - half( health_width ) ) ) );
+                offset + VectorX( ( half( health_width ) * health_percentage ) - half( health_width ) ) ) );
 
             debug_overlay.draw( WHITE, Polygon::rectangle( health_width, health_height, offset ), HEALTH_BAR_BORDER_WIDTH, true );
         }
@@ -152,7 +153,7 @@ void Mob::update_movement( )
 
     if( velocity( ).dx( ) )
     {
-        facing_left( velocity( ).dx( ) < 0.0 );
+        facing_left( is_neg( velocity( ).dx( ) ) );
     }
 }
 
@@ -161,7 +162,7 @@ bool Mob::alive( ) const
     return( m_alive );
 }
 
-dec Mob::health_percentage( ) const
+declmp Mob::health_percentage( ) const
 {
     return( m_health.value_percentage( ) );
 }
@@ -195,20 +196,6 @@ void Mob::max_health( dec in_health, bool in_add )
     m_health.value( min( health, in_health ) );
 }
 
-bool Mob::facing_right( ) const
-{
-    return( m_facing_right );
-}
-
-void Mob::facing_right( bool in_facing_right )
-{
-    if( m_facing_right != in_facing_right )
-    {
-        m_facing_right = in_facing_right;
-        needs_render( true );
-    }
-}
-
 void Mob::die( )
 {
     if( alive( ) )
@@ -240,7 +227,7 @@ void Mob::hurt( dec in_damage )
     {
         dec health = Mob::health( ) - min( in_damage, Mob::health( ) );
 
-        if( health <= 0.0 )
+        if( !is_pos( health ) )
         {
             if( alive( ) )
             {
@@ -265,6 +252,20 @@ void Mob::damage( Damage cref in_damage )
     if( damages( in_damage ) )
     {
         hurt( in_damage.value( ) );
+    }
+}
+
+bool Mob::facing_right( ) const
+{
+    return( m_facing_right );
+}
+
+void Mob::facing_right( bool in_facing_right )
+{
+    if( m_facing_right != in_facing_right )
+    {
+        m_facing_right = in_facing_right;
+        needs_render( true );
     }
 }
 
@@ -308,6 +309,8 @@ void Mob::RagDollLimb::update( )
 {
     static_once{ Assert( SWING_MIN < SWING_MAX ); } // C! constants only need checking once
 
+    return_if( !parent( ) ); // C! the limb's mob gives the force and gravity it swings by, nothing to swing without one
+
     Angle d_angle_total;
 
     for_range( i, m_limbs.size( ) )
@@ -326,13 +329,16 @@ void Mob::RagDollLimb::update( )
             force_offset = limb.angle.min_distance( force.angle( ) );
         }
 
-        limb.d_angle += minmax( force_offset, -SWING_MAX, SWING_MAX );
+        limb.d_angle += minmax( force_offset, -SWING_MAX, +SWING_MAX );
 
-        // TODO add turbulence
+        if( !is_zero( limb.d_angle ) )
+        {
+            limb.d_angle += Angle( Random::rdec( -SWING_TURBULENCE, +SWING_TURBULENCE ) );
+        }
 
         limb.d_angle *= SWING_DAMPER;
 
-        if( in_range( limb.d_angle, SWING_MIN, -SWING_MIN ) )
+        if( in_range( limb.d_angle, -SWING_MIN, +SWING_MIN ) )
         {
             limb.d_angle = A0;
         }

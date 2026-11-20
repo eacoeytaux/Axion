@@ -14,6 +14,7 @@
 #include "axn/geometry/Crescent.hpp"
 #include "axn/geometry/Polygon.hpp"
 #include "axn/geometry/Triangle.hpp"
+#include "axn/geometry/Trapezoid.hpp"
 #include "axn/geometry/FixedRectangle.hpp"
 
 #endif /* Geometry_hpp */

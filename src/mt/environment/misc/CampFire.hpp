@@ -14,6 +14,10 @@ public:
 
     CampFire( ptr<Room> in_room, Point cref in_position );
 
+protected:
+
+    virtual void update( ) override; // C! now and then, while it burns, plays a crackle
+
 };
 
 } // namespace mtmercy

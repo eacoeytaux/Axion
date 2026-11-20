@@ -21,6 +21,8 @@ section( DEBUG_OVERLAY )
     var_const( Planc VELOCITY_ARROW_LENGTH = ( 10.0 ) );
     var_const( Planc VELOCITY_MAGNITUDE_MINIMUM = ( 0.1 ) );
     var_const( Planc VELOCITY_SCALE = ( 3.0 ) );
+
+    var_const( Color LISTENER_COLOR = ( GREEN ) ); // C! a Listener's dot, where it listens from
 }
 #endif
 
@@ -93,10 +95,10 @@ section( MOVEMENT )
     bool same_node( const Terrain::Node * in_node1, const Terrain::Node * in_node2 ) { return( in_node1 == in_node2 ); }
 
     // C! moving away from a surface with in_normal, as opposed to into it or along it
-    bool moving_away( Angle cref in_normal, Vector cref in_velocity ) { return( in_normal.min_distance( in_velocity.angle( ) ).abs( ) < RIGHT ); }
+    bool moving_away( Angle cref in_normal, Vector cref in_velocity ) { return( in_normal.in_semi( in_velocity.angle( ), false ) ); }
 
     // C! moving into a surface with in_normal, as opposed to along it or away from it
-    bool moving_into( Angle cref in_normal, Vector cref in_velocity ) { return( in_normal.min_distance( in_velocity.angle( ) ).abs( ) > RIGHT ); }
+    bool moving_into( Angle cref in_normal, Vector cref in_velocity ) { return( !in_normal.in_semi( in_velocity.angle( ), true ) ); }
 
     // C! where in_path first touches in_bumper_line, Line::intersection returns the path's start for any overlapping parallel lines
     Point first_contact( Line cref in_path, Line cref in_bumper_line )
@@ -116,7 +118,7 @@ section( MOVEMENT )
 
 Object::~Object( )
 {
-    Assert( m_initialized, "never initialized" );
+    Assert( ( m_initialized ), "never initialized" );
 
     #if defined( AXN_DEBUG )
     total_objects--;
@@ -136,12 +138,12 @@ Object::~Object( )
     } m_movement_subscriptions.clear( );
 }
 
-Object::Object( ptr<Room> in_room ) : Matter( ORIGIN ), m_room( in_room ) { init( ); }
-Object::Object( ptr<Room> in_room, dec in_z ) : Matter( ORIGIN ), m_room( in_room ) { z( in_z ); init( ); }
-Object::Object( ptr<Room> in_room, Point cref in_position ) : Matter( in_position ), m_room( in_room ) { init( ); }
-Object::Object( ptr<Room> in_room, Point cref in_position, dec in_z ) : Matter( in_position ), m_room( in_room ) { z( in_z ); init( ); }
-Object::Object( ptr<Room> in_room, Point cref in_position, Vector cref in_velocity ) : Matter( in_position ), m_room( in_room ) { velocity( in_velocity ); init( ); }
-Object::Object( ptr<Room> in_room, Point cref in_position, Vector cref in_velocity, dec in_z ) : Matter( in_position ), m_room( in_room ) { z( in_z ); velocity( in_velocity ); init( ); }
+Object::Object( ptr<Room> in_room ) : Mass( ORIGIN ), m_room( in_room ) { init( ); }
+Object::Object( ptr<Room> in_room, dec in_z ) : Mass( ORIGIN ), m_room( in_room ) { z( in_z ); init( ); }
+Object::Object( ptr<Room> in_room, Point cref in_position ) : Mass( in_position ), m_room( in_room ) { init( ); }
+Object::Object( ptr<Room> in_room, Point cref in_position, dec in_z ) : Mass( in_position ), m_room( in_room ) { z( in_z ); init( ); }
+Object::Object( ptr<Room> in_room, Point cref in_position, Vector cref in_velocity ) : Mass( in_position ), m_room( in_room ) { velocity( in_velocity ); init( ); }
+Object::Object( ptr<Room> in_room, Point cref in_position, Vector cref in_velocity, dec in_z ) : Mass( in_position ), m_room( in_room ) { z( in_z ); velocity( in_velocity ); init( ); }
 
 void Object::init( )
 {
@@ -158,8 +160,41 @@ void Object::init( )
     background( z( ) < 1.0 );
 }
 
+void Object::room( ptr<Room> in_room )
+{
+    return_if( in_room == m_room );
+
+    m_room = in_room;
+
+    // C! the ground and the cached bumpers are the old room's terrain
+    clear_ground( );
+    m_bumper_cache.clear( );
+    m_bumper_cache_active = false;
+}
+
+void Object::play_sound( SoundFX cref in_sound ) const
+{
+    return_if( !world( ) );
+
+    // C! an active Listener's own sounds are played globally, so they're heard whatever their hearing range
+    ptr<const Listener> listener = cast( ptr<const Object>( this ), const Listener );
+
+    if( !is_null( listener ) && listener->active( ) )
+    {
+        world( )->play_sound( SoundFX( in_sound ).global( true ), position( ) ); // C! the position only for the DEBUG_AUDIO overlay
+    }
+    else
+    {
+        world( )->play_sound( in_sound, position( ) );
+    }
+}
+
 void Object::render( )
 {
+    #if defined( AXN_DEBUG )
+    m_base_render_reached = true;
+    #endif
+
     Visible::center( position( ) );
     Visible::render( );
 }
@@ -168,7 +203,15 @@ void Object::render_object( )
 {
     if( needs_render( ) )
     {
+        #if defined( AXN_DEBUG )
+        m_base_render_reached = false;
+        #endif
+
         render( );
+
+        #if defined( AXN_DEBUG )
+        Assert( ( m_base_render_reached ), "a render( ) override didn't call its base class's render( ), so Object::render( ) never ran" );
+        #endif
     }
 }
 
@@ -183,7 +226,7 @@ Drawing Object::trajection_drawing( Planc cref in_distance, Color cref in_color,
         Planc d = in_distance;
         dec a = in_alpha_start;
 
-        while( ( d > 0.0 ) && v.has_magnitude( ) )
+        while( is_pos( d ) && v.has_magnitude( ) )
         {
             v += gravity( );
             v *= one_minus( friction_resistance( ) );
@@ -284,6 +327,13 @@ Drawing Object::debug_overlay( ) const
         }
     }
 
+    if( Settings::get( Settings::DEBUG_AUDIO ) )
+    {
+        ptr<const Listener> listener = cast( ptr<const Object>( this ), const Listener );
+
+        if( !is_null( listener ) ) { debug_overlay.draw( LISTENER_COLOR, Polygon::circle( DOT_RADIUS, Point( listener->listening_position( ) - position( ) ) ) ); }
+    }
+
     return( debug_overlay );
 }
 #endif
@@ -296,6 +346,10 @@ void Object::background( bool in_background ) { m_background = ( in_background |
 
 void Object::update( )
 {
+    #if defined( AXN_DEBUG )
+    m_base_update_reached = true;
+    #endif
+
     while( m_last_positions.size( ) && ( m_last_positions.size( ) >= m_last_position_count ) )
     {
         m_last_positions.pop( );
@@ -320,7 +374,15 @@ void Object::update_object( )
     }
     else
     {
+        #if defined( AXN_DEBUG )
+        m_base_update_reached = false;
+        #endif
+
         update( );
+
+        #if defined( AXN_DEBUG )
+        Assert( ( m_base_update_reached ), "an update( ) override didn't call its base class's update( ), so Object::update( ) never ran" );
+        #endif
     }
 
     m_last_world_age_update = room( )->age( );
@@ -328,7 +390,7 @@ void Object::update_object( )
     m_age++;
 }
 
-Point Object::position( ) const { return( Matter::position( ) ); }
+Point Object::position( ) const { return( Mass::position( ) ); }
 void Object::position( Point cref in_position )
 {
     if( in_position != position( ) )
@@ -344,7 +406,7 @@ void Object::position( Point cref in_position )
         }
 
         Visible::center( in_position );
-        Matter::position( in_position );
+        Mass::position( in_position );
 
         if( interactive( ) )
         {
@@ -381,11 +443,7 @@ queue<Point> Object::last_positions( uint in_past ) const
         }
     }
 
-    // todo allow queue to be initialized by vector
-    queue<Point> ret;
-    ret.push( position( ) );
-
-    return( ret );
+    return( queue<Point>( { position( ) } ) );
 }
 
 queue<queue<Point>> cref Object::last_positions( ) const
@@ -456,6 +514,26 @@ void Object::stationary( bool in_stationary )
     }
 }
 
+void Object::find_ground( )
+{
+    clear_ground( );
+    return_if( !room( ) || !terrain_bound( ) || !has_gravity( ) );
+
+    const varray<Point> c_bumper_poly = Terrain::Node::bumper_polygon( terrain_hitbox( ) );
+
+    for_each( node, room( )->terrain_in_range( hitboxes_bounds( ) ) )
+    {
+        continue_if( !is_neg( gravity( ).dot( VectorA( node->normal( ), 1.0 ) ) ) ); // C! a floor: gravity pulls into it
+
+        Terrain::Bumper node_bumper = node->bumpers( c_bumper_poly );
+        if( on_bumper( node_bumper.path( ), position( ) ) )
+        {
+            ground( node_bumper );
+            return;
+        }
+    }
+}
+
 void Object::ground( Terrain::Bumper cref in_ground )
 {
     m_ground = in_ground;
@@ -463,9 +541,12 @@ void Object::ground( Terrain::Bumper cref in_ground )
 
 Line Object::ground_bumper_line( ) const
 {
-    Assert( grounded( ), "not grounded" );
+    Assert( ( grounded( ) ), "not grounded" );
+    return_if( !grounded( ), Line( position( ), position( ) ) ); // C! the assert is compiled out of release, where the ground's node would be null: no surface, so a line of no length
 
-    for_each( line, bumper( ground( ).node( ) ).path( ).lines( ) )
+    Terrain::Bumper ground_bumper = bumper( ground( ).node( ) ); // C! kept in a local, looping over the lines of a temporary bumper read freed memory
+
+    for_each( line, ground_bumper.path( ).lines( ) )
     {
         return_if( on_bumper( line, position( ) ), line );
     }
@@ -487,8 +568,7 @@ dec Object::friction_resistance( ) const
 {
     if( grounded( ) )
     {
-        return( 0.1 );
-        // C! TODO return( ground( ).node( )->resistance( ) );
+        return( ground( ).node( )->resistance( ) );
     }
 
     return( air_resistance( ) );
@@ -504,14 +584,9 @@ void Object::terrain_bound( bool in_terrain_bound )
     }
 }
 
-Hitbox Object::hitbox( ) const
-{
-    return( Hitbox( space( ), position( ) ) );
-}
-
 varray<Hitbox> Object::hitboxes( ) const
 {
-    return{ hitbox( ) };
+    return{ Hitbox( space( ), position( ) ) };
 }
 
 FixedRectangle Object::hitboxes_bounds( bool in_include_terrain ) const
@@ -520,7 +595,12 @@ FixedRectangle Object::hitboxes_bounds( bool in_include_terrain ) const
 
     for_each( hitbox, hitboxes( ) )
     {
-        bounds.union_with( hitbox.polygon( ).bounds( ) );
+        bounds.union_with( hitbox.bounds( ) );
+    }
+
+    if( in_include_terrain )
+    {
+        bounds.union_with( terrain_hitbox( ).bounds( ) );
     }
 
     return( bounds );
@@ -545,7 +625,7 @@ void Object::mark_to_delete( ticks in_countdown, ticks in_deletion_countdown )
 {
     if( m_marked_to_delete )
     {
-        m_to_deletion_countdown.reset( min( in_countdown, m_deletion_countdown.remaining( ) ) );
+        m_to_deletion_countdown.reset( min( in_countdown, m_to_deletion_countdown.remaining( ) ) );
         m_deletion_countdown.reset( min( in_deletion_countdown, m_deletion_countdown.remaining( ) ) );
     }
     else
@@ -567,11 +647,11 @@ void Object::trim_velocity( )
 {
     if( stationary( ) )
     {
-        Matter::velocity( V0 );
+        Mass::velocity( V0 );
         return;
     }
 
-    Vector velocity = Matter::velocity( );
+    Vector velocity = Mass::velocity( );
 
     if( grounded( ) && terrain_bound( ) )
     {
@@ -579,7 +659,6 @@ void Object::trim_velocity( )
         {
             if( velocity.has_magnitude( ) )
             {
-                // TODO use in_semi here and elsewhere
                 // C! judge leaving against the bumper line actually under the object, a vertex's own normal
                 // C! is only an average of its edges and is wrong for most of its corner
                 Line surface = surface_line( bumper( ground( ).node( ) ).path( ), position( ), velocity );
@@ -607,12 +686,12 @@ void Object::trim_velocity( )
         }
     }
 
-    Matter::velocity( velocity );
+    Mass::velocity( velocity );
 }
 
 void Object::update_velocity( )
 {
-    Vector velocity = Matter::velocity( );
+    Vector velocity = Mass::velocity( );
 
     if( !grounded( ) || !terrain_bound( ) )
     {
@@ -624,15 +703,16 @@ void Object::update_velocity( )
 
     velocity *= one_minus( friction_resistance( ) );
 
-    Matter::velocity( velocity );
+    Mass::velocity( velocity );
 }
 
 void Object::update_movement( )
 {
     // C! TODO if( m_passing_terrain && ground( ).node( )->passable( ) ) clear_ground( );
+    // C! TODO decide how dropping through a passable platform works: clearing the ground alone lands straight back on it next step, so the platform's nodes need ignoring until the object is clear of them (by node, by time, or by distance)
 
     m_bumper_cache.clear( );
-    m_bumper_shape = Terrain::Node::bumper_shape( terrain_hitbox( ) );
+    m_bumper_poly = Terrain::Node::bumper_polygon( terrain_hitbox( ) );
     m_bumper_cache_active = true;
 
     update_velocity( );
@@ -699,7 +779,7 @@ void Object::update_movement( )
 
                         for_each( neighbor, neighbors )
                         {
-                            continue_if( is_null( neighbor ) || same_node( neighbor, ground( ).node( ) ) );
+                            continue_if( is_null( neighbor ) || same_node( neighbor.raw( ), ground( ).node( ).raw( ) ) );
 
                             Terrain::Bumper neighbor_bumper = bumper( neighbor );
 
@@ -723,16 +803,16 @@ void Object::update_movement( )
 
                 bool hit = false;
                 Planc hit_distance = P0;
-                Point hit_point;
+                Point hit_pt;
 
-                // C! the area the hitbox sweeps through this step, from the bumper shape (the hitbox negated)
+                // C! the area the hitbox sweeps through this step, from the bumper polygon (the hitbox negated)
                 // C! instead of building a new hitbox, which isn't cheap
                 Point lower = center;
                 Point upper = center;
 
-                for_each_const( shape_pt, m_bumper_shape )
+                for_each_const( poly_pt, m_bumper_poly )
                 {
-                    for_each_const( pt, varray<Point>( { center - shape_pt, center + movement - shape_pt } ) )
+                    for_each_const( pt, varray<Point>( { center - poly_pt, center + movement - poly_pt } ) )
                     {
                         lower = Point( min( lower.x( ), pt.x( ) ), min( lower.y( ), pt.y( ) ) );
                         upper = Point( max( upper.x( ), pt.x( ) ), max( upper.y( ), pt.y( ) ) );
@@ -743,7 +823,7 @@ void Object::update_movement( )
                 {
                     // C! the current ground is dealt with above, a node the object just left is skipped below
                     // C! because it's only touching it and not moving into it
-                    continue_if( same_node( terrain_node, ground( ).node( ) ) );
+                    continue_if( same_node( terrain_node.raw( ), ground( ).node( ).raw( ) ) ); // C! raw( ): the ground's node is null in the air
 
                     Terrain::Bumper node_bumper = bumper( terrain_node );
 
@@ -765,7 +845,7 @@ void Object::update_movement( )
                         {
                             hit = true;
                             hit_distance = distance;
-                            hit_point = contact;
+                            hit_pt = contact;
 
                             next_ground = node_bumper;
                         }
@@ -774,7 +854,7 @@ void Object::update_movement( )
 
                 if( hit )
                 {
-                    movement = Vector( center, hit_point );
+                    movement = Vector( center, hit_pt );
                 }
             }
         }
@@ -785,11 +865,21 @@ void Object::update_movement( )
             list<ObjectCollision> collided_objects;
 
             varray<ptr<Object>> objects;
+            uset<ptr<Object>> listed_objects; // C! an object near more than one of this object's hitboxes is listed once, it used to be checked again for each of them
 
-            for_each( hitbox, hitboxes( ) )
+            const varray<Hitbox> c_own_hitboxes = hitboxes( ); // C! built once, not again for every hitbox of every object nearby
+
+            for_each_const( hitbox, c_own_hitboxes )
             {
-                FixedRectangle hitbox_bounds = hitbox.polygon( ).bounds( );
-                objects.insert_back( room( )->objects_in_range( hitbox_bounds.union_with( hitbox_bounds + movement ) ) );
+                FixedRectangle hitbox_bounds = hitbox.bounds( );
+
+                for_each_const( object, room( )->objects_in_range( hitbox_bounds.union_with( hitbox_bounds + movement ) ) )
+                {
+                    continue_if( listed_objects.contains( object ) );
+
+                    listed_objects.insert( object );
+                    objects.insert_back( object );
+                }
             }
 
             for_each( object, objects )
@@ -798,19 +888,22 @@ void Object::update_movement( )
 
                 for_each( object_hitbox, object->hitboxes( ) )
                 {
-                    Hitbox expanded_hitbox = object_hitbox.expanded( hitbox( ) );
-                    Polygon expanded_hitbox_poly = expanded_hitbox.polygon( );
-
-                    varray<Line> intersections = expanded_hitbox_poly.intersection( movement );
-
-                    if( !is_empty( intersections ) )
+                    for_each_const( own_hitbox, c_own_hitboxes ) // C! every one of this object's hitboxes, not just the first
                     {
-                        ObjectCollision collision;
+                        Hitbox expanded_hitbox = object_hitbox.expanded( own_hitbox );
+                        Polygon expanded_hitbox_poly = expanded_hitbox.polygon( );
 
-                        collision.object = object;
-                        collision.path = intersections.front( );
+                        varray<Line> intersections = expanded_hitbox_poly.intersection( movement );
 
-                        collided_objects.insert_back( collision );
+                        if( !is_empty( intersections ) )
+                        {
+                            ObjectCollision collision;
+
+                            collision.object = object;
+                            collision.path = intersections.front( );
+
+                            collided_objects.insert_back( collision );
+                        }
                     }
                 }
             }
@@ -898,6 +991,8 @@ dec Object::check_movement( Vector cref in_velocity )
 
 void Object::move( Vector cref in_movement )
 {
+    skip_override; // C! does what Mass::move( ) does through position( ), so calling it too would move the object twice
+
     if( in_movement.has_magnitude( ) )
     {
         position( position( ) + in_movement );
@@ -917,7 +1012,8 @@ void Object::move( Vector cref in_movement )
     }
 }
 
-void Object::react_to_movement( ptr<Object> in_object, Vector cref in_movement ) { Assert( m_movement_subscriptions.contains( in_object ), "not subscribed to object's movement" ); }
+// C! by default a subscriber moves along with the object it's subscribed to (Projectile and Arrow did this themselves, and Wisp's fire never got moved)
+void Object::react_to_movement( ptr<Object> in_object, Vector cref in_movement ) { Assert( ( m_movement_subscriptions.contains( in_object ) ), "not subscribed to object's movement" ); move( in_movement ); }
 
 void Object::add_movement_subscriber( ptr<Object> in_object )
 {
@@ -939,7 +1035,7 @@ Terrain::Bumper Object::bumper( ptr<const Terrain::Node> in_node ) const
 
     if( !m_bumper_cache.contains( in_node ) )
     {
-        return( m_bumper_cache.insert( in_node, in_node->bumpers( m_bumper_shape ) ) );
+        return( m_bumper_cache.insert( in_node, in_node->bumpers( m_bumper_poly ) ) );
     }
 
     return( m_bumper_cache.at( in_node ) );

@@ -8,8 +8,6 @@
 namespace axn
 {
 
-// C! Polygon is written as geometry::Polygon because windows.h (pulled in by Catch) declares a Polygon function
-
 // C! builds prev -> corner -> next and checks the bumpers of both edges and the corner vertex
 // C! bumpers must meet end to end, and a hitbox centered anywhere on them must never be inside the terrain
 static void check_corner_bumpers( Hitbox cref in_hitbox, Point cref in_prev, Point cref in_corner, Point cref in_next )
@@ -37,7 +35,7 @@ static void check_corner_bumpers( Hitbox cref in_hitbox, Point cref in_prev, Poi
     lambdaf( is_endpoint )( Path cref in_path, Point cref in_pt ) { return( close_to( in_path.front( ).pt1( ), in_pt ) || close_to( in_path.back( ).pt2( ), in_pt ) ); };
 
     // C! the terrain on the inside of the corner, convex corners are the intersection of the two edges' half planes
-    bool convex = ( dec( edge1->normal( ).min_distance( edge2->normal( ) ) ) < 0.0 );
+    bool convex = is_neg( dec( edge1->normal( ).min_distance( edge2->normal( ) ) ) );
 
     lambdaf( in_terrain )( Point cref in_pt )
     {
@@ -75,7 +73,7 @@ static void check_corner_bumpers( Hitbox cref in_hitbox, Point cref in_prev, Poi
     check_edge_bumper( bumper1, n1 );
     check_edge_bumper( bumper2, n2 );
 
-    bool concave = ( dec( edge1->normal( ).min_distance( edge2->normal( ) ) ) > 0.0 );
+    bool concave = is_pos( dec( edge1->normal( ).min_distance( edge2->normal( ) ) ) );
 
     // C! concave corners have no arc of their own, the edges' bumpers cross (or touch) and that is the corner
     if( concave )
@@ -114,20 +112,20 @@ static void check_corner_bumpers( Hitbox cref in_hitbox, Point cref in_prev, Poi
 
 test( "Terrain bumper tests" )
 {
-    varray<geometry::Polygon> hitboxes = {
-        geometry::Polygon::rectangle( 10.0, 20.0 ),
-        geometry::Polygon::rectangle( 10.0, 20.0, Angle::fraction( 16.0 ) ),
-        geometry::Polygon::equilateral( 3, 12.0 ),
-        geometry::Polygon::equilateral( 6, 8.0, Angle::fraction( 24.0 ) ),
-        geometry::Polygon( { Point( -5.0, -10.0 ), Point( -5.0, +10.0 ), Point( +5.0, +10.0 ), Point( +5.0, -10.0 ) } ) // C! clockwise
+    varray<Polygon> hitboxes = {
+        Polygon::rectangle( 10.0, 20.0 ),
+        Polygon::rectangle( 10.0, 20.0, Angle::fraction( 16.0 ) ),
+        Polygon::equilateral( 3, 12.0 ),
+        Polygon::equilateral( 6, 8.0, Angle::fraction( 24.0 ) ),
+        Polygon( { Point( -5.0, -10.0 ), Point( -5.0, +10.0 ), Point( +5.0, +10.0 ), Point( +5.0, -10.0 ) } ) // C! clockwise
     };
 
     // C! turns of the terrain at the corner, negative is a right turn (convex), zero is a straight line
     varray<dec> turns = { 0.0, -0.25, -0.785, -1.571, -2.356, -3.0, 0.785, 1.571 };
 
-    for_each_const( hitbox_polygon, hitboxes )
+    for_each_const( hitbox_poly, hitboxes )
     {
-        Hitbox hitbox( hitbox_polygon );
+        Hitbox hitbox( hitbox_poly );
 
         for_range( a, 12 )
         {
@@ -152,7 +150,7 @@ test( "Terrain bumper tests" )
         ptr<Terrain::Vertex> b = new Terrain::Vertex( nullptr, Point( 100.0, 0.0 ) );
         ptr<Terrain::Edge> ab = new Terrain::Edge( nullptr, a, b );
 
-        Line line = ab->bumpers( Hitbox( geometry::Polygon::rectangle( 10.0, 20.0 ) ) ).path( ).front( );
+        Line line = ab->bumpers( Hitbox( Polygon::rectangle( 10.0, 20.0 ) ) ).path( ).front( );
 
         check( equal( line.pt1( ).y( ), 10.0 ) );
         check( equal( line.pt2( ).y( ), 10.0 ) );

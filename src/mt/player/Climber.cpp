@@ -4,6 +4,11 @@
 #include "mt/player/Arrow.hpp"
 #include "mt/environment/misc/Dust.hpp"
 
+var_const( string ARROW_SOUND = ( "arrow.wav" ) ); // C! the bowstring's twang
+var_const( string HOOK_SOUND = ( "hook.wav" ) ); // C! the throw and the chain rattling out
+var_const( string JUMP_SOUND = ( "jump.wav" ) ); // C!
+var_const( string HURT_SOUND = ( "hurt.wav" ) ); // C!
+
 var_const( Planc HEIGHT = ( METER * 1.85 ) );
 var_const( Planc WIDTH = ( HEIGHT / 2.5 ) );
 var_const( Planc WIDTH_GROUND = ( WIDTH * 0.25 ) );
@@ -136,19 +141,21 @@ var_const( ticks BOB_PERIOD = ( 20.0 ) );
 var_const( Planc HEAD_BOB_DISTANCE = ( 1.0 ) );
 var_const( Planc SHOULDER_BOB_DISTANCE = ( 0.8 ) );
 var_const( dec SHOULDER_BOB_OFFSET = ( 0.75 ) );
+var_const( Cycle HEAD_BOB = ( Cycle( BOB_PERIOD, HEAD_BOB_DISTANCE ) ) ); // C! the head bobbing while alive
+var_const( Cycle SHOULDER_BOB = ( Cycle( BOB_PERIOD, SHOULDER_BOB_DISTANCE, Angle( -SHOULDER_BOB_OFFSET ) ) ) ); // C! the shoulders bobbing while alive, SHOULDER_BOB_OFFSET radians ahead of the head
 
 var_const( ticks BLINK_DURATION = ( 8.0 ) );
 var_const( span<ticks> BLINK_WAIT = { 240.0, 480.0 } );
 
 var_const( Planc CROSSBOW_LENGTH = ( METER * 0.9375 ) );
-var_const( Polygon CROSSBOW_SHAPE = Polygon( {
+var_const( Polygon CROSSBOW_POLY = ( Polygon( {
     { 0.0, 0.0 },
     { -CROSSBOW_LENGTH / 3.0, -CROSSBOW_LENGTH / 3.0 },
     { -CROSSBOW_LENGTH / 1.5, -CROSSBOW_LENGTH / 3.0 },
     { -CROSSBOW_LENGTH / 1.5, -CROSSBOW_LENGTH / 1.5 },
     { CROSSBOW_LENGTH / 3.0, -CROSSBOW_LENGTH / 6.0 },
     { CROSSBOW_LENGTH / 1.2, -CROSSBOW_LENGTH / 6.0 },
-    { CROSSBOW_LENGTH, 0.0 } } ) );
+    { CROSSBOW_LENGTH, 0.0 } } ) ) );
 
 var_const( Color CROSSBOW_COLOR = ( Color::rgb( 0xA54B23 ) ) );
 
@@ -204,9 +211,8 @@ section( JUMP_HUD )
 
 section( AIM_HUD )
 {
-    var_const( dec AIM_DISPLAY_RATIO = ( 0.6 ) );
+    var_const( dec AIM_DISPLAY_RATIO = ( 0.5 ) );
 
-    var_const( Planc AIM_DISPLAY_RADIUS = ( 200.0 ) );
     var_const( Planc AIM_DISPLAY_THICKNESS = ( 5.0 ) );
     var_const( Angle AIM_DISPLAY_BREADTH = ( Angle::fraction( 7.5 ) ) );
 
@@ -223,10 +229,14 @@ section( AIM_HUD )
 
 Climber::~Climber( )
 {
-    camera( )->remove_hud_element( &m_healthbar );
-    camera( )->remove_hud_element( &m_jumpbar );
-    camera( )->remove_hud_element( &m_aim_hud );
-    camera( )->remove_screen_effect( &m_low_health_effect );
+    if( camera( ) ) // C! World::destroy( ) deletes the rooms before the camera now, but nothing guarantees that order
+    {
+        camera( )->remove_screen_effect( &m_low_health_effect );
+
+        camera( )->remove_hud_element( &m_aim_hud );
+        camera( )->remove_hud_element( &m_jumpbar );
+        camera( )->remove_hud_element( &m_healthbar );
+    }
 }
 
 Climber::Climber( uint in_player_number, ptr<Room> in_room, Point cref in_position ) : Player( in_player_number, in_room, in_position ),
@@ -265,10 +275,30 @@ m_low_health_effect( this )
 
     m_arrow_feather_color = player_color( );
 
-    camera( )->add_hud_element( &m_healthbar );
-    camera( )->add_hud_element( &m_jumpbar );
-    camera( )->add_hud_element( &m_aim_hud );
-    camera( )->add_screen_effect( &m_low_health_effect );
+    if( camera( ) ) // C! no camera to show the HUD on
+    {
+        camera( )->add_screen_effect( &m_low_health_effect );
+
+        camera( )->add_hud_element( &m_aim_hud );
+        camera( )->add_hud_element( &m_jumpbar );
+        camera( )->add_hud_element( &m_healthbar );
+    }
+}
+
+void Climber::room( ptr<Room> in_room )
+{
+    Player::room( in_room );
+
+    // C! the hook isn't in the room's lists (the climber updates it), so it's moved here, and can't stay hooked into the old room's terrain
+    hook( ).reload( );
+    hook( ).room( in_room );
+}
+
+void Climber::pass_door( ptr<Door> in_door )
+{
+    Player::pass_door( in_door );
+
+    hook( ).stow( ); // C! fully back in the climber's hand, where the climber now is (room( ) only reset it, before the climber was moved to the door)
 }
 
 void Climber::render( )
@@ -296,6 +326,11 @@ Drawing Climber::debug_overlay( ) const
     if( !hook( ).loaded( ) )
     {
         debug_overlay.draw( hook( ).debug_overlay( ).move( hook( ).position( ) - position( ) ) );
+    }
+
+    if( Settings::get( Settings::DEBUG_SKELETONS ) ) // C! on its own, so the skeleton shows whenever the setting is on, whatever else is shown
+    {
+        debug_overlay.draw( rig( ).debug_overlay( ) ); // C! the rig is at the origin, so its points are already offsets from position
     }
 
     return( debug_overlay.draw( Player::debug_overlay( ) ) );
@@ -365,8 +400,7 @@ void Climber::update( )
             {
                 if( hook( ).loaded( ) )
                 {
-                    // static SoundClip twang( "twang.wav" );
-                    // twang.play( 0.5 );
+                    play_sound( SoundFX( HOOK_SOUND ) );
 
                     hook( ).launch( VectorA( aim_angle( ), DEFAULT_HOOK_LAUNCH_SPEED ) + ( velocity( ) * ARROW_VELOCITY_DAMPEN ) );
                 }
@@ -394,8 +428,7 @@ void Climber::update( )
         {
             if( m_arrow_reload_timer.completed( ) )
             {
-                // static SoundClip twang( "twang.wav" );
-                // twang.play( 0.5 );
+                play_sound( SoundFX( ARROW_SOUND ) );
 
                 Angle aim = aim_angle( ) + aim_shake( );
                 Arrow * arrow = new Arrow( Arrow::tip( room( ), position( ), VectorA( aim, DEFAULT_ARROW_LAUNCH_SPEED ) + ( velocity( ) * ARROW_VELOCITY_DAMPEN ), m_arrow_feather_color ) );
@@ -728,6 +761,15 @@ void Climber::die( )
     Player::die( );
 }
 
+void Climber::hurt( dec in_health )
+{
+    const dec c_health_before = health( );
+
+    Player::hurt( in_health );
+
+    if( health( ) < c_health_before ) { play_sound( SoundFX( HURT_SOUND ) ); } // C! nothing when god mode or invincibility kept the health
+}
+
 Planc Climber::light_sight( ) const
 {
     return( LIGHT_SIGHT );
@@ -1053,6 +1095,7 @@ void Climber::update_velocity( )
                 if( m_jump_reset_timer.completed( ) )
                 {
                     m_jumping_timer.reset( JUMP_MAX_DURATION );
+                    play_sound( SoundFX( JUMP_SOUND ) ); // C! here, where a jump starts, so holding the key doesn't play it again
                     m_jump_reset_timer.reset( JUMP_RESET_WAIT_TIME + JUMP_MAX_DURATION );
                     m_jump_degradation = 0.0;
 
@@ -1300,38 +1343,67 @@ void Climber::release_bow( )
     release_arrow( );
 }
 
+SkeletonRig<Climber::BodyPoint> cref Climber::rig( ) const
+{
+    m_rig.add( HEAD, Vector( PointY( BODY_HEIGHT + HEAD_OFFSET_Y + ( alive( ) ? HEAD_BOB.at( age( ) ) : -HEAD_BOB_DISTANCE ) ) ) );
+    m_rig.add( FACE, HEAD, VectorA( alive( ) ? aim_angle( ) : m_dead_arm_back.angle( 0 ), half( HEAD_RADIUS - FACE_RADIUS ) ) );
+
+    lambdaf( add_side )( bool in_front, BodyPoint in_shoulder, BodyPoint in_elbow, BodyPoint in_hand, BodyPoint in_hip, BodyPoint in_foot )
+    {
+        m_rig.add( in_shoulder, Vector( Point( negated( half( BODY_WIDTH - x2( SHOULDER_RADIUS ) ), ( aiming_left( ) ^ in_front ) ),
+            half( BODY_HEIGHT - x2( SHOULDER_RADIUS ) ) + ( alive( ) ? SHOULDER_BOB.at( age( ) ) : -SHOULDER_BOB_DISTANCE ) ) ) );
+
+// C! the elbow is where the arm bends between the shoulder and the hand (or where the ragdoll has it once dead)
+        Point shoulder_at = m_rig.point_position( in_shoulder );
+        Point hand_at = hand_position( in_front );
+        Point elbow_at = ( alive( ) ? Joint( shoulder_at, hand_at, arm_length_upper( in_front ), arm_length_lower( in_front ), !aiming_left( ) ).joint( )
+                                    : ( in_front ? m_dead_arm_front.position( ELBOW_OFFSET_INDEX ) : m_dead_arm_back.position( ELBOW_OFFSET_INDEX ) ) );
+
+        m_rig.add( in_elbow, in_shoulder, Vector( shoulder_at, elbow_at ) );
+        m_rig.add( in_hand, in_elbow, Vector( elbow_at, hand_at ) );
+
+        m_rig.add( in_hip, Vector( Point( negated( half( PANTS_WIDTH_UPPER ) - half( LEG_WIDTH ), ( facing_left( ) ^ in_front ) ), -half( BODY_HEIGHT ) ) ) );
+        m_rig.add( in_foot, in_hip, VectorY( half( BODY_HEIGHT ) - half( HEIGHT ) ) + foot_step( in_front ) ); // C! below the hip at the bottom of the climber, plus its step
+    };
+
+    add_side( true, FRONT_SHOULDER, FRONT_ELBOW, FRONT_HAND, FRONT_HIP, FRONT_FOOT );
+    add_side( false, BACK_SHOULDER, BACK_ELBOW, BACK_HAND, BACK_HIP, BACK_FOOT );
+
+    return( m_rig );
+}
+
 Point Climber::head_center( ) const
 {
-    // todo make cycle
-    return( PointY( BODY_HEIGHT + HEAD_OFFSET_Y + ( HEAD_BOB_DISTANCE * ( alive( ) ? sin( dec( age( ) ) / BOB_PERIOD ) : -1.0 ) ) ) );
+    return( rig( ).point_position( HEAD ) );
 }
 
 Point Climber::face_center( ) const
 {
-    return( head_center( ) + VectorA( alive( ) ? aim_angle( ) : m_dead_arm_back.angle( 0 ), half( HEAD_RADIUS - FACE_RADIUS ) ) );
+    return( rig( ).point_position( FACE ) );
 }
 
 Point Climber::shoulder( bool in_front ) const
 {
-    // todo make cycle
-    return( Point( negated(
-        half( BODY_WIDTH - x2( SHOULDER_RADIUS ) ), ( aiming_left( ) ^ in_front ) ),
-        half( BODY_HEIGHT - x2( SHOULDER_RADIUS ) ) + ( SHOULDER_BOB_DISTANCE * ( alive( ) ? sin( dec( age( ) + ( BOB_PERIOD * SHOULDER_BOB_OFFSET ) ) / BOB_PERIOD ) : -1.0 ) ) ) );
+    return( rig( ).point_position( in_front ? FRONT_SHOULDER : BACK_SHOULDER ) );
 }
 
 Point Climber::elbow( bool in_front ) const
 {
-    if( alive( ) )
-    {
-        return( Joint( shoulder( in_front ), hand( in_front ), arm_length_upper( in_front ), arm_length_lower( in_front ), !( aiming_left( ) ) ).joint( ) );
-    }
-    else
-    {
-        return( in_front ? m_dead_arm_front.position( ELBOW_OFFSET_INDEX ) : m_dead_arm_back.position( ELBOW_OFFSET_INDEX ) );
-    }
+    return( rig( ).point_position( in_front ? FRONT_ELBOW : BACK_ELBOW ) );
 }
 
 Point Climber::hand( bool in_front ) const
+{
+    return( rig( ).point_position( in_front ? FRONT_HAND : BACK_HAND ) );
+}
+
+Point Climber::hand_to_crossbow_offset( bool in_front ) const
+{
+    return( VectorA( aim_angle( ) - negated( in_front ? FRONT_HAND_CROSSBOW_OFFSET_ANGLE : BACK_HAND_CROSSBOW_OFFSET_ANGLE, aiming_left( ) ),
+        negated( in_front ? FRONT_HAND_CROSSBOW_OFFSET_DISTANCE : BACK_HAND_CROSSBOW_OFFSET_DISTANCE ) ) );
+}
+
+Point Climber::hand_position( bool in_front ) const
 {
     if( alive( ) )
     {
@@ -1341,12 +1413,6 @@ Point Climber::hand( bool in_front ) const
     {
         return( in_front ? m_dead_arm_front.position( HAND_OFFSET_INDEX ) : m_dead_arm_back.position( HAND_OFFSET_INDEX ) );
     }
-}
-
-Point Climber::hand_to_crossbow_offset( bool in_front ) const
-{
-    return( VectorA( aim_angle( ) - negated( in_front ? FRONT_HAND_CROSSBOW_OFFSET_ANGLE : BACK_HAND_CROSSBOW_OFFSET_ANGLE, aiming_left( ) ),
-                     negated( in_front ? FRONT_HAND_CROSSBOW_OFFSET_DISTANCE : BACK_HAND_CROSSBOW_OFFSET_DISTANCE ) ) );
 }
 
 Planc Climber::arm_width( bool in_front ) const
@@ -1366,12 +1432,34 @@ Planc Climber::arm_length_lower( bool in_front ) const
 
 Point Climber::hip( bool in_front ) const
 {
-    return( Point( negated( half( PANTS_WIDTH_UPPER ) - half( LEG_WIDTH ), ( facing_left( ) ^ in_front ) ), -half( BODY_HEIGHT ) ) );
+    return( rig( ).point_position( in_front ? FRONT_HIP : BACK_HIP ) );
 }
 
 Point Climber::foot( bool in_front ) const
 {
-    return( Point( hip( in_front ).x( ), -half( HEIGHT ) ) );
+    return( rig( ).point_position( in_front ? FRONT_FOOT : BACK_FOOT ) );
+}
+
+Vector Climber::foot_step( bool in_front ) const
+{
+    if( grounded( ) )
+    {
+        return_if( !( moving_right( ) ^ moving_left( ) ), V0 ); // C! standing still, or pushing both ways
+
+        // C! todo turn in Cycles
+        const Cycle c_step_x = Cycle( STEP_DURATION, STEP_DISTANCE );
+        const Cycle c_step_y = Cycle( STEP_DURATION, STEP_HEIGHT, Angle::fraction( 0.75 ) );
+
+        const Planc c_along = c_step_x.at( age( ) );
+        const Planc c_up = c_step_y.at( age( ) );
+
+        // C! the feet step opposite ways, each lifting on its own half of the step: the back foot forward when walking right, the front one back
+        return( Vector( negated( c_along, moving_left( ) != in_front ), max( negated( c_up, !in_front ), P0 ) ) );
+    }
+
+    return_if( !in_front && alive( ) && !god( ), VectorY( LEG_HEIGHT * FOOT_TUCK_RATIO ) ); // C! in the air, the back foot tucks up
+
+    return( V0 );
 }
 
 void Climber::draw_head( )
@@ -1403,15 +1491,15 @@ void Climber::draw_head( )
     }
 
     draw( color( HAIR ), Line( face_center( ) + Vector( +EYE_SPACING + half( EYEBROW_LENGTH - EYEBROW_SPACING_X ), y_offset ),
-                               face_center( ) + Vector( +EYE_SPACING - half( EYEBROW_LENGTH + EYEBROW_SPACING_X ), y_offset ) ), EYE_RADIUS + EYE_RADIUS );
+        face_center( ) + Vector( +EYE_SPACING - half( EYEBROW_LENGTH + EYEBROW_SPACING_X ), y_offset ) ), EYE_RADIUS + EYE_RADIUS );
     draw( color( HAIR ), Line( face_center( ) + Vector( -EYE_SPACING + half( EYEBROW_LENGTH + EYEBROW_SPACING_X ), y_offset ),
-                               face_center( ) + Vector( -EYE_SPACING - half( EYEBROW_LENGTH - EYEBROW_SPACING_X ), y_offset ) ), EYE_RADIUS + EYE_RADIUS );
+        face_center( ) + Vector( -EYE_SPACING - half( EYEBROW_LENGTH - EYEBROW_SPACING_X ), y_offset ) ), EYE_RADIUS + EYE_RADIUS );
 
     if( m_outfit == MOHAWK )
     {
         { // mohawk
             draw( color( HAIR ), Line( head_center( ) + VectorY( HEAD_RADIUS + ( MOHAWK_HEIGHT - MOHAWK_OFFSET ) ),
-                                       face_center( ) + VectorY( FACE_RADIUS - ( MOHAWK_OFFSET ) ) ), MOHAWK_WIDTH );
+                face_center( ) + VectorY( FACE_RADIUS - ( MOHAWK_OFFSET ) ) ), MOHAWK_WIDTH );
         }
 
         { // beard
@@ -1436,7 +1524,7 @@ void Climber::draw_torso( )
 
     // belt
     draw( color( BELT ), Line( waist - VectorX( half( PANTS_WIDTH_UPPER ) + ( BELT_THICKNESS / 4.0 ) ),
-                               waist + VectorX( half( PANTS_WIDTH_UPPER ) + ( BELT_THICKNESS / 4.0 ) ) ), dec( BELT_THICKNESS ) );
+        waist + VectorX( half( PANTS_WIDTH_UPPER ) + ( BELT_THICKNESS / 4.0 ) ) ), dec( BELT_THICKNESS ) );
 
     draw( color( BELT_BUCKLE ), Polygon::rectangle( BELT_BUCKLE_WIDTH, BELT_BUCKLE_WIDTH, waist ) );
 
@@ -1507,38 +1595,9 @@ void Climber::draw_legs( )
     boot_drawing.draw( color( BOOT_LACE ), lace1, 1.0 );
     boot_drawing.draw( color( BOOT_LACE ), lace2, 1.0 );
 
-    // todo turn in Cycles
-
-    Cycle foot_cycle_x = Cycle( STEP_DURATION, STEP_DISTANCE );
-    Cycle foot_cycle_y = Cycle( STEP_DURATION, STEP_HEIGHT, Angle::fraction( 0.75 ) );
-
-    Planc foot_offset_x = foot_cycle_x.at( age( ) );
-    Planc foot_offset_y = foot_cycle_y.at( age( ) );
-    Planc foot_offset_y_back = max( -foot_offset_y, P0 );
-    Planc foot_offset_y_front = max( foot_offset_y, P0 );
-
     { // back leg
         Point hip = Climber::hip( false );
-        Point foot = Climber::foot( false );
-
-        if( grounded( ) )
-        {
-            if( moving_right( ) ^ moving_left( ) )
-            {
-                if( moving_right( ) )
-                {
-                    foot += Vector( foot_offset_x, foot_offset_y_back );
-                }
-                else if( moving_left( ) )
-                {
-                    foot += Vector( -foot_offset_x, foot_offset_y_back );
-                }
-            }
-        }
-        else if( alive( ) && !god( ) )
-        {
-            foot += VectorY( LEG_HEIGHT * FOOT_TUCK_RATIO );
-        }
+        Point foot = Climber::foot( false ); // C! stepping or tucked, from the rig (foot_step( ))
 
         Drawing boot_drawing_back = boot_drawing;
 
@@ -1556,21 +1615,6 @@ void Climber::draw_legs( )
     { // front leg
         Point hip = Climber::hip( true );
         Point foot = Climber::foot( true );
-
-        if( grounded( ) )
-        {
-            if( moving_right( ) ^ moving_left( ) )
-            {
-                if( moving_right( ) )
-                {
-                    foot += Vector( -foot_offset_x, foot_offset_y_front );
-                }
-                else if( moving_left( ) )
-                {
-                    foot += Vector( foot_offset_x, foot_offset_y_front );
-                }
-            }
-        }
 
         Drawing boot_drawing_front = boot_drawing;
 
@@ -1644,7 +1688,7 @@ void Climber::draw_arrow( )
 
 void Climber::draw_crossbow( )
 {
-    Polygon crossbow = CROSSBOW_SHAPE;
+    Polygon crossbow = CROSSBOW_POLY;
 
     if( aiming_left( ) ) { crossbow.mirror_x( ); }
 
@@ -1823,12 +1867,12 @@ void Climber::HealthHUD::render( ptr<Camera> in_camera )
             }
 
             draw( health_color, Polygon::rectangle( width * health_percentage, height,
-                                                    center - VectorX( half( width * one_minus( health_percentage ) ) ) ) );
+                center - VectorX( half( width * one_minus( health_percentage ) ) ) ) );
         }
     }
 }
 
-Climber::JumpHUD::JumpHUD( ptr<Climber> in_climber ) : HUD( 0.5, ( HEALTH_BAR_HEIGHT + JUMP_BAR_RADIUS + JUMP_BAR_SPACING_Y ), ( ( x2( JUMP_BAR_RADIUS ) * ( in_climber->extra_jumps_max( ) + 1 ) ) + ( JUMP_BAR_SPACING_X /* * in_climber->extra_jumps_max( ) */ ) ), x2( JUMP_BAR_RADIUS ) ), m_climber( in_climber ) { }
+Climber::JumpHUD::JumpHUD( ptr<Climber> in_climber ) : HUD( 0.5, ( HEALTH_BAR_HEIGHT + JUMP_BAR_RADIUS + JUMP_BAR_SPACING_Y ), ( ( x2( JUMP_BAR_RADIUS ) * ( ( in_climber ? in_climber->extra_jumps_max( ) : 0 ) + 1 ) ) + ( JUMP_BAR_SPACING_X /* * in_climber->extra_jumps_max( ) */ ) ), x2( JUMP_BAR_RADIUS ) ), m_climber( in_climber ) { } // C! the climber defaults to nullptr, so without one the bar is sized for no extra jumps
 
 void Climber::JumpHUD::render( ptr<Camera> in_camera )
 {
@@ -1870,6 +1914,13 @@ void Climber::JumpHUD::render( ptr<Camera> in_camera )
 }
 
 Climber::AimHUD::AimHUD( ptr<Climber> in_climber ) : HUD( 0.5, 0.5, AIM_DISPLAY_RATIO, AIM_DISPLAY_RATIO ), m_climber( in_climber ) { }
+
+FixedRectangle Climber::AimHUD::bounds( ptr<Camera> in_camera ) const
+{
+    return_if( is_null( m_climber ), HUD::bounds( in_camera ) );
+
+    return( HUD::bounds( in_camera ) + Vector( ( m_climber->position( ) - in_camera->center( ) ) * in_camera->zoom( ) ) ); // C! where render( ) draws it: the camera's target offset keeps the climber off the screen's center
+}
 
 void Climber::AimHUD::render( ptr<Camera> in_camera )
 {
@@ -1944,7 +1995,7 @@ void Climber::LowHealthAlertEffect::render( ptr<Camera> in_camera )
             dec alpha_time = BASE_ALPHA * abs( sin( dec( climber->age( ) ) / dec( PULSE_DURATION.min( ) + ( PULSE_DURATION.range( ) * climber->health_percentage( ) ) ) ) );
             Color color = BASE_COLOR.a( alpha_health * alpha_time );
 
-            FixedRectangle screen_bounds = in_camera->bounds( false );
+            FixedRectangle screen_bounds = in_camera->lens_bounds( );
             dec effect_distance = SCREEN_FADE_DISTANCE * min( screen_bounds.width( ), screen_bounds.height( ) );
 
             FixedRectangle clear_bounds( screen_bounds.width( ) - effect_distance, screen_bounds.height( ) - effect_distance, screen_bounds.center( ) );

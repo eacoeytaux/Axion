@@ -14,23 +14,6 @@ section( DEBUG_OVERLAY )
 
 section( BUMPERS )
 {
-    dec dot_product( Point cref in_pt, Vector cref in_vec ) { return( ( in_pt.x( ) * in_vec.dx( ) ) + ( in_pt.y( ) * in_vec.dy( ) ) ); }
-
-    bool counter_clockwise( varray<Point> cref in_pts )
-    {
-        dec area = 0.0;
-
-        for_range( i, in_pts.size( ) )
-        {
-            Point cref pt1 = in_pts[ i ];
-            Point cref pt2 = in_pts[ ( i + 1 ) % in_pts.size( ) ];
-
-            area += ( pt1.x( ) * pt2.y( ) ) - ( pt2.x( ) * pt1.y( ) );
-        }
-
-        return( area > 0.0 );
-    }
-
     // C! index of the (inverted) hitbox point that rests against in_edge, the bumper is the edge offset by this point
     // C! when a side of the hitbox is parallel to the edge both of its points rest against it, the one furthest along the edge wins
     // C! edges and vertices both use this so their bumpers always meet end to end
@@ -43,12 +26,12 @@ section( BUMPERS )
 
         for_range( i, in_pts.size( ) )
         {
-            dec depth = dot_product( in_pts[ i ], normal );
-            dec support_depth = dot_product( in_pts[ support ], normal );
+            dec depth = Vector( ORIGIN, in_pts[ i ] ).dot( normal );
+            dec support_depth = Vector( ORIGIN, in_pts[ support ] ).dot( normal );
 
             if( equal( depth, support_depth ) )
             {
-                if( dot_product( in_pts[ i ], direction ) > dot_product( in_pts[ support ], direction ) )
+                if( Vector( ORIGIN, in_pts[ i ] ).dot( direction ) > Vector( ORIGIN, in_pts[ support ] ).dot( direction ) )
                 {
                     support = i;
                 }
@@ -63,13 +46,13 @@ section( BUMPERS )
     }
 }
 
-varray<Point> Terrain::Node::bumper_shape( Hitbox cref in_hitbox )
+varray<Point> Terrain::Node::bumper_polygon( Hitbox cref in_hitbox )
 {
     // C! the hitbox turned inside out (every point negated), same as polygon( false ).inverted( ) without building a second polygon
-    varray<Point> shape = in_hitbox.polygon( false ).points( );
-    for_each( pt, shape ) { pt = -pt; }
+    varray<Point> poly = in_hitbox.polygon( false ).points( );
+    for_each( pt, poly ) { pt = -pt; }
 
-    return( shape );
+    return( poly );
 }
 
 Angle Terrain::Node::bumper_normal( Line cref in_bumper_line ) const
@@ -82,7 +65,7 @@ Angle Terrain::Node::bumper_normal( Line cref in_bumper_line ) const
 
     dec facing = ( normal_vector.dx( ) * outward.dx( ) ) + ( normal_vector.dy( ) * outward.dy( ) );
 
-    return_if( facing < 0.0, normal.flipped( ) );
+    return_if( is_neg( facing ), normal.flipped( ) );
     return( normal );
 }
 
@@ -92,11 +75,11 @@ Point cref Terrain::Vertex::position( ) const { return( m_position ); }
 
 ptr<Terrain::Edge> Terrain::Vertex::edge1( ) const { return( m_e1 ); }
 
-void Terrain::Vertex::edge1( ptr<Terrain::Edge> in_e1 ) { Assert( is_null( m_e1 ), "edge 1 has already been set" ); m_e1 = in_e1; }
+void Terrain::Vertex::edge1( ptr<Terrain::Edge> in_e1 ) { Assert( ( is_null( m_e1 ) ), "edge 1 has already been set" ); m_e1 = in_e1; }
 
 ptr<Terrain::Edge> Terrain::Vertex::edge2( ) const { return( m_e2 ); }
 
-void Terrain::Vertex::edge2( ptr<Terrain::Edge> in_e2 ) { Assert( is_null( m_e2 ), "edge 2 has already been set" ); m_e2 = in_e2; }
+void Terrain::Vertex::edge2( ptr<Terrain::Edge> in_e2 ) { Assert( ( is_null( m_e2 ) ), "edge 2 has already been set" ); m_e2 = in_e2; }
 
 Angle Terrain::Vertex::normal( ) const
 {
@@ -118,15 +101,15 @@ Angle Terrain::Vertex::normal( ) const
 
 FixedRectangle Terrain::Vertex::bounding_box( ) const { return( FixedRectangle( 0.0, 0.0, position( ) ) ); }
 
-Terrain::Bumper Terrain::Vertex::bumpers( varray<Point> cref in_shape ) const
+Terrain::Bumper Terrain::Vertex::bumpers( varray<Point> cref in_poly ) const
 {
-    if( !is_empty( in_shape ) )
+    if( !is_empty( in_poly ) )
     {
         if( edge1( ) && edge2( ) )
         {
             // C! the hitbox rolls around the vertex from the point resting on edge1 to the point resting on edge2
             // C! this includes any hitbox sides in between, so a side of the hitbox can sit on the vertex not just a corner
-            varray<Point> cref pts = in_shape;
+            varray<Point> cref pts = in_poly;
             uint pt_count = pts.size( );
 
             // C! the resting point follows the normal around the hitbox, so walk the hitbox the way the normal turns
@@ -134,7 +117,7 @@ Terrain::Bumper Terrain::Vertex::bumpers( varray<Point> cref in_shape ) const
 
             // C! a concave corner (a valley) has no bumper of its own: the edges' bumpers cross and that is the corner,
             // C! an arc here would be inside the terrain and objects landing on it would sink in
-            if( dec( turn ) > 0.0 )
+            if( is_pos( turn ) )
             {
                 return( Terrain::Bumper( this, Path( ) ) );
             }
@@ -142,7 +125,7 @@ Terrain::Bumper Terrain::Vertex::bumpers( varray<Point> cref in_shape ) const
             uint index1 = support_index( pts, edge1( ) );
             uint index2 = support_index( pts, edge2( ) );
 
-            bool forward = !counter_clockwise( pts ); // C! convex corners turn clockwise
+            bool forward = clockwise( pts );
 
             varray<Point> bumpers;
             uint i = index1;
@@ -157,15 +140,11 @@ Terrain::Bumper Terrain::Vertex::bumpers( varray<Point> cref in_shape ) const
 
             return( Terrain::Bumper( this, Path( bumpers ) ) );
         }
-        else
-        {
-            // todo?
-        }
     }
 
     // C! only one edge (the end of an open terrain), the hitbox can rest against the vertex from any side
     varray<Point> around;
-    for_each_const( pt, in_shape ) { around.insert_back( pt + position( ) ); }
+    for_each_const( pt, in_poly ) { around.insert_back( pt + position( ) ); }
 
     return( Terrain::Bumper( this, Path( around, true ) ) );
 }
@@ -191,11 +170,11 @@ Angle Terrain::Edge::normal( ) const { return( vector( ).angle( ) + RIGHT ); }
 
 FixedRectangle Terrain::Edge::bounding_box( ) const { return( FixedRectangle( m_v1->position( ), m_v2->position( ) ) ); }
 
-Terrain::Bumper Terrain::Edge::bumpers( varray<Point> cref in_shape ) const
+Terrain::Bumper Terrain::Edge::bumpers( varray<Point> cref in_poly ) const
 {
-    if( !is_empty( in_shape ) )
+    if( !is_empty( in_poly ) )
     {
-        return( Terrain::Bumper( this, Path( line( ).flipped( ) + in_shape[ support_index( in_shape, this ) ] ) ) );
+        return( Terrain::Bumper( this, Path( line( ).flipped( ) + in_poly[ support_index( in_poly, this ) ] ) ) );
     }
 
     return( Terrain::Bumper( this, Path( line( ) ) ) );
@@ -367,9 +346,9 @@ void Terrain::make( varray<Point> cref in_positions, Direction in_bound_directio
 
         if( room( ) )
         {
+            // C! the room's bounds, stretched to reach any terrain point outside them, so the fill closes around all of the terrain
             FixedRectangle bounds = room( )->bounds( );
-
-            // TODO these need to extend if terrain bounds go beyond room bounds
+            for_each_const( pt, in_positions ) { bounds.union_with( FixedRectangle( pt ) ); }
 
             if( in_bound_direction == DIRECTION_UP )
             {
@@ -397,5 +376,5 @@ void Terrain::make( varray<Point> cref in_positions, Direction in_bound_directio
     }
 }
 
-void Terrain::fill( ) { for_each( polygon, terrain( ) ) { draw( fill_color( ), polygon ); } }
-void Terrain::crop( ) { for_each( polygon, terrain( ) ) { add_bounds( polygon ); } }
+void Terrain::fill( ) { for_each( poly, terrain( ) ) { draw( fill_color( ), poly ); } }
+void Terrain::crop( ) { for_each( poly, terrain( ) ) { add_bounds( poly ); } }

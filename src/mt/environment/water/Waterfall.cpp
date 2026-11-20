@@ -5,6 +5,7 @@ var_const( Planc RIPPLE_HEIGHT = ( 12.0 ) );
 var_const( Planc RIPPLE_TIP_HEIGHT = ( 8.0 ) );
 var_const( span<Planc> RIPPLE_RADIUS = { 5.0, 20.0 } );
 var_const( uint RIPPLE_EDGE_COUNT = ( 8 ) );
+var_const( dec RIPPLE_TOP_ALPHA = ( 0.75 ) );
 var_const( dec RIPPLE_ALPHA_START = ( 0.1 ) );
 var_const( dec RIPPLE_ALPHA_GROWTH = ( 0.01 ) );
 var_const( dec RIPPLE_GRAVITY_RATIO = ( 5.0 ) );
@@ -21,10 +22,10 @@ var_const( Planc FOAM_ALPHA_SHRINK = ( 0.05 ) );
 var_const( uint FOAM_EDGE_COUNT = ( 24 ) );
 var_const( span<uint> FOAM_NEW_COUNT = { 0, 4 } );
 var_const( span<uint> FOAM_SMALL_NEW_COUNT = { 3, 7 } );
-var_const( dec FOAM_COLOR_TOP_ALPHA = ( 0.75 ) );
 var_const( dec FOAM_GRAVITY_RATIO = ( 0.75 ) );
 
 var_const( Color WATER_COLOR = ( CYAN ) );
+var_const( Color RIPPLE_COLOR = ( WHITE ) );
 var_const( Color FOAM_COLOR = ( WHITE ) );
 
 Waterfall::Waterfall( ptr<Room> in_room, Point cref in_bottom, Planc cref in_width, Planc cref in_height, dec in_z ) : Object( in_room, in_bottom, in_z )
@@ -47,14 +48,14 @@ void Waterfall::render( )
     Polygon bounds = Polygon::rectangle( width( ), height( ), Point( 0.0, half( height( ) ) ) );
 
     draw( WATER_COLOR, bounds );
-    draw( { FOAM_COLOR.transparent( ),
-            FOAM_COLOR.transparent( ),
-            FOAM_COLOR.a( FOAM_COLOR_TOP_ALPHA ),
-            FOAM_COLOR.a( FOAM_COLOR_TOP_ALPHA ) }, bounds );
+    draw( { RIPPLE_COLOR.transparent( ),
+            RIPPLE_COLOR.transparent( ),
+            RIPPLE_COLOR.a( RIPPLE_TOP_ALPHA ),
+            RIPPLE_COLOR.a( RIPPLE_TOP_ALPHA ) }, bounds );
 
     Drawing ripples;
     ripples.add_bounds( bounds );
-    for_each( ripple, m_ripples ) { ripples.draw( FOAM_COLOR.a( ripple.alpha ), ripple.polygon + VectorY( ripple.height ) ); }
+    for_each( ripple, m_ripples ) { ripples.draw( RIPPLE_COLOR.a( ripple.alpha ), ripple.poly + VectorY( ripple.height ) ); }
     draw( ripples );
 
     if( m_create_foam )
@@ -94,7 +95,7 @@ void Waterfall::update( )
 
             Ripple ref ripple = m_ripples.insert_back( );
 
-            ripple.polygon = Polygon( ripple_path.points( ) + ( ripple_path + VectorY( RIPPLE_HEIGHT ) ).points( ).reversed( ) );
+            ripple.poly = Polygon( ripple_path.points( ) + ( ripple_path + VectorY( RIPPLE_HEIGHT ) ).points( ).reversed( ) );
             ripple.height = height( ) + RIPPLE_HEIGHT + RIPPLE_RADIUS.max( );
             ripple.alpha = RIPPLE_ALPHA_START;
         }

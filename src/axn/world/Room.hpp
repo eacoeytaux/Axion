@@ -45,12 +45,17 @@ public:
 
     virtual void input( list<ptr<Input>> cref in_inputs = { } );
 
-    virtual void pass( varray<ptr<Object>> cref in_objects );
+    // C! moves objects released from another room into this one, at in_door (the door they come in through), see World::pass( ).
+    // C! Each object comes out centered across the door, with the bottom of its hitbox level with the bottom of the door
+    virtual void pass( varray<ptr<Object>> cref in_objects, ptr<Door> in_door = nullptr );
+
+    // C! takes the object out of every list in this room without deleting it, so it can be passed to another room
+    virtual void release( ptr<Object> in_object );
 
     uint age( ) const { return( m_age ); }
     void age( ticks in_time ) { for_range( i, in_time ) { update( ); } } // todo just update with time?
 
-    ptr<Camera> camera( ) { return( world( )->camera( ) ); }
+    ptr<Camera> camera( ) { return_null_if( !world( ) ); return( world( )->camera( ) ); } // C! null when the room isn't in a world
 
     ptr<World> world( ) { return( m_world ); }
     ptr<const World> world( ) const { return( m_world ); }

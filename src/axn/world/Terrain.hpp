@@ -51,6 +51,8 @@ public:
 
         bool m_passable = false;
 
+        dec m_resistance = 0.1; // C! friction on anything standing on this node (the 0.1 Object::friction_resistance( ) used for all ground)
+
     public:
 
         Node( ) { }
@@ -66,18 +68,21 @@ public:
 
         bool passable( ) const { return( m_passable ); }
 
+        dec resistance( ) const { return( m_resistance ); }
+        void resistance( dec in_resistance ) { m_resistance = in_resistance; }
+
         virtual Angle normal( ) const = 0;
 
         virtual Point center( ) const = 0; // C! a point on the node itself, its bumper lines all face away from it
 
         virtual FixedRectangle bounding_box( ) const = 0;
 
-        // C! bumpers are built from the hitbox turned inside out, working that shape out is most of the cost,
-        // C! so when building several bumpers for the same hitbox get it once with bumper_shape( ) and pass it in
-        static varray<Point> bumper_shape( Hitbox cref in_hitbox );
+        // C! bumpers are built from the hitbox turned inside out, working that polygon out is most of the cost,
+        // C! so when building several bumpers for the same hitbox get it once with bumper_polygon( ) and pass it in
+        static varray<Point> bumper_polygon( Hitbox cref in_hitbox );
 
-        virtual Bumper bumpers( varray<Point> cref in_shape ) const = 0;
-        Bumper bumpers( Hitbox cref in_hitbox ) const { return( bumpers( bumper_shape( in_hitbox ) ) ); }
+        virtual Bumper bumpers( varray<Point> cref in_poly ) const = 0;
+        Bumper bumpers( Hitbox cref in_hitbox ) const { return( bumpers( bumper_polygon( in_hitbox ) ) ); }
 
         Angle bumper_normal( Line cref in_bumper_line ) const; // C! outward normal of one of this node's bumper lines
 
@@ -117,8 +122,8 @@ public:
 
         virtual FixedRectangle bounding_box( ) const override;
 
-        using Node::bumpers;
-        virtual Bumper bumpers( varray<Point> cref in_shape ) const override;
+        Bumper bumpers( Hitbox cref in_hitbox ) const { return( Node::bumpers( in_hitbox ) ); } // C! as well as the override below, which would hide it
+        virtual Bumper bumpers( varray<Point> cref in_poly ) const override;
 
     };
 
@@ -149,8 +154,8 @@ public:
 
         virtual FixedRectangle bounding_box( ) const override;
 
-        using Node::bumpers;
-        virtual Bumper bumpers( varray<Point> cref in_shape ) const override;
+        Bumper bumpers( Hitbox cref in_hitbox ) const { return( Node::bumpers( in_hitbox ) ); } // C! as well as the override below, which would hide it
+        virtual Bumper bumpers( varray<Point> cref in_poly ) const override;
 
     };
 

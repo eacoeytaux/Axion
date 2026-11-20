@@ -14,8 +14,8 @@ public:
 
     Butterfly( ptr<Room> in_room, Point cref in_position );
 
-    Point anchor( ) const { return( m_anchor ); }
-    Point target( ) const { return( m_target ); }
+    Point cref anchor( ) const { return( m_anchor ); }
+    Point cref target( ) const { return( m_target ); }
 
     virtual void render( ) override;
     virtual void update( ) override;

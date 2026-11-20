@@ -17,8 +17,10 @@ namespace axn
 namespace geometry
 {
 
-class Crescent
+class Crescent : public Stringable
 {
+
+    strinfo( Crescent, "outer: " + string( outer( ) ) + " inner: " + string( inner( ) ) );
 
 private:
 
@@ -82,25 +84,25 @@ private:
 
     Crescent m_crescent;
 
-    Planc m_d_radius;
+    Planc m_d_radius = P0;
 
-    Planc m_d_offset;
-    Angle m_d_offset_rotation;
+    Planc m_d_offset = P0;
+    Angle m_d_offset_rotation = A0;
 
 public:
 
     DynamicCresent( Crescent cref in_crescent ) : m_crescent( in_crescent ) { }
 
-    Crescent crescent( ) const { return( m_crescent ); }
+    Crescent cref crescent( ) const { return( m_crescent ); }
 
     Planc cref d_radius( ) const { return( m_d_radius ); }
 
-    Planc cref d_offset( ) const { return( m_d_radius ); }
+    Planc cref d_offset( ) const { return( m_d_offset ); }
     Angle cref d_offset_rotation( ) const { return( m_d_offset_rotation ); }
 
     void d_radius( Planc cref in_d_radius ) { m_d_radius = in_d_radius; }
 
-    void d_offset( Planc cref in_d_offset ) { m_d_offset_rotation = in_d_offset; }
+    void d_offset( Planc cref in_d_offset ) { m_d_offset = in_d_offset; }
     void d_offset_rotation( Angle cref in_d_offset_rotation ) { m_d_offset_rotation = in_d_offset_rotation; }
 
     void update( )
@@ -110,7 +112,19 @@ public:
 
         inner.radius( inner.radius( ) + d_radius( ) );
 
-        // TODO add offset!
+        Vector offset = Vector( outer.center( ), inner.center( ) );
+
+        if( offset.has_magnitude( ) )
+        {
+            offset.magnitude( offset.magnitude( ) + d_offset( ) );
+            offset.rotate( d_offset_rotation( ) );
+        }
+        else
+        {
+            offset = VectorA( d_offset_rotation( ), d_offset( ) );
+        }
+
+        inner.center( outer.center( ) + offset );
 
         m_crescent = Crescent( outer, inner );
     }

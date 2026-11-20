@@ -13,49 +13,68 @@
 namespace axn
 {
 
-class Random
+class Random final
 {
 
 public:
 
-    // todo add more
     enum distribution_type
     {
         UNIFORM,
+        SKEW_LO,
+        SKEW_MID,
+        SKEW_HI,
     };
 
     #define DISTRIBUTION_IN distribution_type in_distribution = UNIFORM
 
 private:
 
-    Random( ) { }
-
-    static uint seed_value;
     static default_random_engine engine;
 
-    static uint random_int( );
+    static uint seed_value;
+
+    static uint next( );
+
+    static dec spread( dec in_bound1, dec in_bound2, DISTRIBUTION_IN ) { return( min( in_bound1, in_bound2 ) + ( fraction( in_distribution ) * abs( in_bound1 - in_bound2 ) ) ); }
+
+    static declmp fraction( DISTRIBUTION_IN )
+    {
+        dec f1 = ( dec( next( ) ) / dec( RAND_MAX ) );
+        dec f2 = ( dec( next( ) ) / dec( RAND_MAX ) );
+
+        return_if( ( in_distribution == UNIFORM ), f1 );
+        return_if( ( in_distribution == SKEW_LO ), ( f1 * f2 ) );
+        return_if( ( in_distribution == SKEW_MID ), half( f1 + f2 ) );
+        return_if( ( in_distribution == SKEW_HI ), one_minus( f1 * f2 ) );
+
+        return( f1 );
+    }
+
+    Random( ) { }
 
 public:
+
+    static Error reset( ) { return( seed( seed( ) ) ); }
 
     static uint seed( ) { return( seed_value ); }
 
     static Error seed( uint in_seed );
     static Error seed( string cref in_seed ) { return( seed( stoi( in_seed ) ) ); }
-    static Error seed_milliseconds( ) { return( seed( uint( milliseconds( ) ) ) ); }
 
-    static Error reset( ) { return( seed( seed( ) ) ); }
+    static Error rseed( ) { return( seed( next( ) ) ); }
 
-    static bool rbool( dec in_true_odds = 0.5 ) { return( rdec( 1.0 ) <= in_true_odds ); }
+    static bool rbool( declmp in_true_odds = 0.5 ) { return( rdec( 1.0 ) <= in_true_odds ); }
 
     static int rint( int in_bound, DISTRIBUTION_IN ) { return( rint( 0, in_bound, in_distribution ) ); }
-    static int rint( int in_bound1, int in_bound2, DISTRIBUTION_IN ) { return( ( random_int( ) % ( uint( abs( in_bound1 - in_bound2 ) ) + 1 ) ) + min( in_bound1, in_bound2 ) ); }
+    static int rint( int in_bound1, int in_bound2, DISTRIBUTION_IN ) { uint range = ( uint( abs( in_bound1 - in_bound2 ) ) + 1 ); return_if( ( in_distribution == UNIFORM ), ( ( next( ) % range ) + min( in_bound1, in_bound2 ) ) ); return( min( in_bound1, in_bound2 ) + int( min( uint( fraction( in_distribution ) * dec( range ) ), ( range - 1 ) ) ) ); }
 
     static dec rdec( DISTRIBUTION_IN ) { return( rdec( 0.0, 1.0, in_distribution ) ); }
     static dec rdec( dec in_bound, DISTRIBUTION_IN ) { return( rdec( 0.0, in_bound, in_distribution ) ); }
-    static dec rdec( dec in_bound1, dec in_bound2, DISTRIBUTION_IN ) { return( ( ( dec( random_int( ) ) / dec( RAND_MAX ) ) * ( in_bound1 - in_bound2 ) ) + in_bound2 ); }
+    static dec rdec( dec in_bound1, dec in_bound2, DISTRIBUTION_IN ) { return_if( ( in_distribution != UNIFORM ), spread( in_bound1, in_bound2, in_distribution ) ); return( ( ( dec( next( ) ) / dec( RAND_MAX ) ) * ( in_bound1 - in_bound2 ) ) + in_bound2 ); }
 
     static ticks rticks( ticks in_bound, DISTRIBUTION_IN ) { return( rticks( 0.0, in_bound, in_distribution ) ); }
-    static ticks rticks( ticks in_bound1, ticks in_bound2, DISTRIBUTION_IN ) { return( ( ( ticks( random_int( ) ) / ticks( RAND_MAX ) ) * ( in_bound1 - in_bound2 ) ) + in_bound2 ); }
+    static ticks rticks( ticks in_bound1, ticks in_bound2, DISTRIBUTION_IN ) { return_if( ( in_distribution != UNIFORM ), ticks( spread( in_bound1, in_bound2, in_distribution ) ) ); return( ( ( ticks( next( ) ) / ticks( RAND_MAX ) ) * ( in_bound1 - in_bound2 ) ) + in_bound2 ); }
 
     static Planc rPlanc( Planc cref in_bound, DISTRIBUTION_IN ) { return( rPlanc( P0, in_bound, in_distribution ) ); }
     static Planc rPlanc( Planc cref in_bound1, Planc cref in_bound2, DISTRIBUTION_IN ) { return( Planc( rdec( in_bound1, in_bound2, in_distribution ) ) ); }
@@ -72,71 +91,20 @@ public:
     typeT static Planc rPlanc( span<T1> cref in_span, DISTRIBUTION_IN ) { return( rPlanc( in_span.min( ), in_span.max( ), in_distribution ) ); }
     typeT static Angle rAngle( span<T1> cref in_span, DISTRIBUTION_IN ) { return( rAngle( in_span.min( ), in_span.max( ), in_distribution ) ); }
 
-    typeT static void negate( T1 ref in_x, dec in_odds = 0.5 ) { if( rbool( in_odds ) ) { in_x = -in_x; } }
-    typeT static T1 negated( T1 cref in_x, dec in_odds = 0.5 ) { return( rbool( in_odds ) ? -in_x : in_x ); }
+    static Point rPointCircle( Point cref in_center, Planc cref in_distance ) { return( VectorA( rAngle( ), ( sqrt( rdec( 1.0 ) ) * in_distance ), in_center ).destination( ) ); }
+    static Point rPointTriangle( Polygon cref in_bounds ) { Assert( in_bounds.sides( ) == 3 ); dec r1 = rdec( ); dec r2 = rdec( ); dec lo = min( r1, r2 ); dec hi = max( r1, r2 ); varray<Point> cref pts = in_bounds.points( ); return( Point( ( lo * pts[ 0 ].x( ) ) + ( ( hi - lo ) * pts[ 1 ].x( ) ) + ( one_minus( hi ) * pts[ 2 ].x( ) ), ( lo * pts[ 0 ].y( ) ) + ( ( hi - lo ) * pts[ 1 ].y( ) ) + ( one_minus( hi ) * pts[ 2 ].y( ) ) ) ); } // C! two random cuts of 0 to 1, in order: the three pieces are the point's weights, so every point is equally likely
+    static Point rPointPolygon( Polygon cref in_poly ) { varray<Polygon> triangles = in_poly.triangles( ); dec total_area = 0.0; varray<dec> cumulative_area( triangles.size( ) ); for_range( i, triangles.size( ) ) { total_area += dec( triangles[ i ].area( ) ); cumulative_area[ i ] = total_area; } return_if( !is_pos( total_area ), in_poly.bounds_center( ) ); const dec c_r = rdec( ) * total_area; uint index = 0; while( ( ( index + 1 ) < cumulative_area.size( ) ) && ( cumulative_area[ index ] < c_r ) ) { index++; } return( rPointTriangle( triangles[ index ] ) ); } // C! a triangle picked by its share of the area, then a point in it
+
+    static Path rSegment( Line cref in_line, uint in_segments, Planc cref in_offset = P0 ) { return( rSegment( Path( in_line ), in_segments, in_offset ) ); }
+    static Path rSegment( Path cref in_path, uint in_segments, Planc cref in_offset = P0 ) { varray<Point> pts = in_path.segmented( in_segments ).points( ); for_range( i, pts.size( ) ) { if( i && ( ( i + 1 ) < pts.size( ) ) ) { pts[ i ] = pts[ i ] + VectorA( rAngle( ), rPlanc( in_offset ) ); } } return( Path( pts ) ); }
+
+    typeT static void negate( T1 ref in_x, declmp in_odds = 0.5 ) { ::negate( in_x, rbool( in_odds ) ); }
+    typeT static T1 negated( T1 cref in_x, declmp in_odds = 0.5 ) { return( ::negated( in_x, rbool( in_odds ) ) ); }
 
     typeT static void shuffle( varray<T1> ref in_varray ) { default_random_engine engine = default_random_engine{ }; engine.seed( seed( ) ); ::shuffle( in_varray.begin( ), in_varray.end( ), engine ); }
     typeT static varray<T1> shuffled( varray<T1> cref in_varray ) { varray<T1> vs = in_varray; shuffle( vs ); return( vs ); }
 
-    typeT static T1 cref at( varray<T1> cref in_varray, DISTRIBUTION_IN ) { Assert( in_varray.size( ) ); return( in_varray[ rint( in_varray.size( ) - 1 ) ] ); }
-
-    static Point rPointCircle( Point cref in_center, Planc cref in_distance ) { return( VectorA( rAngle( ), ( sqrt( rdec( 1.0 ) ) * in_distance ), in_center ).destination( ) ); }
-
-    static Point rPointTriangle( Polygon cref in_bounds )
-    {
-        Assert( in_bounds.sides( ) == 3 );
-
-        Point cref p1 = in_bounds.points( )[ 0 ];
-        Point cref p2 = in_bounds.points( )[ 1 ];
-        Point cref p3 = in_bounds.points( )[ 2 ];
-
-        dec r1 = Random::rdec( );
-        dec r2 = Random::rdec( );
-
-        dec a = r1;
-        dec b = r2 - r1;
-        dec c = one_minus( r2 );
-
-        Planc x = ( a * p1.x( ) ) + ( b * p2.x( ) ) + ( c * p3.x( ) );
-        Planc y = ( a * p1.y( ) ) + ( b * p2.y( ) ) + ( c * p3.y( ) );
-
-        return( Point( x, y ) );
-    }
-
-    static Point rPointPolygon( Polygon cref in_polygon )
-    {
-        varray<Polygon> triangles = in_polygon.triangles( );
-        varray<dec> div( triangles.size( ) );
-
-        return_if( is_empty( triangles ), in_polygon.bounds_center( ) );
-
-        double area = in_polygon.area( );
-
-        for_range( i, triangles.size( ) )
-        {
-            Polygon triangle = triangles[ i ];
-
-            double div_area = triangle.area( ) / area;
-
-            if( i )
-            {
-                div[ i ] = div_area + div[ i - 1 ];
-            }
-            else
-            {
-                div[ i ] = div_area;
-            }
-        }
-
-        Assert( is_one( div.back( ) ) );
-
-        dec r = Random::rdec( );
-
-        uint index = 0;
-        while( ( index < div.size( ) ) && ( div[ index ] < r ) ) { index++; }
-
-        return( rPointTriangle( triangles[ index ] ) );
-    }
+    typeT static T1 cref at( varray<T1> cref in_varray, DISTRIBUTION_IN ) { Assert( in_varray.size( ) ); return( in_varray[ rint( in_varray.size( ) - 1, in_distribution ) ] ); } // C! passes in_distribution on now
 
 };
 

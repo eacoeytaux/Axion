@@ -44,7 +44,9 @@ public:
     varray ref insert_front( varray<T1> cref in_arr ) { insert_at( in_arr, 0 ); rethis; }
     varray ref insert_back( varray<T1> cref in_arr ) { insert_at( in_arr, size( ) ); rethis; }
 
-    varray ref remove( T1 cref in_elem ) { uint deleted_count = 0; varray<uint> indices = find_indices( in_elem ); for_range( i, size( ) ) { if( at( i - deleted_count ) == in_elem ) { remove_at( i - deleted_count++ ); } } rethis; }
+    varray ref remove( T1 cref in_elem ) { uint deleted_count = 0; for_range( i, size( ) ) { if( at( i - deleted_count ) == in_elem ) { remove_at( i - deleted_count++ ); } } rethis; }
+
+    varray ref remove_duplicates( ) { varray<T1> unique; for_range( i, size( ) ) { if( !unique.contains( at( i ) ) ) { unique.insert_back( at( i ) ); } } rethis = unique; } // C! keeps the first of each
 
     varray ref remove_at( uint in_index ) { remove_at( in_index, in_index + 1 ); rethis; }
     varray ref remove_at( uint in_index_start, uint in_index_end ) { assert_index( in_index_start ); assert_index( in_index_end - 1 ); std::vector<T1>::erase( begin( ) + in_index_start, begin( ) + in_index_end ); rethis; }
@@ -75,24 +77,24 @@ public:
     varray<uint> find_indices( T1 cref in_elem, uint in_max_count = 0 ) const { varray<uint> indices; for_range( i, size( ) ) { if( at( i ) == ( in_elem ) ) { indices.insert_back( i ); break_if( in_max_count && ( indices.size( ) == in_max_count ) ); } } return( indices ); }
 
     uint find_index_first( T1 cref in_elem ) const { for_range( i, size( ) ) { return_if( ( at( i ) == in_elem ), i ); } return( size( ) ); }
-    uint find_index_last( T1 cref in_elem ) const { for_range( i, size( ) ) { return_if( ( at( size( ) - i - 1 ) == in_elem ), i ); } return( size( ) ); }
+    uint find_index_last( T1 cref in_elem ) const { for_range( i, size( ) ) { return_if( ( at( size( ) - i - 1 ) == in_elem ), size( ) - i - 1 ); } return( size( ) ); } // C! the index counted from the front (it used to return how far from the back it was)
 
-    auto begin( ) { return( std::vector<T1>::begin( ) ); }
-    auto end( ) { return( std::vector<T1>::end( ) ); }
+    typename std::vector<T1>::iterator begin( ) { return( std::vector<T1>::begin( ) ); }
+    typename std::vector<T1>::iterator end( ) { return( std::vector<T1>::end( ) ); }
 
-    auto begin( ) const { return( std::vector<T1>::begin( ) ); }
-    auto end( ) const { return( std::vector<T1>::end( ) ); }
+    typename std::vector<T1>::const_iterator begin( ) const { return( std::vector<T1>::begin( ) ); }
+    typename std::vector<T1>::const_iterator end( ) const { return( std::vector<T1>::end( ) ); }
 
     varray ref fill( T1 cref in_elem ) { for_range( i, size( ) ) { at( i ) = in_elem; } rethis; }
 
     varray ref reverse( ) { std::reverse( begin( ), end( ) ); rethis; }
     varray reversed( ) const { varray<T1> ret = ( *this ); ret.reverse( ); return( ret ); }
 
-    varray ref sort( std::function<bool( T1 cref in_x1, T1 cref in_x2 )> cref comparator, bool in_stable = false ) { if( in_stable ) { std::stable_sort( begin( ), end( ), comparator ); } else { std::sort( begin( ), end( ), comparator ); } rethis; }
-    varray sorted( std::function<bool( T1 cref in_x1, T1 cref in_x2 )> cref comparator, bool in_stable = false ) const { varray<T1> ret = ( *this ); ret.sort( comparator, in_stable ); return( ret ); }
+    template( typename T2 ) varray ref sort( T2 cref in_comparator, bool in_stable = false ) { if( in_stable ) { std::stable_sort( begin( ), end( ), in_comparator ); } else { std::sort( begin( ), end( ), in_comparator ); } rethis; }
+    template( typename T2 ) varray sorted( T2 cref in_comparator, bool in_stable = false ) const { varray<T1> ret = ( *this ); ret.sort( in_comparator, in_stable ); return( ret ); }
 
     bool valid_index( uint in_index, bool in_include_end = false ) const { return( ( in_index < size( ) ) || ( in_include_end && ( in_index == size( ) ) ) ); }
-    bool assert_index( uint in_index, bool in_include_end = false ) const { Assert( valid_index( in_index, in_include_end ), "index ( %ui ) out of range, size: %ui", in_index, size( ) ); return( valid_index( in_index, in_include_end ) ); }
+    bool assert_index( uint in_index, bool in_include_end = false ) const { Assert( ( valid_index( in_index, in_include_end ) ), "index ( %ui ) out of range, size: %ui", in_index, size( ) ); return( valid_index( in_index, in_include_end ) ); }
 
     T1 ref operator[ ]( uint in_index ) { return( at( in_index ) ); }
     T1 cref operator[ ]( uint in_index ) const { return( at( in_index ) ); }
@@ -113,14 +115,14 @@ classT vvarray : public varray<varray<T1>>{ };
 classTN carray : private std::array<T1, N>
 {
 
-private:
-
-    using std::array<T1, N>::array;
-
 public:
 
-    T1 ref at( uint in_index ) { assert_index( in_index, false ); return( std::array<T1, N>::at( in_index ) ); }
-    T1 cref at( uint in_index ) const { assert_index( in_index, false ); return( std::array<T1, N>::at( in_index ) ); }
+    // C! every element starts value-initialized (zero for numbers), and a shorter list fills the front
+    carray( ) : std::array<T1, N>( ) { }
+    carray( std::initializer_list<T1> in_list ) : std::array<T1, N>( ) { Assert( ( in_list.size( ) <= N ), "too many elements ( %ui ) for a carray of %ui", uint( in_list.size( ) ), uint( N ) ); uint i = 0; for_each_const( elem, in_list ) { break_if( i == N ); at( i++ ) = elem; } }
+
+    T1 ref at( uint in_index ) { assert_index( in_index ); return( std::array<T1, N>::at( in_index ) ); } // C! assert_index( ) here takes one argument, the varray version's second one isn't needed
+    T1 cref at( uint in_index ) const { assert_index( in_index ); return( std::array<T1, N>::at( in_index ) ); }
 
     T1 ref front( ) { return( at( 0 ) ); }
     T1 cref front( ) const { return( at( 0 ) ); }
@@ -141,24 +143,24 @@ public:
     varray<uint> find_indices( T1 cref in_elem, uint in_max_count = 0 ) const { varray<uint> indices; for_range( i, size( ) ) { if( at( i ) == ( in_elem ) ) { indices.insert_back( i ); break_if( in_max_count && ( indices.size( ) == in_max_count ) ); } } return( indices ); }
 
     uint find_index_first( T1 cref in_elem ) const { for_range( i, size( ) ) { return_if( ( at( i ) == in_elem ), i ); } return( size( ) ); }
-    uint find_index_last( T1 cref in_elem ) const { for_range( i, size( ) ) { return_if( ( at( size( ) - i - 1 ) == in_elem ), i ); } return( size( ) ); }
+    uint find_index_last( T1 cref in_elem ) const { for_range( i, size( ) ) { return_if( ( at( size( ) - i - 1 ) == in_elem ), size( ) - i - 1 ); } return( size( ) ); } // C! the index counted from the front (it used to return how far from the back it was)
 
-    auto begin( ) { return( std::array<T1, N>::begin( ) ); }
-    auto end( ) { return( std::array<T1, N>::end( ) ); }
+    typename std::array<T1, N>::iterator begin( ) { return( std::array<T1, N>::begin( ) ); }
+    typename std::array<T1, N>::iterator end( ) { return( std::array<T1, N>::end( ) ); }
 
-    auto begin( ) const { return( std::array<T1, N>::begin( ) ); }
-    auto end( ) const { return( std::array<T1, N>::end( ) ); }
+    typename std::array<T1, N>::const_iterator begin( ) const { return( std::array<T1, N>::begin( ) ); }
+    typename std::array<T1, N>::const_iterator end( ) const { return( std::array<T1, N>::end( ) ); }
 
     carray ref fill( T1 cref in_elem ) { for_range( i, size( ) ) { at( i ) = in_elem; } rethis; }
 
     carray ref reverse( ) { std::reverse( begin( ), end( ) ); rethis; }
     carray reversed( ) const { carray<T1, N> ret = ( *this ); ret.reverse( ); return( ret ); }
 
-    carray ref sort( std::function<bool( T1 cref in_x1, T1 cref in_x2 )> cref comparator, bool in_stable = false ) { if( in_stable ) { std::stable_sort( begin( ), end( ), comparator ); } else { std::sort( begin( ), end( ), comparator ); } rethis; }
-    carray sorted( std::function<bool( T1 cref in_x1, T1 cref in_x2 )> cref comparator, bool in_stable = false ) const { carray<T1, N> ret = ( *this ); ret.sort( comparator, in_stable ); return( ret ); }
+    template( typename T2 ) carray ref sort( T2 cref in_comparator, bool in_stable = false ) { if( in_stable ) { std::stable_sort( begin( ), end( ), in_comparator ); } else { std::sort( begin( ), end( ), in_comparator ); } rethis; }
+    template( typename T2 ) carray sorted( T2 cref in_comparator, bool in_stable = false ) const { carray<T1, N> ret = ( *this ); ret.sort( in_comparator, in_stable ); return( ret ); }
 
     bool valid_index( uint in_index ) const { return( in_index < size( ) ); }
-    bool assert_index( uint in_index ) const { Assert( valid_index( in_index ), "index ( %ui ) out of range, size: %ui", in_index, size( ) ); return( valid_index( in_index ) ); }
+    bool assert_index( uint in_index ) const { Assert( ( valid_index( in_index ) ), "index ( %ui ) out of range, size: %ui", in_index, size( ) ); return( valid_index( in_index ) ); }
 
     T1 ref operator[ ]( uint in_index ) { return( at( in_index ) ); }
     T1 cref operator[ ]( uint in_index ) const { return( at( in_index ) ); }
@@ -176,6 +178,10 @@ private:
 
 public:
 
+    queue( ) { }
+    queue( varray<T1> cref in_varray ) { for_range( i, in_varray.size( ) ) { push( in_varray[ i ] ); } } // C! the varray's front is the queue's front
+    queue( std::initializer_list<T1> in_list ) : queue( varray<T1>( in_list ) ) { }
+
     T1 pop( ) { T1 x = front( ); std::queue<T1>::pop( ); return( x ); }
 
     T1 ref push( T1 cref in_elem = T1( ) ) { std::queue<T1>::push( in_elem ); return( back( ) ); } // C! the element just added
@@ -185,6 +191,13 @@ public:
 
     T1 ref back( ) { return( std::queue<T1>::back( ) ); }
     T1 cref back( ) const { return( std::queue<T1>::back( ) ); }
+
+    // C! front to back, so it's iterable (see below) like the other containers
+    typename std::deque<T1>::iterator begin( ) { return( std::queue<T1>::c.begin( ) ); }
+    typename std::deque<T1>::iterator end( ) { return( std::queue<T1>::c.end( ) ); }
+
+    typename std::deque<T1>::const_iterator begin( ) const { return( std::queue<T1>::c.begin( ) ); }
+    typename std::deque<T1>::const_iterator end( ) const { return( std::queue<T1>::c.end( ) ); }
 
     queue ref clear( ) { while( size( ) ) { pop( ); }; rethis; }
 
@@ -214,8 +227,15 @@ public:
     T1 ref top( ) { return( std::stack<T1>::top( ) ); }
     T1 cref top( ) const { return( std::stack<T1>::top( ) ); }
 
-    T1 ref bottom( ) { return( std::stack<T1>::bottom( ) ); }
-    T1 cref bottom( ) const { return( std::stack<T1>::bottom( ) ); }
+    T1 ref bottom( ) { return( std::stack<T1>::c.front( ) ); }
+    T1 cref bottom( ) const { return( std::stack<T1>::c.front( ) ); }
+
+    // C! bottom to top, so it's iterable (see below) like the other containers
+    typename std::deque<T1>::iterator begin( ) { return( std::stack<T1>::c.begin( ) ); }
+    typename std::deque<T1>::iterator end( ) { return( std::stack<T1>::c.end( ) ); }
+
+    typename std::deque<T1>::const_iterator begin( ) const { return( std::stack<T1>::c.begin( ) ); }
+    typename std::deque<T1>::const_iterator end( ) const { return( std::stack<T1>::c.end( ) ); }
 
     stack ref clear( ) { while( size( ) ) { pop( ); }; rethis; }
 
@@ -238,8 +258,8 @@ private:
 
 public:
 
-    T1 ref at( uint in_index ) { assert_index( in_index, false ); auto it = std::list<T1>::begin( ); do_count( in_index ) { it++; } return( *it ); }
-    T1 cref at( uint in_index ) const { assert_index( in_index, false ); auto it = std::list<T1>::begin( ); do_count( in_index ) { it++; } return( *it ); }
+    T1 ref at( uint in_index ) { assert_index( in_index, false ); typename std::list<T1>::iterator it = std::list<T1>::begin( ); do_count( in_index ) { it++; } return( *it ); }
+    T1 cref at( uint in_index ) const { assert_index( in_index, false ); typename std::list<T1>::const_iterator it = std::list<T1>::begin( ); do_count( in_index ) { it++; } return( *it ); }
 
     T1 ref front( ) { return( at( 0 ) ); }
     T1 cref front( ) const { return( at( 0 ) ); }
@@ -249,7 +269,7 @@ public:
 
     T1 ref insert( T1 cref in_elem = T1( ) ) { return( insert_back( in_elem ) ); }
 
-    T1 ref insert_at( T1 cref in_elem, uint in_index ) { assert_index( in_index, true ); if( !in_index ) { std::list<T1>::push_front( in_elem ); } else if( in_index == size( ) ) { std::list<T1>::push_back( in_elem ); } else { assert_index( in_index ); auto it = std::list<T1>::begin( ); do_count( in_index ) { it++; } std::list<T1>::insert( it, in_elem ); } return( at( in_index ) ); }
+    T1 ref insert_at( T1 cref in_elem, uint in_index ) { assert_index( in_index, true ); if( !in_index ) { std::list<T1>::push_front( in_elem ); } else if( in_index == size( ) ) { std::list<T1>::push_back( in_elem ); } else { assert_index( in_index ); typename std::list<T1>::iterator it = std::list<T1>::begin( ); do_count( in_index ) { it++; } std::list<T1>::insert( it, in_elem ); } return( at( in_index ) ); }
     T1 ref insert_at( uint in_index ) { return( insert_at( T1( ), in_index ) ); }
 
     T1 ref insert_front( T1 cref in_elem = T1( ) ) { return( insert_at( in_elem, 0 ) ); }
@@ -257,7 +277,9 @@ public:
 
     list ref remove( T1 cref in_elem ) { std::list<T1>::remove( in_elem ); rethis; }
 
-    list ref remove_at( uint in_index ) { assert_index( in_index, false ); auto it = std::list<T1>::begin( ); do_count( in_index ) { it++; } std::list<T1>::erase( it ); rethis; }
+    list ref remove_duplicates( ) { list<T1> unique; for_each_const( elem, *this ) { if( std::find( unique.begin( ), unique.end( ), elem ) == unique.end( ) ) { unique.insert_back( elem ); } } rethis = unique; } // C! keeps the first of each
+
+    list ref remove_at( uint in_index ) { assert_index( in_index, false ); typename std::list<T1>::iterator it = std::list<T1>::begin( ); do_count( in_index ) { it++; } std::list<T1>::erase( it ); rethis; }
 
     list ref remove_front( ) { std::list<T1>::pop_front( ); rethis; }
     list ref remove_back( ) { std::list<T1>::pop_back( ); rethis; }
@@ -272,20 +294,20 @@ public:
 
     operator bool( ) const { return( !empty( ) ); }
 
-    auto begin( ) { return( std::list<T1>::begin( ) ); }
-    auto end( ) { return( std::list<T1>::end( ) ); }
+    typename std::list<T1>::iterator begin( ) { return( std::list<T1>::begin( ) ); }
+    typename std::list<T1>::iterator end( ) { return( std::list<T1>::end( ) ); }
 
-    auto begin( ) const { return( std::list<T1>::begin( ) ); }
-    auto end( ) const { return( std::list<T1>::end( ) ); }
+    typename std::list<T1>::const_iterator begin( ) const { return( std::list<T1>::begin( ) ); }
+    typename std::list<T1>::const_iterator end( ) const { return( std::list<T1>::end( ) ); }
 
     list ref reverse( ) { std::list<T1>::reverse( ); rethis; }
     list reversed( ) const { list<T1> ret = ( *this ); ret.reverse( ); return( ret ); }
 
-    list ref sort( std::function<bool( T1 cref in_x1, T1 cref in_x2 )> cref comparator ) { std::list<T1>::sort( comparator ); rethis; }
-    list sorted( std::function<bool( T1 cref in_x1, T1 cref in_x2 )> cref comparator ) const { list<T1> ret = ( *this ); ret.sort( comparator ); return( ret ); }
+    template( typename T2 ) list ref sort( T2 cref in_comparator ) { std::list<T1>::sort( in_comparator ); rethis; }
+    template( typename T2 ) list sorted( T2 cref in_comparator ) const { list<T1> ret = ( *this ); ret.sort( in_comparator ); return( ret ); }
 
     bool valid_index( uint in_index, bool in_include_end = false ) const { return( ( in_index < size( ) ) || ( in_include_end && ( in_index == size( ) ) ) ); }
-    bool assert_index( uint in_index, bool in_include_end = false ) const { Assert( valid_index( in_index, in_include_end ), "index ( %ui ) out of range, size: %ui", in_index, size( ) ); return( valid_index( in_index, in_include_end ) ); }
+    bool assert_index( uint in_index, bool in_include_end = false ) const { Assert( ( valid_index( in_index, in_include_end ) ), "index ( %ui ) out of range, size: %ui", in_index, size( ) ); return( valid_index( in_index, in_include_end ) ); }
 
     T1 ref operator[ ]( uint in_index ) { return( at( in_index ) ); }
     T1 cref operator[ ]( uint in_index ) const { return( at( in_index ) ); }
@@ -306,6 +328,7 @@ public:
     bool insert( T1 cref in_key ) { std::set<T1>::insert( in_key ); return( true ); }
 
     oset ref remove( T1 cref in_key ) { std::set<T1>::erase( in_key ); rethis; }
+    oset ref remove_duplicates( ) { rethis; } // C! a set never holds the same key twice, so there's nothing to remove
 
     oset ref clear( ) { std::set<T1>::clear( ); rethis; }
 
@@ -317,11 +340,11 @@ public:
 
     bool contains( T1 cref in_key ) const { return( std::set<T1>::find( in_key ) != std::set<T1>::end( ) ); }
 
-    auto begin( ) { return( std::set<T1>::begin( ) ); }
-    auto end( ) { return( std::set<T1>::end( ) ); }
+    typename std::set<T1>::iterator begin( ) { return( std::set<T1>::begin( ) ); }
+    typename std::set<T1>::iterator end( ) { return( std::set<T1>::end( ) ); }
 
-    auto begin( ) const { return( std::set<T1>::begin( ) ); }
-    auto end( ) const { return( std::set<T1>::end( ) ); }
+    typename std::set<T1>::const_iterator begin( ) const { return( std::set<T1>::begin( ) ); }
+    typename std::set<T1>::const_iterator end( ) const { return( std::set<T1>::end( ) ); }
 
     bool operator[ ]( T1 cref in_key ) const { return( contains( in_key ) ); }
 
@@ -341,6 +364,7 @@ public:
     bool insert( T1 cref in_key ) { std::unordered_set<T1>::insert( in_key ); return( true ); }
 
     uset ref remove( T1 cref in_key ) { std::unordered_set<T1>::erase( in_key ); rethis; }
+    uset ref remove_duplicates( ) { rethis; } // C! a set never holds the same key twice, so there's nothing to remove
 
     uset ref clear( ) { std::unordered_set<T1>::clear( ); rethis; }
 
@@ -352,11 +376,11 @@ public:
 
     bool contains( T1 cref in_key ) const { return( std::unordered_set<T1>::find( in_key ) != std::unordered_set<T1>::end( ) ); }
 
-    auto begin( ) { return( std::unordered_set<T1>::begin( ) ); }
-    auto end( ) { return( std::unordered_set<T1>::end( ) ); }
+    typename std::unordered_set<T1>::iterator begin( ) { return( std::unordered_set<T1>::begin( ) ); }
+    typename std::unordered_set<T1>::iterator end( ) { return( std::unordered_set<T1>::end( ) ); }
 
-    auto begin( ) const { return( std::unordered_set<T1>::begin( ) ); }
-    auto end( ) const { return( std::unordered_set<T1>::end( ) ); }
+    typename std::unordered_set<T1>::const_iterator begin( ) const { return( std::unordered_set<T1>::begin( ) ); }
+    typename std::unordered_set<T1>::const_iterator end( ) const { return( std::unordered_set<T1>::end( ) ); }
 
     bool operator[ ]( T1 cref in_key ) const { return( contains( in_key ) ); }
 
@@ -381,6 +405,7 @@ public:
     T2 ref insert( T1 cref in_key, T2 cref in_value = T2( ) ) { std::map<T1, T2>::insert( { in_key, in_value } ); oset<T1>::insert( in_key ); return( at( in_key ) ); }
 
     omap ref remove( T1 cref in_key ) { std::map<T1, T2>::erase( in_key ); oset<T1>::remove( in_key ); rethis; }
+    omap ref remove_duplicates( ) { rethis; } // C! a map never holds the same key twice, so there's nothing to remove
 
     omap ref clear( ) { std::map<T1, T2>::clear( ); oset<T1>::clear( ); rethis; }
 
@@ -392,11 +417,11 @@ public:
 
     bool contains( T1 cref in_key ) const { return( std::map<T1, T2>::find( in_key ) != std::map<T1, T2>::end( ) ); }
 
-    auto begin( ) { return( std::map<T1, T2>::begin( ) ); }
-    auto end( ) { return( std::map<T1, T2>::end( ) ); }
+    typename std::map<T1, T2>::iterator begin( ) { return( std::map<T1, T2>::begin( ) ); }
+    typename std::map<T1, T2>::iterator end( ) { return( std::map<T1, T2>::end( ) ); }
 
-    auto begin( ) const { return( std::map<T1, T2>::begin( ) ); }
-    auto end( ) const { return( std::map<T1, T2>::end( ) ); }
+    typename std::map<T1, T2>::const_iterator begin( ) const { return( std::map<T1, T2>::begin( ) ); }
+    typename std::map<T1, T2>::const_iterator end( ) const { return( std::map<T1, T2>::end( ) ); }
 
     T2 ref operator[ ]( T1 cref in_key ) { return( contains( in_key ) ? at( in_key ) : insert( in_key ) ); } // C! adds a default value for a new key, like std::map
     T2 cref operator[ ]( T1 cref in_key ) const { return( at( in_key ) ); }
@@ -422,6 +447,7 @@ public:
     T2 ref insert( T1 cref in_key, T2 cref in_value = T2( ) ) { std::unordered_map<T1, T2>::insert( { in_key, in_value } ); uset<T1>::insert( in_key ); return( at( in_key ) ); }
 
     umap ref remove( T1 cref in_key ) { std::unordered_map<T1, T2>::erase( in_key ); uset<T1>::remove( in_key ); rethis; }
+    umap ref remove_duplicates( ) { rethis; } // C! a map never holds the same key twice, so there's nothing to remove
 
     umap ref clear( ) { std::unordered_map<T1, T2>::clear( ); uset<T1>::clear( ); rethis; }
 
@@ -433,11 +459,11 @@ public:
 
     bool contains( T1 cref in_key ) const { return( std::unordered_map<T1, T2>::find( in_key ) != std::unordered_map<T1, T2>::end( ) ); }
 
-    auto begin( ) { return( std::unordered_map<T1, T2>::begin( ) ); }
-    auto end( ) { return( std::unordered_map<T1, T2>::end( ) ); }
+    typename std::unordered_map<T1, T2>::iterator begin( ) { return( std::unordered_map<T1, T2>::begin( ) ); }
+    typename std::unordered_map<T1, T2>::iterator end( ) { return( std::unordered_map<T1, T2>::end( ) ); }
 
-    auto begin( ) const { return( std::unordered_map<T1, T2>::begin( ) ); }
-    auto end( ) const { return( std::unordered_map<T1, T2>::end( ) ); }
+    typename std::unordered_map<T1, T2>::const_iterator begin( ) const { return( std::unordered_map<T1, T2>::begin( ) ); }
+    typename std::unordered_map<T1, T2>::const_iterator end( ) const { return( std::unordered_map<T1, T2>::end( ) ); }
 
     T2 ref operator[ ]( T1 cref in_key ) { return( contains( in_key ) ? at( in_key ) : insert( in_key ) ); } // C! adds a default value for a new key, like std::unordered_map
     T2 cref operator[ ]( T1 cref in_key ) const { return( at( in_key ) ); }
@@ -445,6 +471,13 @@ public:
     equal_default( umap<T1, T2> );
 
 };
+
+// C! any container that for_each can walk: every one here (a queue front to back, a stack bottom to top). Functions that work the same
+// C! on any of them (safe_delete( ), sum( ), and the rest in Utility.hpp) are written once, for an iterable
+template( typename T1 ) concept iterable = requires( T1 ref in_x ) { in_x.begin( ); in_x.end( ); };
+
+// C! the type of an iterable's elements
+template( iterable T1 ) using element_of = std::remove_cvref_t<decltype( *std::declval<T1 ref>( ).begin( ) )>;
 
 } // namespace axn
 

@@ -25,26 +25,26 @@ Hook::Hook( ptr<Room> in_room, Climber * in_owner ) : Object( in_room ), m_owner
     draw_debug = true;
     #endif
 
-    Assert( m_owner, "owner cannot be null" );
+    Assert( ( !is_null( owner( ) ) ), "owner cannot be null" );
 
     solid( false );
     interactive( false );
 
-    position( m_owner->position( ) );
+    position( owner( )->position( ) );
 
     state( LOADED );
 
-    m_rope_growth_speed = DEFAULT_ROPE_GROWTH_SPEED;
-    m_rope_retract_speed = DEFAULT_ROPE_RETRACT_SPEED;
-    m_max_rope_length = DEFAULT_ROPE_MAX_LENGTH;
+    rope_growth_speed( DEFAULT_ROPE_GROWTH_SPEED );
+    rope_retract_speed( DEFAULT_ROPE_RETRACT_SPEED );
+    max_rope_length( DEFAULT_ROPE_MAX_LENGTH );
 }
 
 void Hook::render( )
 {
     Object::render( );
 
-    Point tip = hook_tip( ) - m_owner->position( );
-    Point base = hook_base( ) - m_owner->position( );
+    Point tip = hook_tip( ) - owner( )->position( );
+    Point base = hook_base( ) - owner( )->position( );
 
     Vector rod( base, tip );
     rod.magnitude( rod.magnitude( ) - ( HOOK_THICKNESS * HOOK_TIP_LENGTH ) );
@@ -74,11 +74,11 @@ void Hook::trim_velocity( )
     {
         if( state( ) == LAUNCHING )
         {
-            m_angle = velocity( ).angle( );
+            angle( velocity( ).angle( ) );
         }
         else if( state( ) == RETRACTING )
         {
-            m_angle = velocity( ).angle( ) + PI;
+            angle( velocity( ).angle( ) + PI );
         }
     }
 }
@@ -87,18 +87,10 @@ void Hook::update_velocity( )
 {
     Object::update_velocity( );
 
-    if( state( ) == LOADED )
-    {
-        no_gravity( );
-        clear_ground( );
-        velocity( V0 );
-        m_angle = m_owner->aim_angle( );
-        position( m_owner->position( ) + VectorA( m_angle, HOOK_LENGTH ) );
-    }
-    else if( state( ) == LAUNCHING )
+    if( state( ) == LAUNCHING )
     {
         gravity_scale( LAUNCH_GRAVITY_SCALE );
-        m_rope_length = m_owner->position( ).distance_to( position( ) );
+        rope_length( owner( )->position( ).distance_to( position( ) ) );
 
         if( grounded( ) )
         {
@@ -119,14 +111,19 @@ void Hook::update_velocity( )
     {
         clear_ground( );
         stationary( false );
-        velocity( VectorA( Angle( position( ), m_owner->position( ) ), m_rope_retract_speed ) );
+        velocity( VectorA( Angle( position( ), owner( )->position( ) ), rope_retract_speed( ) ) );
 
-        m_rope_length -= m_rope_retract_speed;
+        rope_length( rope_length( ) - rope_retract_speed( ) );
 
-        if( m_rope_length <= HOOK_LENGTH )
+        if( rope_length( ) <= HOOK_LENGTH )
         {
             state( LOADED );
         }
+    }
+
+    if( state( ) == LOADED ) // C! after RETRACTING, so a hook that finishes retracting is back in place this frame (it used to keep its retracting angle and speed for a frame, with its base already at the climber)
+    {
+        stow( );
     }
 }
 
@@ -172,18 +169,18 @@ Planc Hook::rope_length( ) const
 
 void Hook::extend_rope( Planc cref in_length )
 {
-    m_rope_length = min( m_rope_length + in_length, max_rope_length( ) );
+    rope_length( min( rope_length( ) + in_length, max_rope_length( ) ) );
 }
 
 void Hook::shorten_rope( Planc cref in_length )
 {
-    Planc rope_length_start = m_rope_length;
+    Planc rope_length_start = rope_length( );
 
-    m_rope_length = max( m_rope_length - in_length, P0 );
+    rope_length( max( rope_length( ) - in_length, P0 ) );
 
     if( taut( ) )
     {
-        m_owner->position( hook_base( ) + VectorA( rope( ).angle( ).flipped( ), rope_length( ) ) );
+        owner( )->position( hook_base( ) + VectorA( rope( ).angle( ).flipped( ), rope_length( ) ) );
     }
 }
 
@@ -191,11 +188,11 @@ Point Hook::hook_base( ) const
 {
     if( state( ) == LOADED )
     {
-        return( m_owner->position( ) );
+        return( owner( )->position( ) );
     }
     else
     {
-        return( hook_tip( ) - VectorA( m_angle, HOOK_LENGTH ) );
+        return( hook_tip( ) - VectorA( angle( ), HOOK_LENGTH ) );
     }
 }
 
@@ -206,7 +203,7 @@ Point Hook::hook_tip( ) const
 
 Vector Hook::rope( ) const
 {
-    return( Vector( m_owner->position( ), hook_base( ) ) );
+    return( Vector( owner( )->position( ), hook_base( ) ) );
 }
 
 bool Hook::taut( ) const
@@ -216,22 +213,22 @@ bool Hook::taut( ) const
 
 bool Hook::hooked( ) const
 {
-    return( m_state == HOOKED );
+    return( state( ) == HOOKED );
 }
 
 bool Hook::loaded( ) const
 {
-    return( m_state == LOADED );
+    return( state( ) == LOADED );
 }
 
 bool Hook::launching( ) const
 {
-    return( m_state == LOADED );
+    return( state( ) == LAUNCHING );
 }
 
 bool Hook::retracting( ) const
 {
-    return( m_state == RETRACTING );
+    return( state( ) == RETRACTING );
 }
 
 void Hook::launch( Vector cref in_launch_speed )
@@ -248,7 +245,7 @@ void Hook::launch( Vector cref in_launch_speed )
             velocity( in_launch_speed );
             state( LAUNCHING );
 
-            // static SoundClip twang( "twang.wav" );
+            // static Sound twang( "twang.wav" );
             // twang.play( );
         }
 
@@ -289,4 +286,14 @@ void Hook::reload( )
 {
     clear_ground( );
     state( LOADED );
+}
+
+void Hook::stow( )
+{
+    state( LOADED );
+    no_gravity( );
+    clear_ground( );
+    velocity( V0 );
+    angle( owner( )->aim_angle( ) );
+    position( owner( )->position( ) + VectorA( angle( ), HOOK_LENGTH ) );
 }

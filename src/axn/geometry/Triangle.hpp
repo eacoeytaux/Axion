@@ -96,7 +96,7 @@ public:
         return( ( in_line.pt1( ).closer_than( pt1, pt2 ) ) ? Line( pt1, pt2 ) : Line( pt2, pt1 ) );
     }
 
-    virtual Triangle ref transform( Transform cref in_trans ) override { m_pt1 = in_trans.apply( m_pt1 ); m_pt2 = in_trans.apply( m_pt2 ); m_pt3 = in_trans.apply( m_pt3 ); rethis; }
+    virtual Triangle ref transform( Transform cref in_trans ) override { skip_override; m_pt1 = in_trans.apply( m_pt1 ); m_pt2 = in_trans.apply( m_pt2 ); m_pt3 = in_trans.apply( m_pt3 ); rethis; }
 
     Triangle ref operator+=( Vector cref in_vec ) { rethis = ( *this + in_vec ); }
     Triangle ref operator-=( Vector cref in_vec ) { rethis = ( *this - in_vec ); }

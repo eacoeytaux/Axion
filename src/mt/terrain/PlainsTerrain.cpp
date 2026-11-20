@@ -10,6 +10,15 @@ var_const( span<Planc> GRASS_TUFTS_BASE_LENGTH = { 9.0, 15.0 } );
 var_const( span<Planc> GRASS_TUFTS_TIP_LENGTH = { 8.0, 10.0 } );
 var_const( span<dec> GRASS_TUFTS_TIP_SWAY_RATIO = { 0.2, 0.4 } );
 var_const( Planc GRASS_TUFTS_OUTLINE_THICKNESS = ( 3.0 ) );
+var_const( Planc GRASS_CORNER_OVERHANG = ( 4.0 ) ); // C! how far the grass at the end of a grassy stretch reaches past the terrain
+var_const( Angle GRASS_CORNER_LEAN = ( Angle::fraction( 8.0 ) ) ); // C! how far that grass's spike leans out from straight into the ground
+
+// C! the dirt under the surface: DIRT_LAYERS bands, each darker and narrower than the one above it, then black in the middle
+var_const( uint DIRT_LAYERS = ( 3 ) ); // C!
+var_const( Planc DIRT_LAYER_WIDTH = ( 12.0 ) ); // C! the top band's width under an edge without grass
+var_const( Planc DIRT_LAYER_WIDTH_GRASS = ( 24.0 ) ); // C! the top band's width under an edge with grass
+var_const( dec DIRT_LAYER_SHRINK = ( 0.75 ) ); // C! each band's width, as a part of the one above it
+var_const( dec DIRT_LAYER_MITER_LIMIT = ( 3.0 ) ); // C! how far a band's corner can be from its vertex, as a part of its depth there, so sharp corners don't spike
 
 var_const( Planc BUSH_OFFSET = ( 10.0 ) );
 var_const( span<Planc> BUSH_RADIUS_BACK = { 16.0, 42.0 } );
@@ -31,11 +40,13 @@ PlainsTerrain::PlainsTerrain( ptr<Room> in_room, vvarray<Point> cref in_vertices
 
     Planc world_bottom = in_room->bounds( ).lower_bound_y( );
 
+    lambdaf( has_grass )( ptr<Terrain::Edge> in_edge ) { return( !is_null( in_edge ) && ( abs( in_edge->normal( ).min_distance( in_room->gravity( ).angle( ).flipped( ) ) ) < GRASS_MAX_ANGLE ) ); };
+
     for_each( edges, edges( ) )
     {
         for_each( edge, edges )
         {
-            if( abs( edge->normal( ).min_distance( in_room->gravity( ).angle( ).flipped( ) ) ) < GRASS_MAX_ANGLE )
+            if( has_grass( edge ) )
             {
                 Point v1 = edge->vertex1( )->position( );
                 Point v2 = edge->vertex2( )->position( );
@@ -149,6 +160,59 @@ PlainsTerrain::PlainsTerrain( ptr<Room> in_room, vvarray<Point> cref in_vertices
         }
     }
 
+    // C! the grass at the vertices: a spike where two grassy edges meet, filling the gap between theirs, and at the end of a grassy
+    // C! stretch (the next edge has no grass, or there isn't one) a spike reaching a little past the terrain
+    varray<Polygon> grass_corners;
+    varray<Polygon> grass_corner_crops;
+
+    for_each( vertices, vertices( ) )
+    {
+        for_each( vertex, vertices )
+        {
+            ptr<Terrain::Edge> edge1 = vertex->edge1( );
+            ptr<Terrain::Edge> edge2 = vertex->edge2( );
+
+            const bool c_grass1 = has_grass( edge1 );
+            const bool c_grass2 = has_grass( edge2 );
+            continue_if( !c_grass1 && !c_grass2 );
+
+            const Point c_at = vertex->position( );
+            const Planc c_tip_length = Random::rPlanc( GRASS_TUFTS_TIP_LENGTH );
+            const Vector c_sway = VectorA( Random::rAngle( ), c_tip_length * Random::rPlanc( GRASS_TUFTS_TIP_SWAY_RATIO ) );
+
+            if( c_grass1 && c_grass2 )
+            {
+                const Vector c_back = edge1->vector( ).normalized( ) * min( Random::rPlanc( GRASS_TUFTS_BASE_LENGTH ), half( edge1->vector( ).magnitude( ) ) );
+                const Vector c_front = edge2->vector( ).normalized( ) * min( Random::rPlanc( GRASS_TUFTS_BASE_LENGTH ), half( edge2->vector( ).magnitude( ) ) );
+                const Angle c_down = ( VectorA( edge1->normal( ), 1.0 ) + VectorA( edge2->normal( ), 1.0 ) ).angle( ).flipped( ); // C! between the two edges' spikes
+
+                grass_front.insert_back( Polygon( { c_at - c_back, c_at + VectorA( c_down, c_tip_length ) + c_sway, c_at + c_front } ) );
+            }
+            else
+            {
+                ptr<Terrain::Edge> edge = ( c_grass1 ? edge1 : edge2 );
+
+                const Vector c_along = edge->vector( ).normalized( );
+                const Vector c_out = ( c_grass1 ? c_along : -c_along ); // C! along the edge, away from it
+                const Planc c_base = min( Random::rPlanc( GRASS_TUFTS_BASE_LENGTH ), half( edge->vector( ).magnitude( ) ) );
+                const Angle c_down = edge->normal( ).flipped( );
+                const Angle c_tip_angle = ( c_grass1 ? ( c_down + GRASS_CORNER_LEAN ) : ( c_down - GRASS_CORNER_LEAN ) ); // C! leaning out, past the end
+
+                const Point c_inner = c_at - ( c_out * c_base );
+                const Point c_outer = c_at + ( c_out * GRASS_CORNER_OVERHANG );
+                const Point c_tip = c_at + VectorA( c_tip_angle, c_tip_length ) + c_sway;
+
+                grass_corners.insert_back( Polygon( c_grass1 ? varray<Point>( { c_inner, c_tip, c_outer } ) : varray<Point>( { c_outer, c_tip, c_inner } ) ) ); // C! in the edge's direction, like the other spikes
+
+                // C! below the edge's line, out as far as the spike and its outline can reach, so the outline doesn't show above the ground
+                const Planc c_reach = GRASS_TUFTS_BASE_LENGTH.max( ) + GRASS_CORNER_OVERHANG + ( GRASS_TUFTS_TIP_LENGTH.max( ) * ( 1.0 + GRASS_TUFTS_TIP_SWAY_RATIO.max( ) ) ) + GRASS_TUFTS_OUTLINE_THICKNESS;
+                const Vector c_below = VectorA( c_down, c_reach );
+
+                grass_corner_crops.insert_back( Polygon( { c_at - ( c_along * c_reach ), c_at + ( c_along * c_reach ), c_at + ( c_along * c_reach ) + c_below, c_at - ( c_along * c_reach ) + c_below } ) );
+            }
+        }
+    }
+
     //for_each( vertices, vertices( ) )
     //{
     //    for_each( vertex, vertices )
@@ -211,11 +275,86 @@ PlainsTerrain::PlainsTerrain( ptr<Room> in_room, vvarray<Point> cref in_vertices
 
     fill_color( DIRT_COLOR_2 );
 
-    for_each( polygon, grass_back ) { draw( PLANT_GREEN_2, polygon.expanded( GRASS_TUFTS_OUTLINE_THICKNESS ) ); }
-    for_each( polygon, grass_front ) { draw( PLANT_GREEN_2, polygon.expanded( GRASS_TUFTS_OUTLINE_THICKNESS ) ); }
-    for_each( polygon, grass_front ) { draw( PLANT_GREEN_1, polygon ); }
+    // C! how far under in_edge the band in_layer starts (the black middle after the last one)
+    lambdaf( dirt_depth )( ptr<Terrain::Edge> in_edge, uint in_layer )
+    {
+        Planc width = ( has_grass( in_edge ) ? DIRT_LAYER_WIDTH_GRASS : DIRT_LAYER_WIDTH );
+        Planc depth = P0;
+
+        do_count( in_layer ) { depth += width; width *= DIRT_LAYER_SHRINK; }
+
+        return( depth );
+    };
+
+    // C! where a band's edge meets under in_at: where the edges each side of it, moved down to their depths, cross
+    lambdaf( dirt_corner )( ptr<Terrain::Edge> in_before, ptr<Terrain::Edge> in_after, Point cref in_at, uint in_layer )
+    {
+        return_if( is_null( in_before ) && is_null( in_after ), in_at );
+
+        if( is_null( in_before ) || is_null( in_after ) ) // C! the end of an open chain: straight down from it
+        {
+            ptr<Terrain::Edge> edge = ( is_null( in_before ) ? in_after : in_before );
+            return( in_at + VectorA( edge->normal( ).flipped( ), dirt_depth( edge, in_layer ) ) );
+        }
+
+        const Planc c_depth_before = dirt_depth( in_before, in_layer );
+        const Planc c_depth_after = dirt_depth( in_after, in_layer );
+
+        const Point c_p1 = in_at + VectorA( in_before->normal( ).flipped( ), c_depth_before );
+        const Point c_p2 = in_at + VectorA( in_after->normal( ).flipped( ), c_depth_after );
+        const Vector c_d1 = in_before->vector( ).normalized( );
+        const Vector c_d2 = in_after->vector( ).normalized( );
+
+        const dec c_cross = ( dec( c_d1.dx( ) ) * dec( c_d2.dy( ) ) ) - ( dec( c_d1.dy( ) ) * dec( c_d2.dx( ) ) );
+        return_if( is_zero( c_cross ), midpoint( c_p1, c_p2 ) ); // C! the edges carry straight on
+
+        const dec c_t = ( ( dec( c_p2.x( ) - c_p1.x( ) ) * dec( c_d2.dy( ) ) ) - ( dec( c_p2.y( ) - c_p1.y( ) ) * dec( c_d2.dx( ) ) ) ) / c_cross;
+        const Point c_crossing = c_p1 + ( c_d1 * c_t );
+
+        const Planc c_deepest = max( c_depth_before, c_depth_after );
+        return_if( ( in_at.distance_to( c_crossing ) <= ( c_deepest * DIRT_LAYER_MITER_LIMIT ) ), c_crossing );
+
+        // C! too sharp a corner: straight down between the two edges instead
+        return( in_at + VectorA( ( VectorA( in_before->normal( ), 1.0 ) + VectorA( in_after->normal( ), 1.0 ) ).angle( ).flipped( ), c_deepest ) );
+    };
+
+    for_range( chain, vertices( ).size( ) )
+    {
+        varray<ptr<Terrain::Vertex>> cref chain_vertices = vertices( )[ chain ];
+        continue_if( ( chain >= terrain( ).size( ) ) || ( chain_vertices.size( ) <= 1 ) );
+
+        const bool c_loop = ( edges( )[ chain ].size( ) == chain_vertices.size( ) );
+        varray<Point> cref terrain_pts = terrain( )[ chain ].points( );
+
+        for_range( i, DIRT_LAYERS )
+        {
+            const uint c_layer = i + 1; // C! the band under the top one, which is the fill
+
+            varray<Point> pts;
+            for_each_const( vertex, chain_vertices ) { pts.insert_back( dirt_corner( vertex->edge1( ), vertex->edge2( ), vertex->position( ), c_layer ) ); }
+
+            if( !c_loop && ( terrain_pts.size( ) >= ( chain_vertices.size( ) + 2 ) ) ) // C! an open chain closes around the room's bounds, as its fill does
+            {
+                pts.insert_back( terrain_pts[ terrain_pts.size( ) - 2 ] );
+                pts.insert_back( terrain_pts.back( ) );
+            }
+
+            draw( DIRT_COLOR_2.v( DIRT_COLOR_2.v( ) * one_minus( dec( c_layer ) / dec( DIRT_LAYERS ) ) ), Polygon( pts ) ); // C! black for the last
+        }
+    }
+
+    for_each( poly, grass_back ) { draw( PLANT_GREEN_2, poly.expanded( GRASS_TUFTS_OUTLINE_THICKNESS ) ); }
+    for_each( poly, grass_front ) { draw( PLANT_GREEN_2, poly.expanded( GRASS_TUFTS_OUTLINE_THICKNESS ) ); }
+    for_each( poly, grass_front ) { draw( PLANT_GREEN_1, poly ); }
 
     crop( );
+
+    // C! drawn after the crop, in a drawing of their own, so they can reach past the terrain
+    Drawing corners;
+    for_each( poly, grass_corners ) { corners.draw( PLANT_GREEN_2, poly.expanded( GRASS_TUFTS_OUTLINE_THICKNESS ) ); }
+    for_each( poly, grass_corners ) { corners.draw( PLANT_GREEN_1, poly ); }
+    for_each( poly, grass_corner_crops ) { corners.add_bounds( poly ); }
+    draw( corners );
 }
 
 bool PlainsTerrain::grassy( const uint in_type ) const

@@ -1,5 +1,11 @@
 #include "mt/environment/misc/CampFire.hpp"
 
+// C! the fire's pops and snaps, quieter than the other sounds
+var_const( string CRACKLE_SOUND = ( "crackle.wav" ) ); // C!
+var_const( declmp CRACKLE_VOLUME = ( 0.5 ) ); // C!
+
+var_const( dec CRACKLE_ODDS = ( 1.0 / 75.0 ) ); // C! the chance each tick that a burning fire crackles (about every 1.25 seconds)
+
 var_const( span<ticks> FLAME_PAUSE = { 8 } );
 
 var_const( Planc FLAME_ORANGE_RADIUS = ( 30.0 ) );
@@ -67,4 +73,11 @@ CampFire::CampFire( ptr<Room> in_room, Point cref in_position ) : Fire( in_room,
     tint_distance( TINT_DISTANCE );
     tint_flicker( TINT_FLICKER );
     tint_intensity( TINT_INTENSITY );
+}
+
+void CampFire::update( )
+{
+    Fire::update( );
+
+    if( lit( ) && Random::rbool( CRACKLE_ODDS ) ) { play_sound( SoundFX( CRACKLE_SOUND ).volume( CRACKLE_VOLUME ) ); } // C! heard only by a Listener in range
 }

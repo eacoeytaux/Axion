@@ -23,7 +23,7 @@ void Lighting::darkness_active( bool in_darkness_active )
     m_darkness_active = in_darkness_active;
 }
 
-dec Lighting::darkness_intensity( ) const
+declmp Lighting::darkness_intensity( ) const
 {
     #if defined( AXN_DEBUG )
     if( Debug::active ) { return( min( m_darkness_slider.value( ), DARKNESS_MAX_INTENSITY ) ); }
@@ -32,7 +32,7 @@ dec Lighting::darkness_intensity( ) const
     return( m_darkness_slider.value( ) );
 }
 
-void Lighting::darkness_intensity( dec in_intensity )
+void Lighting::darkness_intensity( declmp in_intensity )
 {
     m_darkness_slider.value( in_intensity );
 }

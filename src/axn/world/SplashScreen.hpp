@@ -11,7 +11,7 @@ class SplashScreen : public World
 
 public:
 
-    virtual string name( ) const override { return( "AXION-SplashScreen" ); }
+    virtual string name( ) const override { return( "SplashScreen" ); }
 
     virtual bool quit( ) const override;
 
@@ -20,6 +20,8 @@ public:
 protected:
 
     virtual void create( ) override;
+
+    virtual bool loads_in_background( ) const override { return( false ); }
 
     virtual void complete( ) { m_complete = true; }
 

@@ -31,7 +31,7 @@ class Transform;
 class Point : public Stringable
 {
 
-    strinfo( Point, stringify( dec( x( ) ) ) + " : " + stringify( dec( x( ) ) ) );
+    strinfo( Point, stringify( dec( x( ) ) ) + " : " + stringify( dec( y( ) ) ) );
 
 private:
 
@@ -133,7 +133,7 @@ public:
 };
 
 var_const( Point ORIGIN( 0.0, 0.0 ) );
-var_const( Point INVALID_POINT( INFINITY, INFINITY ) );
+var_const( Point INVALID_PT( INFINITY, INFINITY ) );
 
 inline Point PointX( Planc cref in_x ) { return( Point( in_x, P0 ) ); }
 inline Point PointY( Planc cref in_y ) { return( Point( P0, in_y ) ); }
@@ -144,6 +144,8 @@ inline Planc distance( Point cref in_pt1, Point cref in_pt2 ) { return( in_pt1.d
 inline bool in_distance_range( Point cref in_pt1, Point cref in_pt2, Planc cref in_distance, bool in_inclusive = true ) { return( in_pt1.in_distance_range( in_pt2, in_distance, in_inclusive ) ); }
 
 inline Planc cross( Point cref in_pt1, Point cref in_pt2, Point cref in_pt3 ) { return( ( ( in_pt3.y( ) - in_pt1.y( ) ) * ( in_pt2.x( ) - in_pt1.x( ) ) ) - ( ( in_pt3.x( ) - in_pt1.x( ) ) * ( in_pt2.y( ) - in_pt1.y( ) ) ) ); }
+
+inline bool clockwise( varray<Point> cref in_pts ) { dec area = 0.0; for_range( i, in_pts.size( ) ) { Point cref pt1 = in_pts[ i ]; Point cref pt2 = in_pts[ ( i + 1 ) % in_pts.size( ) ]; area += dec( ( pt1.x( ) * pt2.y( ) ) - ( pt2.x( ) * pt1.y( ) ) ); } return( is_neg( area ) ); }
 
 class MinMaxPoint
 {

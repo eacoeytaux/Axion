@@ -31,8 +31,8 @@ public:
 
 private:
 
-    mutable varray<Point> m_points;
-    varray<Point> m_points_raw;
+    mutable varray<Point> m_pts;
+    varray<Point> m_pts_raw;
 
     // stores in 3s
     mutable vvarray<uint> m_triangle_indices;
@@ -46,13 +46,13 @@ public:
 
     Polygon( ) { }
 
-    Polygon( varray<Point> cref in_points )
+    Polygon( varray<Point> cref in_pts )
     {
-        m_points = in_points;
+        m_pts = in_pts;
 
         m_convex = true;
 
-        uint pt_count = m_points.size( );
+        uint pt_count = m_pts.size( );
 
         if( pt_count )
         {
@@ -60,15 +60,11 @@ public:
 
             if( pt_count <= 3 )
             {
-                for_range( i, pt_count ) { m_bounds.update( m_points[ i ] ); }
+                for_range( i, pt_count ) { m_bounds.update( m_pts[ i ] ); }
 
                 if( pt_count == 3 )
                 {
-                    if( Line( m_points[ 0 ], m_points[ 1 ] ).right( m_points[ 2 ] ) )
-                    {
-                        // is clockwise
-                        m_points.reverse( );
-                    }
+                    if( clockwise( m_pts ) ) { m_pts.reverse( ); }
                 }
             }
             else
@@ -82,33 +78,33 @@ public:
 
                 dec edge_curve = 0.0;
 
-                while( ( pt_count > 1 ) && ( m_points.front( ) == m_points.back( ) ) )
+                while( ( pt_count > 1 ) && ( m_pts.front( ) == m_pts.back( ) ) )
                 {
-                    m_points.remove_back( );
+                    m_pts.remove_back( );
                     pt_count--;
                 }
 
                 uint i = 0;
                 while( i < pt_count )
                 {
-                    Point cref pt = m_points[ i ];
+                    Point cref pt = m_pts[ i ];
 
-                    if( i && ( pt == m_points[ i - 1 ] ) )
+                    if( i && ( pt == m_pts[ i - 1 ] ) )
                     {
-                        m_points.remove_at( i-- );
+                        m_pts.remove_at( i-- );
                         pt_count--;
                     }
                     else
                     {
                         m_bounds.update( pt );
 
-                        Point cref prev_pt = m_points[ ( i + pt_count - 1 ) % pt_count ];
+                        Point cref prev_pt = m_pts[ ( i + pt_count - 1 ) % pt_count ];
 
                         edge_curve += dec( ( pt.x( ) - prev_pt.x( ) ) * ( pt.y( ) + prev_pt.y( ) ) );
 
                         if( convex_cw || convex_ccw )
                         {
-                            Line line( m_points[ ( i + pt_count - 2 ) % pt_count ], prev_pt );
+                            Line line( m_pts[ ( i + pt_count - 2 ) % pt_count ], prev_pt );
 
                             if( convex_cw && line.left( pt ) )
                             {
@@ -129,21 +125,18 @@ public:
 
                 if( clockwise )
                 {
-                    m_points_raw.reverse( );
-                    m_points.reverse( );
+                    m_pts_raw.reverse( );
+                    m_pts.reverse( );
                 }
 
                 m_convex = clockwise ? convex_cw : convex_ccw;
             }
         }
 
-        m_points_raw = m_points;
+        m_pts_raw = m_pts;
     }
 
-    Polygon( FixedRectangle cref in_rect )
-    {
-        *this = Polygon( in_rect.points( ) );
-    }
+    Polygon( FixedRectangle cref in_rect ) { *this = Polygon( in_rect.points( ) ); }
 
     static Polygon triangle( Point cref in_pt1, Point cref in_pt2, Point cref in_pt3 ) { return( Polygon( { in_pt1, in_pt2, in_pt3 } ) ); }
     static Polygon isosceles( Point cref in_tip, Point cref in_base_mid, Planc cref in_base_length )
@@ -182,17 +175,17 @@ public:
 
         if( !equilaterals.contains( in_side_count ) )
         {
-            varray<Point> points( in_side_count );
+            varray<Point> pts( in_side_count );
 
             Angle start_angle( RIGHT ); // start at the top
             Angle delta_angle( Angle::fraction( in_side_count ) );
-            for_each( offset, points )
+            for_each( offset, pts )
             {
                 offset = VectorA( start_angle );
                 start_angle += delta_angle;
             }
 
-            equilaterals.insert( in_side_count, Polygon( points ) );
+            equilaterals.insert( in_side_count, Polygon( pts ) );
         }
 
         return( Polygon( equilaterals[ in_side_count ] ).scale( in_radius ) );
@@ -200,6 +193,72 @@ public:
 
     static Polygon circle( Planc cref in_radius = 1.0, Point cref in_center = ORIGIN ) { uint side_count = curve_point_count( in_radius ); return( Polygon::equilateral( side_count, in_radius, in_center, Angle::fraction( x2( side_count ) ) ) ); }
     static Polygon circle( Point cref in_center ) { return( Polygon::circle( ).move( in_center ) ); }
+
+    static Polygon thicken_path( Path cref in_path, Planc cref in_start_width, Planc cref in_end_width, bool in_bulbed = false )
+    {
+        Assert( !is_neg( in_start_width ) );
+        Assert( !is_neg( in_end_width ) );
+
+        return_if( is_zero( in_start_width ) && is_zero( in_end_width ), Polygon( in_path.points( ) ) );
+
+        // C! the path's points, without any that repeat the one before (they have no direction to thicken across)
+        varray<Point> pts;
+        for_each_const( pt, in_path.points( ) ) { if( is_empty( pts ) || ( pt != pts.back( ) ) ) { pts.insert_back( pt ); } }
+
+        return_if( pts.size( ) <= 1, Polygon( pts ) );
+
+        varray<Planc> along( pts.size( ) ); // C! how far along the path each point is
+        for_range( i, pts.size( ) - 1 ) { along[ i + 1 ] = along[ i ] + pts[ i ].distance_to( pts[ i + 1 ] ); }
+
+        const Planc c_length = along.back( );
+
+        varray<Point> right; // C! from the start, on the right of the path
+        varray<Point> left; // C! from the start, on the left; a point with no width is only in right
+
+        for_range( i, pts.size( ) )
+        {
+            const Planc c_width = in_start_width + ( ( in_end_width - in_start_width ) * ( along[ i ] / c_length ) );
+
+            if( is_zero( c_width ) )
+            {
+                right.insert_back( pts[ i ] );
+                continue;
+            }
+
+            // C! the normals (to the left) of the lines either side of the point; an end has only the one
+            const Angle c_normal_before = ( i ? ( Vector( pts[ i - 1 ], pts[ i ] ).angle( ) + RIGHT ) : ( Vector( pts[ i ], pts[ i + 1 ] ).angle( ) + RIGHT ) );
+            const Angle c_normal_after = ( ( i + 1 ) < pts.size( ) ? ( Vector( pts[ i ], pts[ i + 1 ] ).angle( ) + RIGHT ) : c_normal_before );
+
+            // C! between the two normals, moved out far enough that each side stays half the width from both lines
+            const Vector c_between = VectorA( c_normal_before, 1.0 ) + VectorA( c_normal_after, 1.0 );
+            const Planc c_between_length = c_between.magnitude( );
+
+            Vector offset = VectorA( c_normal_before, half( c_width ) ); // C! the path folds straight back on itself: no between, so across the line before
+            if( !is_zero( c_between_length ) ) { offset = VectorA( c_between.angle( ), c_width / c_between_length ); }
+
+            right.insert_back( pts[ i ] - offset );
+            left.insert_back( pts[ i ] + offset );
+        }
+
+        // C! a bulb is half a circle around an end, half its width across, from one side round to the other (none where the width is 0,
+        // C! which is already a point); only the points between the two sides are added, the sides already end there
+        lambdaf( add_bulb )( varray<Point> ref in_outline, Point cref in_end, Planc cref in_width, Angle cref in_from )
+        {
+            return_if( !in_bulbed || is_zero( in_width ) );
+            varray<Point> arc = Arc::ccw( half( in_width ), in_end, in_from, in_from + PI ).points( );
+            for_range( i, arc.size( ) ) { if( i && ( ( i + 1 ) < arc.size( ) ) ) { in_outline.insert_back( arc[ i ] ); } }
+        };
+
+        const Angle c_start_direction = Vector( pts[ 0 ], pts[ 1 ] ).angle( );
+        const Angle c_end_direction = Vector( pts[ pts.size( ) - 2 ], pts.back( ) ).angle( );
+
+        varray<Point> outline = right;
+        add_bulb( outline, pts.back( ), in_end_width, c_end_direction - RIGHT ); // C! from the right side round the front
+        for_range( i, left.size( ) ) { outline.insert_back( left[ left.size( ) - 1 - i ] ); }
+        add_bulb( outline, pts.front( ), in_start_width, c_start_direction + RIGHT ); // C! from the left side round the back
+
+        return( Polygon( outline ) );
+    }
 
     static Polygon thicken_to_point( Path cref in_spine, Planc cref in_base_thickness, dec in_width_curvature = 1.0 ) { return_if( in_spine.empty( ), Polygon( ) ); return( thicken( in_spine, in_base_thickness, P0, in_spine.front( ).angle( ), in_width_curvature ) ); }
     static Polygon thicken_to_point( Path cref in_spine, Planc cref in_base_thickness, Angle cref in_base_angle, dec in_width_curvature = 1.0 ) { return_if( in_spine.empty( ), Polygon( ) ); return( thicken( in_spine, in_base_thickness, P0, in_base_angle, in_width_curvature ) ); }
@@ -253,41 +312,41 @@ public:
         return( Polygon( pts1 + pts2.reversed( ) ) );
     }
 
-    varray<Point> cref points( bool in_transformed = true ) const { if( !in_transformed ) { return( m_points_raw ); } else { apply_transform( ); return( m_points ); } }
+    varray<Point> cref points( bool in_transformed = true ) const { if( !in_transformed ) { return( m_pts_raw ); } else { apply_transform( ); return( m_pts ); } }
 
     Path perimeter( bool in_transformed = true ) const { return( Path( points( in_transformed ), true ) ); }
 
     vvarray<uint> cref triangle_indices( ) const
     {
-        if( is_empty( m_triangle_indices ) && ( m_points_raw.size( ) >= 3 ) )
+        if( is_empty( m_triangle_indices ) && ( m_pts_raw.size( ) >= 3 ) )
         {
             if( convex( ) )
             {
-                for_range( i, m_points_raw.size( ) - 2 )
+                for_range( i, m_pts_raw.size( ) - 2 )
                 {
                     m_triangle_indices.insert_back( { 0, i + 1, i + 2 } );
                 }
             }
             else
             {
-                varray<Point> temp_points = m_points_raw;
+                varray<Point> temp_pts = m_pts_raw;
 
-                varray<uint> temp_pt_indices( temp_points.size( ) );
+                varray<uint> temp_pt_indices( temp_pts.size( ) );
                 for_range( i, temp_pt_indices.size( ) )
                 {
                     temp_pt_indices[ i ] = i;
                 }
 
                 uint i = 0;
-                while( temp_points.size( ) > 3 )
+                while( temp_pts.size( ) > 3 )
                 {
-                    i %= temp_points.size( );
-                    uint i_prev = ( i + ( temp_points.size( ) - 1 ) ) % temp_points.size( );
-                    uint i_next = ( i + 1 ) % temp_points.size( );
+                    i %= temp_pts.size( );
+                    uint i_prev = ( i + ( temp_pts.size( ) - 1 ) ) % temp_pts.size( );
+                    uint i_next = ( i + 1 ) % temp_pts.size( );
 
-                    Point cref pt = temp_points[ i ];
-                    Point cref pt_prev = temp_points[ i_prev ];
-                    Point cref pt_next = temp_points[ i_next ];
+                    Point cref pt = temp_pts[ i ];
+                    Point cref pt_prev = temp_pts[ i_prev ];
+                    Point cref pt_next = temp_pts[ i_next ];
 
                     bool is_ear = false;
 
@@ -295,11 +354,11 @@ public:
                     {
                         bool containing = false;
 
-                        for_range( j, temp_points.size( ) )
+                        for_range( j, temp_pts.size( ) )
                         {
                             if( ( j != i ) && ( j != i_prev ) && ( j != i_next ) )
                             {
-                                Point cref pt_temp = temp_points[ j ];
+                                Point cref pt_temp = temp_pts[ j ];
 
                                 if( Triangle( pt, pt_next, pt_prev ).contains( pt_temp ) )
                                 {
@@ -316,7 +375,7 @@ public:
                     {
                         m_triangle_indices.insert_back( varray<uint>( { temp_pt_indices[ i ], temp_pt_indices[ i_next ], temp_pt_indices[ i_prev ] } ) );
 
-                        temp_points.remove_at( i );
+                        temp_pts.remove_at( i );
                         temp_pt_indices.remove_at( i );
                     }
                     else
@@ -347,11 +406,11 @@ public:
 
     bool convex( ) const { return( m_convex ); }
 
-    uint sides( ) const { return( m_points.size( ) ); }
+    uint sides( ) const { return( m_pts.size( ) ); }
 
     Planc area( ) const
     {
-        varray<Point> cref pts = m_points_raw;
+        varray<Point> cref pts = m_pts_raw;
 
         if( pts.size( ) >= 3 )
         {
@@ -378,7 +437,7 @@ public:
         Point centroid;
         Planc area = P0;
 
-        varray<Point> cref pts = m_points_raw;
+        varray<Point> cref pts = m_pts_raw;
 
         for_each( ti, triangle_indices( ) )
         {
@@ -405,13 +464,7 @@ public:
                 {
                     for_each( line, lines )
                     {
-                        if( in_inclusive )
-                        {
-                            if( line.on( pt_trans ) )
-                            {
-                                return( true );
-                            }
-                        }
+                        return_if( line.on( pt_trans ), in_inclusive ); // C! on the outline: only inside when inclusive (it used to count as inside either way)
 
                         if( line.right( pt_trans ) )
                         {
@@ -423,17 +476,35 @@ public:
                 }
                 else
                 {
-                    uint intersection_count = 0;
+                    // C! even-odd rule: count the sides crossed by a ray going right from the point. Each side counts the end
+                    // C! above the ray but not the one on it, so a ray through a corner isn't counted twice
+                    // C! (the old version cast its ray from in_pt's x instead of pt_trans's, wrong once the polygon was moved)
+                    bool inside = false;
+
+                    dec x = dec( pt_trans.x( ) );
+                    dec y = dec( pt_trans.y( ) );
 
                     for_each( line, lines )
                     {
-                        if( Line( pt_trans, Point( in_pt.x( ), line.lower_bound_y( ) - 1.0 ) ).intersects( line ) )
+                        return_if( line.on( pt_trans ), in_inclusive );
+
+                        dec x1 = dec( line.pt1( ).x( ) );
+                        dec y1 = dec( line.pt1( ).y( ) );
+                        dec x2 = dec( line.pt2( ).x( ) );
+                        dec y2 = dec( line.pt2( ).y( ) );
+
+                        if( ( y1 > y ) != ( y2 > y ) )
                         {
-                            intersection_count++;
+                            dec x_cross = x1 + ( ( ( y - y1 ) * ( x2 - x1 ) ) / ( y2 - y1 ) );
+
+                            if( x < x_cross )
+                            {
+                                inside = !inside;
+                            }
                         }
                     }
 
-                    return( is_odd( intersection_count ) );
+                    return( inside );
                 }
             }
             else if( in_inclusive )
@@ -457,20 +528,52 @@ public:
         Line line_transformed = in_line;
         line_transformed.transform( cumulative_transform_inverse( ) );
 
-        for_each( line, perimeter( false ).lines( ) )
+        if( in_inclusive )
         {
-            if( line.intersects( line_transformed, in_inclusive ) ) // todo this could be a false negative with inclusive = false
+            for_each( line, perimeter( false ) )
             {
-                return( true );
+                return_true_if( line.intersects( line_transformed, true ) );
+            }
+
+            return( contains( in_line.pt1( ) ) || contains( in_line.pt2( ) ) );
+        }
+
+        // C! not inclusive: some part of the line has to be strictly inside, touching the outline doesn't count
+        // C! (checking each side exclusively missed a line crossing straight through a corner)
+        // C! the line is cut wherever it meets the outline, and the middle of each piece is checked
+        return_false_if( is_zero( line_transformed.length( ) ) );
+
+        varray<dec> cuts = { 0.0, 1.0 };
+
+        for_each( line, perimeter( false ) )
+        {
+            if( line_transformed.on( line.pt1( ) ) )
+            {
+                cuts.insert_back( dec( line_transformed.pt1( ).distance_to( line.pt1( ) ) / line_transformed.length( ) ) );
+            }
+
+            if( !line.parallel( line_transformed ) && line.intersects( line_transformed, true ) )
+            {
+                cuts.insert_back( dec( line_transformed.pt1( ).distance_to( line.intersection( line_transformed ) ) / line_transformed.length( ) ) );
             }
         }
 
-        return( contains( in_line.pt1( ) ) || contains( in_line.pt2( ) ) );
+        cuts.sort( [ ] ( dec cref in_x1, dec cref in_x2 ) { return( in_x1 < in_x2 ); } );
+
+        for_range( i, cuts.size( ) - 1 )
+        {
+            continue_if( is_zero( cuts[ i + 1 ] - cuts[ i ] ) );
+
+            Point mid = line_transformed.pt1( ) + ( line_transformed.vector( ) * half( cuts[ i ] + cuts[ i + 1 ] ) );
+            return_true_if( contains( mid.transform( cumulative_transform( ) ), false ) );
+        }
+
+        return( false );
     }
 
     varray<Line> intersection( Line cref in_line ) const
     {
-        varray<Point> intersection_points = { };
+        varray<Point> intersection_pts = { };
 
         bool pt1 = contains( in_line.pt1( ) );
         bool pt2 = contains( in_line.pt2( ) );
@@ -485,26 +588,26 @@ public:
 
         if( pt1 )
         {
-            intersection_points.insert_back( in_line.pt1( ) );
+            intersection_pts.insert_back( in_line.pt1( ) );
         }
 
         if( pt2 )
         {
-            intersection_points.insert_back( in_line.pt2( ) );
+            intersection_pts.insert_back( in_line.pt2( ) );
         }
 
         Line line_transformed = in_line;
         line_transformed.transform( cumulative_transform_inverse( ) );
 
-        for_each( line, perimeter( false ).lines( ) )
+        for_each( line, perimeter( false ) )
         {
             if( line.intersects( line_transformed ) )
             {
-                intersection_points.insert_back( apply_cumulative_transform( line.intersection( line_transformed ) ) );
+                intersection_pts.insert_back( apply_cumulative_transform( line.intersection( line_transformed ) ) );
 
                 if( convex( ) )
                 {
-                    if( !is_empty( intersection_points ) )
+                    if( !is_empty( intersection_pts ) )
                     {
                         break;
                     }
@@ -512,25 +615,25 @@ public:
             }
         }
 
-        if( is_even( intersection_points.size( ) ) )
+        if( is_even( intersection_pts.size( ) ) )
         {
             // sort intersections by distance from start of line
             struct LineIntersectionDistance { LineIntersectionDistance( Point cref in_pt ) : origin( in_pt ) { } Point origin; bool operator( )( Point cref in_pt1, Point cref in_pt2 ) { return( origin.closer_than( in_pt1, in_pt2 ) ); } };
 
-            intersection_points.sort( LineIntersectionDistance( in_line.pt1( ) ) );
+            intersection_pts.sort( LineIntersectionDistance( in_line.pt1( ) ) );
 
-            varray<Line> intersections( intersection_points.size( ) / 2 );
+            varray<Line> intersections( intersection_pts.size( ) / 2 );
 
             for_range( i, intersections.size( ) )
             {
-                intersections[ i ] = Line( intersection_points[ ( i * 2 ) ], intersection_points[ ( i * 2 ) + 1 ] );
+                intersections[ i ] = Line( intersection_pts[ ( i * 2 ) ], intersection_pts[ ( i * 2 ) + 1 ] );
             }
 
             return( intersections );
         }
         else
         {
-            return{ Line( intersection_points.front( ), intersection_points.front( ) ) };
+            return{ Line( intersection_pts.front( ), intersection_pts.front( ) ) };
         }
 
     }
@@ -554,9 +657,31 @@ public:
 
     Polygon convex_hull( ) const { return( convex_from_cloud( points( true ) ) ); }
 
-    static Polygon convex_from_cloud( varray<Point> cref in_points )
+    bool intersects( Polygon cref in_poly, bool in_inclusive = true ) const
     {
-        const uint pt_count = in_points.size( );
+        return_false_if( is_empty( points( ) ) || !in_poly.points( ).size( ) );
+        return_true_if( contains( in_poly.points( ).front( ), in_inclusive ) );
+        return_true_if( in_poly.contains( points( ).front( ), in_inclusive ) );
+
+        for_each( line1, perimeter( ) ) { for_each( line2, in_poly.perimeter( ) ) { return_true_if( line1.intersects( line2, in_inclusive ) ); } }
+
+        return( false );
+    }
+
+    bool overlaps( Polygon cref in_poly, bool in_inclusive = true ) const { return( in_poly.overlapped( *this, in_inclusive ) ); }
+    bool overlapped( Polygon cref in_poly, bool in_inclusive = true ) const
+    {
+        return_false_if( is_empty( points( ) ) || !in_poly.points( ).size( ) );
+        return_false_if( !in_poly.contains( points( ).front( ), !in_inclusive ) );
+
+        for_each( line1, perimeter( ) ) { for_each( line2, in_poly.perimeter( ) ) { return_false_if( line1.intersects( line2, !in_inclusive ) ); } }
+
+        return( true );
+    }
+
+    static Polygon convex_from_cloud( varray<Point> cref in_pts )
+    {
+        const uint pt_count = in_pts.size( );
 
         if( pt_count )
         {
@@ -567,34 +692,34 @@ public:
 
             for_range( i, pt_count - 1 )
             {
-                if( ( in_points[ i + 1 ].y( ) < in_points[ min_i ].y( ) ) ||
-                    ( ( in_points[ i + 1 ].x( ) < in_points[ min_i ].x( ) ) &&
-                      ( in_points[ i + 1 ].y( ) == in_points[ min_i ].y( ) ) ) )
+                if( ( in_pts[ i + 1 ].y( ) < in_pts[ min_i ].y( ) ) ||
+                    ( ( in_pts[ i + 1 ].x( ) < in_pts[ min_i ].x( ) ) &&
+                        ( in_pts[ i + 1 ].y( ) == in_pts[ min_i ].y( ) ) ) )
                 {
                     min_i = i + 1;
                 }
             }
 
             // sort points by angle to min
-            struct AngleToMin { AngleToMin( Point cref in_pt ) : min( in_pt ) { } Point min; bool operator( )( Point cref in_pt1, Point cref in_pt2 ) { Planc pt = cross( min, in_pt1, in_pt2 ); return( ( pt > 0.0 ) || ( !pt && min.closer_than( in_pt1, in_pt2 ) ) ); } };
+            struct AngleToMin { AngleToMin( Point cref in_pt ) : min( in_pt ) { } Point min; bool operator( )( Point cref in_pt1, Point cref in_pt2 ) { Planc pt = cross( min, in_pt1, in_pt2 ); return( is_pos( pt ) || ( is_zero( pt ) && min.closer_than( in_pt1, in_pt2 ) ) ); } };
 
-            varray<Point> sorted_points = in_points;
+            varray<Point> sorted_pts = in_pts;
 
-            sorted_points.remove_at( min_i );
-            sorted_points.sort( AngleToMin( in_points[ min_i ] ) );
+            sorted_pts.remove_at( min_i );
+            sorted_pts.sort( AngleToMin( in_pts[ min_i ] ) );
 
-            varray<Point> convex_hull = { in_points[ min_i ], sorted_points[ 0 ], sorted_points[ 1 ] };
+            varray<Point> convex_hull = { in_pts[ min_i ], sorted_pts[ 0 ], sorted_pts[ 1 ] };
 
-            for_range( i, sorted_points.size( ) - 2 )
+            for_range( i, sorted_pts.size( ) - 2 )
             {
                 // remove hull points until current pt is part of hull
-                while( ( convex_hull.size( ) > 1 ) && ( cross( convex_hull[ convex_hull.size( ) - 2 ], convex_hull[ convex_hull.size( ) - 1 ], sorted_points[ i + 2 ] ) <= 0.0 ) )
+                while( ( convex_hull.size( ) > 1 ) && !is_pos( cross( convex_hull[ convex_hull.size( ) - 2 ], convex_hull[ convex_hull.size( ) - 1 ], sorted_pts[ i + 2 ] ) ) )
                 {
                     convex_hull.remove_back( );
                 }
 
                 // add to hull
-                convex_hull.insert_back( sorted_points[ i + 2 ] );
+                convex_hull.insert_back( sorted_pts[ i + 2 ] );
             }
 
             return( Polygon( convex_hull ) );
@@ -606,10 +731,10 @@ public:
     Polygon ref invert( ) { rethis = inverted( ); }
     Polygon inverted( ) const
     {
-        varray<Point> inverted_points = points( true );
-        for_range( i, inverted_points.size( ) ) { inverted_points[ i ] = -inverted_points[ i ]; }
+        varray<Point> inverted_pts = points( true );
+        for_range( i, inverted_pts.size( ) ) { inverted_pts[ i ] = -inverted_pts[ i ]; }
 
-        return( Polygon( inverted_points ) );
+        return( Polygon( inverted_pts ) );
     }
 
     Polygon ref expand( Planc cref in_expansion, expand_type in_expand = POINTED ) { rethis = expanded( in_expansion, in_expand ); }
@@ -617,14 +742,15 @@ public:
     {
         Assert( !is_neg( in_expansion ) );
 
-        // TODO only works for convex
+        // C! a concave corner is where the two pushed-out sides cross, whatever the expansion type
+        // C! (an expansion bigger than a concave notch can still fold the outline over itself)
 
         return_if( !in_expansion, ( *this ) );
 
         const varray<Point> pts = points( true );
         const uint pt_count = pts.size( );
 
-        varray<Point> new_points;
+        varray<Point> new_pts;
 
         for_range( i, pt_count )
         {
@@ -636,51 +762,39 @@ public:
 
             bool concave = ( ( line_next.angle( ).truncated( ) - line_prev.angle( ).truncated( ) ).truncated( ) > PI );
 
-            if( in_expand == ROUNDED )
-            {
-                if( !concave )
-                {
-                    new_points.insert_back( Arc::ccw( in_expansion, pts[ i ], ( line_prev.angle( ) - RIGHT ), ( line_next.angle( ) - RIGHT ) ).points( ) );
-                }
-                else
-                {
+            Line line_prev_expanded = line_prev;
+            Line line_next_expanded = line_next;
 
-                }
+            {
+                Vector v_prev( line_prev.pt1( ), line_prev.pt2( ) );
+                Vector v_next( line_next.pt1( ), line_next.pt2( ) );
+
+                v_prev.rotate_right( false );
+                v_next.rotate_right( false );
+
+                v_prev.magnitude( in_expansion );
+                v_next.magnitude( in_expansion );
+
+                line_prev_expanded += v_prev;
+                line_next_expanded += v_next;
+            }
+
+            if( concave )
+            {
+                new_pts.insert_back( line_prev_expanded.intersection( line_next_expanded ) );
+            }
+            else if( in_expand == ROUNDED )
+            {
+                new_pts.insert_back( Arc::ccw( in_expansion, pts[ i ], ( line_prev.angle( ) - RIGHT ), ( line_next.angle( ) - RIGHT ) ).points( ) );
             }
             else if( in_expand == POINTED )
             {
-                if( !concave )
-                {
-                    Vector v_prev( line_prev.pt1( ), line_prev.pt2( ) );
-                    Vector v_next( line_next.pt1( ), line_next.pt2( ) );
-
-                    v_prev.rotate_right( false );
-                    v_next.rotate_right( false );
-
-                    v_prev.magnitude( in_expansion );
-                    v_next.magnitude( in_expansion );
-
-                    line_prev += v_prev;
-                    line_next += v_next;
-
-                    new_points.insert_back( line_prev.intersection( line_next ) );
-                }
-                else
-                {
-
-                }
+                new_pts.insert_back( line_prev_expanded.intersection( line_next_expanded ) );
             }
             else if( in_expand == FLATTENED )
             {
-                if( !concave )
-                {
-                    new_points.insert_back( line_prev.pt2( ) );
-                    new_points.insert_back( line_next.pt1( ) );
-                }
-                else
-                {
-
-                }
+                new_pts.insert_back( line_prev_expanded.pt2( ) ); // C! was the corner itself, which didn't expand at all
+                new_pts.insert_back( line_next_expanded.pt1( ) );
             }
             else
             {
@@ -688,70 +802,175 @@ public:
             }
         }
 
-        return( Polygon( new_points ) );
+        return( Polygon( new_pts ) );
     }
 
-    bool intersects( Polygon cref in_polygon, bool in_inclusive = true ) const
+    // C! each corner in in_indices (every corner when it's empty) cut off by an arc of in_radius, touching both its sides, made of
+    // C! in_edge_count edges: with 1, a straight cut, so a rectangle becomes an octagon. Each arc reaches along a side at most all of it, or
+    // C! half of it when the corner at its other end is rounded too; a straight corner (or one folded back on itself) is left as it is
+    Polygon ref round_corners( Planc cref in_radius, uint in_edge_count, uset<uint> cref in_indices = { } ) { rethis = rounded_corners( in_radius, in_edge_count, in_indices ); }
+    Polygon rounded_corners( Planc cref in_radius, uint in_edge_count, uset<uint> cref in_indices = { } ) const
     {
-        return_false_if( is_empty( points( ) ) || !in_polygon.points( ).size( ) );
-        return_true_if( contains( in_polygon.points( ).front( ), in_inclusive ) );
-        return_true_if( in_polygon.contains( points( ).front( ), in_inclusive ) );
+        const varray<Point> pts = points( true );
+        const uint pt_count = pts.size( );
 
-        for_each( line1, perimeter( ).lines( ) ) { for_each( line2, in_polygon.perimeter( ).lines( ) ) { return_true_if( line1.intersects( line2, in_inclusive ) ); } }
+        Assert( !is_neg( in_radius ) );
+        Assert( is_pos( in_edge_count ) );
+        Assert( pt_count >= 3 );
+        for_each_const( index, in_indices ) { Assert( index < pt_count ); }
 
-        return( false );
-    }
+        return_if( ( pt_count < 3 ) || !is_pos( in_radius ) || !in_edge_count, ( *this ) );
 
-    bool overlaps( Polygon cref in_polygon, bool in_inclusive = true ) const { return( in_polygon.overlapped( *this, in_inclusive ) ); }
-    bool overlapped( Polygon cref in_polygon, bool in_inclusive = true ) const
-    {
-        return_false_if( is_empty( points( ) ) || !in_polygon.points( ).size( ) );
-        return_false_if( !in_polygon.contains( points( ).front( ), !in_inclusive ) );
+        lambdaf( rounding )( uint in_index ) { return( is_empty( in_indices ) || in_indices.contains( in_index ) ); };
 
-        for_each( line1, perimeter( ).lines( ) ) { for_each( line2, in_polygon.perimeter( ).lines( ) ) { return_false_if( line1.intersects( line2, !in_inclusive ) ); } }
+        varray<Point> new_pts;
 
-        return( true );
-    }
-
-    Polygon ref join( Polygon cref in_polygon ) { rethis = joined( in_polygon ); }
-    Polygon joined( Polygon cref in_polygon ) const
-    {
-        return_if( !intersects( in_polygon ), *this );
-        return_if( overlaps( in_polygon ), *this );
-        return_if( overlapped( in_polygon ), in_polygon );
-
-        Polygon cref polygon1 = *this;
-        Polygon cref polygon2 = in_polygon;
-
-        varray<Point> intersections;
-        varray<Point> points1 = polygon1.points( );
-        varray<Point> points2 = polygon2.points( );
-
-        varray<Line> lines1 = polygon1.perimeter( ).lines( );
-        varray<Line> lines2 = polygon2.perimeter( ).lines( );
-
-        vvarray<uint> edges1;
-        vvarray<uint> edges2;
-
-        bool both_convex = ( polygon1.convex( ) && polygon2.convex( ) );
-
-        for_each( line1, lines1 )
+        for_range( i, pt_count )
         {
-            for_each( line2, lines2 )
+            const uint c_prev = ( i ? ( i - 1 ) : ( pt_count - 1 ) );
+            const uint c_next = ( ( i + 1 ) % pt_count );
+            Point cref corner = pts[ i ];
+
+            const Vector c_to_prev = Vector( corner, pts[ c_prev ] );
+            const Vector c_to_next = Vector( corner, pts[ c_next ] );
+            const dec c_length_prev = dec( c_to_prev.magnitude( ) );
+            const dec c_length_next = dec( c_to_next.magnitude( ) );
+
+            if( !rounding( i ) || is_zero( c_length_prev ) || is_zero( c_length_next ) )
             {
-                break_if( both_convex && ( intersections.size( ) == 2 ) );
-                if( line1.intersects( line2 ) )
-                {
-                    intersections.insert_back( line1.intersection( line2 ) );
-                }
+                new_pts.insert_back( corner );
+                continue;
+            }
+
+            // C! the angle at the corner, between its two sides
+            const dec c_ux = dec( c_to_prev.dx( ) ) / c_length_prev;
+            const dec c_uy = dec( c_to_prev.dy( ) ) / c_length_prev;
+            const dec c_vx = dec( c_to_next.dx( ) ) / c_length_next;
+            const dec c_vy = dec( c_to_next.dy( ) ) / c_length_next;
+            const dec c_half_angle = half( acos( minmax( ( c_ux * c_vx ) + ( c_uy * c_vy ), -1.0, 1.0 ) ) );
+
+            if( is_zero( sin( c_half_angle ) ) || is_zero( cos( c_half_angle ) ) ) // C! folded back, or straight: no corner to round
+            {
+                new_pts.insert_back( corner );
+                continue;
+            }
+
+            // C! how far along each side the arc starts: as far as fits, for the radius
+            const dec c_most = min( c_length_prev * ( rounding( c_prev ) ? 0.5 : 1.0 ), c_length_next * ( rounding( c_next ) ? 0.5 : 1.0 ) );
+            const dec c_wanted = dec( in_radius ) / tan( c_half_angle );
+            Assert( ( !greater( c_wanted, c_most ) ), "corner %u can't be rounded to a radius of %f: its sides are too short", i, dec( in_radius ) );
+
+            const dec c_along = min( c_wanted, c_most );
+            const dec c_radius = c_along * tan( c_half_angle ); // C! in_radius, unless its sides were too short for it
+
+            // C! the arc's center, along the line between the sides, and where it touches each side
+            const dec c_bisector_x = c_ux + c_vx;
+            const dec c_bisector_y = c_uy + c_vy;
+            const dec c_bisector_length = sqrt( ( c_bisector_x * c_bisector_x ) + ( c_bisector_y * c_bisector_y ) );
+            const dec c_to_center = c_radius / sin( c_half_angle );
+
+            const dec c_center_x = dec( corner.x( ) ) + ( ( c_bisector_x / c_bisector_length ) * c_to_center );
+            const dec c_center_y = dec( corner.y( ) ) + ( ( c_bisector_y / c_bisector_length ) * c_to_center );
+
+            const dec c_start = atan2( dec( corner.y( ) ) + ( c_uy * c_along ) - c_center_y, dec( corner.x( ) ) + ( c_ux * c_along ) - c_center_x );
+            const dec c_end = atan2( dec( corner.y( ) ) + ( c_vy * c_along ) - c_center_y, dec( corner.x( ) ) + ( c_vx * c_along ) - c_center_x );
+
+            dec sweep = c_end - c_start; // C! the short way round, from the side before to the side after
+            if( sweep > numbers::PI ) { sweep -= numbers::TAU; }
+            if( sweep < -numbers::PI ) { sweep += numbers::TAU; }
+
+            for_range( k, in_edge_count + 1 )
+            {
+                const dec c_angle = c_start + ( sweep * ( dec( k ) / dec( in_edge_count ) ) );
+                new_pts.insert_back( Point( c_center_x + ( c_radius * cos( c_angle ) ), c_center_y + ( c_radius * sin( c_angle ) ) ) );
             }
         }
 
-        Assert( intersections.size( ) );
+        return( Polygon( new_pts ) );
+    }
 
-        // TODO!!!
+    Polygon ref join( Polygon cref in_poly ) { rethis = joined( in_poly ); }
+    Polygon joined( Polygon cref in_poly ) const
+    {
+        rethis_if( !intersects( in_poly ) );
+        rethis_if( overlaps( in_poly ) );
+        return_if( overlapped( in_poly ), in_poly );
 
-        return( Polygon( ) );
+        // C! both polygons are stored counter-clockwise, so the outline of the union is traced by walking one of them
+        // C! from a point outside the other, and switching to the other polygon wherever an edge crosses it
+        // C! (assumes simple polygons that cross properly; edges that only touch can confuse the walk)
+        varray<Point> pts[ 2 ] = { points( ), in_poly.points( ) };
+
+        uint start = pts[ 0 ].size( );
+        for_range( i, pts[ 0 ].size( ) )
+        {
+            if( !in_poly.contains( pts[ 0 ][ i ], true ) )
+            {
+                start = i;
+                break;
+            }
+        }
+
+        return_if( ( start == pts[ 0 ].size( ) ), in_poly );
+
+        varray<Point> joined_pts = { pts[ 0 ][ start ] };
+
+        uint current = 0; // C! which polygon is being walked
+        Point pt = pts[ 0 ][ start ];
+        uint next = ( ( start + 1 ) % pts[ 0 ].size( ) ); // C! the vertex being walked towards
+
+        // C! capped: edges that only touch can send the walk round forever; a proper outline passes each vertex and crossing at most once,
+        // C! well under 4 steps per vertex
+        while_max( true, ( 4 * ( pts[ 0 ].size( ) + pts[ 1 ].size( ) ) ) )
+        {
+            Line edge( pt, pts[ current ][ next ] );
+
+            uint other = ( 1 - current );
+
+            // C! the crossing with the other polygon nearest along this edge, ignoring the point the edge starts on
+            bool crossed = false;
+            Point crossing;
+            uint crossing_next = 0;
+
+            for_range( j, pts[ other ].size( ) )
+            {
+                Line other_edge( pts[ other ][ j ], pts[ other ][ ( j + 1 ) % pts[ other ].size( ) ] );
+
+                continue_if( !edge.intersects( other_edge ) );
+
+                Point intersect = edge.intersection( other_edge );
+
+                continue_if( ( intersect == INVALID_PT ) || ( intersect == pt ) );
+
+                if( !crossed || ( pt.distance_to( intersect ) < pt.distance_to( crossing ) ) )
+                {
+                    crossed = true;
+                    crossing = intersect;
+                    crossing_next = ( ( j + 1 ) % pts[ other ].size( ) );
+                }
+            }
+
+            if( crossed )
+            {
+                pt = crossing;
+                current = other;
+                next = crossing_next;
+            }
+            else
+            {
+                pt = pts[ current ][ next ];
+                next = ( ( next + 1 ) % pts[ current ].size( ) );
+            }
+
+            break_if( is_zero( current ) && ( pt == pts[ 0 ][ start ] ) );
+
+            if( joined_pts.back( ) != pt )
+            {
+                joined_pts.insert_back( pt );
+            }
+        }
+
+        return( Polygon( joined_pts ) );
     }
 
     transform_functions( Polygon );
@@ -781,10 +1000,10 @@ private:
         {
             Transform cref t = cumulative_transform( );
 
-            for_range( i, m_points.size( ) )
+            for_range( i, m_pts.size( ) )
             {
-                m_points[ i ] = t.apply( m_points_raw[ i ] );
-                m_bounds.update( m_points[ i ] );
+                m_pts[ i ] = t.apply( m_pts_raw[ i ] );
+                m_bounds.update( m_pts[ i ] );
             }
 
             clean( );

@@ -29,7 +29,7 @@ public:
 
     Circle( Planc cref in_radius = 1.0, Point cref in_center = ORIGIN ) : m_radius( in_radius ), m_center( in_center ) { }
 
-    Planc radius( ) const { return( m_radius ); }
+    Planc cref radius( ) const { return( m_radius ); }
     Planc diameter( ) const { return( x2( m_radius ) ); }
 
     void radius( dec in_radius ) { Assert( is_pos( in_radius ) ); m_radius = in_radius; }
@@ -45,7 +45,7 @@ public:
     static Planc area( Planc cref in_radius ) { return( square( in_radius ) * PI ); }
     static Planc circumference( Planc cref in_radius ) { return( x2( in_radius ) * PI ); }
 
-    bool contains( Point cref in_point, bool in_inclusive = true ) const { return( center( ).in_distance_range( in_point, radius( ), in_inclusive ) ); }
+    bool contains( Point cref in_pt, bool in_inclusive = true ) const { return( center( ).in_distance_range( in_pt, radius( ), in_inclusive ) ); }
 
     bool tangent( Circle cref in_circle ) const { Planc distance = center( ).distance_to( in_circle.center( ) ); return( ( distance == abs( radius( ) + in_circle.radius( ) ) ) || ( distance == abs( radius( ) - in_circle.radius( ) ) ) ); }
 

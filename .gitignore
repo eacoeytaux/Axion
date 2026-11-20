@@ -2,9 +2,11 @@
 
 # folders
 
+/.*/
 /bin/
 /tmp/
-/.*/
+/res/
+/res.unpacking/
 
 # compiled object files
 

@@ -6,8 +6,7 @@
 #include "axn/world/Room.hpp"
 #include "axn/world/Object.hpp"
 #include "axn/world/Terrain.hpp"
-
-// C! Polygon is written as geometry::Polygon because windows.h (pulled in by Catch) declares a Polygon function
+#include "axn/world/Door.hpp"
 
 // C! the full landing sweep drops the walker about 1,700 times and takes around 2 minutes in a Debug build, too slow for every launch,
 // C! so normally a coarse sweep runs instead, plus the drops that have failed before. uncomment this when working on movement
@@ -75,6 +74,8 @@ protected:
 
     virtual ptr<Terrain> generate_terrain( ) override
     {
+        skip_override;
+
         vvarray<Point> vertices;
         vertices.insert_back( m_ground );
 
@@ -88,7 +89,7 @@ class TestWalker : public Object
 
 public:
 
-    // C! same shape and walking speed as Climber
+    // C! same hitbox polygon and walking speed as Climber
     static constexpr dec HEIGHT = ( 32.0 * 1.85 );
     static constexpr dec WIDTH = ( HEIGHT / 2.5 );
     static constexpr dec WIDTH_GROUND = ( WIDTH * 0.25 );
@@ -98,7 +99,7 @@ public:
 
     TestWalker( ptr<Room> in_room, Point cref in_position ) : Object( in_room, in_position )
     {
-        space( geometry::Polygon( { Point( +( WIDTH / 2.0 ), +( HEIGHT / 2.0 ) ),
+        space( Polygon( { Point( +( WIDTH / 2.0 ), +( HEIGHT / 2.0 ) ),
                                     Point( -( WIDTH / 2.0 ), +( HEIGHT / 2.0 ) ),
                                     Point( -( WIDTH_GROUND / 2.0 ), -( HEIGHT / 2.0 ) ),
                                     Point( +( WIDTH_GROUND / 2.0 ), -( HEIGHT / 2.0 ) ) } ) );
@@ -107,6 +108,7 @@ public:
     void step( ) { update( ); }
     void track( uint in_count ) { track_position( in_count ); }
     void make_interactive( bool in_interactive ) { interactive( in_interactive ); }
+    void add_light( Planc cref in_radius ) { add_light_source( position( ), in_radius ); }
 
 protected:
 
@@ -115,7 +117,7 @@ protected:
     {
         Object::update_velocity( );
 
-        if( walking != 0.0 )
+        if( !is_zero( walking ) )
         {
             Vector v = VectorX( walking * SPEED );
 
@@ -198,7 +200,7 @@ static bool check_walk( string cref in_name, varray<Point> cref in_ground, Planc
         }
 
         // C! reached the end of the walk
-        if( in_direction > 0.0 ? ( walker.position( ).x( ) >= in_stop_x ) : ( walker.position( ).x( ) <= in_stop_x ) )
+        if( is_pos( in_direction ) ? ( walker.position( ).x( ) >= in_stop_x ) : ( walker.position( ).x( ) <= in_stop_x ) )
         {
             return( true );
         }
@@ -284,7 +286,7 @@ static bool check_landing( string cref in_name, varray<Point> cref in_ground, de
 
     TestWalker walker( &room, Point( in_x, room.ground_y( in_x ) + 150.0 ) );
     walker.velocity( Vector( in_speed, 0.0 ) );
-    walker.walking = ( ( in_speed > 0.0 ) ? in_walking : ( ( in_speed < 0.0 ) ? -in_walking : 0.0 ) );
+    walker.walking = ( is_pos( in_speed ) ? in_walking : ( is_neg( in_speed ) ? -in_walking : 0.0 ) );
 
     varray<MovementFrame> frames;
 
@@ -351,12 +353,12 @@ test( "Landing on terrain" )
     varray<Point> steps = { Point( -400.0, 0.0 ), Point( 200.0, 0.0 ), Point( 200.0, 40.0 ), Point( 300.0, 40.0 ), Point( 300.0, 80.0 ), Point( 450.0, 80.0 ), Point( 450.0, 20.0 ), Point( 1400.0, 20.0 ) };
     varray<Point> spikes = { Point( -400.0, 0.0 ), Point( 150.0, 0.0 ), Point( 170.0, 30.0 ), Point( 190.0, 0.0 ), Point( 210.0, 30.0 ), Point( 230.0, 0.0 ), Point( 1400.0, 0.0 ) };
 
-    check( check_landings( "flat", flat, 150.0, 650.0 ) == 0 );
-    check( check_landings( "hill", hill, 150.0, 550.0 ) == 0 );
-    check( check_landings( "valley", valley, 150.0, 550.0 ) == 0 );
-    check( check_landings( "bumpy", bumpy, 50.0, 500.0 ) == 0 );
-    check( check_landings( "steps", steps, 150.0, 500.0 ) == 0 );
-    check( check_landings( "spikes", spikes, 120.0, 260.0 ) == 0 );
+    check( is_zero( check_landings( "flat", flat, 150.0, 650.0 ) ) );
+    check( is_zero( check_landings( "hill", hill, 150.0, 550.0 ) ) );
+    check( is_zero( check_landings( "valley", valley, 150.0, 550.0 ) ) );
+    check( is_zero( check_landings( "bumpy", bumpy, 50.0, 500.0 ) ) );
+    check( is_zero( check_landings( "steps", steps, 150.0, 500.0 ) ) );
+    check( is_zero( check_landings( "spikes", spikes, 120.0, 260.0 ) ) );
 
     // C! drops that went into the ground before the fixes, always checked even when the sweep is coarse
     check( check_landing( "steps", steps, 150.0, 3.0, 1.0 ) ); // C! walked into a step, fell into it at the top corner
@@ -475,11 +477,101 @@ test( "Object movement subscriptions" )
     // C! deleting an object with several subscribers used to modify the set it was looping over
     delete leader;
 
-    check( follower1->movement_subscriptions( ).size( ) == 0 );
-    check( follower2->movement_subscriptions( ).size( ) == 0 );
+    check( is_zero( follower1->movement_subscriptions( ).size( ) ) );
+    check( is_zero( follower2->movement_subscriptions( ).size( ) ) );
 
     delete follower1;
     delete follower2;
+}
+
+test( "Objects passed between rooms" )
+{
+    varray<Point> flat = { Point( -400.0, 0.0 ), Point( 1400.0, 0.0 ) };
+    TestRoom room1( flat );
+    TestRoom room2( flat );
+    room1.init( );
+    room2.init( );
+
+    ptr<TestWalker> walker = new TestWalker( &room1, Point( 300.0, 40.0 ) );
+    walker->make_interactive( true );
+    room1.add_object( walker );
+
+    do_count( 60 ) { room1.update( ); } // C! long enough to land
+
+    lambdaf( in_list )( ptr<Room> in_room )
+    {
+        for_each_const( object, in_room->objects( ) ) { return_true_if( object.operator->( ) == walker.operator->( ) ); }
+        return( false );
+    };
+
+    lambdaf( in_grid )( ptr<Room> in_room )
+    {
+        for_each_const( object, in_room->objects_in_range( FixedRectangle( Point( -400.0, -100.0 ), Point( 1400.0, 200.0 ) ) ) ) { return_true_if( object.operator->( ) == walker.operator->( ) ); }
+        return( false );
+    };
+
+    check( in_list( &room1 ) );
+    check( in_grid( &room1 ) );
+    check( walker->grounded( ) );
+
+    // C! released: out of every list in the old room, but not deleted
+    room1.release( walker );
+    check_not( in_list( &room1 ) );
+    check_not( in_grid( &room1 ) );
+
+    // C! passed: in the new room's lists and grid straight away, with no ground from the old room's terrain
+    room2.pass( { walker } );
+    check( walker->room( ).operator->( ) == &room2 );
+    check( in_list( &room2 ) );
+    check( in_grid( &room2 ) );
+    check_not( walker->grounded( ) );
+    check( walker->position( ) == Point( 0.0, 50.0 ) ); // C! no door to come out of, so the default entrance
+
+    // C! it lands on the new room's terrain
+    do_count( 60 ) { room2.update( ); }
+    check( walker->grounded( ) );
+}
+
+test( "Objects come out of a door standing in it" )
+{
+    varray<Point> flat = { Point( -400.0, 0.0 ), Point( 1400.0, 0.0 ) };
+    TestRoom room1( flat );
+    TestRoom room2( flat );
+    room1.init( );
+    room2.init( );
+
+    // C! a door 60 wide and 100 tall, standing on the ground at x 200: it spans x 170 to 230 and y 0 to 100
+    ptr<Door> door = room2.add_door( new Door( &room2, Point( 200.0, 0.0 ), 60.0, 100.0 ) );
+    check( door->exit_gravity( ) == VectorY( -1.0 ).angle( ) ); // C! the room's gravity, down
+
+    ptr<TestWalker> walker = new TestWalker( &room1, Point( 300.0, 40.0 ) );
+    walker->add_light( 10.0 ); // C! a light where it is in the other room
+
+    // C! gravity down: centered across the door, with the bottom of its hitbox on the bottom of the door
+    room2.pass( { walker }, door );
+    check( walker->position( ) == Point( 200.0, TestWalker::HEIGHT / 2.0 ) );
+    check( walker->grounded( ) ); // C! standing on the floor as it comes out, without having to update first
+    check( walker->light_sources( ).front( ).position( ) == walker->position( ) ); // C! its light came with it
+
+    // C! gravity to the right: against the door's right side, centered top to bottom
+    room2.release( walker );
+    door->exit_gravity( Angle( 0.0 ) );
+    room2.pass( { walker }, door );
+    check( walker->position( ) == Point( 230.0 - ( TestWalker::WIDTH / 2.0 ), 50.0 ) );
+    check( !walker->grounded( ) ); // C! the room's gravity is still down, and there's no floor under it here
+
+    // C! gravity down and to the right (45 degrees): pushed into the door's bottom right corner, the furthest it goes that way, and centered
+    // C! across that direction. Measured along "down" ( s, -s ) and "across" ( s, s ), with s = sin( 45 ) = 1 / sqrt( 2 ):
+    // C!   the door goes furthest down at its corner ( 230, 0 ), 230 s, and across it spans 170 s to 330 s, so its middle is 250 s
+    // C!   the walker goes furthest down at its bottom right corner, ( WIDTH_GROUND / 2 + HEIGHT / 2 ) s, and across it spans from
+    // C!   ( -WIDTH_GROUND / 2 - HEIGHT / 2 ) s to ( WIDTH / 2 + HEIGHT / 2 ) s, so its middle is ( WIDTH - WIDTH_GROUND ) / 4 s
+    room2.release( walker );
+    door->exit_gravity( -Angle::fraction( 8.0 ) );
+    room2.pass( { walker }, door );
+
+    const dec c_down = 230.0 - ( TestWalker::WIDTH_GROUND / 2.0 ) - ( TestWalker::HEIGHT / 2.0 ); // C! how far it moves down, in units of s
+    const dec c_across = 250.0 - ( ( TestWalker::WIDTH - TestWalker::WIDTH_GROUND ) / 4.0 ); // C! and across
+    check( walker->position( ) == Point( ( c_down + c_across ) / 2.0, ( c_across - c_down ) / 2.0 ) ); // C! down ( s, -s ) and across ( s, s ), with s * s = 1 / 2
 }
 
 } // namespace axn

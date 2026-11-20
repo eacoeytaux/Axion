@@ -32,13 +32,13 @@ public:
                       Color cref in_color );
 
     Drawing ref draw( varray<Color> cref in_colors,
-                      Polygon cref in_polygon,
+                      Polygon cref in_poly,
                       dec in_thickness = FILLED,
                       bool in_preserve_thickness = false,
                       bool in_extend_lines = false );
 
     Drawing ref draw( Color cref in_color,
-                      Polygon cref in_polygon,
+                      Polygon cref in_poly,
                       dec in_thickness = FILLED,
                       bool in_preserve_thickness = false,
                       bool in_extend_lines = false );
@@ -78,36 +78,38 @@ public:
 
     bool opaque( ) const { return( m_opaque ); }
 
+    // C! how see-through the whole drawing is when it's rendered (1 is as drawn, 0 is invisible), applied to it as one: where one of its own
+    // C! opaque polygons covers another, the covered part stays hidden as it fades, while what a see-through polygon covers still shows.
+    // C! Use it to fade a whole object rather than lowering each color's alpha. Only a drawing that's rendered itself (a Visible) uses it,
+    // C! not one drawn into another
+    declmp opacity( ) const { return( m_opacity ); }
+    Drawing ref opacity( declmp in_opacity ) { m_opacity = in_opacity; rethis; }
+
+    bool empty( ) const; // C! nothing drawn: no polygons in any node or nested drawing
+
     Point cref center( ) const { return( m_center ); }
     Drawing ref center( Point cref in_center ) { m_center = in_center; rethis; }
 
-    FixedRectangle cref bounding_box( ) const { return( m_bounding_box ); }
+    // C! the box around everything drawn, after the drawing's transforms and cut down by its crops (a point at the origin when empty)
+    // C! worked out again from the polygons the first time it's asked for after a change
+    FixedRectangle cref bounding_box( ) const;
 
-    void clear( bool in_reserve_mem = true )
-    {
-        Transformable::clear_transform( );
+    // C! the union of every box bounding_box( ) has had, the current one included: it never shrinks (clear( ) keeps it), so a drawing that
+    // C! changes between frames stays inside it, and Room::render( ) uses it to decide what's worth redrawing
+    FixedRectangle cref max_bounding_box( ) const;
 
-        m_nodes.clear( !in_reserve_mem );
+    void clear( bool in_reserve_mem = true );
 
-        m_bounding_box.width( 0.0 );
-        m_bounding_box.height( 0.0 );
-        m_bounding_box.center( ORIGIN );
-
-        m_opaque = true;
-
-        clear_color_filter( );
-    }
-
-    void optimize( ); // should only be called when a drawing is reused // todo make use of this
-
-    equal_never( Drawing );
-
-public:
+    // C! packs the drawing into as few nodes as possible without changing how it looks, and drops crops and holes that affect nothing
+    // C! it's slow, so call it once (while loading) on drawings that get rendered every frame, not every frame
+    // C! it keeps the look when the drawing is rendered or drawn into a drawing without crops or holes; inside one with crops, a crop no longer
+    // C! moves with this drawing's own transforms (the renderer redraws crops under each inner node's transform)
+    void optimize( );
 
     struct ColoredPolygon
     {
 
-        Polygon polygon;
+        Polygon poly;
 
         varray<Color> colors;
 
@@ -117,27 +119,89 @@ public:
 
         bool opaque = true;
 
+        bool bakeable( Transform cref in_transform ) const; // C! whether in_transform can go into the points without changing how the polygon is drawn
+
         equal_default( ColoredPolygon );
 
     };
+
+    class Nodes;
 
     struct Node
     {
 
         Transform transform = IDENTITY_TRANSFORM; // first thing applied
 
-        varray<ColoredPolygon> crop_shapes; // non-ordered
-        varray<ColoredPolygon> hole_shapes; // non-ordered
+        varray<Polygon> crop_polys; // non-ordered
+        varray<Polygon> hole_polys; // non-ordered
 
-        varray<ColoredPolygon> colored_shapes; // LIFO
+        varray<ColoredPolygon> colored_polys; // LIFO
 
-        vvarray<Node> drawings; // LIFO
+        varray<Nodes> drawings; // LIFO
+
+        bool transform_only( ) const { return( crop_polys.empty( ) && hole_polys.empty( ) && colored_polys.empty( ) && drawings.empty( ) ); } // C! nothing but a transform
+        bool empty( ) const { return( transform_only( ) && transform.is_identity( ) ); } // C! does nothing at all
 
         equal_default( Node );
 
     };
 
-    varray<Node> nodes( ) const;
+    // C! a drawing's nodes, or a nested drawing's: everything Drawing works out by walking through them, nested drawings included
+    class Nodes : public varray<Node>
+    {
+
+    public:
+
+        Nodes( ) { }
+        Nodes( varray<Node> cref in_nodes ) : varray<Node>( in_nodes ) { }
+
+        uint node_count( ) const;
+
+        bool draws_nothing( ) const; // C! no polygons in any node or nested drawing (empty( ) is still whether there are no nodes)
+
+        bool has_crops_or_holes( ) const;
+
+        bool all_identity( ) const; // C! every transform is the identity
+
+        // C! sets every polygon to one color when in_set_color is true, runs the filter over the colors when in_use_filter is true,
+        // C! and updates each polygon's opaque flag; returns whether every polygon is opaque
+        bool recolor( bool in_set_color, Color cref in_color, bool in_use_filter, function<void( Color ref in_color )> cref in_filter );
+
+        // C! adds the box around these nodes' polygons to in_bounds (in_any says whether it has anything in it yet), see Drawing.cpp
+        void add_bounding_box( Transform cref in_outer, varray<FixedRectangle> in_crops, bool ref in_any, FixedRectangle ref in_bounds ) const;
+
+        // C! -- the steps of Drawing::optimize( ), see Drawing.cpp -- //
+
+        bool add_polygon_bounds( varray<FixedRectangle> ref in_poly_bounds ) const;
+
+        void remove_unused_crops_and_holes( varray<FixedRectangle> cref in_poly_bounds, bool ref in_crops_hold_everything );
+        void remove_crops( );
+
+        void merge( bool in_crop_free_context );
+
+        Nodes optimized_crop_free( ) const;
+
+    private:
+
+        struct TransformedColoredPolygon
+        {
+
+            ColoredPolygon colored_poly;
+            Transform transform = IDENTITY_TRANSFORM;
+
+        };
+
+        void flatten( uint in_count, Transform cref in_outer, varray<TransformedColoredPolygon> ref in_transformed_polys ) const;
+
+        static Nodes rebuilt( varray<TransformedColoredPolygon> cref in_polys );
+
+    };
+
+    // C! a temporary drawing hands its nodes over by value, so for_each( node, object.debug_overlay( ).nodes( ) ) doesn't loop over a destroyed drawing
+    Nodes cref nodes( ) cref;
+    Nodes nodes( ) &&;
+
+    equal_never( Drawing );
 
 protected:
 
@@ -145,13 +209,19 @@ protected:
 
 private:
 
-    mutable varray<Node> m_nodes;
+    mutable Nodes m_nodes;
 
     mutable Point m_center = ORIGIN;
 
     mutable FixedRectangle m_bounding_box;
+    mutable bool m_bounding_box_dirty = false;
+
+    mutable FixedRectangle m_max_bounding_box;
+    mutable bool m_max_bounding_box_set = false; // C! false until something has been drawn
 
     mutable bool m_opaque = true;
+
+    declmp m_opacity = 1.0;
 
     bool m_color_filter_set = false;
     function<void( Color ref in_color )> m_color_filter = [ ] ( Color ref in_color ) { };

@@ -18,7 +18,7 @@ string Assert::format( const char * in_message, va_list in_args )
     int length = vsnprintf( nullptr, 0, in_message, args_copy );
     va_end( args_copy );
 
-    return_if( length <= 0, string( in_message ) );
+    return_if( !is_pos( length ), string( in_message ) );
 
     string message( size_t( length ), '\0' );
     vsnprintf( message.data( ), size_t( length ) + 1, in_message, in_args );

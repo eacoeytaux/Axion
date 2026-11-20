@@ -2,5 +2,5 @@
 
 int main( int argc, char * argv[ ] )
 {
-    return( Engine::run( new mtmercy::MtMerciless( ) ) );
+    return( Engine::run( new MtMerciless( ) ) );
 }

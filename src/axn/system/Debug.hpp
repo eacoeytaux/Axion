@@ -12,18 +12,21 @@ namespace axn
 #if defined( OS_WINDOWS )
 // ------------------- //
 #if defined( _DEBUG )
+#undef AXN_DEBUG // C! the project can define it too (Axion.vcxproj does, as 1), and redefining it differently is a warning
 #define AXN_DEBUG
 #endif
 // ------------------- //
 #elif defined( OS_APPLE )
 // ------------------- //
 #if defined( DEBUG )
+#undef AXN_DEBUG // C! the project can define it too (Axion.vcxproj does, as 1), and redefining it differently is a warning
 #define AXN_DEBUG
 #endif
 // ------------------- //
 #elif defined( OS_LINUX )
 // ------------------- //
 #if defined( DEBUG )
+#undef AXN_DEBUG // C! the project can define it too (Axion.vcxproj does, as 1), and redefining it differently is a warning
 #define AXN_DEBUG
 #endif
 // ------------------- //
@@ -42,7 +45,7 @@ namespace axn
 #define breakpoint Debug::breakpointf( ); macro_end
 #define breakpoint_if( b ) Debug::breakpointiff( b ); macro_end
 
-class Debug
+class Debug final
 {
 
 public:

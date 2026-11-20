@@ -39,10 +39,10 @@ public:
     FixedRectangle ref center( Point cref in_center ) { m_center = in_center; rethis; }
 
     Planc cref width( ) const { return( m_width ); }
-    FixedRectangle ref width( Planc cref in_width ) { Assert( !is_neg( in_width ), "cannot have negative width" ); m_width = in_width; rethis; }
+    FixedRectangle ref width( Planc cref in_width ) { Assert( ( !is_neg( in_width ) ), "cannot have negative width" ); m_width = in_width; rethis; }
 
     Planc cref height( ) const { return( m_height ); }
-    FixedRectangle ref height( Planc cref in_height ) { Assert( !is_neg( in_height ), "cannot have negative height" ); m_height = in_height; rethis; }
+    FixedRectangle ref height( Planc cref in_height ) { Assert( ( !is_neg( in_height ) ), "cannot have negative height" ); m_height = in_height; rethis; }
 
     Planc area( ) const { return( width( ) * height( ) ); }
 
@@ -75,53 +75,49 @@ public:
 
     varray<Line> intersection( Line cref in_line ) const
     {
-        if( is_pos( width( ) ) && is_pos( height( ) ) )
+        // C! the part of the line inside the rectangle (edges included), clipped against each side in turn (Liang-Barsky)
+        // C! works for a rectangle with no width or height too, where the result is a point or a piece of a line
+        Vector direction = Vector( in_line.pt1( ), in_line.pt2( ) );
+
+        dec dx = dec( direction.dx( ) );
+        dec dy = dec( direction.dy( ) );
+
+        dec x1 = dec( in_line.pt1( ).x( ) );
+        dec y1 = dec( in_line.pt1( ).y( ) );
+
+        dec t_min = 0.0;
+        dec t_max = 1.0;
+
+        // C! each side as ( p, q ): the line is inside that side where t * p <= q
+        varray<dec> ps = { -dx, +dx, -dy, +dy };
+        varray<dec> qs = { ( x1 - dec( lower_bound_x( ) ) ), ( dec( upper_bound_x( ) ) - x1 ), ( y1 - dec( lower_bound_y( ) ) ), ( dec( upper_bound_y( ) ) - y1 ) };
+
+        for_range( i, ps.size( ) )
         {
-            bool b1 = contains( in_line.pt1( ) );
-            bool b2 = contains( in_line.pt2( ) );
-
-            if( b1 && b2 )
+            if( is_zero( ps[ i ] ) )
             {
-                return{ in_line };
-            }
-
-            // TODO!!!
-
-            if( b1 || b2 )
-            {
-                return{ in_line }; // TODO NOT RIGHT!!!
-            }
-        }
-        else
-        {
-            if( is_pos( width( ) ) )
-            {
-                Line line( center( ) - VectorX( half( width( ) ) ), center( ) + VectorX( half( width( ) ) ) );
-                if( line.intersects( line ) )
-                {
-                    Point pt = line.intersection( line );
-                    return{ Line( pt, pt ) };
-                }
-            }
-            else if( is_pos( height( ) ) )
-            {
-                Line line( center( ) - VectorY( half( height( ) ) ), center( ) + VectorY( half( height( ) ) ) );
-                if( line.intersects( line ) )
-                {
-                    Point pt = line.intersection( line );
-                    return{ Line( pt, pt ) };
-                }
+                return_if( ( qs[ i ] < -DEFAULT_EPSILON ), varray<Line>( ) ); // C! parallel to this side and outside it
             }
             else
             {
-                if( in_line.on( center( ), true ) )
+                dec t = ( qs[ i ] / ps[ i ] );
+
+                if( is_neg( ps[ i ] ) )
                 {
-                    return{ Line( center( ), center( ) ) };
+                    t_min = max( t_min, t );
+                }
+                else
+                {
+                    t_max = min( t_max, t );
                 }
             }
         }
 
-        return{ };
+        return_if( ( t_min > ( t_max + DEFAULT_EPSILON ) ), varray<Line>( ) );
+
+        t_max = max( t_min, t_max );
+
+        return{ Line( ( in_line.pt1( ) + ( direction * t_min ) ), ( in_line.pt1( ) + ( direction * t_max ) ) ) };
     }
 
     bool intersects( FixedRectangle cref in_rect ) const

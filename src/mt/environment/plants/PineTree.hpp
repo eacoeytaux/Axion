@@ -19,7 +19,7 @@ public:
 private:
 
     varray<Drawing> m_leave_bunches_and_trunk;
-    varray<Point> m_leave_bunches_rotation_points;
+    varray<Point> m_leave_bunches_rotation_pts;
 
 };
 

@@ -26,32 +26,28 @@ public:
 
 private:
 
-    dec m_r = 1.0; // red value
-    dec m_g = 1.0; // green value
-    dec m_b = 1.0; // blue value
-    dec m_a = 1.0; // alpha value
+    declmp m_r = 1.0; // red value
+    declmp m_g = 1.0; // green value
+    declmp m_b = 1.0; // blue value
+    declmp m_a = 1.0; // alpha value
 
 public:
 
     Color( ) : m_r( 0.0 ), m_g( 0.0 ), m_b( 0.0 ), m_a( 1.0 ) { }
 
     Color( Color cref in_color ) : m_r( in_color.m_r ), m_g( in_color.m_g ), m_b( in_color.m_b ), m_a( in_color.m_a ) { }
-    Color( Color cref in_color, dec in_a ) : m_r( in_color.m_r ), m_g( in_color.m_g ), m_b( in_color.m_b ), m_a( in_a ) { }
+    Color( Color cref in_color, declmp in_a ) : m_r( in_color.m_r ), m_g( in_color.m_g ), m_b( in_color.m_b ), m_a( in_a ) { }
 
-    static Color rgb( uint in_rgb, dec in_a = 1.0 )
+    static Color rgb( uint in_rgb, declmp in_a = 1.0 )
     {
         return( rgb( dec( ( in_rgb & 0xFF0000 ) >> 16 ) / 255.0,
                      dec( ( in_rgb & 0x00FF00 ) >> 8 ) / 255.0,
                      dec( ( in_rgb & 0x0000FF ) >> 0 ) / 255.0, in_a ) );
     }
 
-    static Color rgb( dec in_r, dec in_g, dec in_b, dec in_a = 1.0 )
+    // C! each component is a declmp, so one outside 0 to 1 is clamped to it (it used to fail an Assert)
+    static Color rgb( declmp in_r, declmp in_g, declmp in_b, declmp in_a = 1.0 )
     {
-        Assert( in_range_0_to_1( in_r, true ), "red must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_g, true ), "green must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_b, true ), "blue must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_a, true ), "alpha must be [ 0-1 ]" );
-
         Color color;
 
         color.m_r = in_r;
@@ -62,29 +58,29 @@ public:
         return( color );
     }
 
-    static Color cmyk( dec in_c, dec in_m, dec in_y, dec in_k, dec in_a = 1.0 )
+    static Color cmyk( dec in_c, dec in_m, dec in_y, dec in_k, declmp in_a = 1.0 )
     {
-        Assert( in_range_0_to_1( in_c, true ), "cyan must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_m, true ), "magenta must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_y, true ), "yellow must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_k, true ), "black must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_a, true ), "alpha must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_c, true ) ), "cyan must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_m, true ) ), "magenta must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_y, true ) ), "yellow must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_k, true ) ), "black must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_a, true ) ), "alpha must be [ 0-1 ]" );
 
-        in_k = one_minus( in_k );
+        dec k = one_minus( in_k );
 
-        dec r = one_minus( in_c ) * in_k;
-        dec g = one_minus( in_m ) * in_k;
-        dec b = one_minus( in_y ) * in_k;
+        dec r = one_minus( in_c ) * k;
+        dec g = one_minus( in_m ) * k;
+        dec b = one_minus( in_y ) * k;
 
         return( rgb( r, g, b, in_a ) );
     }
 
-    static Color hsv( dec in_h, dec in_s, dec in_v, dec in_a = 1.0 )
+    static Color hsv( dec in_h, dec in_s, dec in_v, declmp in_a = 1.0 )
     {
-        Assert( in_range_0_to_1( in_h, true ), "hue must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_s, true ), "saturation must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_v, true ), "value must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_a, true ), "alpha must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_h, true ) ), "hue must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_s, true ) ), "saturation must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_v, true ) ), "value must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_a, true ) ), "alpha must be [ 0-1 ]" );
 
         dec r, g, b;
 
@@ -134,12 +130,12 @@ public:
         return( rgb( r, g, b, in_a ) );
     }
 
-    static Color hsl( dec in_h, dec in_s, dec in_l, dec in_a = 1.0 )
+    static Color hsl( dec in_h, dec in_s, dec in_l, declmp in_a = 1.0 )
     {
-        Assert( in_range_0_to_1( in_h, true ), "hue must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_s, true ), "saturation must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_l, true ), "lightness must be [ 0-1 ]" );
-        Assert( in_range_0_to_1( in_a, true ), "alpha must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_h, true ) ), "hue must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_s, true ) ), "saturation must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_l, true ) ), "lightness must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_a, true ) ), "alpha must be [ 0-1 ]" );
 
         dec r, g, b;
 
@@ -189,7 +185,7 @@ public:
         return( rgb( r, g, b, in_a ) );
     }
 
-    static Color gray( dec in_gray, dec in_a = 1.0 ) { return( rgb( in_gray, in_gray, in_gray, in_a ) ); }
+    static Color gray( declmp in_gray, declmp in_a = 1.0 ) { return( rgb( in_gray, in_gray, in_gray, in_a ) ); }
 
     static Color grayscale( Color cref in_color, grayscale_type in_grayscale = GRAYSCALE_LUMINOSITY )
     {
@@ -235,17 +231,17 @@ public:
     bool is_opaque( ) const { return( is_one( m_a ) ); }
     bool is_transparent( ) const { return( !is_one( m_a ) ); }
 
-    dec r( ) const { return( m_r ); }
-    Color r( dec in_r ) const { return( rgb( in_r, g( ), b( ), a( ) ) ); }
-    Color ref r( dec in_r ) { rethis = rgb( in_r, g( ), b( ), a( ) ); }
+    declmp r( ) const { return( m_r ); }
+    Color r( declmp in_r ) const { return( rgb( in_r, g( ), b( ), a( ) ) ); }
+    Color ref r( declmp in_r ) { rethis = rgb( in_r, g( ), b( ), a( ) ); }
 
-    dec g( ) const { return( m_g ); }
-    Color g( dec in_g ) const { return( rgb( r( ), in_g, b( ), a( ) ) ); }
-    Color ref g( dec in_g ) { rethis = rgb( r( ), in_g, b( ), a( ) ); }
+    declmp g( ) const { return( m_g ); }
+    Color g( declmp in_g ) const { return( rgb( r( ), in_g, b( ), a( ) ) ); }
+    Color ref g( declmp in_g ) { rethis = rgb( r( ), in_g, b( ), a( ) ); }
 
-    dec b( ) const { return( m_b ); }
-    Color b( dec in_b ) const { return( rgb( r( ), g( ), in_b, a( ) ) ); }
-    Color ref b( dec in_b ) { rethis = rgb( r( ), g( ), in_b, a( ) ); }
+    declmp b( ) const { return( m_b ); }
+    Color b( declmp in_b ) const { return( rgb( r( ), g( ), in_b, a( ) ) ); }
+    Color ref b( declmp in_b ) { rethis = rgb( r( ), g( ), in_b, a( ) ); }
 
     dec c( ) const { return( one_minus( max_rgb( ) ) ); }
     Color c( dec in_c ) const { return( cmyk( in_c, m( ), y( ), k( ), a( ) ) ); }
@@ -298,10 +294,11 @@ public:
 
     dec sl( ) const
     {
-        return( max_rgb( ) == min_rgb( ) ) ? ( 0.0 ) :
-            ( ( less_or_equal( l( ), 0.5 ) ) ?
-              ( ( max_rgb( ) - min_rgb( ) ) / ( max_rgb( ) + min_rgb( ) ) ) :
-              ( ( max_rgb( ) - min_rgb( ) / ( 2.0 - ( max_rgb( ) + min_rgb( ) ) ) ) ) );
+        // C! the whole difference is divided for light colors too (only min_rgb( ) was, giving 0 or less for most of them)
+        return( ( max_rgb( ) == min_rgb( ) ) ? ( 0.0 ) :
+                ( less_or_equal( l( ), 0.5 ) ?
+                  ( ( max_rgb( ) - min_rgb( ) ) / ( max_rgb( ) + min_rgb( ) ) ) :
+                  ( ( max_rgb( ) - min_rgb( ) ) / ( 2.0 - ( max_rgb( ) + min_rgb( ) ) ) ) ) );
     }
 
     Color sl( dec in_s ) const { return( hsl( h( ), in_s, l( ), a( ) ) ); }
@@ -311,12 +308,12 @@ public:
     Color l( dec in_l ) const { return( hsl( h( ), sl( ), in_l, a( ) ) ); }
     Color ref l( dec in_l ) { rethis = hsl( h( ), sl( ), in_l, a( ) ); }
 
-    dec a( ) const { return( m_a ); }
-    Color a( dec in_a ) const { return( rgb( r( ), g( ), b( ), in_a ) ); }
-    Color ref a( dec in_a ) { rethis = rgb( r( ), g( ), b( ), in_a ); }
+    declmp a( ) const { return( m_a ); }
+    Color a( declmp in_a ) const { return( rgb( r( ), g( ), b( ), in_a ) ); }
+    Color ref a( declmp in_a ) { rethis = rgb( r( ), g( ), b( ), in_a ); }
 
-    dec max_rgb( ) const { return( max<dec>( { m_r, m_g, m_b } ) ); }
-    dec min_rgb( ) const { return( min<dec>( { m_r, m_g, m_b } ) ); }
+    dec max_rgb( ) const { return( max( max( dec( m_r ), dec( m_g ) ), dec( m_b ) ) ); }
+    dec min_rgb( ) const { return( min( min( dec( m_r ), dec( m_g ) ), dec( m_b ) ) ); }
 
     equal_default( Color );
 
@@ -363,11 +360,11 @@ public:
     Color cref color_end( ) const { return( m_color_end ); }
 
     dec slide( ) const { return( m_slide ); }
-    void slide( dec in_slide ) { m_slide = in_slide; Assert( in_range_0_to_1( m_slide, true ), "slide must be [ 0-1 ]" ); }
+    void slide( dec in_slide ) { m_slide = in_slide; Assert( ( in_range_0_to_1( m_slide, true ) ), "slide must be [ 0-1 ]" ); }
 
     Color color_at( dec in_slide ) const
     {
-        Assert( in_range_0_to_1( in_slide, true ), "slide must be [ 0-1 ]" );
+        Assert( ( in_range_0_to_1( in_slide, true ) ), "slide must be [ 0-1 ]" );
 
         dec d_r = m_color_end.r( ) - m_color_start.r( );
         dec d_g = m_color_end.g( ) - m_color_start.g( );

@@ -1,18 +1,22 @@
 #include "axn/world/World.hpp"
 
 #include "axn/world/Player.hpp"
+#include "axn/world/Door.hpp"
 #include "axn/world/Terrain.hpp"
 #include "axn/graphics/Camera.hpp"
 #include "axn/graphics/Lighting.hpp"
 
+#if defined( AXN_DEBUG )
+var_const( uint START_AGE = ( 99 ) ); // TODO have objects individually validate when they're ready?
+var_const( uint END_AGE = ( 999999 ) ); // DEBUG only, closes World is ages this much
+#else
 var_const( uint START_AGE = ( 999 ) ); // TODO have objects individually validate when they're ready?
+#endif
 
 #if defined( AXN_DEBUG )
-var_const( uint END_AGE = ( 9999999 ) );
 #endif
 
 var_const( dec CAMERA_ZOOM_RATIO = ( 0.96875 ) );
-var_const( dec CAMERA_FOCUS_RATIO = ( 0.75 ) );
 
 #if defined( AXN_DEBUG )
 var_const( dec CAMERA_SIDE_BUFFER_RATIO = ( 0.1 ) );
@@ -20,14 +24,16 @@ var_const( dec CAMERA_SIDE_BUFFER_RATIO = ( 0.1 ) );
 var_const( dec CAMERA_SIDE_BUFFER_RATIO = ( 0.1 ) );
 #endif
 
+World::~World( )
+{
+    if( m_load_thread.joinable( ) ) { m_load_thread.join( ); } // C! a load still running would be making rooms as they're destroyed
+
+    destroy( ); // from destruction comes destruction
+}
+
 World::World( )
 {
     destroy( ); // from destruction comes creation
-}
-
-World::~World( )
-{
-    destroy( ); // from destruction comes destruction
 }
 
 void World::init( )
@@ -40,11 +46,14 @@ void World::init( )
 
     Random::reset( );
 
-    create( );
-
-    #if !defined( AXN_DEBUG )
-    age( START_AGE );
-    #endif
+    if( loads_in_background( ) )
+    {
+        start_loading( [ this ] ( ) { load( ); } );
+    }
+    else
+    {
+        load( );
+    }
 }
 
 void World::render( )
@@ -72,9 +81,16 @@ void World::update( )
         {
             if( camera( )->transitioned( ) )
             {
-                current_room_swap( next_room( ) );
+                ptr<Room> room = next_room( );
 
-                camera( )->transition( Camera::CIRCLE, camera( )->target( true ) );
+                m_queued_sounds.clear( ); // C! nothing from the room being left is heard in the next one
+                Engine::stop_audio( ); // C! the sounds and the music
+
+                // C! behind the loading screen, the room catches up to the world's age (only the current room has been updating); the
+                // C! rooms swap once it's done, in finish_loading( ), so whatever comes through the door arrives in a room that's caught up
+                m_switching_room = true;
+                start_loading( [ this, room ] ( ) { if( room->age( ) < age( ) ) { catch_up( room ); } } );
+                return;
             }
             else if( !camera( )->transitioning( ) )
             {
@@ -96,7 +112,7 @@ void World::update( )
                 camera( )->target( current_room( )->player_main( )->position( ) );
             }
 
-            camera( )->update( );
+            // C! the camera's own update( ) is called by Engine::run, every frame, paused or not
         }
     }
 
@@ -109,7 +125,7 @@ void World::pause( bool in_paused )
 {
     m_paused = in_paused;
 
-    if( paused( ) )
+    if( paused( ) && current_room( ) ) // C! no room yet, so no players to stop
     {
         for_each( player, current_room( )->players( ) )
         {
@@ -175,7 +191,7 @@ void World::input( list<ptr<Input>> cref in_inputs )
                 {
                     if( pressed )
                     {
-                        if( Settings::shifty( ) ) { Random::seed_milliseconds( ); }
+                        if( Settings::shifty( ) ) { Random::rseed( ); }
 
                         reset( );
                     }
@@ -237,6 +253,16 @@ void World::input( list<ptr<Input>> cref in_inputs )
                     }
                 }
 
+                b_case( 'x' ) :
+                {
+                    if( pressed )
+                    {
+                        Engine::screenshot( Engine::ImageFormat( Settings::value( Settings::SCREENSHOT_FORMAT ) ), camera( )->bounds( false ) );
+
+                        camera( )->shutter( ).start( );
+                    }
+                }
+
                 b_case( -27 ) : a_case( -30 ) : a_case( -31 ) : // shift
                 {
                     if( pressed )
@@ -275,9 +301,7 @@ void World::input( list<ptr<Input>> cref in_inputs )
                 {
                     if( pressed )
                     {
-                        static bool focused = false;
-
-                        camera( )->height( camera( )->height( ) * ( ( focused = !focused ) ? ( CAMERA_FOCUS_RATIO ) : inverse( CAMERA_FOCUS_RATIO ) ) );
+                        camera( )->cinematic( !camera( )->cinematic( ) ); // C! was shrinking the camera's height, which moved its center
                     }
                 };
 
@@ -295,7 +319,7 @@ void World::input( list<ptr<Input>> cref in_inputs )
 
                 b_case( 'l' ) :
                 {
-                    if( pressed )
+                    if( pressed && current_room( ) ) // C! no room yet, so no lighting to toggle
                     {
                         current_room( )->lighting_active( !current_room( )->lighting_active( ) );
                     }
@@ -366,7 +390,7 @@ void World::input( list<ptr<Input>> cref in_inputs )
                 {
                     if( pressed )
                     {
-                        Settings::flip( Settings::DEBUG_GRID );
+                        Settings::flip( Settings::DEBUG_SKELETONS );
                     }
                 }
 
@@ -374,7 +398,7 @@ void World::input( list<ptr<Input>> cref in_inputs )
                 {
                     if( pressed )
                     {
-                        Settings::flip( Settings::DEBUG_SHOW_VISUAL_BBOX );
+                        Settings::flip( Settings::DEBUG_AUDIO );
                     }
                 }
 
@@ -382,19 +406,11 @@ void World::input( list<ptr<Input>> cref in_inputs )
                 {
                     if( pressed )
                     {
-                        Settings::flip( Settings::DEBUG_SHOW_TERRAIN );
+                        Settings::flip( Settings::DEBUG_GRID );
                     }
                 }
 
                 b_case( '8' ) :
-                {
-                    if( pressed )
-                    {
-                        Settings::flip( Settings::DEBUG_SHOW_FOREGROUND );
-                    }
-                }
-
-                b_case( '9' ) :
                 {
                     if( pressed )
                     {
@@ -412,6 +428,21 @@ void World::input( list<ptr<Input>> cref in_inputs )
                         else
                         {
                             Settings::flip( Settings::DEBUG_SHOW_BACKGROUND );
+                        }
+                    }
+                }
+
+                b_case( '9' ) :
+                {
+                    if( pressed )
+                    {
+                        if( Settings::shifty( ) )
+                        {
+                            Settings::flip( Settings::DEBUG_SHOW_FOREGROUND );
+                        }
+                        else
+                        {
+                            Settings::flip( Settings::DEBUG_SHOW_TERRAIN );
                         }
                     }
                 }
@@ -488,6 +519,39 @@ void World::input( list<ptr<Input>> cref in_inputs )
     }
 }
 
+void World::update_loading( )
+{
+    return_if( !loading( ) );
+
+    m_loading_ticks++;
+
+    return_if( !m_loaded.load( ) );
+
+    finish_loading( );
+}
+
+void World::age( ticks in_time, bool in_current_only )
+{
+    varray<ptr<Room>> rooms;
+    if( in_current_only ) { if( current_room( ) ) { rooms.insert_back( current_room( ) ); } }
+    else { for_each( room, m_rooms ) { rooms.insert_back( room ); } }
+
+    const varray<HiddenPlayer> c_hidden = hide_players( rooms );
+
+    for_range( i, uint( in_time ) )
+    {
+        for_each( room, rooms ) { room->update( ); }
+
+        m_age++;
+    }
+
+    m_queued_sounds.clear( );
+    show_players( c_hidden );
+    #if defined( AXN_DEBUG )
+    m_heard_sounds.clear( );
+    #endif
+}
+
 ptr<Room> World::next_room( ) { return( m_next_room ); }
 ptr<Room> World::current_room( ) { return( m_current_room ); }
 ptr<Room> World::current_room( ptr<Room> in_room ) { return( m_next_room = in_room ); }
@@ -503,6 +567,74 @@ ptr<Room> World::add_room( ptr<Room> in_room, bool in_current )
     return( in_room );
 }
 
+void World::pass( varray<ptr<Object>> cref in_objects, ptr<Door> in_door )
+{
+    return_if( is_null( in_door ) || is_null( in_door->out( ) ) || is_null( in_door->out( )->room( ) ) ); // C! a door that doesn't lead anywhere passes nothing
+    return_if( next_room( ) && ( next_room( ) != current_room( ) ) ); // C! already on the way through a door
+
+    m_passing_objects = in_objects;
+    m_passing_door = in_door->out( );
+
+    current_room( m_passing_door->room( ) );
+}
+
+void World::play_sound( SoundFX cref in_sound, Point cref in_position )
+{
+    m_queued_sounds.insert_back( QueuedSound{ in_sound, in_position } );
+
+    #if defined( AXN_DEBUG )
+    m_heard_sounds.insert_back( HeardSound{ in_position, in_sound.hearing_umbra( ), in_sound.hearing_penumbra( ), Countdown( max( Engine::sound_length( in_sound ), 1.0 ) ) } ); // C! at least a frame, so one that isn't loaded still shows
+    #endif
+}
+
+void World::play_sound( SoundFX cref in_sound )
+{
+    Assert( ( in_sound.global( ) ), "a sound played without a position has to be global( )" );
+
+    m_queued_sounds.insert_back( QueuedSound{ in_sound, ORIGIN } );
+}
+
+void World::play_queued_sounds( )
+{
+    #if defined( AXN_DEBUG )
+    for_each( heard, m_heard_sounds ) { heard.playing.tick( ); }
+    m_heard_sounds.remove_if( [ ] ( HeardSound cref in_heard ) { return( in_heard.playing.completed( ) ); } );
+    #endif
+
+    return_if( m_queued_sounds.empty( ) );
+
+    varray<ptr<Listener>> listeners; // C! gathered only when there's something to hear
+
+    if( current_room( ) )
+    {
+        for_each_const( object, current_room( )->objects( ) )
+        {
+            if( cast_as( object, listener, Listener ) ) { listeners.insert_back( listener ); }
+        }
+    }
+
+    for_each_const( queued, m_queued_sounds )
+    {
+        declmp loudest_volume = 0.0;
+        bool heard = false; // C! by an active listener
+
+        for_each_const( listener, listeners )
+        {
+            continue_if( !listener->active( ) );
+            heard = true;
+
+            const Planc c_distance = listener->listening_position( ).distance_to( queued.position );
+            loudest_volume = max( loudest_volume, declmp( dec( listener->volume( ) ) * dec( queued.sound.reach( c_distance ) ) ) );
+        }
+
+        if( !heard && queued.sound.global( ) ) { loudest_volume = 1.0; } // C! no one to hear it, as when there's no player
+
+        if( is_pos( loudest_volume ) ) { Engine::speaker( ).play( queued.sound, loudest_volume ); }
+    }
+
+    m_queued_sounds.clear( );
+}
+
 void World::create( ) { }
 
 void World::destroy( )
@@ -511,6 +643,9 @@ void World::destroy( )
 
     m_current_room = nullptr;
     m_next_room = nullptr;
+
+    m_passing_objects.clear( ); // C! deleted with their rooms
+    m_passing_door = nullptr;
 
     safe_delete( m_camera );
 }
@@ -525,9 +660,53 @@ void World::reset( )
     camera( )->zoom( zoom );
 }
 
+void World::start_loading( function<void( )> cref in_load )
+{
+    if( m_load_thread.joinable( ) ) { m_load_thread.join( ); } // C! a thread object still holding a finished load can't take a new one
+
+    m_loading = true;
+    m_loading_ticks = 0.0;
+    m_loaded = !in_load;
+
+    if( in_load )
+    {
+        m_load_thread = thread( [ this, in_load ] ( ) { in_load( ); m_loaded = true; } );
+    }
+}
+
 ptr<Room> World::current_room_swap( ptr<Room> in_room )
 {
     m_current_room = in_room;
+
+    // C! objects going through a door move now, between the camera transitioning out and back in (outside any room's update, so no room's lists are being looped over)
+    if( !is_empty( m_passing_objects ) && !is_null( m_passing_door ) && ( m_passing_door->room( ) == in_room ) )
+    {
+        uset<ptr<Object>> passing;
+
+        for_each( object, m_passing_objects )
+        {
+            continue_if( is_null( object ) ); // C! nothing to move
+
+            passing.insert( object );
+
+            if( object->room( ) ) { object->room( )->release( object ); }
+        }
+
+        // C! following another object's movement only works within one room, so links to objects left behind are cut
+        for_each( object, passing )
+        {
+            uset<ptr<Object>> subscribers = object->movement_subscribers( ); // C! copies, unsubscribing changes these sets
+            uset<ptr<Object>> subscriptions = object->movement_subscriptions( );
+
+            for_each( subscriber, subscribers ) { if( !passing.contains( subscriber ) ) { subscriber->unsubscribe_to_movement( object ); } }
+            for_each( subscription, subscriptions ) { if( !passing.contains( subscription ) ) { object->unsubscribe_to_movement( subscription ); } }
+        }
+
+        in_room->pass( m_passing_objects, m_passing_door );
+    }
+
+    m_passing_objects.clear( );
+    m_passing_door = nullptr;
 
     if( camera( ) && ( current_room( ) && current_room( )->player_main( ) ) )
     {
@@ -535,4 +714,66 @@ ptr<Room> World::current_room_swap( ptr<Room> in_room )
     }
 
     return( current_room( in_room ) );
+}
+
+varray<World::HiddenPlayer> World::hide_players( varray<ptr<Room>> cref in_rooms )
+{
+    varray<HiddenPlayer> hidden;
+
+    for_each( room, in_rooms )
+    {
+        for_each( player, room->players( ) )
+        {
+            hidden.insert_back( HiddenPlayer{ player, player->invincible_always( ) } );
+            player->invisible( true );
+            player->invincible_always( true );
+        }
+    }
+
+    return( hidden );
+}
+
+void World::show_players( varray<HiddenPlayer> cref in_hidden )
+{
+    for_each_const( hidden, in_hidden )
+    {
+        hidden.player->invisible( false );
+        hidden.player->invincible_always( hidden.invincible_always );
+    }
+}
+
+void World::catch_up( ptr<Room> in_room )
+{
+    const varray<HiddenPlayer> c_hidden = hide_players( { in_room } );
+    in_room->age( ticks( age( ) - in_room->age( ) ) );
+    show_players( c_hidden );
+
+    m_queued_sounds.clear( );
+    #if defined( AXN_DEBUG )
+    m_heard_sounds.clear( );
+    #endif
+}
+
+void World::load( ) { create( ); age( START_AGE ); }
+
+void World::finish_loading( )
+{
+    if( m_load_thread.joinable( ) ) { m_load_thread.join( ); }
+
+    m_loading = false;
+
+    if( current_room( ) )
+    {
+        for_each( player, current_room( )->players( ) )
+        {
+            player->clear_input( ); // C! the loading screen took no input, so a key let go during it would otherwise stay held
+        }
+    }
+
+    if( m_switching_room && camera( ) )
+    {
+        m_switching_room = false;
+        current_room_swap( next_room( ) ); // C! the room caught up behind the loading screen, so the objects going through the door move in now
+        camera( )->transition( Camera::CIRCLE, camera( )->target( true ) );
+    }
 }

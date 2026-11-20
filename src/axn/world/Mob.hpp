@@ -42,7 +42,7 @@ public:
     virtual bool alive( ) const;
     bool dead( ) const { return( !alive( ) ); }
 
-    dec health_percentage( ) const;
+    declmp health_percentage( ) const;
     virtual dec health( ) const;
     virtual dec max_health( ) const;
 
@@ -50,9 +50,6 @@ public:
 
     virtual bool invincible_always( ) const { return( m_invincible_always ); }
     virtual uint invincible_duration( ) const { return( m_invincible_duration ); }
-
-    virtual bool facing_right( ) const;
-    bool facing_left( ) const { return( !facing_right( ) ); }
 
     virtual void die( );
 
@@ -81,7 +78,10 @@ public:
     Countdown cref hurt_display_timer( ) const { return( m_hurt_display_timer ); }
     void hurt_display_duration( ticks in_ticks ) { m_hurt_display_timer.duration( in_ticks ); }
 
+    virtual bool facing_right( ) const;
     virtual void facing_right( bool in_facing_right );
+
+    bool facing_left( ) const { return( !facing_right( ) ); }
     void facing_left( bool in_facing_left ) { return( facing_right( !in_facing_left ) ); }
 
     // eyes
@@ -106,7 +106,7 @@ public:
     virtual void draw_eyes( Point cref in_eye_position1, Point cref in_eye_position2, Angle cref in_angle = A0 ) { draw_eye( in_eye_position1, in_angle ); draw_eye( in_eye_position2, in_angle ); }
     virtual void draw_eyes( varray<Point> cref in_eye_positions, Angle cref in_angle = A0 ) { for_each( position, in_eye_positions ) { draw_eye( position, in_angle ); } }
 
-    virtual Planc eye_radius( ) const { return( m_eye_radius ); }
+    virtual Planc cref eye_radius( ) const { return( m_eye_radius ); }
     virtual Color eye_color( ) const { return( m_eye_color ); }
 
 private:
@@ -146,7 +146,7 @@ protected:
 
         Mob * parent( ) { return( m_parent ); }
 
-        Point base( ) const { return( m_base ); }
+        Point cref base( ) const { return( m_base ); }
 
         Point position( uint in_i ) const { Point p = m_base; for_range( j, in_i + 1 ) { p += VectorA( m_limbs[ j ].angle, m_limbs[ j ].length ); } return( p ); }
 

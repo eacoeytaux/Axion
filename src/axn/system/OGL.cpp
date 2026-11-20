@@ -47,7 +47,7 @@ Error ogl::error_check( )
 
         if( m_error_code )
         {
-            m_error = error_system; // TODO use error_code instead
+            m_error = Error( error_system.code( ), uint( m_error_code ), ( "OpenGL error " + to_string( m_error_code ) ) ); // C! keeps the OpenGL error code as the sub code
         }
     }
 
@@ -125,6 +125,22 @@ Error ogl::clear( )
     clear_stencil( );
 
     return( error_check( ) );
+}
+
+varray<unsigned char> ogl::read_pixels( uint in_x, uint in_y, uint in_width, uint in_height )
+{
+    varray<unsigned char> pixels;
+    pixels.resize( in_width * in_height * 3 );
+
+    return_if( pixels.empty( ), pixels );
+
+    glReadBuffer( GL_BACK );
+    glPixelStorei( GL_PACK_ALIGNMENT, 1 ); // C! rows packed tightly, whatever the width
+    glReadPixels( GLint( in_x ), GLint( in_y ), GLsizei( in_width ), GLsizei( in_height ), GL_RGB, GL_UNSIGNED_BYTE, &pixels[ 0 ] );
+
+    error_check( );
+
+    return( pixels );
 }
 
 Error ogl::clear_color( )
@@ -265,7 +281,7 @@ Error ogl::push_attribute( )
 
 Error ogl::pop_attribute( )
 {
-    Assert( is_pos( m_attrib_stack_count ), "attribute stack is empty" );
+    Assert( ( is_pos( m_attrib_stack_count ) ), "attribute stack is empty" );
 
     glPopAttrib( );
 
@@ -285,7 +301,7 @@ Error ogl::push_matrix( )
 
 Error ogl::pop_matrix( )
 {
-    Assert( is_pos( m_matrix_stack_count ), "matrix stack is empty" );
+    Assert( ( is_pos( m_matrix_stack_count ) ), "matrix stack is empty" );
 
     glPopMatrix( );
 
@@ -296,16 +312,14 @@ Error ogl::pop_matrix( )
 
 Error ogl::transform( Transform cref in_trans )
 {
+    // C! the 2D part only, with z passed through unchanged: the third row and column used to go into z, which did nothing while every
+    // C! vertex had z = 0, but moved anything drawn at another z (a fading drawing's depth pass). The translation is done by ogl::translate( )
     dec matrix[ 16 ] = {
         in_trans.get( 0, 0 ),
-        in_trans.get( 1, 0 ),
-        in_trans.get( 2, 0 ), 0,
+        in_trans.get( 1, 0 ), 0, 0,
         in_trans.get( 0, 1 ),
-        in_trans.get( 1, 1 ),
-        in_trans.get( 2, 1 ), 0,
-        in_trans.get( 0, 2 ),
-        in_trans.get( 1, 2 ),
-        in_trans.get( 2, 2 ), 0,
+        in_trans.get( 1, 1 ), 0, 0,
+        0, 0, 1, 0,
         0, 0, 0, 1 };
 
     glMultMatrixd( matrix );
@@ -540,6 +554,14 @@ Error ogl::depth_equal_less( )
 Error ogl::depth_less( )
 {
     return( depth_func( GL_LESS ) );
+}
+
+Error ogl::color_mask( bool in_mask )
+{
+    const GLboolean c_mask = ( in_mask ? GL_TRUE : GL_FALSE );
+
+    glColorMask( c_mask, c_mask, c_mask, c_mask );
+    return( error_check( ) );
 }
 
 Error ogl::depth_mask( bool in_mask )

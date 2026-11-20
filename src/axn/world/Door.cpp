@@ -18,6 +18,8 @@ Door::Door( ptr<Room> in_room, Point cref in_position, Planc cref in_width, Plan
 
     stationary( true );
     interactive( true );
+
+    if( in_room && in_room->gravity( in_position ).has_magnitude( ) ) { exit_gravity( in_room->gravity( in_position ).angle( ) ); } // C! the room's gravity at the door, or down when there's none
 }
 
 void Door::render( )
@@ -26,13 +28,6 @@ void Door::render( )
 
     draw( FILL_COLOR, space( ) );
     draw( door_drawing( ) );
-}
-
-void Door::open( varray<ptr<Object>> cref in_objects )
-{
-    //room( )->remove_objects( in_objects, false );
-    room( )->world( )->current_room( out( )->room( ) );
-    //out( )->room( )->pass( in_objects );
 }
 
 #if defined( AXN_DEBUG )
@@ -49,3 +44,9 @@ Drawing Door::debug_overlay( ) const
 }
 #endif
 
+void Door::open( varray<ptr<Object>> cref in_objects )
+{
+    return_if( is_null( world( ) ) ); // C! no world to go through to another room in
+
+    world( )->pass( in_objects, this ); // C! moves in_objects to the room on the other side once the camera has transitioned out
+}

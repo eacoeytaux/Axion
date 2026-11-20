@@ -30,4 +30,6 @@ Bush::Bush( ptr<Room> in_room, Point cref in_root, dec in_z ) : Object( in_room,
     }
 
     draw( bush_drawing );
+
+    optimize( ); // C! drawn once and kept, so flatten the nested bush drawing
 }

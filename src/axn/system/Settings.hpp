@@ -6,7 +6,7 @@
 namespace axn
 {
 
-class Settings
+class Settings final
 {
 
 public:
@@ -31,30 +31,39 @@ public:
         DEBUG_SHOW_VISUAL_BBOX,
         DEBUG_CAMERA_ZOOM_LOCK,
         DEBUG_CAMERA_DISPLAY,
-        DEBUG_HEALTH,
-        DEBUG_DAMAGE,
+        DEBUG_AUDIO,
         DEBUG_PHYSICS,
         DEBUG_TERRAIN,
         DEBUG_GRID,
+        DEBUG_HEALTH,
+        DEBUG_DAMAGE,
+        DEBUG_SKELETONS,
         #endif
+
+        SCREENSHOT_FORMAT,
+
+        OPTION_COUNT, // not an option, just a counter
     };
 
     static void init( );
 
-    static bool get( Option in_opt ) { Assert( !is_zero( in_opt ) ); return( settings.contains( in_opt ) ); }
-    static bool set( Option in_opt, bool in_set ) { Assert( !is_zero( in_opt ) ); if( in_set ) { settings.insert( in_opt ); } else { settings.remove( in_opt ); } return( in_set ); }
+    static uint value( Option in_opt ) { Assert( !is_zero( in_opt ) ); return( settings[ in_opt ] ); }
+    static uint value( Option in_opt, uint in_value ) { Assert( !is_zero( in_opt ) ); return( settings[ in_opt ] = in_value ); }
 
-    static bool flip( Option in_opt ) { Assert( !is_zero( in_opt ) ); return( set( in_opt, !get( in_opt ) ) ); }
+    static bool get( Option in_opt ) { return( !is_zero( value( in_opt ) ) ); }
+    static bool set( Option in_opt, bool in_set ) { value( in_opt, in_set ? 1 : 0 ); return( in_set ); }
+
+    static bool flip( Option in_opt ) { Assert( !is_zero( in_opt ) ); return( set( in_opt, is_zero( settings[ in_opt ] ) ) ); }
 
     static bool shifty( ) { return( b_shifty ); }
-    static bool shifty( bool in_set ) { b_shifty = in_set; return( in_set ); }
+    static bool shifty( bool in_set ) { return( b_shifty = in_set ); }
 
     static bool controlling( ) { return( b_controlling ); }
-    static bool controlling( bool in_set ) { b_controlling = in_set; return( in_set ); }
+    static bool controlling( bool in_set ) { return( b_controlling = in_set ); }
 
 private:
 
-    static uset<Option> settings;
+    static carray<uint, OPTION_COUNT> settings;
 
     static bool b_shifty; // if shift key is held
     static bool b_controlling; // if ctrl key is held

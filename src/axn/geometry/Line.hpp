@@ -12,6 +12,8 @@ namespace axn
 namespace geometry
 {
 
+class Path;
+
 class Line : public Stringable, Transformable
 {
 
@@ -58,6 +60,8 @@ public:
 
     Point point( dec in_percent ) const { return( vector( ) * in_percent ); }
 
+    Path segmented( uint in_segments ) const; // C! cut into in_segments equal lengths (see Path::segmented( ), where it's defined)
+
     Planc x( Planc cref in_y ) const { return( ( vertical( ) || horizontal( ) ) ? pt1( ).x( ) : ( ( in_y - b( ) ) / m( ) ) ); }
     Planc y( Planc cref in_x ) const { return( ( vertical( ) || horizontal( ) ) ? pt1( ).y( ) : ( ( m( ) * in_x ) + b( ) ) ); }
 
@@ -92,7 +96,7 @@ public:
                 else
                 {
                     return( in_range( in_line.pt1( ).x( ), lower_bound_x( ), upper_bound_x( ), inclusive ) ||
-                            in_range( in_line.pt2( ).x( ), lower_bound_x( ), upper_bound_x( ), in_line.pt2( ).x( ), inclusive ) ||
+                            in_range( in_line.pt2( ).x( ), lower_bound_x( ), upper_bound_x( ), inclusive ) || // C! had a stray in_line.pt2( ).x( ) argument, taken as the first bound's inclusiveness
                             in_range( pt1( ).x( ), in_line.lower_bound_x( ), in_line.upper_bound_x( ), inclusive ) ||
                             in_range( pt2( ).x( ), in_line.lower_bound_x( ), in_line.upper_bound_x( ), inclusive ) );
                 }
@@ -124,7 +128,10 @@ public:
                 intersect = Point( x, ( x * m( ) ) + b( ) );
             }
 
-            return( in_bounds( intersect, inclusive ) && in_line.in_bounds( intersect, inclusive ) );
+            // C! not inclusive means the lines can't meet at an end of either one; checking the bounds exclusively instead
+            // C! missed every crossing on a horizontal or vertical line, which has no room between its bounds on one axis
+            return( in_bounds( intersect, true ) && in_line.in_bounds( intersect, true ) &&
+                    ( inclusive || ( ( intersect != pt1( ) ) && ( intersect != pt2( ) ) && ( intersect != in_line.pt1( ) ) && ( intersect != in_line.pt2( ) ) ) ) );
         }
     }
 
@@ -134,7 +141,7 @@ public:
         {
             if( b( ) != in_line.b( ) )
             {
-                return( INVALID_POINT );
+                return( INVALID_PT );
             }
             else
             {
@@ -185,18 +192,19 @@ public:
         }
     }
 
-    Point closest( Point cref in_point, bool in_bounded = true ) const
+    Point closest( Point cref in_pt, bool in_bounded = true ) const
     {
-        return_if( on( in_point, in_bounded ), in_point );
+        return_if( on( in_pt, in_bounded ), in_pt );
 
-        Point pt = intersection( Line( in_point, in_point + VectorA( angle( ) + RIGHT ) ) );
+        Point pt = intersection( Line( in_pt, in_pt + VectorA( angle( ) + RIGHT ) ) );
 
         return_if( !in_bounded, pt );
         return_if( in_bounds( pt, true ), pt );
-        return( in_point.distance_to( pt1( ) ) < in_point.distance_to( pt2( ) ) ? pt1( ) : pt2( ) );
+
+        return( in_pt.distance_to( pt1( ) ) < in_pt.distance_to( pt2( ) ) ? pt1( ) : pt2( ) );
     }
 
-    virtual Line ref transform( Transform cref in_t ) override { m_pt1 = in_t.apply( m_pt1 ); m_pt2 = in_t.apply( m_pt2 ); return( solve_mb( ) ); }
+    virtual Line ref transform( Transform cref in_t ) override { skip_override; m_pt1 = in_t.apply( m_pt1 ); m_pt2 = in_t.apply( m_pt2 ); return( solve_mb( ) ); }
 
     Line ref operator+=( Vector cref in_vec ) { rethis = ( *this + in_vec ); }
     Line ref operator-=( Vector cref in_vec ) { rethis = ( *this - in_vec ); }
